@@ -3112,6 +3112,14 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div id="cf-body"></div>
         </div>
 
+        <div class="sheet-section" data-sec="species" id="species-section" style="display:none;">
+          <div class="sheet-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span id="species-title">Species Traits</span>
+            <span style="font-size:0.7rem;color:#555;font-style:italic;">D&amp;D 2024 PHB</span>
+          </div>
+          <div id="species-body"></div>
+        </div>
+
         <!-- Class Resources -->
 
         <div class="sheet-section" data-sec="ressources">
@@ -3255,7 +3263,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             </div>
             <div class="field-group">
               <label class="field-label">Species</label>
-              <input type="text" class="field-input" data-f="species" placeholder="ex. Humain, Elfe…">
+              <select class="field-input" id="species-select"></select>
+              <input type="text" class="field-input" data-f="species" id="species-custom" placeholder="Espèce personnalisée…" style="display:none;margin-top:0.3rem;">
+            </div>
+            <div class="field-group" id="lineage-group" style="display:none;">
+              <label class="field-label" id="lineage-label">Lineage</label>
+              <select class="field-input" id="lineage-select"></select>
             </div>
             <div class="field-group" style="grid-column:span 2;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
@@ -4089,6 +4102,176 @@ const MULTICLASS_SLOTS = {
    Each feature: { name, desc, type }
    type: 'feature' | 'asi' | 'subclass' | 'epic'
    ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   D&D 2024 SPECIES DATA (PHB)
+   traits: { niveau: [{name, desc}] } — lineages: { nom: {niveau: [...]}}
+   ════════════════════════════════════════════════════════════ */
+const SPECIES_DATA = {
+
+'Aasimar': {
+  size: 'Medium or Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Celestial Resistance', desc:'You have Resistance to Necrotic and Radiant damage.' },
+      { name:'Darkvision', desc:'Darkvision 60 ft.' },
+      { name:'Healing Hands', desc:'Magic action: touch a creature — it regains HP equal to your Proficiency Bonus d4s. 1/Long Rest.' },
+      { name:'Light Bearer', desc:'You know the Light cantrip (Charisma is your spellcasting ability for it).' }
+    ],
+    3: [
+      { name:'Celestial Revelation', desc:'Bonus action (1/Long Rest, 1 minute): choose Heavenly Wings (fly speed = your speed), Inner Radiance (bright light 10 ft, Radiant damage = PB to creatures within 10 ft at end of your turn), or Necrotic Shroud (creatures within 10 ft make CHA save or Frightened until end of your next turn). While active, once per turn deal extra Radiant/Necrotic damage = your Proficiency Bonus.' }
+    ]
+  }
+},
+
+'Dragonborn': {
+  size: 'Medium', speed: 30,
+  traits: {
+    1: [
+      { name:'Draconic Ancestry', desc:'Choose a dragon type (Black/Copper: Acid · Blue/Bronze: Lightning · Brass/Gold/Red: Fire · Green: Poison · Silver/White: Cold). It sets your Breath Weapon and Damage Resistance.' },
+      { name:'Breath Weapon', desc:'Replace one attack of the Attack action: exhale a 15-ft cone or 30×5-ft line (your choice). DEX save DC 8 + CON mod + PB; 1d10 damage of your ancestry type, half on success. Damage : 2d10 au niv.5, 3d10 au niv.11, 4d10 au niv.17. Uses = Proficiency Bonus / Long Rest.' },
+      { name:'Damage Resistance', desc:'Resistance to the damage type of your Draconic Ancestry.' },
+      { name:'Darkvision', desc:'Darkvision 60 ft.' }
+    ],
+    5: [
+      { name:'Draconic Flight', desc:'Bonus action (1/Long Rest): spectral wings for 10 minutes — fly speed equal to your speed.' }
+    ]
+  }
+},
+
+'Dwarf': {
+  size: 'Medium', speed: 30,
+  traits: {
+    1: [
+      { name:'Darkvision', desc:'Darkvision 120 ft.' },
+      { name:'Dwarven Resilience', desc:'Resistance to Poison damage, and Advantage on saves to avoid or end the Poisoned condition.' },
+      { name:'Dwarven Toughness', desc:'+1 HP maximum per level.' },
+      { name:'Stonecunning', desc:'Bonus action (PB/Long Rest): Tremorsense 60 ft for 10 minutes while on a stone surface.' }
+    ]
+  }
+},
+
+'Elf': {
+  size: 'Medium', speed: 30,
+  traits: {
+    1: [
+      { name:'Darkvision', desc:'Darkvision 60 ft.' },
+      { name:'Fey Ancestry', desc:'Advantage on saves to avoid or end the Charmed condition.' },
+      { name:'Keen Senses', desc:'Proficiency in Insight, Perception, or Survival (choose one).' },
+      { name:'Trance', desc:"You don't need sleep: 4 hours of trance give the benefits of a Long Rest." }
+    ]
+  },
+  lineages: {
+    'Drow': {
+      1: [{ name:'Drow Lineage', desc:'Darkvision 120 ft. You know the Dancing Lights cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
+      3: [{ name:'Faerie Fire', desc:'You always have Faerie Fire prepared — cast 1/Long Rest without a slot (or with your slots).' }],
+      5: [{ name:'Darkness', desc:'You always have Darkness prepared — cast 1/Long Rest without a slot (or with your slots).' }]
+    },
+    'High Elf': {
+      1: [{ name:'High Elf Lineage', desc:'You know the Prestidigitation cantrip; on Long Rest you can swap it for another Wizard cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
+      3: [{ name:'Detect Magic', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
+      5: [{ name:'Misty Step', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
+    },
+    'Wood Elf': {
+      1: [{ name:'Wood Elf Lineage', desc:'Speed 35 ft. You know the Druidcraft cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
+      3: [{ name:'Longstrider', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
+      5: [{ name:'Pass without Trace', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
+    }
+  }
+},
+
+'Gnome': {
+  size: 'Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Darkvision', desc:'Darkvision 60 ft.' },
+      { name:'Gnomish Cunning', desc:'Advantage on Intelligence, Wisdom, and Charisma saving throws.' }
+    ]
+  },
+  lineages: {
+    'Forest Gnome': {
+      1: [{ name:'Forest Gnome Lineage', desc:'You know the Minor Illusion cantrip. You always have Speak with Animals prepared — cast PB/Long Rest without a slot. Spellcasting: INT, WIS or CHA (choose).' }]
+    },
+    'Rock Gnome': {
+      1: [{ name:'Rock Gnome Lineage', desc:'You know Mending and Prestidigitation. You can spend 10 min to create a Tiny clockwork device (up to 3) reproducing a Prestidigitation effect. Spellcasting: INT, WIS or CHA (choose).' }]
+    }
+  }
+},
+
+'Goliath': {
+  size: 'Medium', speed: 35,
+  traits: {
+    1: [
+      { name:'Giant Ancestry', desc:"Choose a boon usable PB/Long Rest: Cloud's Jaunt (bonus action: teleport 30 ft) · Fire's Burn (+1d10 Fire on a hit) · Frost's Chill (+1d6 Cold + speed −10 on a hit) · Hill's Tumble (knock Prone a Large- creature you hit) · Stone's Endurance (reaction: reduce damage by 1d12 + CON) · Storm's Thunder (reaction: 1d8 Thunder to an attacker within 60 ft)." },
+      { name:'Powerful Build', desc:'Advantage on saves to end the Grappled condition; you count as one size larger for carrying capacity.' }
+    ],
+    5: [
+      { name:'Large Form', desc:'Bonus action (1/Long Rest, 10 min): become Large — Advantage on Strength checks, speed +10 ft.' }
+    ]
+  }
+},
+
+'Halfling': {
+  size: 'Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Brave', desc:'Advantage on saves to avoid or end the Frightened condition.' },
+      { name:'Halfling Nimbleness', desc:'You can move through the space of any creature larger than you (not a stopping place).' },
+      { name:'Luck', desc:'When you roll a 1 on a d20 Test, reroll — you must use the new roll.' },
+      { name:'Naturally Stealthy', desc:'You can take the Hide action even when only obscured by a creature one size larger than you.' }
+    ]
+  }
+},
+
+'Human': {
+  size: 'Medium or Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Resourceful', desc:'You gain Heroic Inspiration whenever you finish a Long Rest.' },
+      { name:'Skillful', desc:'Proficiency in one skill of your choice.' },
+      { name:'Versatile', desc:'You gain an Origin feat of your choice (Skilled by default).' }
+    ]
+  }
+},
+
+'Orc': {
+  size: 'Medium', speed: 30,
+  traits: {
+    1: [
+      { name:'Adrenaline Rush', desc:'Bonus action: take the Dash action and gain Temp HP = your Proficiency Bonus. Uses = PB / Short or Long Rest.' },
+      { name:'Darkvision', desc:'Darkvision 120 ft.' },
+      { name:'Relentless Endurance', desc:'When reduced to 0 HP without being killed outright, drop to 1 HP instead. 1/Long Rest.' }
+    ]
+  }
+},
+
+'Tiefling': {
+  size: 'Medium or Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Darkvision', desc:'Darkvision 60 ft.' },
+      { name:'Otherworldly Presence', desc:'You know the Thaumaturgy cantrip (same spellcasting ability as your Fiendish Legacy).' }
+    ]
+  },
+  lineages: {
+    'Abyssal': {
+      1: [{ name:'Abyssal Legacy', desc:'Resistance to Poison damage. You know the Poison Spray cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
+      3: [{ name:'Ray of Sickness', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
+      5: [{ name:'Hold Person', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
+    },
+    'Chthonic': {
+      1: [{ name:'Chthonic Legacy', desc:'Resistance to Necrotic damage. You know the Chill Touch cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
+      3: [{ name:'False Life', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
+      5: [{ name:'Ray of Enfeeblement', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
+    },
+    'Infernal': {
+      1: [{ name:'Infernal Legacy', desc:'Resistance to Fire damage. You know the Fire Bolt cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
+      3: [{ name:'Hellish Rebuke', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
+      5: [{ name:'Darkness', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
+    }
+  }
+}
+};
+
 const CLASS_DATA = {
 
 'Barbarian': {
@@ -5714,6 +5897,7 @@ function autoFillClass(classe) {
    CLASS FEATURES — Render automatique par niveau
    ════════════════════════════════════════════════════════════ */
 function renderClassFeatures() {
+  renderSpeciesTraits(); // les traits d'espèce dépendent du niveau total — même cycle de rendu
   const c       = C();
   const classes = getClasses(c);
   const section = document.getElementById('cf-section');
@@ -5883,6 +6067,140 @@ function renderClassFeatures() {
   } // end for lvl
   }); // end validClasses.forEach
 }
+
+/* ════════════════════════════════════════════════════════════
+   SPECIES TRAITS — traits d'espèce par niveau (PHB 2024)
+   Réutilise les classes CSS cf-* de la section Class Features.
+   ════════════════════════════════════════════════════════════ */
+function renderSpeciesTraits() {
+  const c       = C();
+  const section = document.getElementById('species-section');
+  const body    = document.getElementById('species-body');
+  if (!section || !body) return;
+  const data = SPECIES_DATA[c.species];
+  if (!data) { section.style.display = 'none'; return; }
+
+  section.style.display = '';
+  const totalLvl = getTotalLevel(c);
+  const lineage  = (data.lineages && data.lineages[c.lineage]) ? c.lineage : '';
+  document.getElementById('species-title').textContent =
+    c.species + (lineage ? ' (' + lineage + ')' : '') + ' — Species Traits';
+
+  body.innerHTML = `
+    <div class="cf-profs">
+      <div class="cf-prof-item"><span class="cf-prof-label">Size:</span> ${data.size}</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${data.speed} ft.</div>
+      ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choisis une lignée (onglet Identity)</div>` : ''}
+    </div>
+  `;
+
+  const lineageTraits = (data.lineages && data.lineages[lineage]) || {};
+  for (let lvl = 1; lvl <= 20; lvl++) {
+    if (lvl > totalLvl) continue; // pas encore débloqué
+    const feats = [...(data.traits[lvl] || []), ...(lineageTraits[lvl] || [])];
+    if (!feats.length) continue;
+
+    const isCurrent = lvl === totalLvl && lvl > 1;
+    const group = document.createElement('div');
+    group.className = 'cf-level-group';
+
+    const header = document.createElement('div');
+    // Niveau 1 (le gros des traits) reste déplié ; les niveaux passés se replient
+    const startCollapsed = lvl < totalLvl && lvl !== 1;
+    header.className = 'cf-level-header' + (isCurrent ? ' cf-current' : '') + (startCollapsed ? ' cf-collapsed' : '');
+    header.innerHTML = `
+      <span class="cf-level-title">${lvl === 1 ? 'Base traits' : 'Level ' + lvl}</span>
+      <span class="cf-level-preview">${feats.map(f => f.name).join(', ')}</span>
+      <span class="cf-chevron">▼</span>
+    `;
+
+    const levelBody = document.createElement('div');
+    levelBody.className = 'cf-level-body' + (startCollapsed ? ' cf-hidden' : '');
+    feats.forEach(feat => {
+      const div = document.createElement('div');
+      div.className = 'cf-feature' + (isCurrent ? ' cf-new' : '');
+      const badge = isCurrent ? '<span class="cf-badge cf-badge-new">NEW</span>' : '';
+      div.innerHTML = `
+        <div class="cf-feature-row"><span class="cf-feature-name">${feat.name}</span>${badge}</div>
+        <div class="cf-feature-desc">${feat.desc}</div>
+      `;
+      levelBody.appendChild(div);
+    });
+
+    header.addEventListener('click', () => {
+      const wasCollapsed = header.classList.toggle('cf-collapsed');
+      levelBody.classList.toggle('cf-hidden', wasCollapsed);
+    });
+
+    group.appendChild(header);
+    group.appendChild(levelBody);
+    body.appendChild(group);
+  }
+}
+
+/* ── Sélecteurs Espèce / Lignée (onglet Identity) ── */
+function populateSpeciesUI() {
+  const sel    = document.getElementById('species-select');
+  const custom = document.getElementById('species-custom');
+  const linGrp = document.getElementById('lineage-group');
+  const linSel = document.getElementById('lineage-select');
+  if (!sel) return;
+  const c = C();
+  const names = Object.keys(SPECIES_DATA);
+  const isKnown = names.includes(c.species);
+
+  sel.innerHTML = '<option value="">— Species —</option>'
+    + names.map(n => `<option value="${n}"${c.species === n ? ' selected' : ''}>${n}</option>`).join('')
+    + `<option value="__custom__"${c.species && !isKnown ? ' selected' : ''}>✏ Custom…</option>`;
+  custom.style.display = (c.species && !isKnown) ? '' : 'none';
+
+  const data = SPECIES_DATA[c.species];
+  if (data?.lineages) {
+    const lins = Object.keys(data.lineages);
+    linGrp.style.display = '';
+    document.getElementById('lineage-label').textContent =
+      c.species === 'Tiefling' ? 'Fiendish Legacy' : 'Lineage';
+    linSel.innerHTML = '<option value="">— Choisir —</option>'
+      + lins.map(l => `<option value="${l}"${c.lineage === l ? ' selected' : ''}>${l}</option>`).join('');
+  } else {
+    linGrp.style.display = 'none';
+  }
+}
+document.getElementById('species-select')?.addEventListener('change', () => {
+  const sel = document.getElementById('species-select');
+  const c = C();
+  if (sel.value === '__custom__') {
+    // État transitoire : on n'appelle PAS populateSpeciesUI (il écraserait le choix)
+    if (SPECIES_DATA[c.species]) c.species = '';
+    c.lineage = '';
+    const custom = document.getElementById('species-custom');
+    custom.style.display = '';
+    custom.value = c.species || '';
+    document.getElementById('lineage-group').style.display = 'none';
+    renderSpeciesTraits();
+    renderHero();
+    custom.focus();
+    triggerSave();
+    return;
+  }
+  c.species = sel.value;
+  // lignée invalide pour la nouvelle espèce → reset
+  if (!SPECIES_DATA[c.species]?.lineages?.[c.lineage]) c.lineage = '';
+  populateSpeciesUI();
+  renderSpeciesTraits();
+  updateCharSummary();
+  renderHero();
+  triggerSave();
+});
+document.getElementById('lineage-select')?.addEventListener('change', () => {
+  C().lineage = document.getElementById('lineage-select').value;
+  renderSpeciesTraits();
+  triggerSave();
+});
+document.getElementById('species-custom')?.addEventListener('input', () => {
+  // la sauvegarde passe par le binding data-f générique — on rafraîchit juste la section
+  renderSpeciesTraits();
+});
 
 /* ── Barre de PV ── */
 function updateHpBar() {
@@ -6407,6 +6725,7 @@ function _renderTab(tabId) {
 function renderAll() {
   migrateToMulticlass(C());
   fillFields();
+  populateSpeciesUI();
   updateCharSummary();
   updateProfBonus();
   updateHpBar();
@@ -10740,7 +11059,7 @@ function esc(val) {
 
 /* ── Barre d'onglets de sections (mobile/tablette ≤ 1024px) ── */
 const SEC_LABELS = {
-  saves: 'Skills', attaques: 'Attacks', cf: 'Class',
+  saves: 'Skills', attaques: 'Attacks', cf: 'Class', species: 'Species',
   ressources: 'Resources', conditions: 'Conditions',
   features: 'Features', sorts: 'Spells', mods: 'Mods'
 };
