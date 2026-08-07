@@ -3120,6 +3120,14 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div id="species-body"></div>
         </div>
 
+        <div class="sheet-section" data-sec="bg" id="bg-section" style="display:none;">
+          <div class="sheet-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span id="bg-title">Background</span>
+            <span style="font-size:0.7rem;color:#555;font-style:italic;">D&amp;D 2024 PHB</span>
+          </div>
+          <div id="bg-body"></div>
+        </div>
+
         <!-- Class Resources -->
 
         <div class="sheet-section" data-sec="ressources">
@@ -3282,7 +3290,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             </div>
             <div class="field-group">
               <label class="field-label">Background</label>
-              <input type="text" class="field-input" data-f="background" placeholder="ex. Acolyte…">
+              <select class="field-input" id="background-select"></select>
+              <input type="text" class="field-input" data-f="background" id="background-custom" placeholder="Background personnalisé…" style="display:none;margin-top:0.3rem;">
             </div>
             <div class="field-group">
               <label class="field-label">Alignment</label>
@@ -4102,6 +4111,42 @@ const MULTICLASS_SLOTS = {
    Each feature: { name, desc, type }
    type: 'feature' | 'asi' | 'subclass' | 'epic'
    ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   D&D 2024 BACKGROUNDS (PHB) — chaque background donne :
+   +2/+1 (ou +1/+1/+1) réparti sur 3 caractéristiques, un Origin Feat,
+   2 compétences, 1 outil et un équipement de départ.
+   ════════════════════════════════════════════════════════════ */
+const ORIGIN_FEATS = {
+  'Alert':            "Add your Proficiency Bonus to Initiative. You can swap your Initiative with a willing ally's.",
+  'Crafter':          "Tool proficiency with three Artisan's Tools. 20% discount on nonmagical items. Craft one item from a list during a Long Rest.",
+  'Healer':           "As a Utility action, use a Healer's Kit to let a creature spend a Hit Die: heal that die + its CON modifier (minimum 1). Also restores 1 HP on a 0-HP creature.",
+  'Lucky':            "You have Luck Points equal to your Proficiency Bonus (regained on Long Rest). Spend one to gain Advantage on a d20 Test, or to impose Disadvantage on an attack against you.",
+  'Magic Initiate':   "Learn 2 cantrips and one level-1 spell from a chosen class list (Cleric, Druid or Wizard). Cast the level-1 spell once per Long Rest for free, or with slots.",
+  'Musician':         "Proficiency with three Musical Instruments. After a Rest, give Heroic Inspiration to allies equal to your Proficiency Bonus.",
+  'Savage Attacker':  "Once per turn when you hit with a weapon, you can reroll the damage dice and use either total.",
+  'Skilled':          "Proficiency in any combination of three skills or tools of your choice.",
+  'Tavern Brawler':   "Unarmed Strike deals 1d4. Once per turn, deal extra damage equal to your Proficiency Bonus. You can push a creature 5 ft on an Unarmed Strike hit. Proficiency with improvised weapons.",
+  'Tough':            "Your Hit Point maximum increases by twice your character level.",
+};
+const BACKGROUND_DATA = {
+  'Acolyte':      { abilities:['int','sag','cha'], feat:'Magic Initiate',  skills:'Insight, Religion',        tool:"Calligrapher's Supplies" },
+  'Artisan':      { abilities:['for','dex','int'], feat:'Crafter',         skills:'Investigation, Persuasion', tool:"Artisan's Tools (choice)" },
+  'Charlatan':    { abilities:['dex','con','cha'], feat:'Skilled',         skills:'Deception, Sleight of Hand', tool:"Forgery Kit" },
+  'Criminal':     { abilities:['dex','con','int'], feat:'Alert',           skills:'Sleight of Hand, Stealth',  tool:"Thieves' Tools" },
+  'Entertainer':  { abilities:['for','dex','cha'], feat:'Musician',        skills:'Acrobatics, Performance',   tool:"Musical Instrument (choice)" },
+  'Farmer':       { abilities:['for','con','sag'], feat:'Tough',           skills:'Animal Handling, Nature',   tool:"Carpenter's Tools" },
+  'Guard':        { abilities:['for','int','sag'], feat:'Alert',           skills:'Athletics, Perception',     tool:"Gaming Set (choice)" },
+  'Guide':        { abilities:['dex','con','sag'], feat:'Magic Initiate',  skills:'Stealth, Survival',         tool:"Cartographer's Tools" },
+  'Hermit':       { abilities:['con','sag','cha'], feat:'Healer',          skills:'Medicine, Religion',        tool:"Herbalism Kit" },
+  'Merchant':     { abilities:['con','int','cha'], feat:'Lucky',           skills:'Animal Handling, Persuasion', tool:"Navigator's Tools" },
+  'Noble':        { abilities:['for','int','cha'], feat:'Skilled',         skills:'History, Persuasion',       tool:"Gaming Set (choice)" },
+  'Sage':         { abilities:['con','int','sag'], feat:'Magic Initiate',  skills:'Arcana, History',           tool:"Calligrapher's Supplies" },
+  'Sailor':       { abilities:['for','dex','sag'], feat:'Tavern Brawler',  skills:'Acrobatics, Perception',    tool:"Navigator's Tools" },
+  'Scribe':       { abilities:['dex','int','sag'], feat:'Skilled',         skills:'Investigation, Perception', tool:"Calligrapher's Supplies" },
+  'Soldier':      { abilities:['for','dex','con'], feat:'Savage Attacker', skills:'Athletics, Intimidation',   tool:"Gaming Set (choice)" },
+  'Wayfarer':     { abilities:['dex','sag','cha'], feat:'Lucky',           skills:'Insight, Stealth',          tool:"Thieves' Tools" },
+};
+
 /* ════════════════════════════════════════════════════════════
    D&D 2024 SPECIES DATA (PHB)
    traits: { niveau: [{name, desc}] } — lineages: { nom: {niveau: [...]}}
@@ -5898,6 +5943,7 @@ function autoFillClass(classe) {
    ════════════════════════════════════════════════════════════ */
 function renderClassFeatures() {
   renderSpeciesTraits(); // les traits d'espèce dépendent du niveau total — même cycle de rendu
+  renderBackground();
   const c       = C();
   const classes = getClasses(c);
   const section = document.getElementById('cf-section');
@@ -6200,6 +6246,88 @@ document.getElementById('lineage-select')?.addEventListener('change', () => {
 document.getElementById('species-custom')?.addEventListener('input', () => {
   // la sauvegarde passe par le binding data-f générique — on rafraîchit juste la section
   renderSpeciesTraits();
+});
+
+/* ════════════════════════════════════════════════════════════
+   BACKGROUND — bonus de caractéristiques, origin feat, compétences (PHB 2024)
+   ════════════════════════════════════════════════════════════ */
+const ABIL_LABEL = { for:'FOR', dex:'DEX', con:'CON', int:'INT', sag:'SAG', cha:'CHA' };
+
+function renderBackground() {
+  const c       = C();
+  const section = document.getElementById('bg-section');
+  const body    = document.getElementById('bg-body');
+  if (!section || !body) return;
+  const data = BACKGROUND_DATA[c.background];
+  if (!data) { section.style.display = 'none'; return; }
+
+  section.style.display = '';
+  document.getElementById('bg-title').textContent = c.background + ' — Background';
+  const abils = data.abilities.map(a => ABIL_LABEL[a]).join(' · ');
+
+  body.innerHTML = `
+    <div class="cf-profs">
+      <div class="cf-prof-item"><span class="cf-prof-label">Ability Scores:</span> ${abils}
+        <span style="color:#888;font-size:0.9em;"> — répartis +2/+1 ou +1/+1/+1</span></div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Skills:</span> ${data.skills}</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Tool:</span> ${data.tool}</div>
+    </div>
+    <div class="cf-level-group">
+      <div class="cf-level-header cf-current">
+        <span class="cf-level-title">Origin Feat</span>
+        <span class="cf-level-preview">${data.feat}</span>
+        <span class="cf-chevron">▼</span>
+      </div>
+      <div class="cf-level-body">
+        <div class="cf-feature">
+          <div class="cf-feature-row"><span class="cf-feature-name">${data.feat}</span></div>
+          <div class="cf-feature-desc">${ORIGIN_FEATS[data.feat] || ''}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  const hdr = body.querySelector('.cf-level-header');
+  const bod = body.querySelector('.cf-level-body');
+  hdr.addEventListener('click', () => {
+    bod.classList.toggle('cf-hidden', hdr.classList.toggle('cf-collapsed'));
+  });
+}
+
+function populateBackgroundUI() {
+  const sel    = document.getElementById('background-select');
+  const custom = document.getElementById('background-custom');
+  if (!sel) return;
+  const c = C();
+  const names = Object.keys(BACKGROUND_DATA);
+  const isKnown = names.includes(c.background);
+  sel.innerHTML = '<option value="">— Background —</option>'
+    + names.map(n => `<option value="${n}"${c.background === n ? ' selected' : ''}>${n}</option>`).join('')
+    + `<option value="__custom__"${c.background && !isKnown ? ' selected' : ''}>✏ Custom…</option>`;
+  custom.style.display = (c.background && !isKnown) ? '' : 'none';
+}
+document.getElementById('background-select')?.addEventListener('change', () => {
+  const sel = document.getElementById('background-select');
+  const c = C();
+  if (sel.value === '__custom__') {
+    // État transitoire : ne pas repeupler (ça écraserait la sélection)
+    if (BACKGROUND_DATA[c.background]) c.background = '';
+    const custom = document.getElementById('background-custom');
+    custom.style.display = '';
+    custom.value = c.background || '';
+    renderBackground();
+    custom.focus();
+    triggerSave();
+    return;
+  }
+  c.background = sel.value;
+  populateBackgroundUI();
+  renderBackground();
+  updateCharSummary();
+  renderHero();
+  triggerSave();
+});
+document.getElementById('background-custom')?.addEventListener('input', () => {
+  renderBackground(); // la sauvegarde passe par le binding data-f générique
 });
 
 /* ── Barre de PV ── */
@@ -6726,6 +6854,7 @@ function renderAll() {
   migrateToMulticlass(C());
   fillFields();
   populateSpeciesUI();
+  populateBackgroundUI();
   updateCharSummary();
   updateProfBonus();
   updateHpBar();
@@ -11059,7 +11188,7 @@ function esc(val) {
 
 /* ── Barre d'onglets de sections (mobile/tablette ≤ 1024px) ── */
 const SEC_LABELS = {
-  saves: 'Skills', attaques: 'Attacks', cf: 'Class', species: 'Species',
+  saves: 'Skills', attaques: 'Attacks', cf: 'Class', species: 'Species', bg: 'Background',
   ressources: 'Resources', conditions: 'Conditions',
   features: 'Features', sorts: 'Spells', mods: 'Mods'
 };
