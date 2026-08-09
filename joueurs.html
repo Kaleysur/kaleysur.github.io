@@ -2568,6 +2568,26 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .lvlrow-feat-tag { color: var(--gold-dark, #8a6e1a); font-weight: 600; }
 .lvlrow-feat-tag.asi-tag { color: var(--gold, #c9a96e); }
+/* ── Sélecteur de feat (ASI) ── */
+.lvlrow-feat-pick { margin-bottom: 0.4rem; }
+.lvlrow-feat-select {
+  width: 100%; background: var(--j-input, #0a0703);
+  border: 1px solid var(--j-border-col, #3a2810); color: var(--j-text, #e2cfa0);
+  font-size: 0.82rem; padding: 0.35rem 0.5rem; border-radius: 4px; font-family: inherit;
+}
+.lvlrow-feat-select:focus { outline: none; border-color: var(--gold-dark, #8a6e1a); }
+.lvlrow-feat-desc:not(:empty) {
+  font-size: 0.8rem; line-height: 1.5; color: var(--j-text, #e2cfa0);
+  background: rgba(201,169,110,0.06); border-left: 2px solid var(--gold-dark, #8a6e1a);
+  padding: 0.5rem 0.65rem; border-radius: 0 4px 4px 0; margin-bottom: 0.4rem;
+}
+.feat-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.35rem; }
+.feat-tag {
+  font-size: 0.68rem; padding: 0.1rem 0.45rem; border-radius: 10px;
+  background: rgba(201,169,110,0.15); color: var(--gold, #c9a96e);
+  border: 1px solid var(--gold-dark, #8a6e1a);
+}
+.feat-tag.prereq { background: rgba(120,120,140,0.12); color: #999; border-color: #4a4a5a; }
 .lvlrow-expand-btn {
   background: none; border: none; color: #555; cursor: pointer; font-size: 0.75rem;
   padding: 0; transition: transform 0.2s, color 0.12s; line-height: 1; flex-shrink: 0;
@@ -4111,6 +4131,57 @@ const MULTICLASS_SLOTS = {
    Each feature: { name, desc, type }
    type: 'feature' | 'asi' | 'subclass' | 'epic'
    ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════
+   D&D 2024 GENERAL FEATS (PHB) — disponibles aux niveaux 4/8/12/16
+   (et 19 pour certaines classes) en remplacement d'un ASI.
+   Un feat marqué asi:true donne aussi +1 dans une caractéristique.
+   ════════════════════════════════════════════════════════════ */
+const GENERAL_FEATS = {
+  'Ability Score Improvement': { asi:false, prereq:'', desc:"Increase one ability score by 2, or two ability scores by 1 each (max 20). Can be taken multiple times." },
+  'Actor':              { asi:true, abil:'CHA', prereq:'CHA 13+', desc:"Advantage on Deception and Performance checks when trying to pass yourself off as someone else. You can mimic a voice or sound you've heard (Insight vs your Deception to detect)." },
+  'Athlete':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Standing up from Prone costs only 5 ft of movement. You can Climb without extra movement cost, and make a running Long/High Jump after moving only 5 ft." },
+  'Charger':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"When you take the Dash action, you can make one melee attack as a Bonus Action: +1d8 damage if you moved 10+ ft straight, or push the target 10 ft." },
+  'Chef':               { asi:true, abil:'CON or SAG', prereq:'CON or SAG 13+', desc:"Proficiency with Cook's Utensils. Short Rest: cook a meal for up to 4+PB creatures, each regains 1d8 extra HP. Long Rest: bake PB treats granting 1d8 Temp HP each." },
+  'Crossbow Expert':    { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"Ignore the Loading property of crossbows. Being within 5 ft of an enemy doesn't impose Disadvantage on your ranged attacks. When you use the Attack action with a one-handed weapon, you can attack with a Hand Crossbow as a Bonus Action." },
+  'Crusher':            { asi:true, abil:'FOR or CON', prereq:'FOR or CON 13+', desc:"Once per turn when you deal Bludgeoning damage, move the target 5 ft. On a Critical Hit, attacks against that creature have Advantage until your next turn." },
+  'Defensive Duelist':  { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"Reaction when hit by a melee attack while wielding a Finesse weapon: add your Proficiency Bonus to AC, possibly causing the attack to miss." },
+  'Dual Wielder':       { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"+1 AC while wielding a Melee weapon in each hand. You can use two-weapon fighting even with non-Light weapons. You can draw or stow two weapons at once." },
+  'Durable':            { asi:true, abil:'CON', prereq:'CON 13+', desc:"When you roll a Hit Die to regain HP, the minimum equals twice your CON modifier (min 2). As a Bonus Action, spend a Hit Die to regain HP (PB times/Long Rest)." },
+  'Elemental Adept':    { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Choose a damage type (Acid, Cold, Fire, Lightning, Thunder). Your spells ignore Resistance to it, and treat any 1 on a damage die as a 2." },
+  'Fey-Touched':        { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Learn Misty Step and one level-1 Divination or Enchantment spell. Cast each once per Long Rest without a slot, or with slots." },
+  'Grappler':           { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Advantage on attacks against a creature you're grappling. Grappling doesn't cost extra movement. You can move a grappled creature of your size or smaller at full speed." },
+  'Great Weapon Master':{ asi:true, abil:'FOR', prereq:'FOR 13+', desc:"When you score a Critical Hit or reduce a creature to 0 HP with a Heavy weapon, make one melee attack as a Bonus Action. When you hit with a Heavy weapon, add your Proficiency Bonus to the damage (once per turn)." },
+  'Heavily Armored':    { asi:true, abil:'FOR', prereq:'Medium armor proficiency', desc:"Gain proficiency with Heavy armor." },
+  'Heavy Armor Master': { asi:true, abil:'FOR or CON', prereq:'Heavy armor proficiency', desc:"While wearing Heavy armor, reduce Bludgeoning/Piercing/Slashing damage taken by your Proficiency Bonus." },
+  'Inspiring Leader':   { asi:true, abil:'SAG or CHA', prereq:'SAG or CHA 13+', desc:"After a Rest, give up to 6 creatures (including yourself) Temp HP equal to your PB + your SAG or CHA modifier." },
+  'Keen Mind':          { asi:true, abil:'INT', prereq:'INT 13+', desc:"You always know which way is north and the number of hours until sunrise/sunset. As a Magic action, gain Advantage on your next INT (History/Investigation/Nature/Religion) check (PB/Long Rest)." },
+  'Lightly Armored':    { asi:true, abil:'FOR or DEX', prereq:'', desc:"Gain proficiency with Light armor and Shields." },
+  'Mage Slayer':        { asi:true, abil:'FOR or DEX', prereq:'', desc:"Reaction: when a creature within 5 ft casts a spell, make one melee attack against it. Advantage on saves against spells cast by creatures within 5 ft." },
+  'Martial Weapon Training': { asi:true, abil:'FOR or DEX', prereq:'', desc:"Gain proficiency with Martial weapons." },
+  'Medium Armor Master':{ asi:true, abil:'FOR or DEX', prereq:'Medium armor proficiency', desc:"Wearing Medium armor doesn't impose Disadvantage on Stealth, and you can add 3 (instead of 2) to your AC from DEX." },
+  'Moderately Armored': { asi:true, abil:'FOR or DEX', prereq:'Light armor proficiency', desc:"Gain proficiency with Medium armor." },
+  'Mounted Combatant':  { asi:true, abil:'FOR, DEX or WIS', prereq:'', desc:"Advantage on melee attacks against unmounted creatures smaller than your mount. Your mount takes no damage on a successful DEX save (half on failure). You can force an attack targeting your mount to target you instead." },
+  'Observant':          { asi:true, abil:'INT or SAG', prereq:'INT or SAG 13+', desc:"As a Bonus Action, make a WIS (Perception) or INT (Investigation) check (PB/Long Rest). You can read lips if you can see a creature's mouth and know the language." },
+  'Piercer':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Once per turn when you deal Piercing damage, reroll one damage die. On a Critical Hit, roll one additional damage die." },
+  'Poisoner':           { asi:true, abil:'DEX or INT', prereq:'', desc:"Proficiency with the Poisoner's Kit. Apply poison as a Bonus Action. Your poisons ignore Resistance to Poison. Craft doses that deal 2d8 Poison damage (CON save DC 14 or Poisoned)." },
+  'Polearm Master':     { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Bonus Action: attack with the opposite end of a Quarterstaff/Spear/Glaive/Halberd/Pike (1d4 Bludgeoning). Opportunity attack when a creature enters your reach with these weapons." },
+  'Resilient':          { asi:true, abil:'choice', prereq:'', desc:"Increase one ability score by 1 and gain proficiency in saving throws using that ability." },
+  'Ritual Caster':      { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting', desc:"Gain a ritual book with two level-1 ritual spells from a chosen class list. You can add more rituals found in your adventures." },
+  'Sentinel':           { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"When you hit with an Opportunity Attack, the creature's Speed becomes 0 for the turn. Creatures provoke Opportunity Attacks even if they Disengage. Reaction: attack a creature within 5 ft that attacks a target other than you." },
+  'Sharpshooter':       { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"Attacking at Long Range doesn't impose Disadvantage. Your ranged attacks ignore Half and Three-Quarters Cover. When you hit with a ranged weapon, add your Proficiency Bonus to damage (once per turn)." },
+  'Shield Master':      { asi:true, abil:'FOR', prereq:'Shield proficiency', desc:"Bonus Action: shove a creature within 5 ft with your Shield. Add your Shield's AC bonus to DEX saves against effects targeting only you. Reaction: take no damage on a successful DEX save." },
+  'Skulker':            { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"You can Hide when only Lightly Obscured. Missing with a ranged attack doesn't reveal your position. Dim light doesn't impose Disadvantage on Perception checks." },
+  'Slasher':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Once per turn when you deal Slashing damage, reduce the target's Speed by 10 ft. On a Critical Hit, the target has Disadvantage on attacks until your next turn." },
+  'Speedy':             { asi:true, abil:'DEX or CON', prereq:'DEX or CON 13+', desc:"Your Speed increases by 10 ft. Difficult Terrain doesn't slow your Dash. Opportunity attacks against you have Disadvantage when you Dash." },
+  'Spell Sniper':       { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Your attack-roll spells have double range and ignore Half and Three-Quarters Cover. Learn one attack cantrip." },
+  'Shadow-Touched':     { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Learn Invisibility and one level-1 Illusion or Necromancy spell. Cast each once per Long Rest without a slot, or with slots." },
+  'Telekinetic':        { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Learn Mage Hand (invisible, cast without components). Bonus Action: telekinetically shove a creature 5 ft (STR save)." },
+  'Telepathic':         { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Speak telepathically to any creature within 60 ft that understands a language. You always have Detect Thoughts prepared — cast once per Long Rest without a slot." },
+  'War Caster':         { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Advantage on CON saves to maintain Concentration. Perform somatic components with weapons/shield in hand. Cast a spell (1 action, targeting one creature) instead of an Opportunity Attack." },
+  'Weapon Master':      { asi:true, abil:'FOR or DEX', prereq:'', desc:"You gain the Mastery property for one kind of weapon you're proficient with; you can change it on a Long Rest." },
+};
+const ASI_LEVELS = [4, 8, 12, 16, 19];
+
 /* ════════════════════════════════════════════════════════════
    D&D 2024 BACKGROUNDS (PHB) — chaque background donne :
    +2/+1 (ou +1/+1/+1) réparti sur 3 caractéristiques, un Origin Feat,
@@ -8521,10 +8592,18 @@ function renderLvlupTab() {
       </div>
     </div>`;
 
-    // Body: ASI
+    // Body: ASI — sélecteur de feat (PHB 2024) + note libre
     if (d.isAsi) {
+      const featOpts = Object.keys(GENERAL_FEATS).map(fn =>
+        `<option value="${esc(fn)}">${esc(fn)}</option>`).join('');
       bodyHtml += `<div class="lvlrow-section">
         <div class="lvlrow-sec-title">⬆ ASI / Feat Decision</div>
+        <div class="lvlrow-feat-pick">
+          <select class="lvlrow-feat-select" data-featpick="${i}">
+            <option value="">— Choisir un feat (PHB 2024) —</option>${featOpts}
+          </select>
+        </div>
+        <div class="lvlrow-feat-desc" id="featdesc-${i}"></div>
         <textarea class="lvlrow-textarea" data-asi="${i}" placeholder="e.g. +2 STR, Feat: Sentinel, +1 STR +1 DEX…">${esc(row.asi||'')}</textarea>
       </div>`;
     }
@@ -8646,6 +8725,36 @@ function renderLvlupTab() {
   );
 
   // Textareas (ASI / spells / notes) — just save, no re-render
+  /* Sélecteur de feat : affiche la description et pré-remplit la note ASI */
+  rowsCont.querySelectorAll('[data-featpick]').forEach(sel => {
+    const i    = +sel.dataset.featpick;
+    const desc = document.getElementById('featdesc-' + i);
+    const ta   = rowsCont.querySelector(`[data-asi="${i}"]`);
+    // Re-sélectionner le feat déjà noté (persistance à travers les re-renders)
+    const noted = Object.keys(GENERAL_FEATS).find(fn => (rows[i].asi || '').includes(fn));
+    if (noted) sel.value = noted;
+    const paint = fn => {
+      const f = GENERAL_FEATS[fn];
+      if (!f) { desc.innerHTML = ''; return; }
+      const tags = [
+        f.asi ? `<span class="feat-tag">+1 ${f.abil}</span>` : '',
+        f.prereq ? `<span class="feat-tag prereq">Prérequis : ${esc(f.prereq)}</span>` : ''
+      ].filter(Boolean).join('');
+      desc.innerHTML = `${tags ? `<div class="feat-tags">${tags}</div>` : ''}<div>${f.desc}</div>`;
+    };
+    paint(sel.value);
+    sel.addEventListener('change', () => {
+      paint(sel.value);
+      if (!sel.value) return;
+      const f = GENERAL_FEATS[sel.value];
+      // Note pré-remplie — le joueur reste libre de la réécrire
+      const note = sel.value === 'Ability Score Improvement'
+        ? 'ASI : '
+        : `Feat : ${sel.value}${f.asi ? ` (+1 ${f.abil})` : ''}`;
+      if (ta) { ta.value = note; rows[i].asi = note; triggerSave(); }
+    });
+  });
+
   rowsCont.querySelectorAll('[data-asi]').forEach(ta =>
     ta.addEventListener('input', () => { rows[+ta.dataset.asi].asi = ta.value; triggerSave(); })
   );
