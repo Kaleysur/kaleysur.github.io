@@ -2588,6 +2588,15 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   border: 1px solid var(--gold-dark, #8a6e1a);
 }
 .feat-tag.prereq { background: rgba(120,120,140,0.12); color: #999; border-color: #4a4a5a; }
+/* ── Boutons « appliquer à la fiche » (background / espèce) ── */
+.apply-btn {
+  margin-left: 0.5rem; font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 10px;
+  background: rgba(201,169,110,0.12); color: var(--gold, #c9a96e);
+  border: 1px solid var(--gold-dark, #8a6e1a); cursor: pointer;
+  font-family: inherit; transition: all 0.12s; white-space: nowrap;
+}
+.apply-btn:hover { background: rgba(201,169,110,0.25); color: #f0d9a0; }
+.apply-done { margin-left: 0.5rem; font-size: 0.7rem; color: var(--success, #6aba6a); white-space: nowrap; }
 .lvlrow-expand-btn {
   background: none; border: none; color: #555; cursor: pointer; font-size: 0.75rem;
   padding: 0; transition: transform 0.2s, color 0.12s; line-height: 1; flex-shrink: 0;
@@ -4200,22 +4209,22 @@ const ORIGIN_FEATS = {
   'Tough':            "Your Hit Point maximum increases by twice your character level.",
 };
 const BACKGROUND_DATA = {
-  'Acolyte':      { abilities:['int','sag','cha'], feat:'Magic Initiate',  skills:'Insight, Religion',        tool:"Calligrapher's Supplies" },
-  'Artisan':      { abilities:['for','dex','int'], feat:'Crafter',         skills:'Investigation, Persuasion', tool:"Artisan's Tools (choice)" },
-  'Charlatan':    { abilities:['dex','con','cha'], feat:'Skilled',         skills:'Deception, Sleight of Hand', tool:"Forgery Kit" },
-  'Criminal':     { abilities:['dex','con','int'], feat:'Alert',           skills:'Sleight of Hand, Stealth',  tool:"Thieves' Tools" },
-  'Entertainer':  { abilities:['for','dex','cha'], feat:'Musician',        skills:'Acrobatics, Performance',   tool:"Musical Instrument (choice)" },
-  'Farmer':       { abilities:['for','con','sag'], feat:'Tough',           skills:'Animal Handling, Nature',   tool:"Carpenter's Tools" },
-  'Guard':        { abilities:['for','int','sag'], feat:'Alert',           skills:'Athletics, Perception',     tool:"Gaming Set (choice)" },
-  'Guide':        { abilities:['dex','con','sag'], feat:'Magic Initiate',  skills:'Stealth, Survival',         tool:"Cartographer's Tools" },
-  'Hermit':       { abilities:['con','sag','cha'], feat:'Healer',          skills:'Medicine, Religion',        tool:"Herbalism Kit" },
-  'Merchant':     { abilities:['con','int','cha'], feat:'Lucky',           skills:'Animal Handling, Persuasion', tool:"Navigator's Tools" },
-  'Noble':        { abilities:['for','int','cha'], feat:'Skilled',         skills:'History, Persuasion',       tool:"Gaming Set (choice)" },
-  'Sage':         { abilities:['con','int','sag'], feat:'Magic Initiate',  skills:'Arcana, History',           tool:"Calligrapher's Supplies" },
-  'Sailor':       { abilities:['for','dex','sag'], feat:'Tavern Brawler',  skills:'Acrobatics, Perception',    tool:"Navigator's Tools" },
-  'Scribe':       { abilities:['dex','int','sag'], feat:'Skilled',         skills:'Investigation, Perception', tool:"Calligrapher's Supplies" },
-  'Soldier':      { abilities:['for','dex','con'], feat:'Savage Attacker', skills:'Athletics, Intimidation',   tool:"Gaming Set (choice)" },
-  'Wayfarer':     { abilities:['dex','sag','cha'], feat:'Lucky',           skills:'Insight, Stealth',          tool:"Thieves' Tools" },
+  'Acolyte':      { abilities:['int','sag','cha'], feat:'Magic Initiate',  skills:'Insight, Religion',        skillKeys:['perspicacite','religion'],   tool:"Calligrapher's Supplies" },
+  'Artisan':      { abilities:['for','dex','int'], feat:'Crafter',         skills:'Investigation, Persuasion', skillKeys:['investigation','persuasion'], tool:"Artisan's Tools (choice)" },
+  'Charlatan':    { abilities:['dex','con','cha'], feat:'Skilled',         skills:'Deception, Sleight of Hand', skillKeys:['duperie','prestidig'],     tool:"Forgery Kit" },
+  'Criminal':     { abilities:['dex','con','int'], feat:'Alert',           skills:'Sleight of Hand, Stealth',  skillKeys:['prestidig','discret'],       tool:"Thieves' Tools" },
+  'Entertainer':  { abilities:['for','dex','cha'], feat:'Musician',        skills:'Acrobatics, Performance',   skillKeys:['acrobaties','performance'],  tool:"Musical Instrument (choice)" },
+  'Farmer':       { abilities:['for','con','sag'], feat:'Tough',           skills:'Animal Handling, Nature',   skillKeys:['animaux','nature'],          tool:"Carpenter's Tools" },
+  'Guard':        { abilities:['for','int','sag'], feat:'Alert',           skills:'Athletics, Perception',     skillKeys:['athletisme','perception'],   tool:"Gaming Set (choice)" },
+  'Guide':        { abilities:['dex','con','sag'], feat:'Magic Initiate',  skills:'Stealth, Survival',         skillKeys:['discret','survie'],          tool:"Cartographer's Tools" },
+  'Hermit':       { abilities:['con','sag','cha'], feat:'Healer',          skills:'Medicine, Religion',        skillKeys:['medecine','religion'],       tool:"Herbalism Kit" },
+  'Merchant':     { abilities:['con','int','cha'], feat:'Lucky',           skills:'Animal Handling, Persuasion', skillKeys:['animaux','persuasion'],    tool:"Navigator's Tools" },
+  'Noble':        { abilities:['for','int','cha'], feat:'Skilled',         skills:'History, Persuasion',       skillKeys:['histoire','persuasion'],     tool:"Gaming Set (choice)" },
+  'Sage':         { abilities:['con','int','sag'], feat:'Magic Initiate',  skills:'Arcana, History',           skillKeys:['arcanes','histoire'],        tool:"Calligrapher's Supplies" },
+  'Sailor':       { abilities:['for','dex','sag'], feat:'Tavern Brawler',  skills:'Acrobatics, Perception',    skillKeys:['acrobaties','perception'],   tool:"Navigator's Tools" },
+  'Scribe':       { abilities:['dex','int','sag'], feat:'Skilled',         skills:'Investigation, Perception', skillKeys:['investigation','perception'], tool:"Calligrapher's Supplies" },
+  'Soldier':      { abilities:['for','dex','con'], feat:'Savage Attacker', skills:'Athletics, Intimidation',   skillKeys:['athletisme','intimidation'], tool:"Gaming Set (choice)" },
+  'Wayfarer':     { abilities:['dex','sag','cha'], feat:'Lucky',           skills:'Insight, Stealth',          skillKeys:['perspicacite','discret'],    tool:"Thieves' Tools" },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -4256,6 +4265,8 @@ const SPECIES_DATA = {
 
 'Dwarf': {
   size: 'Medium', speed: 30,
+  // effects : valeurs mécaniques applicables en un clic à la fiche
+  effects: { hpPerLevel: 1 },
   traits: {
     1: [
       { name:'Darkvision', desc:'Darkvision 120 ft.' },
@@ -4288,6 +4299,7 @@ const SPECIES_DATA = {
       5: [{ name:'Misty Step', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
     },
     'Wood Elf': {
+      effects: { speed: 35 },
       1: [{ name:'Wood Elf Lineage', desc:'Speed 35 ft. You know the Druidcraft cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
       3: [{ name:'Longstrider', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
       5: [{ name:'Pass without Trace', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
@@ -4315,6 +4327,7 @@ const SPECIES_DATA = {
 
 'Goliath': {
   size: 'Medium', speed: 35,
+  effects: { speed: 35 },
   traits: {
     1: [
       { name:'Giant Ancestry', desc:"Choose a boon usable PB/Long Rest: Cloud's Jaunt (bonus action: teleport 30 ft) · Fire's Burn (+1d10 Fire on a hit) · Frost's Chill (+1d6 Cold + speed −10 on a hit) · Hill's Tumble (knock Prone a Large- creature you hit) · Stone's Endurance (reaction: reduce damage by 1d12 + CON) · Storm's Thunder (reaction: 1d8 Thunder to an attacker within 60 ft)." },
@@ -6203,13 +6216,29 @@ function renderSpeciesTraits() {
   document.getElementById('species-title').textContent =
     c.species + (lineage ? ' (' + lineage + ')' : '') + ' — Species Traits';
 
+  // Effets mécaniques : ceux de l'espèce, surchargés par ceux de la lignée
+  const fx = Object.assign({}, data.effects, (data.lineages?.[lineage]?.effects) || {});
+  const speedTarget = fx.speed || data.speed;
+  const speedOk = (parseInt(c.vitesse) || 0) === speedTarget;
+
   body.innerHTML = `
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Size:</span> ${data.size}</div>
-      <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${data.speed} ft.</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${speedTarget} ft.
+        ${speedOk ? `<span class="apply-done">✓ appliquée</span>`
+                  : `<button class="apply-btn" id="sp-apply-speed">✓ Appliquer (${speedTarget} ft)</button>`}</div>
+      ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">PV bonus:</span>
+        +${fx.hpPerLevel}/niveau — soit <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max au niveau ${totalLvl}
+        <span style="color:#888;font-size:0.9em;">(à inclure dans tes PV max)</span></div>` : ''}
       ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choisis une lignée (onglet Identity)</div>` : ''}
     </div>
   `;
+
+  document.getElementById('sp-apply-speed')?.addEventListener('click', () => {
+    c.vitesse = speedTarget;
+    fillFields(); renderHero(); renderSpeciesTraits(); triggerSave();
+    showToast(`✓ Vitesse réglée à ${speedTarget} ft.`);
+  });
 
   const lineageTraits = (data.lineages && data.lineages[lineage]) || {};
   for (let lvl = 1; lvl <= 20; lvl++) {
@@ -6336,11 +6365,17 @@ function renderBackground() {
   document.getElementById('bg-title').textContent = c.background + ' — Background';
   const abils = data.abilities.map(a => ABIL_LABEL[a]).join(' · ');
 
+  // Les maîtrises de compétences sont-elles déjà cochées dans la fiche ?
+  const skillsDone = (data.skillKeys || []).every(k => (parseInt(c[k]) || 0) >= 1);
+
   body.innerHTML = `
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Ability Scores:</span> ${abils}
         <span style="color:#888;font-size:0.9em;"> — répartis +2/+1 ou +1/+1/+1</span></div>
-      <div class="cf-prof-item"><span class="cf-prof-label">Skills:</span> ${data.skills}</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Skills:</span> ${data.skills}
+        ${data.skillKeys ? (skillsDone
+          ? `<span class="apply-done">✓ maîtrises cochées</span>`
+          : `<button class="apply-btn" id="bg-apply-skills">✓ Cocher les maîtrises</button>`) : ''}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Tool:</span> ${data.tool}</div>
     </div>
     <div class="cf-level-group">
@@ -6361,6 +6396,13 @@ function renderBackground() {
   const bod = body.querySelector('.cf-level-body');
   hdr.addEventListener('click', () => {
     bod.classList.toggle('cf-hidden', hdr.classList.toggle('cf-collapsed'));
+  });
+
+  // Cocher les maîtrises de compétences du background dans la fiche
+  document.getElementById('bg-apply-skills')?.addEventListener('click', () => {
+    (data.skillKeys || []).forEach(k => { if ((parseInt(c[k]) || 0) < 1) c[k] = 1; });
+    renderSkills(); renderPassiveSkills(); renderBackground(); triggerSave();
+    showToast(`✓ Maîtrises appliquées : ${data.skills}`);
   });
 }
 
