@@ -2597,6 +2597,42 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .apply-btn:hover { background: rgba(201,169,110,0.25); color: #f0d9a0; }
 .apply-done { margin-left: 0.5rem; font-size: 0.7rem; color: var(--success, #6aba6a); white-space: nowrap; }
+
+/* ── Assistant de création de personnage ── */
+.wiz-modal { width: 460px; }
+.wiz-steps { display: flex; gap: 0.3rem; margin-bottom: 1rem; }
+.wiz-dot {
+  flex: 1; height: 3px; border-radius: 2px; background: var(--j-border-col, #3a2810);
+  transition: background 0.2s;
+}
+.wiz-dot.done { background: var(--gold-dark, #8a6e1a); }
+.wiz-dot.active { background: var(--gold, #c9a227); box-shadow: 0 0 8px rgba(201,162,39,0.5); }
+.wiz-step { display: none; }
+.wiz-step.active { display: block; }
+.wiz-preview {
+  font-size: 0.78rem; line-height: 1.5; color: var(--j-text, #e2cfa0);
+  background: rgba(201,169,110,0.06); border-left: 2px solid var(--gold-dark, #8a6e1a);
+  padding: 0.55rem 0.7rem; border-radius: 0 4px 4px 0; margin-top: 0.6rem;
+  max-height: 190px; overflow-y: auto;
+}
+.wiz-preview:empty { display: none; }
+.wiz-preview strong { color: var(--gold, #c9a227); }
+.wiz-preview .wiz-trait { margin-top: 0.35rem; }
+.wiz-preview .wiz-trait-name { color: var(--gold, #c9a227); font-weight: 600; }
+.wiz-abils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.wiz-abil-cell {
+  background: var(--j-input, #0a0703); border: 1px solid var(--j-border-col, #3a2810);
+  border-radius: 5px; padding: 0.45rem 0.3rem; text-align: center;
+}
+.wiz-abil-lbl { font-size: 0.65rem; color: #888; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+.wiz-abil-sel {
+  width: 100%; background: transparent; border: none; color: var(--gold, #c9a227);
+  font-family: 'Cinzel', serif; font-size: 1rem; text-align: center; cursor: pointer;
+}
+.wiz-abil-sel:focus { outline: none; }
+.wiz-abil-mod { font-size: 0.7rem; color: #888; margin-top: 0.15rem; }
+.wiz-nav { display: flex; gap: 0.4rem; justify-content: flex-end; margin-top: 1rem; }
+@media (max-width: 640px) { .wiz-modal { width: 94vw; padding: 1.2rem; } }
 .lvlrow-expand-btn {
   background: none; border: none; color: #555; cursor: pointer; font-size: 0.75rem;
   padding: 0; transition: transform 0.2s, color 0.12s; line-height: 1; flex-shrink: 0;
@@ -12549,14 +12585,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ── Initialisation modal nouveau personnage ── */
   let newCharSelectedAvatar = AVATARS[0];
 
-  (function initNewCharModal() {
+  /* ════════════════════════════════════════════════════════════
+     ASSISTANT DE CRÉATION — 5 étapes : identité, espèce, classe,
+     background, caractéristiques. À la création, tout est appliqué :
+     maîtrises de sauvegarde de la classe, compétences du background,
+     vitesse d'espèce, PV de niveau 1, caractéristique d'incantation.
+     ════════════════════════════════════════════════════════════ */
+  (function initNewCharWizard() {
     const overlay  = document.getElementById('new-char-modal-overlay');
     const grid     = document.getElementById('new-char-avatar-grid');
     const nameInp  = document.getElementById('new-char-name');
     const btnOk    = document.getElementById('new-char-confirm');
     const btnClose = document.getElementById('new-char-cancel');
+    const btnPrev  = document.getElementById('wiz-prev');
+    const btnNext  = document.getElementById('wiz-next');
+    if (!overlay) return;
 
-    // Grille d'avatars
+    const STD_ARRAY = [15, 14, 13, 12, 10, 8];
+    const ABILS = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
+    const TOTAL_STEPS = 5;
+    let step = 1;
+
+    /* ── Grille d'avatars ── */
     AVATARS.forEach(av => {
       const btn = document.createElement('button');
       btn.className = 'new-char-av-btn' + (av === newCharSelectedAvatar ? ' selected' : '');
@@ -12569,30 +12619,193 @@ document.addEventListener('DOMContentLoaded', async () => {
       grid.appendChild(btn);
     });
 
-    function closeModal() { overlay.classList.remove('open'); nameInp.value = ''; }
+    /* ── Remplissage des listes ── */
+    const selSpecies = document.getElementById('wiz-species');
+    const selLineage = document.getElementById('wiz-lineage');
+    const selClass   = document.getElementById('wiz-class');
+    const selBg      = document.getElementById('wiz-bg');
+    selSpecies.innerHTML = '<option value="">— Choisir —</option>'
+      + Object.keys(SPECIES_DATA).map(n => `<option>${n}</option>`).join('');
+    selClass.innerHTML   = '<option value="">— Choisir —</option>'
+      + Object.keys(CLASS_DATA).map(n => `<option>${n}</option>`).join('');
+    selBg.innerHTML      = '<option value="">— Choisir —</option>'
+      + Object.keys(BACKGROUND_DATA).map(n => `<option>${n}</option>`).join('');
+
+    /* ── Grille de caractéristiques (tableau standard) ── */
+    const abilBox = document.getElementById('wiz-abils');
+    abilBox.innerHTML = ABILS.map(([k, lbl]) => `
+      <div class="wiz-abil-cell">
+        <div class="wiz-abil-lbl">${lbl}</div>
+        <select class="wiz-abil-sel" data-abil="${k}">
+          <option value="">—</option>${STD_ARRAY.map(v => `<option>${v}</option>`).join('')}
+        </select>
+        <div class="wiz-abil-mod" id="wiz-mod-${k}">—</div>
+      </div>`).join('');
+
+    function refreshAbils() {
+      const sels = [...abilBox.querySelectorAll('.wiz-abil-sel')];
+      const used = sels.map(s => s.value).filter(Boolean);
+      sels.forEach(s => {
+        // Griser les valeurs déjà prises ailleurs (chaque score du tableau est unique)
+        [...s.options].forEach(o => {
+          if (!o.value) return;
+          const takenElsewhere = used.includes(o.value) && s.value !== o.value;
+          o.disabled = takenElsewhere;
+        });
+        const mod = s.value ? Math.floor((parseInt(s.value) - 10) / 2) : null;
+        document.getElementById('wiz-mod-' + s.dataset.abil).textContent =
+          mod === null ? '—' : (mod >= 0 ? '+' : '') + mod;
+      });
+      const remaining = STD_ARRAY.length - used.length;
+      document.getElementById('wiz-abil-note').innerHTML = remaining
+        ? `Il reste <strong>${remaining}</strong> valeur${remaining > 1 ? 's' : ''} à placer — tu pourras aussi tout ajuster plus tard dans la fiche.`
+        : `<strong>✓ Tableau complet.</strong> Tu peux ajuster les scores à tout moment dans la fiche.`;
+    }
+    abilBox.addEventListener('change', refreshAbils);
+
+    /* ── Aperçus ── */
+    function previewSpecies() {
+      const wrap = document.getElementById('wiz-lineage-wrap');
+      const data = SPECIES_DATA[selSpecies.value];
+      const box  = document.getElementById('wiz-species-preview');
+      if (!data) { wrap.style.display = 'none'; box.innerHTML = ''; return; }
+      if (data.lineages) {
+        wrap.style.display = '';
+        document.getElementById('wiz-lineage-label').textContent =
+          selSpecies.value === 'Tiefling' ? 'Héritage fiélon' : 'Lignée';
+        selLineage.innerHTML = '<option value="">— Choisir —</option>'
+          + Object.keys(data.lineages).map(l => `<option>${l}</option>`).join('');
+      } else { wrap.style.display = 'none'; selLineage.innerHTML = ''; }
+      const lin = data.lineages?.[selLineage.value];
+      const fx  = Object.assign({}, data.effects, lin?.effects || {});
+      const traits = [...(data.traits[1] || []), ...((lin && lin[1]) || [])];
+      box.innerHTML = `<div>Taille <strong>${data.size}</strong> · Vitesse <strong>${fx.speed || data.speed} ft</strong></div>`
+        + traits.map(t => `<div class="wiz-trait"><span class="wiz-trait-name">${t.name}</span> — ${t.desc}</div>`).join('');
+    }
+    selSpecies.addEventListener('change', () => { selLineage.value = ''; previewSpecies(); });
+    selLineage.addEventListener('change', previewSpecies);
+
+    function previewClass() {
+      const box = document.getElementById('wiz-class-preview');
+      const d = CLASS_DATA[selClass.value];
+      if (!d) { box.innerHTML = ''; return; }
+      const info = DND_CLASSES[selClass.value] || {};
+      box.innerHTML = `<div>Dé de vie <strong>${info.de || '1d8'}</strong>`
+        + `${info.sort ? ` · Incantation <strong>${info.sort}</strong>` : ''}`
+        + ` · Sauvegardes <strong>${d.saves.map(s => s.toUpperCase()).join(' & ')}</strong></div>`
+        + (d.armorProf ? `<div>Armures : ${d.armorProf}</div>` : '')
+        + (d.weaponProf ? `<div>Armes : ${d.weaponProf}</div>` : '')
+        + (d.features[1] || []).map(f => `<div class="wiz-trait"><span class="wiz-trait-name">${f.name}</span> — ${f.desc}</div>`).join('');
+    }
+    selClass.addEventListener('change', previewClass);
+
+    function previewBg() {
+      const box = document.getElementById('wiz-bg-preview');
+      const d = BACKGROUND_DATA[selBg.value];
+      if (!d) { box.innerHTML = ''; return; }
+      box.innerHTML = `<div>Caractéristiques <strong>${d.abilities.map(a => ABIL_LABEL[a]).join(' · ')}</strong></div>`
+        + `<div>Compétences <strong>${d.skills}</strong> <span style="color:#888;">(cochées automatiquement)</span></div>`
+        + `<div>Outil : ${d.tool}</div>`
+        + `<div class="wiz-trait"><span class="wiz-trait-name">${d.feat}</span> — ${ORIGIN_FEATS[d.feat] || ''}</div>`;
+    }
+    selBg.addEventListener('change', previewBg);
+
+    /* ── Navigation ── */
+    function showStep(n) {
+      step = Math.max(1, Math.min(TOTAL_STEPS, n));
+      overlay.querySelectorAll('.wiz-step').forEach(s =>
+        s.classList.toggle('active', +s.dataset.step === step));
+      document.getElementById('wiz-steps').innerHTML = Array.from({ length: TOTAL_STEPS }, (_, i) =>
+        `<div class="wiz-dot${i + 1 === step ? ' active' : i + 1 < step ? ' done' : ''}"></div>`).join('');
+      btnPrev.style.display = step > 1 ? '' : 'none';
+      btnNext.style.display = step < TOTAL_STEPS ? '' : 'none';
+      btnOk.style.display   = step === TOTAL_STEPS ? '' : 'none';
+      if (step === 1) setTimeout(() => nameInp.focus(), 50);
+    }
+    btnNext.addEventListener('click', () => showStep(step + 1));
+    btnPrev.addEventListener('click', () => showStep(step - 1));
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      nameInp.value = '';
+      [selSpecies, selLineage, selClass, selBg].forEach(s => s.value = '');
+      abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
+      ['wiz-species-preview','wiz-class-preview','wiz-bg-preview'].forEach(id =>
+        document.getElementById(id).innerHTML = '');
+      refreshAbils();
+      showStep(1);
+    }
+    window._wizReset = closeModal;
 
     btnClose.addEventListener('click', closeModal);
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 
+    /* ── Création : applique tous les choix à la fiche ── */
     btnOk.addEventListener('click', () => {
       const name = nameInp.value.trim() || 'Nouveau personnage';
-      const id = newCharId();
+      const id   = newCharId();
       playerData.characters[id] = emptyCharSlot(name);
-      playerData.characters[id].character = playerData.characters[id].character || {};
-      playerData.characters[id].character.characterName = name;
+      const slot = playerData.characters[id];
+      const c    = slot.character;
+      c.characterName = name;
+      c.avatar = newCharSelectedAvatar;
+
+      // Caractéristiques du tableau standard
+      abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => {
+        if (s.value) c[s.dataset.abil] = parseInt(s.value);
+      });
+
+      // Espèce + lignée → vitesse
+      if (selSpecies.value) {
+        c.species = selSpecies.value;
+        const sd = SPECIES_DATA[c.species];
+        if (selLineage.value) c.lineage = selLineage.value;
+        const fx = Object.assign({}, sd.effects, sd.lineages?.[c.lineage]?.effects || {});
+        c.vitesse = fx.speed || sd.speed;
+      }
+
+      // Classe niveau 1 → sauvegardes, dé de vie, incantation, PV
+      if (selClass.value) {
+        c.classe  = selClass.value;
+        c.niveau  = 1;
+        c.classes = [{ classe: selClass.value, sousClasse: '', niveau: 1, customSousClasse: '' }];
+        const cd = CLASS_DATA[selClass.value];
+        const saveMap = { for:'saveFor', dex:'saveDex', con:'saveCon', int:'saveInt', sag:'saveSag', cha:'saveCha' };
+        Object.entries(saveMap).forEach(([a, k]) => { c[k] = cd.saves.includes(a); });
+        const info = DND_CLASSES[selClass.value] || {};
+        c.deVie = info.de || '1d8';
+        c.nbDeVie = 1;
+        if (info.sort) c.caractSort = info.sort;
+        // PV niveau 1 = max du dé + mod CON
+        const dieMax = parseInt((info.de || '1d8').replace('1d', '')) || 8;
+        const conMod = Math.floor(((parseInt(c.con) || 10) - 10) / 2);
+        c.pvMax = Math.max(1, dieMax + conMod);
+        c.pvActuel = c.pvMax;
+        // Ressources de départ de la classe
+        if (typeof CLASS_RESOURCES !== 'undefined' && CLASS_RESOURCES[selClass.value]) {
+          c.resources = CLASS_RESOURCES[selClass.value](1).map(r => ({ ...r }));
+        }
+      }
+
+      // Background → compétences cochées
+      if (selBg.value) {
+        c.background = selBg.value;
+        (BACKGROUND_DATA[selBg.value].skillKeys || []).forEach(k => { c[k] = 1; });
+      }
+
       playerData.activeCharId = id;
-      // Avatar assigné au nouveau personnage
-      if (!playerData.characters[id].character) playerData.characters[id].character = {};
-      playerData.characters[id].character.avatar = newCharSelectedAvatar;
       closeModal();
       renderCharCards();
       renderCharSelector();
       renderAll();
       triggerSave();
+      showToast(`✦ ${name} créé — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'fiche vierge'}`);
     });
 
-    nameInp.addEventListener('keydown', e => { if (e.key === 'Enter') btnOk.click(); });
+    nameInp.addEventListener('keydown', e => { if (e.key === 'Enter') showStep(step + 1); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+    refreshAbils();
+    showStep(1);
   })();
 
 }); // end DOMContentLoaded
@@ -12601,6 +12814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function openNewCharModal() {
   const overlay = document.getElementById('new-char-modal-overlay');
   if (!overlay) return;
+  window._wizReset?.();       // repart toujours de l'étape 1, formulaire vierge
   overlay.classList.add('open');
   setTimeout(() => document.getElementById('new-char-name')?.focus(), 50);
 }
@@ -13210,17 +13424,65 @@ document.addEventListener('keydown', e => {
 
     <!-- ── Modal Nouveau Personnage ── -->
     <div class="new-char-modal-overlay" id="new-char-modal-overlay">
-      <div class="new-char-modal">
-        <h3>✦ New character</h3>
-        <div class="auth-field">
-          <label class="auth-label" for="new-char-name">Character name</label>
-          <input type="text" class="auth-input" id="new-char-name" placeholder="Hero's name…" maxlength="40" autocomplete="off">
+      <div class="new-char-modal wiz-modal">
+        <h3>✦ Nouveau personnage</h3>
+        <div class="wiz-steps" id="wiz-steps"></div>
+
+        <!-- 1 · Identité -->
+        <div class="wiz-step" data-step="1">
+          <div class="auth-field">
+            <label class="auth-label" for="new-char-name">Nom du personnage</label>
+            <input type="text" class="auth-input" id="new-char-name" placeholder="Nom du héros…" maxlength="40" autocomplete="off">
+          </div>
+          <div class="field-label" style="margin:0.5rem 0 0.4rem;">Avatar</div>
+          <div class="new-char-avatar-grid" id="new-char-avatar-grid"></div>
         </div>
-        <div class="field-label" style="margin:0.5rem 0 0.4rem;">Avatar</div>
-        <div class="new-char-avatar-grid" id="new-char-avatar-grid"></div>
-        <div class="new-char-btn-row">
-          <button class="btn btn-sm" id="new-char-cancel">Cancel</button>
-          <button class="btn btn-sm btn-gold" id="new-char-confirm">✦ Create</button>
+
+        <!-- 2 · Espèce -->
+        <div class="wiz-step" data-step="2">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-species">Espèce</label>
+            <select class="auth-input" id="wiz-species"></select>
+          </div>
+          <div class="auth-field" id="wiz-lineage-wrap" style="display:none;">
+            <label class="auth-label" for="wiz-lineage" id="wiz-lineage-label">Lignée</label>
+            <select class="auth-input" id="wiz-lineage"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-species-preview"></div>
+        </div>
+
+        <!-- 3 · Classe -->
+        <div class="wiz-step" data-step="3">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-class">Classe (niveau 1)</label>
+            <select class="auth-input" id="wiz-class"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-class-preview"></div>
+        </div>
+
+        <!-- 4 · Background -->
+        <div class="wiz-step" data-step="4">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-bg">Background</label>
+            <select class="auth-input" id="wiz-bg"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-bg-preview"></div>
+        </div>
+
+        <!-- 5 · Caractéristiques -->
+        <div class="wiz-step" data-step="5">
+          <div class="field-label" style="margin-bottom:0.5rem;">
+            Répartis le tableau standard <strong style="color:var(--gold);">15 · 14 · 13 · 12 · 10 · 8</strong>
+          </div>
+          <div class="wiz-abils" id="wiz-abils"></div>
+          <div class="wiz-preview" id="wiz-abil-note"></div>
+        </div>
+
+        <div class="new-char-btn-row wiz-nav">
+          <button class="btn btn-sm" id="new-char-cancel">Annuler</button>
+          <button class="btn btn-sm" id="wiz-prev" style="display:none;">‹ Retour</button>
+          <button class="btn btn-sm btn-gold" id="wiz-next">Suivant ›</button>
+          <button class="btn btn-sm btn-gold" id="new-char-confirm" style="display:none;">✦ Créer</button>
         </div>
       </div>
     </div>
