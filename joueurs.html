@@ -2568,6 +2568,71 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .lvlrow-feat-tag { color: var(--gold-dark, #8a6e1a); font-weight: 600; }
 .lvlrow-feat-tag.asi-tag { color: var(--gold, #c9a96e); }
+/* ── Sélecteur de feat (ASI) ── */
+.lvlrow-feat-pick { margin-bottom: 0.4rem; }
+.lvlrow-feat-select {
+  width: 100%; background: var(--j-input, #0a0703);
+  border: 1px solid var(--j-border-col, #3a2810); color: var(--j-text, #e2cfa0);
+  font-size: 0.82rem; padding: 0.35rem 0.5rem; border-radius: 4px; font-family: inherit;
+}
+.lvlrow-feat-select:focus { outline: none; border-color: var(--gold-dark, #8a6e1a); }
+.lvlrow-feat-desc:not(:empty) {
+  font-size: 0.8rem; line-height: 1.5; color: var(--j-text, #e2cfa0);
+  background: rgba(201,169,110,0.06); border-left: 2px solid var(--gold-dark, #8a6e1a);
+  padding: 0.5rem 0.65rem; border-radius: 0 4px 4px 0; margin-bottom: 0.4rem;
+}
+.feat-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.35rem; }
+.feat-tag {
+  font-size: 0.68rem; padding: 0.1rem 0.45rem; border-radius: 10px;
+  background: rgba(201,169,110,0.15); color: var(--gold, #c9a96e);
+  border: 1px solid var(--gold-dark, #8a6e1a);
+}
+.feat-tag.prereq { background: rgba(120,120,140,0.12); color: #999; border-color: #4a4a5a; }
+/* ── Boutons « appliquer à la fiche » (background / espèce) ── */
+.apply-btn {
+  margin-left: 0.5rem; font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 10px;
+  background: rgba(201,169,110,0.12); color: var(--gold, #c9a96e);
+  border: 1px solid var(--gold-dark, #8a6e1a); cursor: pointer;
+  font-family: inherit; transition: all 0.12s; white-space: nowrap;
+}
+.apply-btn:hover { background: rgba(201,169,110,0.25); color: #f0d9a0; }
+.apply-done { margin-left: 0.5rem; font-size: 0.7rem; color: var(--success, #6aba6a); white-space: nowrap; }
+
+/* ── Assistant de création de personnage ── */
+.wiz-modal { width: 460px; }
+.wiz-steps { display: flex; gap: 0.3rem; margin-bottom: 1rem; }
+.wiz-dot {
+  flex: 1; height: 3px; border-radius: 2px; background: var(--j-border-col, #3a2810);
+  transition: background 0.2s;
+}
+.wiz-dot.done { background: var(--gold-dark, #8a6e1a); }
+.wiz-dot.active { background: var(--gold, #c9a227); box-shadow: 0 0 8px rgba(201,162,39,0.5); }
+.wiz-step { display: none; }
+.wiz-step.active { display: block; }
+.wiz-preview {
+  font-size: 0.78rem; line-height: 1.5; color: var(--j-text, #e2cfa0);
+  background: rgba(201,169,110,0.06); border-left: 2px solid var(--gold-dark, #8a6e1a);
+  padding: 0.55rem 0.7rem; border-radius: 0 4px 4px 0; margin-top: 0.6rem;
+  max-height: 190px; overflow-y: auto;
+}
+.wiz-preview:empty { display: none; }
+.wiz-preview strong { color: var(--gold, #c9a227); }
+.wiz-preview .wiz-trait { margin-top: 0.35rem; }
+.wiz-preview .wiz-trait-name { color: var(--gold, #c9a227); font-weight: 600; }
+.wiz-abils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.wiz-abil-cell {
+  background: var(--j-input, #0a0703); border: 1px solid var(--j-border-col, #3a2810);
+  border-radius: 5px; padding: 0.45rem 0.3rem; text-align: center;
+}
+.wiz-abil-lbl { font-size: 0.65rem; color: #888; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+.wiz-abil-sel {
+  width: 100%; background: transparent; border: none; color: var(--gold, #c9a227);
+  font-family: 'Cinzel', serif; font-size: 1rem; text-align: center; cursor: pointer;
+}
+.wiz-abil-sel:focus { outline: none; }
+.wiz-abil-mod { font-size: 0.7rem; color: #888; margin-top: 0.15rem; }
+.wiz-nav { display: flex; gap: 0.4rem; justify-content: flex-end; margin-top: 1rem; }
+@media (max-width: 640px) { .wiz-modal { width: 94vw; padding: 1.2rem; } }
 .lvlrow-expand-btn {
   background: none; border: none; color: #555; cursor: pointer; font-size: 0.75rem;
   padding: 0; transition: transform 0.2s, color 0.12s; line-height: 1; flex-shrink: 0;
@@ -4112,6 +4177,57 @@ const MULTICLASS_SLOTS = {
    type: 'feature' | 'asi' | 'subclass' | 'epic'
    ════════════════════════════════════════════════════════════ */
 /* ════════════════════════════════════════════════════════════
+   D&D 2024 GENERAL FEATS (PHB) — disponibles aux niveaux 4/8/12/16
+   (et 19 pour certaines classes) en remplacement d'un ASI.
+   Un feat marqué asi:true donne aussi +1 dans une caractéristique.
+   ════════════════════════════════════════════════════════════ */
+const GENERAL_FEATS = {
+  'Ability Score Improvement': { asi:false, prereq:'', desc:"Increase one ability score by 2, or two ability scores by 1 each (max 20). Can be taken multiple times." },
+  'Actor':              { asi:true, abil:'CHA', prereq:'CHA 13+', desc:"Advantage on Deception and Performance checks when trying to pass yourself off as someone else. You can mimic a voice or sound you've heard (Insight vs your Deception to detect)." },
+  'Athlete':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Standing up from Prone costs only 5 ft of movement. You can Climb without extra movement cost, and make a running Long/High Jump after moving only 5 ft." },
+  'Charger':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"When you take the Dash action, you can make one melee attack as a Bonus Action: +1d8 damage if you moved 10+ ft straight, or push the target 10 ft." },
+  'Chef':               { asi:true, abil:'CON or SAG', prereq:'CON or SAG 13+', desc:"Proficiency with Cook's Utensils. Short Rest: cook a meal for up to 4+PB creatures, each regains 1d8 extra HP. Long Rest: bake PB treats granting 1d8 Temp HP each." },
+  'Crossbow Expert':    { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"Ignore the Loading property of crossbows. Being within 5 ft of an enemy doesn't impose Disadvantage on your ranged attacks. When you use the Attack action with a one-handed weapon, you can attack with a Hand Crossbow as a Bonus Action." },
+  'Crusher':            { asi:true, abil:'FOR or CON', prereq:'FOR or CON 13+', desc:"Once per turn when you deal Bludgeoning damage, move the target 5 ft. On a Critical Hit, attacks against that creature have Advantage until your next turn." },
+  'Defensive Duelist':  { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"Reaction when hit by a melee attack while wielding a Finesse weapon: add your Proficiency Bonus to AC, possibly causing the attack to miss." },
+  'Dual Wielder':       { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"+1 AC while wielding a Melee weapon in each hand. You can use two-weapon fighting even with non-Light weapons. You can draw or stow two weapons at once." },
+  'Durable':            { asi:true, abil:'CON', prereq:'CON 13+', desc:"When you roll a Hit Die to regain HP, the minimum equals twice your CON modifier (min 2). As a Bonus Action, spend a Hit Die to regain HP (PB times/Long Rest)." },
+  'Elemental Adept':    { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Choose a damage type (Acid, Cold, Fire, Lightning, Thunder). Your spells ignore Resistance to it, and treat any 1 on a damage die as a 2." },
+  'Fey-Touched':        { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Learn Misty Step and one level-1 Divination or Enchantment spell. Cast each once per Long Rest without a slot, or with slots." },
+  'Grappler':           { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Advantage on attacks against a creature you're grappling. Grappling doesn't cost extra movement. You can move a grappled creature of your size or smaller at full speed." },
+  'Great Weapon Master':{ asi:true, abil:'FOR', prereq:'FOR 13+', desc:"When you score a Critical Hit or reduce a creature to 0 HP with a Heavy weapon, make one melee attack as a Bonus Action. When you hit with a Heavy weapon, add your Proficiency Bonus to the damage (once per turn)." },
+  'Heavily Armored':    { asi:true, abil:'FOR', prereq:'Medium armor proficiency', desc:"Gain proficiency with Heavy armor." },
+  'Heavy Armor Master': { asi:true, abil:'FOR or CON', prereq:'Heavy armor proficiency', desc:"While wearing Heavy armor, reduce Bludgeoning/Piercing/Slashing damage taken by your Proficiency Bonus." },
+  'Inspiring Leader':   { asi:true, abil:'SAG or CHA', prereq:'SAG or CHA 13+', desc:"After a Rest, give up to 6 creatures (including yourself) Temp HP equal to your PB + your SAG or CHA modifier." },
+  'Keen Mind':          { asi:true, abil:'INT', prereq:'INT 13+', desc:"You always know which way is north and the number of hours until sunrise/sunset. As a Magic action, gain Advantage on your next INT (History/Investigation/Nature/Religion) check (PB/Long Rest)." },
+  'Lightly Armored':    { asi:true, abil:'FOR or DEX', prereq:'', desc:"Gain proficiency with Light armor and Shields." },
+  'Mage Slayer':        { asi:true, abil:'FOR or DEX', prereq:'', desc:"Reaction: when a creature within 5 ft casts a spell, make one melee attack against it. Advantage on saves against spells cast by creatures within 5 ft." },
+  'Martial Weapon Training': { asi:true, abil:'FOR or DEX', prereq:'', desc:"Gain proficiency with Martial weapons." },
+  'Medium Armor Master':{ asi:true, abil:'FOR or DEX', prereq:'Medium armor proficiency', desc:"Wearing Medium armor doesn't impose Disadvantage on Stealth, and you can add 3 (instead of 2) to your AC from DEX." },
+  'Moderately Armored': { asi:true, abil:'FOR or DEX', prereq:'Light armor proficiency', desc:"Gain proficiency with Medium armor." },
+  'Mounted Combatant':  { asi:true, abil:'FOR, DEX or WIS', prereq:'', desc:"Advantage on melee attacks against unmounted creatures smaller than your mount. Your mount takes no damage on a successful DEX save (half on failure). You can force an attack targeting your mount to target you instead." },
+  'Observant':          { asi:true, abil:'INT or SAG', prereq:'INT or SAG 13+', desc:"As a Bonus Action, make a WIS (Perception) or INT (Investigation) check (PB/Long Rest). You can read lips if you can see a creature's mouth and know the language." },
+  'Piercer':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Once per turn when you deal Piercing damage, reroll one damage die. On a Critical Hit, roll one additional damage die." },
+  'Poisoner':           { asi:true, abil:'DEX or INT', prereq:'', desc:"Proficiency with the Poisoner's Kit. Apply poison as a Bonus Action. Your poisons ignore Resistance to Poison. Craft doses that deal 2d8 Poison damage (CON save DC 14 or Poisoned)." },
+  'Polearm Master':     { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Bonus Action: attack with the opposite end of a Quarterstaff/Spear/Glaive/Halberd/Pike (1d4 Bludgeoning). Opportunity attack when a creature enters your reach with these weapons." },
+  'Resilient':          { asi:true, abil:'choice', prereq:'', desc:"Increase one ability score by 1 and gain proficiency in saving throws using that ability." },
+  'Ritual Caster':      { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting', desc:"Gain a ritual book with two level-1 ritual spells from a chosen class list. You can add more rituals found in your adventures." },
+  'Sentinel':           { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"When you hit with an Opportunity Attack, the creature's Speed becomes 0 for the turn. Creatures provoke Opportunity Attacks even if they Disengage. Reaction: attack a creature within 5 ft that attacks a target other than you." },
+  'Sharpshooter':       { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"Attacking at Long Range doesn't impose Disadvantage. Your ranged attacks ignore Half and Three-Quarters Cover. When you hit with a ranged weapon, add your Proficiency Bonus to damage (once per turn)." },
+  'Shield Master':      { asi:true, abil:'FOR', prereq:'Shield proficiency', desc:"Bonus Action: shove a creature within 5 ft with your Shield. Add your Shield's AC bonus to DEX saves against effects targeting only you. Reaction: take no damage on a successful DEX save." },
+  'Skulker':            { asi:true, abil:'DEX', prereq:'DEX 13+', desc:"You can Hide when only Lightly Obscured. Missing with a ranged attack doesn't reveal your position. Dim light doesn't impose Disadvantage on Perception checks." },
+  'Slasher':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Once per turn when you deal Slashing damage, reduce the target's Speed by 10 ft. On a Critical Hit, the target has Disadvantage on attacks until your next turn." },
+  'Speedy':             { asi:true, abil:'DEX or CON', prereq:'DEX or CON 13+', desc:"Your Speed increases by 10 ft. Difficult Terrain doesn't slow your Dash. Opportunity attacks against you have Disadvantage when you Dash." },
+  'Spell Sniper':       { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Your attack-roll spells have double range and ignore Half and Three-Quarters Cover. Learn one attack cantrip." },
+  'Shadow-Touched':     { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Learn Invisibility and one level-1 Illusion or Necromancy spell. Cast each once per Long Rest without a slot, or with slots." },
+  'Telekinetic':        { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Learn Mage Hand (invisible, cast without components). Bonus Action: telekinetically shove a creature 5 ft (STR save)." },
+  'Telepathic':         { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Speak telepathically to any creature within 60 ft that understands a language. You always have Detect Thoughts prepared — cast once per Long Rest without a slot." },
+  'War Caster':         { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Advantage on CON saves to maintain Concentration. Perform somatic components with weapons/shield in hand. Cast a spell (1 action, targeting one creature) instead of an Opportunity Attack." },
+  'Weapon Master':      { asi:true, abil:'FOR or DEX', prereq:'', desc:"You gain the Mastery property for one kind of weapon you're proficient with; you can change it on a Long Rest." },
+};
+const ASI_LEVELS = [4, 8, 12, 16, 19];
+
+/* ════════════════════════════════════════════════════════════
    D&D 2024 BACKGROUNDS (PHB) — chaque background donne :
    +2/+1 (ou +1/+1/+1) réparti sur 3 caractéristiques, un Origin Feat,
    2 compétences, 1 outil et un équipement de départ.
@@ -4129,22 +4245,22 @@ const ORIGIN_FEATS = {
   'Tough':            "Your Hit Point maximum increases by twice your character level.",
 };
 const BACKGROUND_DATA = {
-  'Acolyte':      { abilities:['int','sag','cha'], feat:'Magic Initiate',  skills:'Insight, Religion',        tool:"Calligrapher's Supplies" },
-  'Artisan':      { abilities:['for','dex','int'], feat:'Crafter',         skills:'Investigation, Persuasion', tool:"Artisan's Tools (choice)" },
-  'Charlatan':    { abilities:['dex','con','cha'], feat:'Skilled',         skills:'Deception, Sleight of Hand', tool:"Forgery Kit" },
-  'Criminal':     { abilities:['dex','con','int'], feat:'Alert',           skills:'Sleight of Hand, Stealth',  tool:"Thieves' Tools" },
-  'Entertainer':  { abilities:['for','dex','cha'], feat:'Musician',        skills:'Acrobatics, Performance',   tool:"Musical Instrument (choice)" },
-  'Farmer':       { abilities:['for','con','sag'], feat:'Tough',           skills:'Animal Handling, Nature',   tool:"Carpenter's Tools" },
-  'Guard':        { abilities:['for','int','sag'], feat:'Alert',           skills:'Athletics, Perception',     tool:"Gaming Set (choice)" },
-  'Guide':        { abilities:['dex','con','sag'], feat:'Magic Initiate',  skills:'Stealth, Survival',         tool:"Cartographer's Tools" },
-  'Hermit':       { abilities:['con','sag','cha'], feat:'Healer',          skills:'Medicine, Religion',        tool:"Herbalism Kit" },
-  'Merchant':     { abilities:['con','int','cha'], feat:'Lucky',           skills:'Animal Handling, Persuasion', tool:"Navigator's Tools" },
-  'Noble':        { abilities:['for','int','cha'], feat:'Skilled',         skills:'History, Persuasion',       tool:"Gaming Set (choice)" },
-  'Sage':         { abilities:['con','int','sag'], feat:'Magic Initiate',  skills:'Arcana, History',           tool:"Calligrapher's Supplies" },
-  'Sailor':       { abilities:['for','dex','sag'], feat:'Tavern Brawler',  skills:'Acrobatics, Perception',    tool:"Navigator's Tools" },
-  'Scribe':       { abilities:['dex','int','sag'], feat:'Skilled',         skills:'Investigation, Perception', tool:"Calligrapher's Supplies" },
-  'Soldier':      { abilities:['for','dex','con'], feat:'Savage Attacker', skills:'Athletics, Intimidation',   tool:"Gaming Set (choice)" },
-  'Wayfarer':     { abilities:['dex','sag','cha'], feat:'Lucky',           skills:'Insight, Stealth',          tool:"Thieves' Tools" },
+  'Acolyte':      { abilities:['int','sag','cha'], feat:'Magic Initiate',  skills:'Insight, Religion',        skillKeys:['perspicacite','religion'],   tool:"Calligrapher's Supplies" },
+  'Artisan':      { abilities:['for','dex','int'], feat:'Crafter',         skills:'Investigation, Persuasion', skillKeys:['investigation','persuasion'], tool:"Artisan's Tools (choice)" },
+  'Charlatan':    { abilities:['dex','con','cha'], feat:'Skilled',         skills:'Deception, Sleight of Hand', skillKeys:['duperie','prestidig'],     tool:"Forgery Kit" },
+  'Criminal':     { abilities:['dex','con','int'], feat:'Alert',           skills:'Sleight of Hand, Stealth',  skillKeys:['prestidig','discret'],       tool:"Thieves' Tools" },
+  'Entertainer':  { abilities:['for','dex','cha'], feat:'Musician',        skills:'Acrobatics, Performance',   skillKeys:['acrobaties','performance'],  tool:"Musical Instrument (choice)" },
+  'Farmer':       { abilities:['for','con','sag'], feat:'Tough',           skills:'Animal Handling, Nature',   skillKeys:['animaux','nature'],          tool:"Carpenter's Tools" },
+  'Guard':        { abilities:['for','int','sag'], feat:'Alert',           skills:'Athletics, Perception',     skillKeys:['athletisme','perception'],   tool:"Gaming Set (choice)" },
+  'Guide':        { abilities:['dex','con','sag'], feat:'Magic Initiate',  skills:'Stealth, Survival',         skillKeys:['discret','survie'],          tool:"Cartographer's Tools" },
+  'Hermit':       { abilities:['con','sag','cha'], feat:'Healer',          skills:'Medicine, Religion',        skillKeys:['medecine','religion'],       tool:"Herbalism Kit" },
+  'Merchant':     { abilities:['con','int','cha'], feat:'Lucky',           skills:'Animal Handling, Persuasion', skillKeys:['animaux','persuasion'],    tool:"Navigator's Tools" },
+  'Noble':        { abilities:['for','int','cha'], feat:'Skilled',         skills:'History, Persuasion',       skillKeys:['histoire','persuasion'],     tool:"Gaming Set (choice)" },
+  'Sage':         { abilities:['con','int','sag'], feat:'Magic Initiate',  skills:'Arcana, History',           skillKeys:['arcanes','histoire'],        tool:"Calligrapher's Supplies" },
+  'Sailor':       { abilities:['for','dex','sag'], feat:'Tavern Brawler',  skills:'Acrobatics, Perception',    skillKeys:['acrobaties','perception'],   tool:"Navigator's Tools" },
+  'Scribe':       { abilities:['dex','int','sag'], feat:'Skilled',         skills:'Investigation, Perception', skillKeys:['investigation','perception'], tool:"Calligrapher's Supplies" },
+  'Soldier':      { abilities:['for','dex','con'], feat:'Savage Attacker', skills:'Athletics, Intimidation',   skillKeys:['athletisme','intimidation'], tool:"Gaming Set (choice)" },
+  'Wayfarer':     { abilities:['dex','sag','cha'], feat:'Lucky',           skills:'Insight, Stealth',          skillKeys:['perspicacite','discret'],    tool:"Thieves' Tools" },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -4185,6 +4301,8 @@ const SPECIES_DATA = {
 
 'Dwarf': {
   size: 'Medium', speed: 30,
+  // effects : valeurs mécaniques applicables en un clic à la fiche
+  effects: { hpPerLevel: 1 },
   traits: {
     1: [
       { name:'Darkvision', desc:'Darkvision 120 ft.' },
@@ -4217,6 +4335,7 @@ const SPECIES_DATA = {
       5: [{ name:'Misty Step', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
     },
     'Wood Elf': {
+      effects: { speed: 35 },
       1: [{ name:'Wood Elf Lineage', desc:'Speed 35 ft. You know the Druidcraft cantrip. Spellcasting: INT, WIS or CHA (choose).' }],
       3: [{ name:'Longstrider', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }],
       5: [{ name:'Pass without Trace', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
@@ -4244,6 +4363,7 @@ const SPECIES_DATA = {
 
 'Goliath': {
   size: 'Medium', speed: 35,
+  effects: { speed: 35 },
   traits: {
     1: [
       { name:'Giant Ancestry', desc:"Choose a boon usable PB/Long Rest: Cloud's Jaunt (bonus action: teleport 30 ft) · Fire's Burn (+1d10 Fire on a hit) · Frost's Chill (+1d6 Cold + speed −10 on a hit) · Hill's Tumble (knock Prone a Large- creature you hit) · Stone's Endurance (reaction: reduce damage by 1d12 + CON) · Storm's Thunder (reaction: 1d8 Thunder to an attacker within 60 ft)." },
@@ -6132,13 +6252,29 @@ function renderSpeciesTraits() {
   document.getElementById('species-title').textContent =
     c.species + (lineage ? ' (' + lineage + ')' : '') + ' — Species Traits';
 
+  // Effets mécaniques : ceux de l'espèce, surchargés par ceux de la lignée
+  const fx = Object.assign({}, data.effects, (data.lineages?.[lineage]?.effects) || {});
+  const speedTarget = fx.speed || data.speed;
+  const speedOk = (parseInt(c.vitesse) || 0) === speedTarget;
+
   body.innerHTML = `
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Size:</span> ${data.size}</div>
-      <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${data.speed} ft.</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${speedTarget} ft.
+        ${speedOk ? `<span class="apply-done">✓ appliquée</span>`
+                  : `<button class="apply-btn" id="sp-apply-speed">✓ Appliquer (${speedTarget} ft)</button>`}</div>
+      ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">PV bonus:</span>
+        +${fx.hpPerLevel}/niveau — soit <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max au niveau ${totalLvl}
+        <span style="color:#888;font-size:0.9em;">(à inclure dans tes PV max)</span></div>` : ''}
       ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choisis une lignée (onglet Identity)</div>` : ''}
     </div>
   `;
+
+  document.getElementById('sp-apply-speed')?.addEventListener('click', () => {
+    c.vitesse = speedTarget;
+    fillFields(); renderHero(); renderSpeciesTraits(); triggerSave();
+    showToast(`✓ Vitesse réglée à ${speedTarget} ft.`);
+  });
 
   const lineageTraits = (data.lineages && data.lineages[lineage]) || {};
   for (let lvl = 1; lvl <= 20; lvl++) {
@@ -6265,11 +6401,17 @@ function renderBackground() {
   document.getElementById('bg-title').textContent = c.background + ' — Background';
   const abils = data.abilities.map(a => ABIL_LABEL[a]).join(' · ');
 
+  // Les maîtrises de compétences sont-elles déjà cochées dans la fiche ?
+  const skillsDone = (data.skillKeys || []).every(k => (parseInt(c[k]) || 0) >= 1);
+
   body.innerHTML = `
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Ability Scores:</span> ${abils}
         <span style="color:#888;font-size:0.9em;"> — répartis +2/+1 ou +1/+1/+1</span></div>
-      <div class="cf-prof-item"><span class="cf-prof-label">Skills:</span> ${data.skills}</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Skills:</span> ${data.skills}
+        ${data.skillKeys ? (skillsDone
+          ? `<span class="apply-done">✓ maîtrises cochées</span>`
+          : `<button class="apply-btn" id="bg-apply-skills">✓ Cocher les maîtrises</button>`) : ''}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Tool:</span> ${data.tool}</div>
     </div>
     <div class="cf-level-group">
@@ -6290,6 +6432,13 @@ function renderBackground() {
   const bod = body.querySelector('.cf-level-body');
   hdr.addEventListener('click', () => {
     bod.classList.toggle('cf-hidden', hdr.classList.toggle('cf-collapsed'));
+  });
+
+  // Cocher les maîtrises de compétences du background dans la fiche
+  document.getElementById('bg-apply-skills')?.addEventListener('click', () => {
+    (data.skillKeys || []).forEach(k => { if ((parseInt(c[k]) || 0) < 1) c[k] = 1; });
+    renderSkills(); renderPassiveSkills(); renderBackground(); triggerSave();
+    showToast(`✓ Maîtrises appliquées : ${data.skills}`);
   });
 }
 
@@ -8521,10 +8670,18 @@ function renderLvlupTab() {
       </div>
     </div>`;
 
-    // Body: ASI
+    // Body: ASI — sélecteur de feat (PHB 2024) + note libre
     if (d.isAsi) {
+      const featOpts = Object.keys(GENERAL_FEATS).map(fn =>
+        `<option value="${esc(fn)}">${esc(fn)}</option>`).join('');
       bodyHtml += `<div class="lvlrow-section">
         <div class="lvlrow-sec-title">⬆ ASI / Feat Decision</div>
+        <div class="lvlrow-feat-pick">
+          <select class="lvlrow-feat-select" data-featpick="${i}">
+            <option value="">— Choisir un feat (PHB 2024) —</option>${featOpts}
+          </select>
+        </div>
+        <div class="lvlrow-feat-desc" id="featdesc-${i}"></div>
         <textarea class="lvlrow-textarea" data-asi="${i}" placeholder="e.g. +2 STR, Feat: Sentinel, +1 STR +1 DEX…">${esc(row.asi||'')}</textarea>
       </div>`;
     }
@@ -8646,6 +8803,36 @@ function renderLvlupTab() {
   );
 
   // Textareas (ASI / spells / notes) — just save, no re-render
+  /* Sélecteur de feat : affiche la description et pré-remplit la note ASI */
+  rowsCont.querySelectorAll('[data-featpick]').forEach(sel => {
+    const i    = +sel.dataset.featpick;
+    const desc = document.getElementById('featdesc-' + i);
+    const ta   = rowsCont.querySelector(`[data-asi="${i}"]`);
+    // Re-sélectionner le feat déjà noté (persistance à travers les re-renders)
+    const noted = Object.keys(GENERAL_FEATS).find(fn => (rows[i].asi || '').includes(fn));
+    if (noted) sel.value = noted;
+    const paint = fn => {
+      const f = GENERAL_FEATS[fn];
+      if (!f) { desc.innerHTML = ''; return; }
+      const tags = [
+        f.asi ? `<span class="feat-tag">+1 ${f.abil}</span>` : '',
+        f.prereq ? `<span class="feat-tag prereq">Prérequis : ${esc(f.prereq)}</span>` : ''
+      ].filter(Boolean).join('');
+      desc.innerHTML = `${tags ? `<div class="feat-tags">${tags}</div>` : ''}<div>${f.desc}</div>`;
+    };
+    paint(sel.value);
+    sel.addEventListener('change', () => {
+      paint(sel.value);
+      if (!sel.value) return;
+      const f = GENERAL_FEATS[sel.value];
+      // Note pré-remplie — le joueur reste libre de la réécrire
+      const note = sel.value === 'Ability Score Improvement'
+        ? 'ASI : '
+        : `Feat : ${sel.value}${f.asi ? ` (+1 ${f.abil})` : ''}`;
+      if (ta) { ta.value = note; rows[i].asi = note; triggerSave(); }
+    });
+  });
+
   rowsCont.querySelectorAll('[data-asi]').forEach(ta =>
     ta.addEventListener('input', () => { rows[+ta.dataset.asi].asi = ta.value; triggerSave(); })
   );
@@ -12398,14 +12585,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ── Initialisation modal nouveau personnage ── */
   let newCharSelectedAvatar = AVATARS[0];
 
-  (function initNewCharModal() {
+  /* ════════════════════════════════════════════════════════════
+     ASSISTANT DE CRÉATION — 5 étapes : identité, espèce, classe,
+     background, caractéristiques. À la création, tout est appliqué :
+     maîtrises de sauvegarde de la classe, compétences du background,
+     vitesse d'espèce, PV de niveau 1, caractéristique d'incantation.
+     ════════════════════════════════════════════════════════════ */
+  (function initNewCharWizard() {
     const overlay  = document.getElementById('new-char-modal-overlay');
     const grid     = document.getElementById('new-char-avatar-grid');
     const nameInp  = document.getElementById('new-char-name');
     const btnOk    = document.getElementById('new-char-confirm');
     const btnClose = document.getElementById('new-char-cancel');
+    const btnPrev  = document.getElementById('wiz-prev');
+    const btnNext  = document.getElementById('wiz-next');
+    if (!overlay) return;
 
-    // Grille d'avatars
+    const STD_ARRAY = [15, 14, 13, 12, 10, 8];
+    const ABILS = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
+    const TOTAL_STEPS = 5;
+    let step = 1;
+
+    /* ── Grille d'avatars ── */
     AVATARS.forEach(av => {
       const btn = document.createElement('button');
       btn.className = 'new-char-av-btn' + (av === newCharSelectedAvatar ? ' selected' : '');
@@ -12418,30 +12619,193 @@ document.addEventListener('DOMContentLoaded', async () => {
       grid.appendChild(btn);
     });
 
-    function closeModal() { overlay.classList.remove('open'); nameInp.value = ''; }
+    /* ── Remplissage des listes ── */
+    const selSpecies = document.getElementById('wiz-species');
+    const selLineage = document.getElementById('wiz-lineage');
+    const selClass   = document.getElementById('wiz-class');
+    const selBg      = document.getElementById('wiz-bg');
+    selSpecies.innerHTML = '<option value="">— Choisir —</option>'
+      + Object.keys(SPECIES_DATA).map(n => `<option>${n}</option>`).join('');
+    selClass.innerHTML   = '<option value="">— Choisir —</option>'
+      + Object.keys(CLASS_DATA).map(n => `<option>${n}</option>`).join('');
+    selBg.innerHTML      = '<option value="">— Choisir —</option>'
+      + Object.keys(BACKGROUND_DATA).map(n => `<option>${n}</option>`).join('');
+
+    /* ── Grille de caractéristiques (tableau standard) ── */
+    const abilBox = document.getElementById('wiz-abils');
+    abilBox.innerHTML = ABILS.map(([k, lbl]) => `
+      <div class="wiz-abil-cell">
+        <div class="wiz-abil-lbl">${lbl}</div>
+        <select class="wiz-abil-sel" data-abil="${k}">
+          <option value="">—</option>${STD_ARRAY.map(v => `<option>${v}</option>`).join('')}
+        </select>
+        <div class="wiz-abil-mod" id="wiz-mod-${k}">—</div>
+      </div>`).join('');
+
+    function refreshAbils() {
+      const sels = [...abilBox.querySelectorAll('.wiz-abil-sel')];
+      const used = sels.map(s => s.value).filter(Boolean);
+      sels.forEach(s => {
+        // Griser les valeurs déjà prises ailleurs (chaque score du tableau est unique)
+        [...s.options].forEach(o => {
+          if (!o.value) return;
+          const takenElsewhere = used.includes(o.value) && s.value !== o.value;
+          o.disabled = takenElsewhere;
+        });
+        const mod = s.value ? Math.floor((parseInt(s.value) - 10) / 2) : null;
+        document.getElementById('wiz-mod-' + s.dataset.abil).textContent =
+          mod === null ? '—' : (mod >= 0 ? '+' : '') + mod;
+      });
+      const remaining = STD_ARRAY.length - used.length;
+      document.getElementById('wiz-abil-note').innerHTML = remaining
+        ? `Il reste <strong>${remaining}</strong> valeur${remaining > 1 ? 's' : ''} à placer — tu pourras aussi tout ajuster plus tard dans la fiche.`
+        : `<strong>✓ Tableau complet.</strong> Tu peux ajuster les scores à tout moment dans la fiche.`;
+    }
+    abilBox.addEventListener('change', refreshAbils);
+
+    /* ── Aperçus ── */
+    function previewSpecies() {
+      const wrap = document.getElementById('wiz-lineage-wrap');
+      const data = SPECIES_DATA[selSpecies.value];
+      const box  = document.getElementById('wiz-species-preview');
+      if (!data) { wrap.style.display = 'none'; box.innerHTML = ''; return; }
+      if (data.lineages) {
+        wrap.style.display = '';
+        document.getElementById('wiz-lineage-label').textContent =
+          selSpecies.value === 'Tiefling' ? 'Héritage fiélon' : 'Lignée';
+        selLineage.innerHTML = '<option value="">— Choisir —</option>'
+          + Object.keys(data.lineages).map(l => `<option>${l}</option>`).join('');
+      } else { wrap.style.display = 'none'; selLineage.innerHTML = ''; }
+      const lin = data.lineages?.[selLineage.value];
+      const fx  = Object.assign({}, data.effects, lin?.effects || {});
+      const traits = [...(data.traits[1] || []), ...((lin && lin[1]) || [])];
+      box.innerHTML = `<div>Taille <strong>${data.size}</strong> · Vitesse <strong>${fx.speed || data.speed} ft</strong></div>`
+        + traits.map(t => `<div class="wiz-trait"><span class="wiz-trait-name">${t.name}</span> — ${t.desc}</div>`).join('');
+    }
+    selSpecies.addEventListener('change', () => { selLineage.value = ''; previewSpecies(); });
+    selLineage.addEventListener('change', previewSpecies);
+
+    function previewClass() {
+      const box = document.getElementById('wiz-class-preview');
+      const d = CLASS_DATA[selClass.value];
+      if (!d) { box.innerHTML = ''; return; }
+      const info = DND_CLASSES[selClass.value] || {};
+      box.innerHTML = `<div>Dé de vie <strong>${info.de || '1d8'}</strong>`
+        + `${info.sort ? ` · Incantation <strong>${info.sort}</strong>` : ''}`
+        + ` · Sauvegardes <strong>${d.saves.map(s => s.toUpperCase()).join(' & ')}</strong></div>`
+        + (d.armorProf ? `<div>Armures : ${d.armorProf}</div>` : '')
+        + (d.weaponProf ? `<div>Armes : ${d.weaponProf}</div>` : '')
+        + (d.features[1] || []).map(f => `<div class="wiz-trait"><span class="wiz-trait-name">${f.name}</span> — ${f.desc}</div>`).join('');
+    }
+    selClass.addEventListener('change', previewClass);
+
+    function previewBg() {
+      const box = document.getElementById('wiz-bg-preview');
+      const d = BACKGROUND_DATA[selBg.value];
+      if (!d) { box.innerHTML = ''; return; }
+      box.innerHTML = `<div>Caractéristiques <strong>${d.abilities.map(a => ABIL_LABEL[a]).join(' · ')}</strong></div>`
+        + `<div>Compétences <strong>${d.skills}</strong> <span style="color:#888;">(cochées automatiquement)</span></div>`
+        + `<div>Outil : ${d.tool}</div>`
+        + `<div class="wiz-trait"><span class="wiz-trait-name">${d.feat}</span> — ${ORIGIN_FEATS[d.feat] || ''}</div>`;
+    }
+    selBg.addEventListener('change', previewBg);
+
+    /* ── Navigation ── */
+    function showStep(n) {
+      step = Math.max(1, Math.min(TOTAL_STEPS, n));
+      overlay.querySelectorAll('.wiz-step').forEach(s =>
+        s.classList.toggle('active', +s.dataset.step === step));
+      document.getElementById('wiz-steps').innerHTML = Array.from({ length: TOTAL_STEPS }, (_, i) =>
+        `<div class="wiz-dot${i + 1 === step ? ' active' : i + 1 < step ? ' done' : ''}"></div>`).join('');
+      btnPrev.style.display = step > 1 ? '' : 'none';
+      btnNext.style.display = step < TOTAL_STEPS ? '' : 'none';
+      btnOk.style.display   = step === TOTAL_STEPS ? '' : 'none';
+      if (step === 1) setTimeout(() => nameInp.focus(), 50);
+    }
+    btnNext.addEventListener('click', () => showStep(step + 1));
+    btnPrev.addEventListener('click', () => showStep(step - 1));
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      nameInp.value = '';
+      [selSpecies, selLineage, selClass, selBg].forEach(s => s.value = '');
+      abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
+      ['wiz-species-preview','wiz-class-preview','wiz-bg-preview'].forEach(id =>
+        document.getElementById(id).innerHTML = '');
+      refreshAbils();
+      showStep(1);
+    }
+    window._wizReset = closeModal;
 
     btnClose.addEventListener('click', closeModal);
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 
+    /* ── Création : applique tous les choix à la fiche ── */
     btnOk.addEventListener('click', () => {
       const name = nameInp.value.trim() || 'Nouveau personnage';
-      const id = newCharId();
+      const id   = newCharId();
       playerData.characters[id] = emptyCharSlot(name);
-      playerData.characters[id].character = playerData.characters[id].character || {};
-      playerData.characters[id].character.characterName = name;
+      const slot = playerData.characters[id];
+      const c    = slot.character;
+      c.characterName = name;
+      c.avatar = newCharSelectedAvatar;
+
+      // Caractéristiques du tableau standard
+      abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => {
+        if (s.value) c[s.dataset.abil] = parseInt(s.value);
+      });
+
+      // Espèce + lignée → vitesse
+      if (selSpecies.value) {
+        c.species = selSpecies.value;
+        const sd = SPECIES_DATA[c.species];
+        if (selLineage.value) c.lineage = selLineage.value;
+        const fx = Object.assign({}, sd.effects, sd.lineages?.[c.lineage]?.effects || {});
+        c.vitesse = fx.speed || sd.speed;
+      }
+
+      // Classe niveau 1 → sauvegardes, dé de vie, incantation, PV
+      if (selClass.value) {
+        c.classe  = selClass.value;
+        c.niveau  = 1;
+        c.classes = [{ classe: selClass.value, sousClasse: '', niveau: 1, customSousClasse: '' }];
+        const cd = CLASS_DATA[selClass.value];
+        const saveMap = { for:'saveFor', dex:'saveDex', con:'saveCon', int:'saveInt', sag:'saveSag', cha:'saveCha' };
+        Object.entries(saveMap).forEach(([a, k]) => { c[k] = cd.saves.includes(a); });
+        const info = DND_CLASSES[selClass.value] || {};
+        c.deVie = info.de || '1d8';
+        c.nbDeVie = 1;
+        if (info.sort) c.caractSort = info.sort;
+        // PV niveau 1 = max du dé + mod CON
+        const dieMax = parseInt((info.de || '1d8').replace('1d', '')) || 8;
+        const conMod = Math.floor(((parseInt(c.con) || 10) - 10) / 2);
+        c.pvMax = Math.max(1, dieMax + conMod);
+        c.pvActuel = c.pvMax;
+        // Ressources de départ de la classe
+        if (typeof CLASS_RESOURCES !== 'undefined' && CLASS_RESOURCES[selClass.value]) {
+          c.resources = CLASS_RESOURCES[selClass.value](1).map(r => ({ ...r }));
+        }
+      }
+
+      // Background → compétences cochées
+      if (selBg.value) {
+        c.background = selBg.value;
+        (BACKGROUND_DATA[selBg.value].skillKeys || []).forEach(k => { c[k] = 1; });
+      }
+
       playerData.activeCharId = id;
-      // Avatar assigné au nouveau personnage
-      if (!playerData.characters[id].character) playerData.characters[id].character = {};
-      playerData.characters[id].character.avatar = newCharSelectedAvatar;
       closeModal();
       renderCharCards();
       renderCharSelector();
       renderAll();
       triggerSave();
+      showToast(`✦ ${name} créé — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'fiche vierge'}`);
     });
 
-    nameInp.addEventListener('keydown', e => { if (e.key === 'Enter') btnOk.click(); });
+    nameInp.addEventListener('keydown', e => { if (e.key === 'Enter') showStep(step + 1); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+    refreshAbils();
+    showStep(1);
   })();
 
 }); // end DOMContentLoaded
@@ -12450,6 +12814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function openNewCharModal() {
   const overlay = document.getElementById('new-char-modal-overlay');
   if (!overlay) return;
+  window._wizReset?.();       // repart toujours de l'étape 1, formulaire vierge
   overlay.classList.add('open');
   setTimeout(() => document.getElementById('new-char-name')?.focus(), 50);
 }
@@ -13059,17 +13424,65 @@ document.addEventListener('keydown', e => {
 
     <!-- ── Modal Nouveau Personnage ── -->
     <div class="new-char-modal-overlay" id="new-char-modal-overlay">
-      <div class="new-char-modal">
-        <h3>✦ New character</h3>
-        <div class="auth-field">
-          <label class="auth-label" for="new-char-name">Character name</label>
-          <input type="text" class="auth-input" id="new-char-name" placeholder="Hero's name…" maxlength="40" autocomplete="off">
+      <div class="new-char-modal wiz-modal">
+        <h3>✦ Nouveau personnage</h3>
+        <div class="wiz-steps" id="wiz-steps"></div>
+
+        <!-- 1 · Identité -->
+        <div class="wiz-step" data-step="1">
+          <div class="auth-field">
+            <label class="auth-label" for="new-char-name">Nom du personnage</label>
+            <input type="text" class="auth-input" id="new-char-name" placeholder="Nom du héros…" maxlength="40" autocomplete="off">
+          </div>
+          <div class="field-label" style="margin:0.5rem 0 0.4rem;">Avatar</div>
+          <div class="new-char-avatar-grid" id="new-char-avatar-grid"></div>
         </div>
-        <div class="field-label" style="margin:0.5rem 0 0.4rem;">Avatar</div>
-        <div class="new-char-avatar-grid" id="new-char-avatar-grid"></div>
-        <div class="new-char-btn-row">
-          <button class="btn btn-sm" id="new-char-cancel">Cancel</button>
-          <button class="btn btn-sm btn-gold" id="new-char-confirm">✦ Create</button>
+
+        <!-- 2 · Espèce -->
+        <div class="wiz-step" data-step="2">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-species">Espèce</label>
+            <select class="auth-input" id="wiz-species"></select>
+          </div>
+          <div class="auth-field" id="wiz-lineage-wrap" style="display:none;">
+            <label class="auth-label" for="wiz-lineage" id="wiz-lineage-label">Lignée</label>
+            <select class="auth-input" id="wiz-lineage"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-species-preview"></div>
+        </div>
+
+        <!-- 3 · Classe -->
+        <div class="wiz-step" data-step="3">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-class">Classe (niveau 1)</label>
+            <select class="auth-input" id="wiz-class"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-class-preview"></div>
+        </div>
+
+        <!-- 4 · Background -->
+        <div class="wiz-step" data-step="4">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-bg">Background</label>
+            <select class="auth-input" id="wiz-bg"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-bg-preview"></div>
+        </div>
+
+        <!-- 5 · Caractéristiques -->
+        <div class="wiz-step" data-step="5">
+          <div class="field-label" style="margin-bottom:0.5rem;">
+            Répartis le tableau standard <strong style="color:var(--gold);">15 · 14 · 13 · 12 · 10 · 8</strong>
+          </div>
+          <div class="wiz-abils" id="wiz-abils"></div>
+          <div class="wiz-preview" id="wiz-abil-note"></div>
+        </div>
+
+        <div class="new-char-btn-row wiz-nav">
+          <button class="btn btn-sm" id="new-char-cancel">Annuler</button>
+          <button class="btn btn-sm" id="wiz-prev" style="display:none;">‹ Retour</button>
+          <button class="btn btn-sm btn-gold" id="wiz-next">Suivant ›</button>
+          <button class="btn btn-sm btn-gold" id="new-char-confirm" style="display:none;">✦ Créer</button>
         </div>
       </div>
     </div>
