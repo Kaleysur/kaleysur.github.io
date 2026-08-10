@@ -40,9 +40,10 @@ function ok(cond, label) {
   if (!cond) failures.push(label);
 }
 
-/* ══════════ joueurs.html ══════════ */
+/* ══════════ joueurs.html + js/rules-2024.js ══════════ */
 {
   const J = staged('joueurs.html');
+  const R = staged('js/rules-2024.js'); // données de règles extraites
   const window = {};
   eval([
     extract(J, 'function mod(score)'),
@@ -50,7 +51,7 @@ function ok(cond, label) {
     extract(J, 'function esc(val)'),
     extract(J, 'function getClasses(c)'),
     extract(J, 'function getTotalLevel(c)'),
-    extract(J, 'const MULTICLASS_SLOTS'),
+    extract(R, 'const MULTICLASS_SLOTS'),
     extract(J, 'function computeMulticlassSlots(c)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
@@ -90,6 +91,59 @@ function ok(cond, label) {
   ok((() => { const r = rollDiceExpr('d20'); return r.total >= 1 && r.total <= 20; })(), 'rollDiceExpr d20 bornes');
   eq(rollDiceExpr('+3').total, 3, 'rollDiceExpr constante');
   ok(rollDiceExpr('2d6-1').total >= 1, 'rollDiceExpr malus');
+
+  /* ── Cohérence des données de règles 2024 ──
+     Les const d'un eval direct ne fuient pas vers la portée appelante :
+     on les récupère via une IIFE qui les renvoie. */
+  const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,
+          ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES } = eval('(function(){\n' + [
+    extract(R, 'const CLASS_DATA'),
+    extract(R, 'const SPECIES_DATA'),
+    extract(R, 'const BACKGROUND_DATA'),
+    extract(R, 'const GENERAL_FEATS'),
+    extract(R, 'const ORIGIN_FEATS'),
+    extract(R, 'const STARTING_EQUIP'),
+    extract(R, 'const DND_CLASSES'),
+  ].join('\n') + '\nreturn { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES };})()');
+  const SKILL_KEYS = extract(J, 'const SKILLS = [')
+    .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
+
+  // Toutes les classes choisissent leur sous-classe au niveau 3 (PHB 2024)
+  Object.entries(CLASS_DATA).forEach(([cls, d]) => {
+    const first = Object.entries(d.features)
+      .filter(([, fs]) => fs.some(f => f.type === 'subclass'))
+      .map(([l]) => +l).sort((a, b) => a - b)[0];
+    eq(first, 3, `${cls} : sous-classe au niveau 3`);
+    ok(Array.isArray(d.saves) && d.saves.length === 2, `${cls} : 2 jets de sauvegarde`);
+    ok(!!DND_CLASSES[cls], `${cls} : présent dans DND_CLASSES (dé de vie)`);
+  });
+
+  // Backgrounds : clés de compétences valides + origin feat documenté
+  Object.entries(BACKGROUND_DATA).forEach(([bg, d]) => {
+    eq(d.abilities.length, 3, `${bg} : 3 caractéristiques`);
+    ok(!!ORIGIN_FEATS[d.feat], `${bg} : origin feat « ${d.feat} » documenté`);
+    (d.skillKeys || []).forEach(k =>
+      ok(SKILL_KEYS.includes(k), `${bg} : clé de compétence « ${k} » inconnue`));
+    eq((d.skillKeys || []).length, 2, `${bg} : 2 compétences`);
+  });
+
+  // Espèces : vitesse et traits de base présents ; lignées non vides
+  Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
+    ok(typeof d.speed === 'number' && d.speed > 0, `${sp} : vitesse définie`);
+    ok(Array.isArray(d.traits[1]) && d.traits[1].length > 0, `${sp} : traits de niveau 1`);
+    Object.entries(d.lineages || {}).forEach(([ln, lv]) =>
+      ok(Array.isArray(lv[1]) && lv[1].length > 0, `${sp}/${ln} : trait de niveau 1`));
+  });
+
+  // Feats généraux : description non vide
+  Object.entries(GENERAL_FEATS).forEach(([f, d]) =>
+    ok(typeof d.desc === 'string' && d.desc.length > 20, `feat « ${f} » : description`));
+
+  // Équipement de départ : au moins une option par classe jouable
+  Object.entries(STARTING_EQUIP).forEach(([cls, opts]) => {
+    ok(opts.length >= 1, `${cls} : option d'équipement`);
+    opts.forEach(o => ok(typeof o.gold === 'number', `${cls}/${o.label} : bourse`));
+  });
 }
 
 /* ══════════ dm.html ══════════ */
