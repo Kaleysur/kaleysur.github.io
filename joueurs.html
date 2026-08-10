@@ -2597,6 +2597,14 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .apply-btn:hover { background: rgba(201,169,110,0.25); color: #f0d9a0; }
 .apply-done { margin-left: 0.5rem; font-size: 0.7rem; color: var(--success, #6aba6a); white-space: nowrap; }
+/* ── Rappel de sous-classe non choisie (niveau 3+) ── */
+.cf-subclass-alert {
+  font-size: 0.8rem; line-height: 1.5; color: #f0c060;
+  background: rgba(232,201,106,0.1); border: 1px solid rgba(232,201,106,0.35);
+  border-radius: 5px; padding: 0.5rem 0.7rem; margin-bottom: 0.65rem;
+}
+.cf-subclass-alert strong { color: var(--gold, #c9a227); }
+.cf-alert-hint { color: #888; font-size: 0.9em; font-style: italic; }
 
 /* ── Assistant de création de personnage ── */
 .wiz-modal { width: 460px; }
@@ -4176,6 +4184,59 @@ const MULTICLASS_SLOTS = {
    Each feature: { name, desc, type }
    type: 'feature' | 'asi' | 'subclass' | 'epic'
    ════════════════════════════════════════════════════════════ */
+/* ── Équipement de départ 2024 (PHB) — utilisé par l'assistant de création et le compendium ── */
+const STARTING_EQUIP = {
+  Barbarian: [
+    { label:'Option A', gold:15, items:[{qty:1,name:'Greataxe'},{qty:4,name:'Handaxe'},{qty:1,name:"Explorer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:75, items:[] }
+  ],
+  Bard: [
+    { label:'Option A', gold:19, items:[{qty:1,name:'Leather Armor'},{qty:2,name:'Dagger'},{qty:1,name:'Musical Instrument'},{qty:1,name:"Entertainer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:90, items:[] }
+  ],
+  Cleric: [
+    { label:'Option A', gold:7, items:[{qty:1,name:'Chain Shirt'},{qty:1,name:'Shield'},{qty:1,name:'Mace'},{qty:1,name:'Holy Symbol'},{qty:1,name:"Priest's Pack"}] },
+    { label:'Option B — Or uniquement', gold:110, items:[] }
+  ],
+  Druid: [
+    { label:'Option A', gold:9, items:[{qty:1,name:'Leather Armor'},{qty:1,name:'Shield'},{qty:1,name:'Sickle'},{qty:1,name:'Druidic Focus (Quarterstaff)'},{qty:1,name:"Explorer's Pack"},{qty:1,name:'Herbalism Kit'}] },
+    { label:'Option B — Or uniquement', gold:50, items:[] }
+  ],
+  Fighter: [
+    { label:'Option A', gold:4, items:[{qty:1,name:'Chain Mail'},{qty:1,name:'Greatsword'},{qty:1,name:'Flail'},{qty:8,name:'Javelin'},{qty:1,name:"Dungeoneer's Pack"}] },
+    { label:'Option B', gold:11, items:[{qty:1,name:'Studded Leather Armor'},{qty:1,name:'Scimitar'},{qty:1,name:'Shortsword'},{qty:1,name:'Longbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:"Dungeoneer's Pack"}] },
+    { label:'Option C — Or uniquement', gold:155, items:[] }
+  ],
+  Monk: [
+    { label:'Option A', gold:11, items:[{qty:1,name:'Spear'},{qty:5,name:'Dagger'},{qty:1,name:"Artisan's Tools ou Instrument"},{qty:1,name:"Explorer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:50, items:[] }
+  ],
+  Paladin: [
+    { label:'Option A', gold:9, items:[{qty:1,name:'Chain Mail'},{qty:1,name:'Shield'},{qty:1,name:'Longsword'},{qty:6,name:'Javelin'},{qty:1,name:'Holy Symbol'},{qty:1,name:"Priest's Pack"}] },
+    { label:'Option B — Or uniquement', gold:150, items:[] }
+  ],
+  Ranger: [
+    { label:'Option A', gold:7, items:[{qty:1,name:'Studded Leather Armor'},{qty:1,name:'Scimitar'},{qty:1,name:'Shortsword'},{qty:1,name:'Longbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:'Druidic Focus (sprig of mistletoe)'},{qty:1,name:"Explorer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:150, items:[] }
+  ],
+  Rogue: [
+    { label:'Option A', gold:8, items:[{qty:1,name:'Leather Armor'},{qty:2,name:'Dagger'},{qty:1,name:'Shortsword'},{qty:1,name:'Shortbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:"Thieves' Tools"},{qty:1,name:"Burglar's Pack"}] },
+    { label:'Option B — Or uniquement', gold:100, items:[] }
+  ],
+  Sorcerer: [
+    { label:'Option A', gold:28, items:[{qty:1,name:'Spear'},{qty:2,name:'Dagger'},{qty:1,name:'Arcane Focus (crystal)'},{qty:1,name:"Dungeoneer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:50, items:[] }
+  ],
+  Warlock: [
+    { label:'Option A', gold:15, items:[{qty:1,name:'Leather Armor'},{qty:1,name:'Sickle'},{qty:2,name:'Dagger'},{qty:1,name:'Arcane Focus (orb)'},{qty:1,name:'Book (occult lore)'},{qty:1,name:"Scholar's Pack"}] },
+    { label:'Option B — Or uniquement', gold:100, items:[] }
+  ],
+  Wizard: [
+    { label:'Option A', gold:5, items:[{qty:2,name:'Dagger'},{qty:1,name:'Arcane Focus (Quarterstaff)'},{qty:1,name:'Robe'},{qty:1,name:'Spellbook'},{qty:1,name:"Scholar's Pack"}] },
+    { label:'Option B — Or uniquement', gold:55, items:[] }
+  ]
+};
+
 /* ════════════════════════════════════════════════════════════
    D&D 2024 GENERAL FEATS (PHB) — disponibles aux niveaux 4/8/12/16
    (et 19 pour certaines classes) en remplacement d'un ASI.
@@ -4564,7 +4625,9 @@ const CLASS_DATA = {
       { name:'Wild Shape', type:'feature', desc:"Bonus action: transform into a Beast you've seen, CR 1/4 or lower. Lasts 1 hour or until you drop to 0 HP. Regain uses (equal to WIS mod) on Long Rest, or 1 use on Short Rest." }
     ],
     2: [
-      { name:'Wild Companion', type:'feature', desc:"You can cast Find Familiar as a Ritual without spell slot or components. The familiar is Fey, not a spirit." },
+      { name:'Wild Companion', type:'feature', desc:"You can cast Find Familiar as a Ritual without spell slot or components. The familiar is Fey, not a spirit." }
+    ],
+    3: [
       { name:'Druid Subclass', type:'subclass', desc:"Choose a Druid Circle: Land, Moon, Sea, Stars, or Wildfire. You gain subclass features that expand your Wild Shape and spellcasting." }
     ],
     4: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Also, Wild Shape now allows CR 1/2 Beasts." }],
@@ -4800,14 +4863,13 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Innate Sorcery', type:'feature', desc:"Bonus action: unleash your inner power for 1 minute. Your spell save DC increases by 1 and you have advantage on Concentration saving throws. Uses = your Sorcerer level; regain all on Long Rest." },
-      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Charisma. You know a fixed number of spells from the Sorcerer list (fewer than a Wizard, but always available)." },
-      { name:'Sorcerous Origin', type:'subclass', desc:"Choose your magical origin: Aberrant Mind, Clockwork Soul, Draconic Bloodline, Shadow Magic, or Wild Magic. You gain spells and the first subclass feature." }
+      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Charisma. You know a fixed number of spells from the Sorcerer list (fewer than a Wizard, but always available)." }
     ],
     2: [
       { name:'Font of Magic', type:'feature', desc:"You have Sorcery Points = your Sorcerer level. Flexible Casting: create spell slots from Sorcery Points (2 pts = 1st, 3 = 2nd, 4 = 3rd, 5 = 4th, 6 = 5th) or convert spell slots into Sorcery Points (slot level = points gained)." },
       { name:'Metamagic', type:'feature', desc:"Choose 2 Metamagic options: Careful (protect allies from spells), Distant (double range), Empowered (reroll damage dice), Extended (double duration), Heightened (disadvantage on save), Quickened (cast with Bonus Action), Seeking (reroll missed attacks), Subtle (no verbal/somatic components), Transmuted (change damage type), or Twinned (target two creatures)." }
     ],
-    3: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Sorcerous Origin." }],
+    3: [{ name:'Sorcerous Origin', type:'subclass', desc:"Choose your magical origin: Aberrant Mind, Clockwork Soul, Draconic Bloodline, Shadow Magic, or Wild Magic. You gain spells and the first subclass feature." }],
     4: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
     5: [{ name:'Sorcerous Restoration', type:'feature', desc:"When you roll Initiative and have fewer Sorcery Points than half your Sorcerer level (rounded up), you regain Sorcery Points up to half your Sorcerer level. 1/Long Rest." }],
     6: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Sorcerous Origin." }],
@@ -4862,10 +4924,12 @@ const CLASS_DATA = {
       { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Intelligence. You have a spellbook of known spells and prepare spells equal to your INT modifier + Wizard level each day." }
     ],
     2: [
-      { name:'Scholar', type:'feature', desc:"You gain Expertise in your choice of Arcana or History. You also learn one additional language of your choice." },
-      { name:'Wizard Subclass', type:'subclass', desc:"Choose an Arcane Tradition: Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, or Transmutation. You gain the first subclass feature." }
+      { name:'Scholar', type:'feature', desc:"You gain Expertise in your choice of Arcana or History. You also learn one additional language of your choice." }
     ],
-    3: [{ name:'Cantrip Formulas', type:'feature', desc:"When you finish a Long Rest, you can study your spellbook for 1 minute to swap one Wizard cantrip you know for another Wizard cantrip." }],
+    3: [
+      { name:'Wizard Subclass', type:'subclass', desc:"Choose an Arcane Tradition: Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, or Transmutation. You gain the first subclass feature." },
+      { name:'Cantrip Formulas', type:'feature', desc:"When you finish a Long Rest, you can study your spellbook for 1 minute to swap one Wizard cantrip you know for another Wizard cantrip." }
+    ],
     4: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
     5: [{ name:'Memorize Spell', type:'feature', desc:"When you finish a Long Rest, choose one spell from your spellbook. That spell is always prepared and doesn't count against your number of prepared spells. You can change it each Long Rest." }],
     6: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Arcane Tradition." }],
@@ -6128,7 +6192,19 @@ function renderClassFeatures() {
 
   /* ── Proficiencies from primary class ── */
   const data = CLASS_DATA[classe];
+
+  /* Rappel de sous-classe : PHB 2024 — toutes les classes choisissent au niveau 3.
+     On alerte pour chaque classe qui a atteint le palier sans choix enregistré. */
+  const pending = validClasses.filter(cl => {
+    const lvl = parseInt(cl.niveau) || 1;
+    const sub = cl.sousClasse === '__custom__' ? (cl.customSousClasse || '') : (cl.sousClasse || '');
+    return lvl >= 3 && !sub;
+  });
+
   body.innerHTML = `
+    ${pending.length ? `<div class="cf-subclass-alert">⚠ Sous-classe à choisir —
+      ${pending.map(cl => `<strong>${esc(cl.classe)} ${cl.niveau}</strong>`).join(', ')}
+      <span class="cf-alert-hint">(onglet Identity)</span></div>` : ''}
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Saving Throws:</span> ${data.saves.map(s=>s.toUpperCase()).join(' &amp; ')}</div>
       ${data.armorProf  ? `<div class="cf-prof-item"><span class="cf-prof-label">Armor:</span> ${data.armorProf}</div>` : ''}
@@ -8404,8 +8480,21 @@ function openShortRestModal() {
   document.getElementById('sr-total').textContent = '';
   const applyBtn = document.getElementById('sr-btn-apply');
   const rollBtn  = document.getElementById('sr-btn-roll');
-  applyBtn.disabled = true;
+  // Un repos court est valide même sans dépenser de dé de vie : il restaure
+  // déjà les ressources « short » (Second Wind, Ki…) et les slots de Warlock.
+  applyBtn.disabled = false;
   rollBtn.disabled  = diceLeft <= diceRolled;
+
+  // Aperçu de ce que le repos va restaurer
+  const isWarlock = getClasses(c).some(cl => cl.classe === 'Warlock');
+  const shortRes  = (c.resources || []).filter(r => r.reset === 'short' && (parseInt(r.used) || 0) > 0);
+  const restoreBits = [
+    ...shortRes.map(r => r.name || r.nom),
+    isWarlock ? 'Emplacements de Pacte' : ''
+  ].filter(Boolean);
+  document.getElementById('sr-total').textContent = restoreBits.length
+    ? '↺ Restauré : ' + restoreBits.join(', ')
+    : '';
 
   function updateDisplay() {
     const remaining = diceLeft - diceRolled;
@@ -8414,7 +8503,6 @@ function openShortRestModal() {
     if (pendingHealing > 0) {
       const newHP = Math.min(maxHP, curHP + pendingHealing);
       document.getElementById('sr-total').textContent = `Soin total : +${pendingHealing} → ${newHP} PV`;
-      applyBtn.disabled = false;
     }
   }
 
@@ -8434,9 +8522,19 @@ function openShortRestModal() {
     c2.pvActuel = Math.min(parseInt(c2.pvMax)||0, (parseInt(c2.pvActuel)||0) + pendingHealing);
     c2.nbDeVieUtilises = (parseInt(c2.nbDeVieUtilises)||0) + diceRolled;
     (c2.resources || []).forEach(r => { if (r.reset === 'short') r.used = 0; });
+    // PHB 2024 : la Magie de Pacte du Warlock récupère ses emplacements sur un repos court
+    if (getClasses(c2).some(cl => cl.classe === 'Warlock')) {
+      const wLvl  = getClasses(c2).find(cl => cl.classe === 'Warlock')?.niveau || 1;
+      const pact  = WARLOCK_SLOTS[Math.max(1, Math.min(20, parseInt(wLvl) || 1))] || [];
+      c2.emplacementsUtilises = c2.emplacementsUtilises || {};
+      // Seuls les niveaux couverts par le pacte sont rendus (les autres classes gardent leurs slots dépensés)
+      pact.forEach((n, i) => { if (n > 0) c2.emplacementsUtilises[i + 1] = 0; });
+    }
     overlay.classList.remove('open');
     renderAll(); triggerSave();
-    showToast(`Repos court — +${pendingHealing} PV, ressources courtes restaurées.`);
+    const bits = [pendingHealing > 0 ? `+${pendingHealing} PV` : null, restoreBits.length ? restoreBits.join(', ') : null]
+      .filter(Boolean).join(' · ');
+    showToast('Repos court' + (bits ? ' — ' + bits : ' effectué'));
   };
 
   document.getElementById('sr-btn-cancel').onclick = () => overlay.classList.remove('open');
@@ -8450,7 +8548,11 @@ function doLongRest() {
   (c.resources || []).forEach(r => { r.used = 0; });
   // Reset sorts utilisés
   c.emplacementsUtilises = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0};
-  c.nbDeVieUtilises = 0;
+  // Dés de vie : PHB 2024 — on récupère la moitié du total (arrondi bas, min 1), pas tous
+  const totalHd  = parseInt(c.nbDeVie) || getTotalLevel(c) || 1;
+  const spentHd  = parseInt(c.nbDeVieUtilises) || 0;
+  const regained = Math.max(1, Math.floor(totalHd / 2));
+  c.nbDeVieUtilises = Math.max(0, spentHd - regained);
   // PV max
   c.pvActuel = c.pvMax || 0;
   c.pvTemp = 0;
@@ -8463,7 +8565,8 @@ function doLongRest() {
   // Exhaustion -1 level
   if (c.exhaustion > 0) c.exhaustion = c.exhaustion - 1;
   renderAll(); triggerSave();
-  showToast('Repos long effectué — tout est restauré.');
+  const hdLeft = totalHd - c.nbDeVieUtilises;
+  showToast(`Repos long — PV pleins, sorts et ressources restaurés · dés de vie ${hdLeft}/${totalHd} (+${Math.min(regained, spentHd)})`);
 }
 function showToast(msg) {
   let t = document.getElementById('rest-toast');
@@ -12603,7 +12706,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const STD_ARRAY = [15, 14, 13, 12, 10, 8];
     const ABILS = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
-    const TOTAL_STEPS = 5;
+    const TOTAL_STEPS = 6;
     let step = 1;
 
     /* ── Grille d'avatars ── */
@@ -12664,25 +12767,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     abilBox.addEventListener('change', refreshAbils);
 
     /* ── Aperçus ── */
-    function previewSpecies() {
+    /* Reconstruit la liste des lignées — uniquement au changement d'espèce :
+       le faire dans previewSpecies effacerait la lignée qu'on vient de choisir. */
+    function buildLineageOptions() {
       const wrap = document.getElementById('wiz-lineage-wrap');
       const data = SPECIES_DATA[selSpecies.value];
-      const box  = document.getElementById('wiz-species-preview');
-      if (!data) { wrap.style.display = 'none'; box.innerHTML = ''; return; }
-      if (data.lineages) {
+      if (data?.lineages) {
         wrap.style.display = '';
         document.getElementById('wiz-lineage-label').textContent =
           selSpecies.value === 'Tiefling' ? 'Héritage fiélon' : 'Lignée';
         selLineage.innerHTML = '<option value="">— Choisir —</option>'
           + Object.keys(data.lineages).map(l => `<option>${l}</option>`).join('');
       } else { wrap.style.display = 'none'; selLineage.innerHTML = ''; }
+    }
+
+    function previewSpecies() {
+      const data = SPECIES_DATA[selSpecies.value];
+      const box  = document.getElementById('wiz-species-preview');
+      if (!data) { box.innerHTML = ''; return; }
       const lin = data.lineages?.[selLineage.value];
       const fx  = Object.assign({}, data.effects, lin?.effects || {});
       const traits = [...(data.traits[1] || []), ...((lin && lin[1]) || [])];
       box.innerHTML = `<div>Taille <strong>${data.size}</strong> · Vitesse <strong>${fx.speed || data.speed} ft</strong></div>`
         + traits.map(t => `<div class="wiz-trait"><span class="wiz-trait-name">${t.name}</span> — ${t.desc}</div>`).join('');
     }
-    selSpecies.addEventListener('change', () => { selLineage.value = ''; previewSpecies(); });
+    selSpecies.addEventListener('change', () => { buildLineageOptions(); previewSpecies(); });
     selLineage.addEventListener('change', previewSpecies);
 
     function previewClass() {
@@ -12698,6 +12807,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         + (d.features[1] || []).map(f => `<div class="wiz-trait"><span class="wiz-trait-name">${f.name}</span> — ${f.desc}</div>`).join('');
     }
     selClass.addEventListener('change', previewClass);
+
+    /* ── Équipement de départ (dépend de la classe choisie à l'étape 3) ── */
+    const selEquip = document.getElementById('wiz-equip');
+    function refreshEquip() {
+      const opts = STARTING_EQUIP[selClass.value];
+      const box  = document.getElementById('wiz-equip-preview');
+      if (!opts) {
+        selEquip.innerHTML = '<option value="">— aucune donnée pour cette classe —</option>';
+        box.innerHTML = 'Choisis une classe à l\'étape 3 pour voir son équipement de départ.';
+        return;
+      }
+      selEquip.innerHTML = '<option value="">— Passer (inventaire vide) —</option>'
+        + opts.map((o, i) => `<option value="${i}">${o.label}</option>`).join('');
+      previewEquip();
+    }
+    function previewEquip() {
+      const box  = document.getElementById('wiz-equip-preview');
+      const opts = STARTING_EQUIP[selClass.value];
+      const o    = opts && selEquip.value !== '' ? opts[+selEquip.value] : null;
+      if (!o) { box.innerHTML = opts ? 'Aucun équipement — tu pourras tout ajouter à la main.' : box.innerHTML; return; }
+      box.innerHTML = (o.items.length
+          ? o.items.map(it => `<div>• ${it.qty} × ${it.name}</div>`).join('')
+          : '<div>Aucun objet</div>')
+        + `<div style="margin-top:0.35rem;">Bourse : <strong>${o.gold} po</strong></div>`;
+    }
+    selEquip.addEventListener('change', previewEquip);
 
     function previewBg() {
       const box = document.getElementById('wiz-bg-preview');
@@ -12721,6 +12856,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnNext.style.display = step < TOTAL_STEPS ? '' : 'none';
       btnOk.style.display   = step === TOTAL_STEPS ? '' : 'none';
       if (step === 1) setTimeout(() => nameInp.focus(), 50);
+      if (step === 6) refreshEquip(); // dépend de la classe choisie à l'étape 3
     }
     btnNext.addEventListener('click', () => showStep(step + 1));
     btnPrev.addEventListener('click', () => showStep(step - 1));
@@ -12728,7 +12864,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function closeModal() {
       overlay.classList.remove('open');
       nameInp.value = '';
-      [selSpecies, selLineage, selClass, selBg].forEach(s => s.value = '');
+      [selSpecies, selLineage, selClass, selBg, selEquip].forEach(s => s.value = '');
       abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
       ['wiz-species-preview','wiz-class-preview','wiz-bg-preview'].forEach(id =>
         document.getElementById(id).innerHTML = '');
@@ -12791,6 +12927,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (selBg.value) {
         c.background = selBg.value;
         (BACKGROUND_DATA[selBg.value].skillKeys || []).forEach(k => { c[k] = 1; });
+      }
+
+      // Équipement de départ → inventaire + bourse
+      const eqOpts = STARTING_EQUIP[selClass.value];
+      if (eqOpts && selEquip.value !== '') {
+        const eq = eqOpts[+selEquip.value];
+        if (eq) {
+          slot.inventory.items = eq.items.map(it => ({ name: it.name, qty: it.qty, notes: '', cat: '' }));
+          slot.inventory.currency = Object.assign(
+            { pp:0, gp:0, ep:0, sp:0, cp:0 }, slot.inventory.currency, { gp: eq.gold }
+          );
+        }
       }
 
       playerData.activeCharId = id;
@@ -13476,6 +13624,15 @@ document.addEventListener('keydown', e => {
           </div>
           <div class="wiz-abils" id="wiz-abils"></div>
           <div class="wiz-preview" id="wiz-abil-note"></div>
+        </div>
+
+        <!-- 6 · Équipement de départ -->
+        <div class="wiz-step" data-step="6">
+          <div class="auth-field">
+            <label class="auth-label" for="wiz-equip">Équipement de départ</label>
+            <select class="auth-input" id="wiz-equip"></select>
+          </div>
+          <div class="wiz-preview" id="wiz-equip-preview"></div>
         </div>
 
         <div class="new-char-btn-row wiz-nav">
