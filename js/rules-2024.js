@@ -1528,8 +1528,6 @@ const SUBCLASS_DATA = {
     9:[{ name:'Arcane Jolt', desc:'When you or your Steel Defender hits with a Magic weapon or the defender\'s attack, deal extra 2d6 Force or heal one creature within 30 ft for 2d6 HP. Uses = INT mod/Long Rest.' }],
     15:[{ name:'Improved Defender', desc:'Arcane Jolt damage/healing increases to 4d6. Your Steel Defender gains a +2 bonus to its AC.' }],
   },
-},
-
   'Cartographer': {
     3:[
       { name:'Tool Proficiencies', desc:'You gain proficiency with Calligrapher\'s Supplies and Cartographer\'s Tools. You can scribe spell scrolls in half the normal time and cost.' },
@@ -1542,6 +1540,7 @@ const SUBCLASS_DATA = {
       { name:'Cartographer\'s Path', desc:'Each map holder can cast Find the Path once per Long Rest for free. When you use your Flash of Genius reaction, you or the map holder can additionally teleport up to 30 ft to an unoccupied space.' }
     ],
   },
+},
 
 }; // end SUBCLASS_DATA
 

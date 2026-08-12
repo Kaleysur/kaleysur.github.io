@@ -95,16 +95,12 @@ function ok(cond, label) {
   /* ── Cohérence des données de règles 2024 ──
      Les const d'un eval direct ne fuient pas vers la portée appelante :
      on les récupère via une IIFE qui les renvoie. */
-  const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,
-          ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES } = eval('(function(){\n' + [
-    extract(R, 'const CLASS_DATA'),
-    extract(R, 'const SPECIES_DATA'),
-    extract(R, 'const BACKGROUND_DATA'),
-    extract(R, 'const GENERAL_FEATS'),
-    extract(R, 'const ORIGIN_FEATS'),
-    extract(R, 'const STARTING_EQUIP'),
-    extract(R, 'const DND_CLASSES'),
-  ].join('\n') + '\nreturn { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES };})()');
+  // Le fichier de règles est du JS valide complet : on l'exécute en entier plutôt
+  // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
+  const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
+          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA } =
+    new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
+      + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
 
@@ -143,6 +139,25 @@ function ok(cond, label) {
   Object.entries(STARTING_EQUIP).forEach(([cls, opts]) => {
     ok(opts.length >= 1, `${cls} : option d'équipement`);
     opts.forEach(o => ok(typeof o.gold === 'number', `${cls}/${o.label} : bourse`));
+  });
+
+  // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].
+  // Attrape une sous-classe mal imbriquée (elle apparaîtrait comme une fausse classe).
+  Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) => {
+    ok(!!CLASS_DATA[cls], `SUBCLASS_DATA : « ${cls} » n'est pas une classe connue`);
+    Object.entries(subs).forEach(([sub, byLevel]) => {
+      if (/^\d+$/.test(sub)) {
+        // Un nom de sous-classe numérique = un niveau d'imbrication perdu
+        ok(false, `${cls} : « ${sub} » est un niveau, pas une sous-classe — imbrication cassée`);
+        return;
+      }
+      Object.entries(byLevel).forEach(([lvl, feats]) => {
+        ok(/^\d+$/.test(lvl) && +lvl >= 1 && +lvl <= 20, `${cls}/${sub} : niveau « ${lvl} » invalide`);
+        if (!Array.isArray(feats)) { ok(false, `${cls}/${sub} niv.${lvl} : liste de capacités attendue`); return; }
+        ok(feats.length > 0, `${cls}/${sub} niv.${lvl} : liste non vide`);
+        feats.forEach(f => ok(f && f.name && f.desc, `${cls}/${sub} niv.${lvl} : nom + description`));
+      });
+    });
   });
 }
 
