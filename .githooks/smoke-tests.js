@@ -55,7 +55,11 @@ function ok(cond, label) {
     extract(J, 'function computeMulticlassSlots(c)'),
     extract(R, 'const STARTING_ARMOR'),
     extract(R, 'const STARTING_WEAPONS'),
+    extract(R, 'const STARTING_SPELLS'),
+    extract(R, 'const PREPARED_SPELLS'),
     extract(J, 'function applyStartingGear(c, className, items)'),
+    extract(J, 'function startingMaxHp(c, hitDie, speciesEffects)'),
+    extract(J, 'function startingSpellHint(className)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -101,9 +105,11 @@ function ok(cond, label) {
   // Le fichier de règles est du JS valide complet : on l'exécute en entier plutôt
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
-          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE } =
+          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
+          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
+      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -202,6 +208,69 @@ function ok(cond, label) {
   // Focus d'incantation monté sur bâton : reconnu comme arme
   ok(gear('Wizard', 0).attaques.some(a => a.name === 'Quarterstaff'),
      'Magicien : « Arcane Focus (Quarterstaff) » compte comme un bâton');
+
+  /* ── PV de départ (startingMaxHp) ── */
+  eq(startingMaxHp({ con:14 }, '1d8',  {}), 10, 'd8 + CON 14 = 10 PV');
+  eq(startingMaxHp({ con:10 }, '1d12', {}), 12, 'd12 + CON 10 = 12 PV');
+  eq(startingMaxHp({ con:6 },  '1d6',  {}),  4, 'd6 + CON 6 = 4 PV');
+  eq(startingMaxHp({ con:1 },  '1d6',  {}),  1, 'PV jamais sous 1');
+  // Robustesse naine : le bonus était affiché sur la fiche mais jamais ajouté
+  eq(startingMaxHp({ con:14 }, '1d8', { hpPerLevel:1 }), 11, 'Nain : +1 PV/niveau appliqué');
+  eq(startingMaxHp({ con:14 }, '1d8', { speed:25 }),     10, 'Un effet sans PV ne change rien');
+  // Toute espèce déclarant hpPerLevel doit être un entier positif
+  Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
+    const h = d.effects?.hpPerLevel;
+    if (h !== undefined) ok(Number.isInteger(h) && h > 0, `${sp} : hpPerLevel invalide (${h})`);
+  });
+
+  /* ── Sorts à choisir après création (startingSpellHint) ── */
+  eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');
+  eq(startingSpellHint('Rogue'),   null, 'Roublard : aucun sort à choisir');
+  ok(/3<\/strong> sorts mineurs/.test(startingSpellHint('Wizard')), 'Magicien : 3 sorts mineurs');
+  ok(/6<\/strong> sorts de niveau 1 pour ton grimoire/.test(startingSpellHint('Wizard')), 'Magicien : grimoire de 6');
+  ok(/4<\/strong> préparés/.test(startingSpellHint('Wizard')), 'Magicien : 4 préparés');
+  ok(/3<\/strong> sorts mineurs/.test(startingSpellHint('Cleric')), 'Clerc : 3 sorts mineurs');
+  ok(!/grimoire/.test(startingSpellHint('Cleric')), 'Clerc : pas de grimoire');
+  // Demi-lanceurs 2024 : pas de sorts mineurs, mais des sorts préparés dès le niveau 1
+  ok(!/mineur/.test(startingSpellHint('Paladin')), 'Paladin : aucun sort mineur');
+  ok(/2<\/strong> sorts de niveau 1 à préparer/.test(startingSpellHint('Paladin')), 'Paladin : 2 sorts préparés');
+  ok(/2<\/strong> sorts de niveau 1 à préparer/.test(startingSpellHint('Ranger')), 'Rôdeur : lanceur dès le niveau 1 (2024)');
+  // Tout lanceur doit déclarer ses sorts mineurs, sinon la fiche sort sans indication
+  Object.keys(PREPARED_SPELLS).forEach(cls => {
+    ok(!!STARTING_SPELLS[cls], `${cls} : sorts de départ non déclarés`);
+    ok(Number.isInteger(STARTING_SPELLS[cls].cantrips), `${cls} : nombre de sorts mineurs invalide`);
+    ok(!!startingSpellHint(cls), `${cls} : lanceur sans rappel de sorts à choisir`);
+  });
+  eq(Object.entries(STARTING_SPELLS).filter(([, s]) => s.spellbook).map(([c]) => c).join(','),
+     'Wizard', 'seul le Magicien démarre avec un grimoire');
+
+  /* ── Langues et outils au choix ── */
+  ok(LANGUAGES.standard.length >= 8 && LANGUAGES.rare.length >= 8, 'listes de langues fournies');
+  ok(!LANGUAGES.standard.includes('Common'), 'le Commun est automatique, pas au choix');
+  ok(!LANGUAGES.rare.includes('Common'), 'le Commun n\'est pas une langue rare');
+  {
+    const all = [...LANGUAGES.standard, ...LANGUAGES.rare];
+    eq(new Set(all).size, all.length, 'aucune langue en double');
+  }
+  // Chaque outil « (choice) » d'un background doit proposer une liste
+  Object.entries(BACKGROUND_DATA).forEach(([bg, d]) => {
+    if (/\(choice\)/.test(d.tool))
+      ok((TOOL_CHOICES[d.tool] || []).length >= 2, `${bg} : « ${d.tool} » sans liste de choix`);
+  });
+  Object.entries(TOOL_CHOICES).forEach(([k, list]) => {
+    eq(new Set(list).size, list.length, `${k} : doublon dans la liste`);
+    ok(list.every(t => !/\(choice\)/.test(t)), `${k} : un choix ne peut pas rester « (choice) »`);
+  });
+
+  // Les descriptions d'incantation ne doivent plus porter la formule 2014
+  // (« mod + niveau ») : depuis 2024 le nombre vient de la table de classe.
+  Object.entries(CLASS_DATA).forEach(([cls, d]) => {
+    Object.values(d.features).flat().forEach(f => {
+      if (!/Spellcasting|Pact Magic/i.test(f.name)) return;
+      ok(!/modifier \+ (half your |your )?\w+ level/i.test(f.desc),
+         `${cls} : description d'incantation encore en formule 2014`);
+    });
+  });
 
   // Sorts préparés : 20 niveaux, croissance monotone, classe connue
   Object.entries(PREPARED_SPELLS).forEach(([cls, table]) => {

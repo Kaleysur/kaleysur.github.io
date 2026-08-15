@@ -2649,6 +2649,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .wiz-preview:empty { display: none; }
 .wiz-preview strong { color: var(--gold, #c9a227); }
+.wiz-lang-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.wiz-lang-note { font-size: 0.72rem; color: #7a7a8a; margin-top: 0.35rem; }
+.wiz-lang-note strong { color: var(--gold, #c9a227); }
+.wiz-lang-warn { font-size: 0.72rem; color: #d9a441; margin-top: 0.3rem; }
 .wiz-summary {
   font-size: 0.75rem; line-height: 1.5; color: #9a9aaa; margin-top: 0.7rem;
   padding: 0.5rem 0.65rem; border-radius: 4px;
@@ -2657,6 +2661,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .wiz-summary:empty { display: none; }
 .wiz-summary .wiz-sum-ok   { color: #8aba8a; font-weight: 600; }
 .wiz-summary .wiz-sum-warn { color: #d9a441; font-weight: 600; }
+.wiz-summary .wiz-sum-todo { margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px solid var(--j-border-col, #3a2810); color: #a89a7a; }
+.wiz-summary .wiz-sum-todo strong { color: var(--gold, #c9a227); }
 .wiz-preview .wiz-trait { margin-top: 0.35rem; }
 .wiz-preview .wiz-trait-name { color: var(--gold, #c9a227); font-weight: 600; }
 .wiz-abils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
@@ -7725,6 +7731,33 @@ const ARMOR_PRESETS = {
   ],
 };
 
+/* ── Ce qu'un lanceur doit encore choisir après la création ──
+   Le créateur ne sélectionne pas les sorts (ce serait un second assistant) : il
+   dit au moins combien il en faut, sinon la fiche sort avec une liste vide et
+   un compteur « 0 / 4 » sans explication. Renvoie null pour un non-lanceur. */
+function startingSpellHint(className) {
+  if (typeof STARTING_SPELLS === 'undefined') return null;
+  const st = STARTING_SPELLS[className];
+  if (!st) return null;
+  const prepared = (PREPARED_SPELLS[className] || [])[0] || 0;
+  const bits = [];
+  if (st.cantrips)  bits.push(`<strong>${st.cantrips}</strong> sort${st.cantrips > 1 ? 's' : ''} mineur${st.cantrips > 1 ? 's' : ''}`);
+  if (st.spellbook) bits.push(`<strong>${st.spellbook}</strong> sorts de niveau 1 pour ton grimoire (dont <strong>${prepared}</strong> préparés)`);
+  else if (prepared) bits.push(`<strong>${prepared}</strong> sorts de niveau 1 à préparer`);
+  if (!bits.length) return null;
+  return `Il te reste à choisir ${bits.join(' et ')} — via le Compendium, une fois la fiche créée.`;
+}
+
+/* ── PV maximum au niveau 1 ──
+   Max du dé de vie + modificateur de CON + le bonus d'espèce (Robustesse naine :
+   hpPerLevel). Ce bonus était affiché sur la fiche mais jamais ajouté aux PV. */
+function startingMaxHp(c, hitDie, speciesEffects) {
+  const dieMax = parseInt((hitDie || '1d8').replace('1d', '')) || 8;
+  const conMod = Math.floor(((parseInt(c.con) || 10) - 10) / 2);
+  const bonus  = parseInt(speciesEffects?.hpPerLevel) || 0;   // ×1 : on est au niveau 1
+  return Math.max(1, dieMax + conMod + bonus);
+}
+
 /* ── Équipement de départ → CA + lignes d'attaque ──
    Appelé à la création : l'armure choisie configure c.armorConfig (la CA se
    recalcule ensuite toute seule) et chaque arme devient une attaque prête à lancer.
@@ -11310,6 +11343,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const selLineage = document.getElementById('wiz-lineage');
     const selClass   = document.getElementById('wiz-class');
     const selBg      = document.getElementById('wiz-bg');
+    const selTool    = document.getElementById('wiz-tool');
+    const selLang1   = document.getElementById('wiz-lang1');
+    const selLang2   = document.getElementById('wiz-lang2');
     selSpecies.innerHTML = '<option value="">— Choisir —</option>'
       + Object.keys(SPECIES_DATA).map(n => `<option>${n}</option>`).join('');
     selClass.innerHTML   = '<option value="">— Choisir —</option>'
@@ -11505,13 +11541,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     function previewBg() {
       const box = document.getElementById('wiz-bg-preview');
       const d = BACKGROUND_DATA[selBg.value];
+      refreshTool();
       if (!d) { box.innerHTML = ''; return; }
       box.innerHTML = `<div>Caractéristiques <strong>${d.abilities.map(a => ABIL_LABEL[a]).join(' · ')}</strong></div>`
         + `<div>Compétences <strong>${d.skills}</strong> <span style="color:#888;">(cochées automatiquement)</span></div>`
-        + `<div>Outil : ${d.tool}</div>`
+        // Si l'outil est au choix, le select ci-dessus fait foi — pas de « (choice) » en double
+        + (TOOL_CHOICES[d.tool] ? '' : `<div>Outil : ${d.tool}</div>`)
         + `<div class="wiz-trait"><span class="wiz-trait-name">${d.feat}</span> — ${ORIGIN_FEATS[d.feat] || ''}</div>`;
     }
     selBg.addEventListener('change', previewBg);
+
+    /* Outil « (choice) » : on fait choisir plutôt que d'écrire « (choice) » sur la fiche */
+    function refreshTool() {
+      const wrap = document.getElementById('wiz-tool-wrap');
+      const opts = TOOL_CHOICES[BACKGROUND_DATA[selBg.value]?.tool];
+      if (!opts) { wrap.style.display = 'none'; selTool.innerHTML = ''; return; }
+      wrap.style.display = '';
+      selTool.innerHTML = opts.map(o => `<option>${o}</option>`).join('');
+    }
+
+    /* Langues : Commun d'office + 2 au choix (PHB 2024) */
+    const langOpts = sel => '<option value="">— Choisir —</option>'
+      + `<optgroup label="Courantes">${LANGUAGES.standard.map(l => `<option${l === sel ? ' selected' : ''}>${l}</option>`).join('')}</optgroup>`
+      + `<optgroup label="Rares">${LANGUAGES.rare.map(l => `<option${l === sel ? ' selected' : ''}>${l}</option>`).join('')}</optgroup>`;
+    selLang1.innerHTML = langOpts();
+    selLang2.innerHTML = langOpts();
+    // Deux fois la même langue = une langue gâchée : on prévient sans bloquer
+    const syncLangs = () => {
+      const dup = selLang1.value && selLang1.value === selLang2.value;
+      document.getElementById('wiz-lang-warn')?.remove();
+      if (dup) selLang2.insertAdjacentHTML('afterend',
+        `<div class="wiz-lang-warn" id="wiz-lang-warn">⚠ Deux fois la même langue — tu en perds une.</div>`);
+    };
+    selLang1.addEventListener('change', syncLangs);
+    selLang2.addEventListener('change', syncLangs);
 
     /* ── Navigation ── */
     function showStep(n) {
@@ -11538,9 +11601,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         !selClass.value   && 'classe',
         !selBg.value      && 'background',
       ].filter(Boolean);
-      el.innerHTML = missing.length
+      const spellHint = startingSpellHint(selClass.value);
+      el.innerHTML = (missing.length
         ? `<span class="wiz-sum-warn">⚠ Non renseigné : ${missing.join(', ')}</span> — la fiche sera créée telle quelle, à compléter à la main.`
-        : `<span class="wiz-sum-ok">✓</span> ${esc(selSpecies.value)} · ${esc(selClass.value)} 1 · ${esc(selBg.value)} — CA, attaques et maîtrises seront remplies automatiquement.`;
+        : `<span class="wiz-sum-ok">✓</span> ${esc(selSpecies.value)} · ${esc(selClass.value)} 1 · ${esc(selBg.value)} — CA, attaques et maîtrises seront remplies automatiquement.`)
+        + (spellHint ? `<div class="wiz-sum-todo">✦ ${spellHint}</div>` : '');
     }
 
     btnNext.addEventListener('click', () => {
@@ -11556,7 +11621,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function closeModal() {
       overlay.classList.remove('open');
       nameInp.value = '';
-      [selSpecies, selLineage, selClass, selBg, selEquip].forEach(s => s.value = '');
+      [selSpecies, selLineage, selClass, selBg, selEquip, selLang1, selLang2].forEach(s => s.value = '');
+      document.getElementById('wiz-lang-warn')?.remove();
+      refreshTool();
       abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
       wizSkills = new Set();
       wizBgOk = true;
@@ -11593,12 +11660,13 @@ document.addEventListener('DOMContentLoaded', async () => {
              + (bgOk && k === b1 ? 1 : 0);
       });
 
-      // Espèce + lignée → vitesse
+      // Espèce + lignée → vitesse (fx sert aussi au calcul des PV plus bas)
+      let fx = {};
       if (selSpecies.value) {
         c.species = selSpecies.value;
         const sd = SPECIES_DATA[c.species];
         if (selLineage.value) c.lineage = selLineage.value;
-        const fx = Object.assign({}, sd.effects, sd.lineages?.[c.lineage]?.effects || {});
+        fx = Object.assign({}, sd.effects, sd.lineages?.[c.lineage]?.effects || {});
         c.vitesse = fx.speed || sd.speed;
       }
 
@@ -11615,10 +11683,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         c.deVie = info.de || '1d8';
         c.nbDeVie = 1;
         if (info.sort) c.caractSort = info.sort;
-        // PV niveau 1 = max du dé + mod CON
-        const dieMax = parseInt((info.de || '1d8').replace('1d', '')) || 8;
-        const conMod = Math.floor(((parseInt(c.con) || 10) - 10) / 2);
-        c.pvMax = Math.max(1, dieMax + conMod);
+        c.pvMax = startingMaxHp(c, info.de, fx);
         c.pvActuel = c.pvMax;
         // Ressources de départ de la classe
         if (typeof CLASS_RESOURCES !== 'undefined' && CLASS_RESOURCES[selClass.value]) {
@@ -11651,13 +11716,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (selClass.value || selBg.value) {
         const cd   = CLASS_DATA[selClass.value];
         const bd   = BACKGROUND_DATA[selBg.value];
+        // « Gaming Set (choice) » → l'outil réellement choisi à l'étape 4
+        const tool = bd && (TOOL_CHOICES[bd.tool] ? selTool.value : bd.tool);
         const list = [
           cd?.armorProf  && `Armures : ${cd.armorProf}`,
           cd?.weaponProf && `Armes : ${cd.weaponProf}`,
-          bd?.tool       && `Outil : ${bd.tool}`,
+          tool           && `Outil : ${tool}`,
         ].filter(Boolean);
         if (list.length) c.maitrises = list.join('\n');
       }
+
+      // Langues : Commun d'office + les deux choix de l'origine (doublon ignoré)
+      c.langues = ['Common', selLang1.value, selLang2.value]
+        .filter((l, i, arr) => l && arr.indexOf(l) === i).join(', ');
 
       finishCreate(id, `✦ ${name} créé — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'fiche vierge'}`);
     });
@@ -12344,12 +12415,27 @@ document.addEventListener('keydown', e => {
           <div class="wiz-preview" id="wiz-class-preview"></div>
         </div>
 
-        <!-- 4 · Background -->
+        <!-- 4 · Background (origine : background, outil, langues) -->
         <div class="wiz-step" data-step="4">
           <div class="auth-field">
             <label class="auth-label" for="wiz-bg">Background</label>
             <select class="auth-input" id="wiz-bg"></select>
           </div>
+          <div class="auth-field" id="wiz-tool-wrap" style="display:none;">
+            <label class="auth-label" for="wiz-tool">Outil au choix</label>
+            <select class="auth-input" id="wiz-tool"></select>
+          </div>
+          <div class="wiz-lang-row">
+            <div class="auth-field">
+              <label class="auth-label" for="wiz-lang1">Langue 1</label>
+              <select class="auth-input" id="wiz-lang1"></select>
+            </div>
+            <div class="auth-field">
+              <label class="auth-label" for="wiz-lang2">Langue 2</label>
+              <select class="auth-input" id="wiz-lang2"></select>
+            </div>
+          </div>
+          <div class="wiz-lang-note">Tu parles le <strong>Commun</strong> d'office, plus deux langues de ton origine.</div>
           <div class="wiz-preview" id="wiz-bg-preview"></div>
         </div>
 

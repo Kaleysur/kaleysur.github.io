@@ -60,6 +60,37 @@ const SPELL_PREP_STYLE = {
   'Warlock':   { swap:'level', book:false },
 };
 
+/* ── Ce qu'un lanceur doit choisir au niveau 1 ──
+   Le nombre de sorts préparés vient de PREPARED_SPELLS[classe][0] ; on ne stocke
+   ici que les sorts mineurs et, pour le Magicien, la taille du grimoire de départ.
+   La progression complète des sorts mineurs relèvera du monteur de niveau. */
+const STARTING_SPELLS = {
+  'Artificer': { cantrips: 2 },
+  'Bard':      { cantrips: 2 },
+  'Cleric':    { cantrips: 3 },
+  'Druid':     { cantrips: 2 },
+  'Paladin':   { cantrips: 0 },   // demi-lanceur sans sorts mineurs
+  'Psion':     { cantrips: 2 },
+  'Ranger':    { cantrips: 0 },   // idem — mais lanceur dès le niveau 1 en 2024
+  'Sorcerer':  { cantrips: 4 },
+  'Warlock':   { cantrips: 2 },
+  'Wizard':    { cantrips: 3, spellbook: 6 },
+};
+
+/* ── Langues (PHB 2024) ── Commun est automatique, +2 au choix via l'origine. */
+const LANGUAGES = {
+  standard: ['Common Sign Language','Draconic','Dwarvish','Elvish','Giant','Gnomish','Goblin','Halfling','Orc'],
+  rare:     ['Abyssal','Celestial','Deep Speech','Druidic','Infernal','Primordial','Sylvan','Thieves\' Cant','Undercommon'],
+};
+
+/* ── Outils laissés au choix par certains backgrounds ──
+   La clé correspond au texte « … (choice) » de BACKGROUND_DATA.tool. */
+const TOOL_CHOICES = {
+  "Artisan's Tools (choice)": ["Alchemist's Supplies","Brewer's Supplies","Calligrapher's Supplies","Carpenter's Tools","Cartographer's Tools","Cobbler's Tools","Cook's Utensils","Glassblower's Tools","Jeweler's Tools","Leatherworker's Tools","Mason's Tools","Painter's Supplies","Potter's Tools","Smith's Tools","Tinker's Tools","Weaver's Tools","Woodcarver's Tools"],
+  "Gaming Set (choice)":        ['Dice Set','Dragonchess Set','Playing Card Set','Three-Dragon Ante Set'],
+  "Musical Instrument (choice)":['Bagpipes','Drum','Dulcimer','Flute','Horn','Lute','Lyre','Pan Flute','Shawm','Viol'],
+};
+
 /* ── Spell Slot Tables ── */
 const FULL_CASTER_SLOTS = {
   1:[2,0,0,0,0,0,0,0,0], 2:[3,0,0,0,0,0,0,0,0], 3:[4,2,0,0,0,0,0,0,0],
@@ -524,7 +555,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Bardic Inspiration', type:'feature', desc:"Bonus action: give one creature within 60 ft a Bardic Inspiration die (d6). They can roll it and add it to one ability check, attack roll, or saving throw within the next 10 minutes. You can use this CHA modifier times (minimum 1), regaining uses on Long Rest." },
-      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Charisma. You know 2 cantrips and 4 spells at 1st level. You prepare spells by learning them from any class's list (Magical Secrets at 10th)." }
+      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Charisma. You know 2 cantrips and prepare 4 spells at level 1 (number set by your class table). Your prepared list is fixed: you may only swap a spell when you gain a level. Magical Secrets at level 10 opens any class's list." }
     ],
     2: [
       { name:'Expertise', type:'feature', desc:"Choose 2 skills you are proficient in. Your proficiency bonus is doubled for any check using those skills." },
@@ -565,7 +596,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Divine Order', type:'feature', desc:"Choose Protector (proficiency with Martial weapons, Heavy armor) or Thaumaturge (one additional Cleric cantrip, Expertise in Arcana or Religion)." },
-      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Wisdom. You prepare spells from the Cleric spell list equal to your WIS modifier + Cleric level." }
+      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Wisdom. You know 3 cantrips and prepare spells from the Cleric list — the number is set by your class table (4 at level 1), not by your WIS modifier. You may swap prepared spells on a Long Rest." }
     ],
     2: [{ name:'Channel Divinity', type:'feature', desc:"You gain Channel Divinity (2/Long Rest). Turn Undead: action, each Undead within 30 ft makes a WIS save or is Turned for 1 minute. Your subclass grants additional Channel Divinity options." }],
     3: [{ name:'Cleric Subclass', type:'subclass', desc:"Choose a Divine Domain: Life, Light, Trickery, War, Knowledge, Nature, Tempest, or others. You gain the domain spells and first subclass feature." }],
@@ -596,7 +627,7 @@ const CLASS_DATA = {
     1: [
       { name:'Druidic', type:'feature', desc:"You know Druidic, the secret language of druids. You can speak it and use it to leave hidden messages. Creatures who don't know Druidic can detect a message exists with a DC 15 Perception check." },
       { name:'Primal Order', type:'feature', desc:"Choose Magician (one extra cantrip from any list, Nature spell always prepared per level) or Warden (proficiency with Martial weapons and Medium Armor)." },
-      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Wisdom. You prepare spells from the Druid spell list equal to your WIS modifier + Druid level." },
+      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Wisdom. You know 2 cantrips and prepare spells from the Druid list — the number is set by your class table (4 at level 1). You may swap prepared spells on a Long Rest." },
       { name:'Wild Shape', type:'feature', desc:"Bonus action: transform into a Beast you've seen, CR 1/4 or lower. Lasts 1 hour or until you drop to 0 HP. Regain uses (equal to WIS mod) on Long Rest, or 1 use on Short Rest." }
     ],
     2: [
@@ -724,7 +755,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Lay on Hands', type:'feature', desc:"You have a pool of HP = 5 × your Paladin level. As a Bonus Action, restore HP to a creature you touch (any amount from your pool), or expend 5 HP to cure one disease or poison." },
-      { name:'Spellcasting', type:'feature', desc:"You are a half-caster using Charisma. You prepare spells from the Paladin list equal to your CHA modifier + half your Paladin level (rounded up)." },
+      { name:'Spellcasting', type:'feature', desc:"You are a half-caster using Charisma, from level 1. No cantrips. The number of prepared spells is set by your class table (2 at level 1). You may swap prepared spells on a Long Rest." },
       { name:'Weapon Mastery', type:'feature', desc:"Use the Mastery property of 2 weapons. You can swap choices on Long Rest." }
     ],
     2: [
@@ -800,7 +831,7 @@ const CLASS_DATA = {
     1: [
       { name:'Expertise', type:'feature', desc:"Choose 2 skills you are proficient in. Your proficiency bonus is doubled for those skills." },
       { name:'Favored Enemy', type:'feature', desc:"Hunter's Mark is always prepared for you. You can cast it without expending a spell slot a number of times equal to your WIS modifier (minimum 1)/Long Rest." },
-      { name:'Spellcasting', type:'feature', desc:"You are a half-caster using Wisdom. Spells start at 2nd level." },
+      { name:'Spellcasting', type:'feature', desc:"You are a half-caster using Wisdom, from level 1 (a 2024 change — spellcasting no longer waits for level 2). No cantrips. Prepared spells are set by your class table (2 at level 1) and can only be swapped when you gain a level." },
       { name:'Weapon Mastery', type:'feature', desc:"Use the Mastery property of 2 weapons. You can swap choices on Long Rest." }
     ],
     2: [
@@ -879,7 +910,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Innate Sorcery', type:'feature', desc:"Bonus action: unleash your inner power for 1 minute. Your spell save DC increases by 1 and you have advantage on Concentration saving throws. Uses = your Sorcerer level; regain all on Long Rest." },
-      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Charisma. You know a fixed number of spells from the Sorcerer list (fewer than a Wizard, but always available)." }
+      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Charisma. You know 4 cantrips and prepare 2 spells at level 1 (number set by your class table). Your prepared list is fixed: you may only swap a spell when you gain a level." }
     ],
     2: [
       { name:'Font of Magic', type:'feature', desc:"You have Sorcery Points = your Sorcerer level. Flexible Casting: create spell slots from Sorcery Points (2 pts = 1st, 3 = 2nd, 4 = 3rd, 5 = 4th, 6 = 5th) or convert spell slots into Sorcery Points (slot level = points gained)." },
@@ -909,7 +940,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Eldritch Invocations', type:'feature', desc:"You gain 1 Eldritch Invocation (gaining more at higher levels). Invocations grant permanent magical abilities such as Agonizing Blast (add CHA to Eldritch Blast damage), Devil's Sight (see in magical darkness), or Mask of Many Faces (cast Disguise Self at will)." },
-      { name:'Pact Magic', type:'feature', desc:"You are a spellcaster using Charisma with a unique slot system. All your spell slots are the same level (ascending with your level). Slots recharge on a Short or Long Rest. Slot level scales as you level up." }
+      { name:'Pact Magic', type:'feature', desc:"You are a spellcaster using Charisma with a unique slot system. You know 2 cantrips and prepare 2 spells at level 1 (number set by your class table); your prepared list can only change when you gain a level. All your slots are the same level and recharge on a Short or Long Rest." }
     ],
     2: [{ name:'Magical Cunning', type:'feature', desc:"As an action (once per Long Rest), if you have expended all your Pact Magic slots, you can regain half your maximum Pact Magic slots (rounded up)." }],
     3: [{ name:'Warlock Subclass', type:'subclass', desc:"Choose your Otherworldly Patron: Archfey, Celestial, Fiend, Great Old One, or others. You gain Patron spells (always prepared) and the first subclass feature." }],
@@ -939,7 +970,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Arcane Recovery', type:'feature', desc:"Once per day when you finish a Short Rest, recover expended spell slots with a total level equal to half your Wizard level (rounded up). Can't recover 6th-level or higher slots this way." },
-      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Intelligence. You have a spellbook of known spells and prepare spells equal to your INT modifier + Wizard level each day." }
+      { name:'Spellcasting', type:'feature', desc:"You are a full spellcaster using Intelligence. You start with 3 cantrips and a spellbook of 6 level-1 spells. Each day you prepare a subset of your spellbook — the number is set by your class table (4 at level 1). Unprepared spells stay in the book." }
     ],
     2: [
       { name:'Scholar', type:'feature', desc:"You gain Expertise in your choice of Arcana or History. You also learn one additional language of your choice." }
@@ -970,7 +1001,7 @@ const CLASS_DATA = {
   features: {
     1: [
       { name:'Magical Tinkering', type:'feature', desc:"Touch a Tiny nonmagical object and give it a magical property: emit light, emit a recorded message, emit an odor, or display a static visual. You can have INT modifier such objects active at once." },
-      { name:'Spellcasting', type:'feature', desc:"You are a spellcaster using Intelligence. You prepare spells from the Artificer list equal to your INT modifier + half your Artificer level (rounded up)." }
+      { name:'Spellcasting', type:'feature', desc:"You are a spellcaster using Intelligence. You know 2 cantrips and prepare spells from the Artificer list — the number is set by your class table (2 at level 1). You may swap prepared spells on a Long Rest." }
     ],
     2: [
       { name:'Infuse Item', type:'feature', desc:"You gain 4 Infusion recipes (more at higher levels). After a Long Rest, infuse up to 2 items simultaneously (increasing as you level). Infused items count as magic items." },
