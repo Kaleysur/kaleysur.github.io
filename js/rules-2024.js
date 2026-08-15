@@ -117,7 +117,42 @@ const MULTICLASS_SLOTS = {
    type: 'feature' | 'asi' | 'subclass' | 'epic'
    ════════════════════════════════════════════════════════════ */
 /* ── Équipement de départ 2024 (PHB) — utilisé par l'assistant de création et le compendium ── */
+/* ── Armes et armures de départ ──
+   Sert à dériver la CA et les lignes d'attaque à la création du personnage.
+   Les clés correspondent exactement aux `name` de STARTING_EQUIP.
+   `mode`/`baseAC` alimentent c.armorConfig (voir calcAndSetAC dans joueurs.html). */
+const STARTING_ARMOR = {
+  'Leather Armor':          { mode:'light',  baseAC:11, armorName:'Leather' },
+  'Studded Leather Armor':  { mode:'light',  baseAC:12, armorName:'Studded Leather' },
+  'Chain Shirt':            { mode:'medium', baseAC:13, armorName:'Chain Shirt' },
+  'Chain Mail':             { mode:'heavy',  baseAC:16, armorName:'Chain Mail' },
+};
+
+/* dmg = dé de base, abil = 'for' | 'dex', finesse = le joueur prend le meilleur des deux */
+const STARTING_WEAPONS = {
+  'Dagger':         { dmg:'1d4',  type:'piercing',    abil:'for', finesse:true },
+  'Flail':          { dmg:'1d8',  type:'bludgeoning', abil:'for' },
+  'Greataxe':       { dmg:'1d12', type:'slashing',    abil:'for' },
+  'Greatsword':     { dmg:'2d6',  type:'slashing',    abil:'for' },
+  'Handaxe':        { dmg:'1d6',  type:'slashing',    abil:'for' },
+  'Javelin':        { dmg:'1d6',  type:'piercing',    abil:'for' },
+  'Light Crossbow': { dmg:'1d8',  type:'piercing',    abil:'dex' },
+  'Longbow':        { dmg:'1d8',  type:'piercing',    abil:'dex' },
+  'Longsword':      { dmg:'1d8',  type:'slashing',    abil:'for' },
+  'Mace':           { dmg:'1d6',  type:'bludgeoning', abil:'for' },
+  'Quarterstaff':   { dmg:'1d6',  type:'bludgeoning', abil:'for' },
+  'Scimitar':       { dmg:'1d6',  type:'slashing',    abil:'for', finesse:true },
+  'Shortbow':       { dmg:'1d6',  type:'piercing',    abil:'dex' },
+  'Shortsword':     { dmg:'1d6',  type:'piercing',    abil:'for', finesse:true },
+  'Sickle':         { dmg:'1d4',  type:'slashing',    abil:'for', finesse:true },
+  'Spear':          { dmg:'1d6',  type:'piercing',    abil:'for' },
+};
+
 const STARTING_EQUIP = {
+  Artificer: [
+    { label:'Option A', gold:8, items:[{qty:1,name:'Studded Leather Armor'},{qty:1,name:'Dagger'},{qty:1,name:'Light Crossbow'},{qty:20,name:'Bolt'},{qty:1,name:"Thieves' Tools"},{qty:1,name:"Artisan's Tools ou Instrument"},{qty:1,name:"Dungeoneer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:100, items:[] }
+  ],
   Barbarian: [
     { label:'Option A', gold:15, items:[{qty:1,name:'Greataxe'},{qty:4,name:'Handaxe'},{qty:1,name:"Explorer's Pack"}] },
     { label:'Option B — Or uniquement', gold:75, items:[] }

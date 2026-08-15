@@ -2649,6 +2649,14 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .wiz-preview:empty { display: none; }
 .wiz-preview strong { color: var(--gold, #c9a227); }
+.wiz-summary {
+  font-size: 0.75rem; line-height: 1.5; color: #9a9aaa; margin-top: 0.7rem;
+  padding: 0.5rem 0.65rem; border-radius: 4px;
+  background: var(--j-input, #0a0703); border: 1px solid var(--j-border-col, #3a2810);
+}
+.wiz-summary:empty { display: none; }
+.wiz-summary .wiz-sum-ok   { color: #8aba8a; font-weight: 600; }
+.wiz-summary .wiz-sum-warn { color: #d9a441; font-weight: 600; }
 .wiz-preview .wiz-trait { margin-top: 0.35rem; }
 .wiz-preview .wiz-trait-name { color: var(--gold, #c9a227); font-weight: 600; }
 .wiz-abils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
@@ -7717,6 +7725,50 @@ const ARMOR_PRESETS = {
   ],
 };
 
+/* ── Équipement de départ → CA + lignes d'attaque ──
+   Appelé à la création : l'armure choisie configure c.armorConfig (la CA se
+   recalcule ensuite toute seule) et chaque arme devient une attaque prête à lancer.
+   Fonction pure sur `c` : ne lit pas le personnage actif, testable hors navigateur. */
+function applyStartingGear(c, className, items) {
+  if (typeof STARTING_ARMOR === 'undefined') return;
+  const m = k => Math.floor(((parseInt(c[k]) || 10) - 10) / 2);
+  const names = (items || []).map(it => it.name);
+
+  // ── Armure ──
+  const worn = names.find(n => STARTING_ARMOR[n]);
+  const cfg  = { mode:'unarmored', baseAC:10, armorName:'', shield:false, otherBonus:0 };
+  if (worn) Object.assign(cfg, STARTING_ARMOR[worn]);
+  else if (className === 'Barbarian') cfg.mode = 'unarmoredBarb';  // Défense sans armure
+  else if (className === 'Monk')      cfg.mode = 'unarmoredMonk';
+  cfg.shield = names.includes('Shield');
+  c.armorConfig = cfg;
+
+  // ── Attaques ──
+  // Une seule ligne par type d'arme, même si on en reçoit plusieurs (4 haches de jet).
+  const seen = new Set();
+  const atks = [];
+  names.forEach(n => {
+    // « Arcane Focus (Quarterstaff) » compte comme un bâton
+    const key = STARTING_WEAPONS[n] ? n
+              : Object.keys(STARTING_WEAPONS).find(w => n.includes(w));
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    const w = STARTING_WEAPONS[key];
+    // Finesse : on prend le meilleur des deux caractéristiques
+    const abil = w.finesse ? (m('dex') > m('for') ? 'dex' : 'for') : w.abil;
+    const bonus = m(abil);
+    atks.push({
+      name: key,
+      degats: w.dmg + (bonus ? (bonus > 0 ? '+' : '') + bonus : ''),
+      typeDegat: w.type,
+      atkType: abil,
+      prof: true,          // toute classe est maîtrisée avec ses armes de départ
+      bonus: ''
+    });
+  });
+  if (atks.length) c.attaques = atks;
+}
+
 function calcAndSetAC() {
   if (!playerData) return;
   const cfg = C().armorConfig || {};
@@ -11231,12 +11283,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnClose = document.getElementById('new-char-cancel');
     const btnPrev  = document.getElementById('wiz-prev');
     const btnNext  = document.getElementById('wiz-next');
+    const btnBlank = document.getElementById('wiz-blank');
     if (!overlay) return;
 
     const STD_ARRAY = [15, 14, 13, 12, 10, 8];
     const ABILS = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
     const TOTAL_STEPS = 6;
     let step = 1;
+    let wizBgOk = true;   // les deux bonus de background pointent-ils deux carac. différentes ?
 
     /* ── Grille d'avatars ── */
     AVATARS.forEach(av => {
@@ -11315,6 +11369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const s2 = box.querySelector('[data-bgb="2"]'), s1 = box.querySelector('[data-bgb="1"]');
       const sync = () => {
         const same = s2.value === s1.value;
+        wizBgOk = !same;   // bloque « Suivant » : sinon les +2/+1 sont perdus en silence
         document.getElementById('wiz-bgb-warn').textContent =
           same ? '⚠ Choisis deux caractéristiques différentes (ou +1/+1/+1 à la main dans la fiche).' : '';
         // Aperçu du total dans les cellules
@@ -11468,11 +11523,34 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnPrev.style.display = step > 1 ? '' : 'none';
       btnNext.style.display = step < TOTAL_STEPS ? '' : 'none';
       btnOk.style.display   = step === TOTAL_STEPS ? '' : 'none';
+      btnBlank.style.display = step === 1 ? '' : 'none';
       if (step === 1) setTimeout(() => nameInp.focus(), 50);
       if (step === 5) renderBgBonus();  // dépend du background choisi à l'étape 4
-      if (step === 6) refreshEquip();   // dépend de la classe choisie à l'étape 3
+      if (step === 6) { refreshEquip(); renderWizSummary(); }
     }
-    btnNext.addEventListener('click', () => showStep(step + 1));
+
+    /* Récapitulatif de la dernière étape : signale ce qui restera vide. */
+    function renderWizSummary() {
+      const el = document.getElementById('wiz-summary');
+      if (!el) return;
+      const missing = [
+        !selSpecies.value && 'espèce',
+        !selClass.value   && 'classe',
+        !selBg.value      && 'background',
+      ].filter(Boolean);
+      el.innerHTML = missing.length
+        ? `<span class="wiz-sum-warn">⚠ Non renseigné : ${missing.join(', ')}</span> — la fiche sera créée telle quelle, à compléter à la main.`
+        : `<span class="wiz-sum-ok">✓</span> ${esc(selSpecies.value)} · ${esc(selClass.value)} 1 · ${esc(selBg.value)} — CA, attaques et maîtrises seront remplies automatiquement.`;
+    }
+
+    btnNext.addEventListener('click', () => {
+      // Étape 5 : deux bonus sur la même caractéristique = +2/+1 perdus sans avertir
+      if (step === 5 && selBg.value && !wizBgOk) {
+        showToast('⚠ Choisis deux caractéristiques différentes pour les bonus du background.');
+        return;
+      }
+      showStep(step + 1);
+    });
     btnPrev.addEventListener('click', () => showStep(step - 1));
 
     function closeModal() {
@@ -11481,7 +11559,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       [selSpecies, selLineage, selClass, selBg, selEquip].forEach(s => s.value = '');
       abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
       wizSkills = new Set();
-      ['wiz-species-preview','wiz-class-preview','wiz-bg-preview','wiz-class-skills','wiz-bg-bonus'].forEach(id =>
+      wizBgOk = true;
+      ['wiz-species-preview','wiz-class-preview','wiz-bg-preview','wiz-class-skills','wiz-bg-bonus','wiz-summary'].forEach(id =>
         document.getElementById(id).innerHTML = '');
       refreshAbils();
       showStep(1);
@@ -11553,26 +11632,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         (BACKGROUND_DATA[selBg.value].skillKeys || []).forEach(k => { c[k] = 1; });
       }
 
-      // Équipement de départ → inventaire + bourse
+      // Équipement de départ → inventaire + bourse, puis CA et attaques dérivées
       const eqOpts = STARTING_EQUIP[selClass.value];
+      let eqItems = [];
       if (eqOpts && selEquip.value !== '') {
         const eq = eqOpts[+selEquip.value];
         if (eq) {
+          eqItems = eq.items;
           slot.inventory.items = eq.items.map(it => ({ name: it.name, qty: it.qty, notes: '', cat: '' }));
           slot.inventory.currency = Object.assign(
             { pp:0, gp:0, ep:0, sp:0, cp:0 }, slot.inventory.currency, { gp: eq.gold }
           );
         }
       }
+      applyStartingGear(c, selClass.value, eqItems);
 
+      // Maîtrises : armures + armes de la classe, outil du background
+      if (selClass.value || selBg.value) {
+        const cd   = CLASS_DATA[selClass.value];
+        const bd   = BACKGROUND_DATA[selBg.value];
+        const list = [
+          cd?.armorProf  && `Armures : ${cd.armorProf}`,
+          cd?.weaponProf && `Armes : ${cd.weaponProf}`,
+          bd?.tool       && `Outil : ${bd.tool}`,
+        ].filter(Boolean);
+        if (list.length) c.maitrises = list.join('\n');
+      }
+
+      finishCreate(id, `✦ ${name} créé — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'fiche vierge'}`);
+    });
+
+    /* ── Fiche vierge : certains préfèrent tout remplir eux-mêmes ── */
+    btnBlank.addEventListener('click', () => {
+      const name = nameInp.value.trim() || 'Nouveau personnage';
+      const id   = newCharId();
+      playerData.characters[id] = emptyCharSlot(name);
+      playerData.characters[id].character.characterName = name;
+      playerData.characters[id].character.avatar = newCharSelectedAvatar;
+      finishCreate(id, `⊘ ${name} créé — fiche vierge`);
+    });
+
+    function finishCreate(id, toast) {
       playerData.activeCharId = id;
+      // renderWornArmor() n'existe que dans l'onglet Inventaire : sans ça la CA
+      // dérivée de l'armure de départ resterait à 10 jusqu'à la première visite.
+      calcAndSetAC();
       closeModal();
       renderCharCards();
       renderCharSelector();
       renderAll();
       triggerSave();
-      showToast(`✦ ${name} créé — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'fiche vierge'}`);
-    });
+      showToast(toast);
+    }
 
     nameInp.addEventListener('keydown', e => { if (e.key === 'Enter') showStep(step + 1); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
@@ -12260,10 +12371,12 @@ document.addEventListener('keydown', e => {
             <select class="auth-input" id="wiz-equip"></select>
           </div>
           <div class="wiz-preview" id="wiz-equip-preview"></div>
+          <div class="wiz-summary" id="wiz-summary"></div>
         </div>
 
         <div class="new-char-btn-row wiz-nav">
           <button class="btn btn-sm" id="new-char-cancel">Annuler</button>
+          <button class="btn btn-sm" id="wiz-blank" title="Créer une fiche entièrement vide, à remplir soi-même">⊘ Fiche vierge</button>
           <button class="btn btn-sm" id="wiz-prev" style="display:none;">‹ Retour</button>
           <button class="btn btn-sm btn-gold" id="wiz-next">Suivant ›</button>
           <button class="btn btn-sm btn-gold" id="new-char-confirm" style="display:none;">✦ Créer</button>

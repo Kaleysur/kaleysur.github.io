@@ -53,6 +53,9 @@ function ok(cond, label) {
     extract(J, 'function getTotalLevel(c)'),
     extract(R, 'const MULTICLASS_SLOTS'),
     extract(J, 'function computeMulticlassSlots(c)'),
+    extract(R, 'const STARTING_ARMOR'),
+    extract(R, 'const STARTING_WEAPONS'),
+    extract(J, 'function applyStartingGear(c, className, items)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -148,6 +151,57 @@ function ok(cond, label) {
     ok(opts.length >= 1, `${cls} : option d'équipement`);
     opts.forEach(o => ok(typeof o.gold === 'number', `${cls}/${o.label} : bourse`));
   });
+  // Aucune classe ne doit sortir du créateur les mains vides (l'Artificier l'était)
+  Object.keys(CLASS_DATA).forEach(cls =>
+    ok(!!STARTING_EQUIP[cls], `${cls} : aucun équipement de départ — le créateur laisse la fiche vide`));
+
+  /* ── Équipement de départ → CA et attaques (applyStartingGear) ── */
+  const gear = (cls, optIdx, abils) => {
+    const c = Object.assign({ for:15, dex:14, con:13, int:12, sag:10, cha:8 }, abils);
+    applyStartingGear(c, cls, STARTING_EQUIP[cls][optIdx].items);
+    return c;
+  };
+  // Toute option A doit produire au moins une attaque : sinon un nom d'arme a changé
+  // dans STARTING_EQUIP sans être répercuté dans STARTING_WEAPONS.
+  Object.keys(STARTING_EQUIP).forEach(cls => {
+    const c = gear(cls, 0);
+    ok((c.attaques || []).length >= 1, `${cls} option A : aucune arme reconnue`);
+    (c.attaques || []).forEach(a => {
+      ok(/^\d+d\d+([+-]\d+)?$/.test(a.degats), `${cls}/${a.name} : dégâts mal formés (${a.degats})`);
+      ok(['for','dex'].includes(a.atkType), `${cls}/${a.name} : atkType invalide (${a.atkType})`);
+      ok(a.prof === true, `${cls}/${a.name} : maîtrise attendue`);
+    });
+  });
+  // Armures : le mode doit correspondre à l'armure reçue
+  eq(gear('Cleric', 0).armorConfig.mode, 'medium', 'Clerc : chemise de mailles = intermédiaire');
+  eq(gear('Cleric', 0).armorConfig.baseAC, 13, 'Clerc : CA de base 13');
+  eq(gear('Cleric', 0).armorConfig.shield, true, 'Clerc : bouclier détecté');
+  eq(gear('Fighter', 0).armorConfig.mode, 'heavy', 'Guerrier : cotte de mailles = lourde');
+  eq(gear('Fighter', 0).armorConfig.baseAC, 16, 'Guerrier : CA de base 16');
+  eq(gear('Rogue', 0).armorConfig.mode, 'light', 'Roublard : armure légère');
+  // Défense sans armure : la classe décide quand aucune armure n'est fournie
+  eq(gear('Barbarian', 0).armorConfig.mode, 'unarmoredBarb', 'Barbare : défense sans armure');
+  eq(gear('Monk', 0).armorConfig.mode, 'unarmoredMonk', 'Moine : défense sans armure');
+  eq(gear('Wizard', 0).armorConfig.mode, 'unarmored', 'Magicien : sans armure');
+  // Option « or uniquement » : pas d'armure, pas d'attaque, mais un armorConfig valide
+  const goldOnly = gear('Barbarian', 1);
+  eq(goldOnly.armorConfig.mode, 'unarmoredBarb', 'or seul : la classe décide encore de la CA');
+  eq(goldOnly.armorConfig.shield, false, 'or seul : pas de bouclier');
+  ok(!goldOnly.attaques, 'or seul : aucune attaque inventée');
+  // Dégâts = dé de l'arme + modificateur de la caractéristique utilisée
+  eq(gear('Barbarian', 0, { for:17 }).attaques[0].degats, '1d12+3', 'Hache d\'armes 1d12 + FOR 17');
+  eq(gear('Barbarian', 0, { for:8 }).attaques[0].degats,  '1d12-1', 'Hache d\'armes avec FOR 8');
+  eq(gear('Barbarian', 0, { for:10 }).attaques[0].degats, '1d12',   'Aucun modificateur affiché si 0');
+  // Doublons : 4 haches de jet → une seule ligne d'attaque
+  eq(gear('Barbarian', 0).attaques.length, 2, 'Barbare : haches de jet regroupées en une ligne');
+  // Finesse : la meilleure des deux caractéristiques
+  eq(gear('Rogue', 0, { for:10, dex:17 }).attaques[1].atkType, 'dex', 'Épée courte (finesse) → DEX');
+  eq(gear('Rogue', 0, { for:17, dex:10 }).attaques[1].atkType, 'for', 'Épée courte (finesse) → FOR');
+  // Les armes à distance restent en DEX quelle que soit la FOR
+  eq(gear('Ranger', 0, { for:18, dex:10 }).attaques[2].atkType, 'dex', 'Arc long toujours en DEX');
+  // Focus d'incantation monté sur bâton : reconnu comme arme
+  ok(gear('Wizard', 0).attaques.some(a => a.name === 'Quarterstaff'),
+     'Magicien : « Arcane Focus (Quarterstaff) » compte comme un bâton');
 
   // Sorts préparés : 20 niveaux, croissance monotone, classe connue
   Object.entries(PREPARED_SPELLS).forEach(([cls, table]) => {
