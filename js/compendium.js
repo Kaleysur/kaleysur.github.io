@@ -1224,57 +1224,7 @@
   });
 
   /* ── Équipement de départ 2024 (PHB) ── */
-  const STARTING_EQUIP = {
-    Barbarian: [
-      { label:'Option A', gold:15, items:[{qty:1,name:'Greataxe'},{qty:4,name:'Handaxe'},{qty:1,name:"Explorer's Pack"}] },
-      { label:'Option B — Or uniquement', gold:75, items:[] }
-    ],
-    Bard: [
-      { label:'Option A', gold:19, items:[{qty:1,name:'Leather Armor'},{qty:2,name:'Dagger'},{qty:1,name:'Musical Instrument'},{qty:1,name:"Entertainer's Pack"}] },
-      { label:'Option B — Or uniquement', gold:90, items:[] }
-    ],
-    Cleric: [
-      { label:'Option A', gold:7, items:[{qty:1,name:'Chain Shirt'},{qty:1,name:'Shield'},{qty:1,name:'Mace'},{qty:1,name:'Holy Symbol'},{qty:1,name:"Priest's Pack"}] },
-      { label:'Option B — Or uniquement', gold:110, items:[] }
-    ],
-    Druid: [
-      { label:'Option A', gold:9, items:[{qty:1,name:'Leather Armor'},{qty:1,name:'Shield'},{qty:1,name:'Sickle'},{qty:1,name:'Druidic Focus (Quarterstaff)'},{qty:1,name:"Explorer's Pack"},{qty:1,name:'Herbalism Kit'}] },
-      { label:'Option B — Or uniquement', gold:50, items:[] }
-    ],
-    Fighter: [
-      { label:'Option A', gold:4, items:[{qty:1,name:'Chain Mail'},{qty:1,name:'Greatsword'},{qty:1,name:'Flail'},{qty:8,name:'Javelin'},{qty:1,name:"Dungeoneer's Pack"}] },
-      { label:'Option B', gold:11, items:[{qty:1,name:'Studded Leather Armor'},{qty:1,name:'Scimitar'},{qty:1,name:'Shortsword'},{qty:1,name:'Longbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:"Dungeoneer's Pack"}] },
-      { label:'Option C — Or uniquement', gold:155, items:[] }
-    ],
-    Monk: [
-      { label:'Option A', gold:11, items:[{qty:1,name:'Spear'},{qty:5,name:'Dagger'},{qty:1,name:"Artisan's Tools ou Instrument"},{qty:1,name:"Explorer's Pack"}] },
-      { label:'Option B — Or uniquement', gold:50, items:[] }
-    ],
-    Paladin: [
-      { label:'Option A', gold:9, items:[{qty:1,name:'Chain Mail'},{qty:1,name:'Shield'},{qty:1,name:'Longsword'},{qty:6,name:'Javelin'},{qty:1,name:'Holy Symbol'},{qty:1,name:"Priest's Pack"}] },
-      { label:'Option B — Or uniquement', gold:150, items:[] }
-    ],
-    Ranger: [
-      { label:'Option A', gold:7, items:[{qty:1,name:'Studded Leather Armor'},{qty:1,name:'Scimitar'},{qty:1,name:'Shortsword'},{qty:1,name:'Longbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:'Druidic Focus (sprig of mistletoe)'},{qty:1,name:"Explorer's Pack"}] },
-      { label:'Option B — Or uniquement', gold:150, items:[] }
-    ],
-    Rogue: [
-      { label:'Option A', gold:8, items:[{qty:1,name:'Leather Armor'},{qty:2,name:'Dagger'},{qty:1,name:'Shortsword'},{qty:1,name:'Shortbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:"Thieves' Tools"},{qty:1,name:"Burglar's Pack"}] },
-      { label:'Option B — Or uniquement', gold:100, items:[] }
-    ],
-    Sorcerer: [
-      { label:'Option A', gold:28, items:[{qty:1,name:'Spear'},{qty:2,name:'Dagger'},{qty:1,name:'Arcane Focus (crystal)'},{qty:1,name:"Dungeoneer's Pack"}] },
-      { label:'Option B — Or uniquement', gold:50, items:[] }
-    ],
-    Warlock: [
-      { label:'Option A', gold:15, items:[{qty:1,name:'Leather Armor'},{qty:1,name:'Sickle'},{qty:2,name:'Dagger'},{qty:1,name:'Arcane Focus (orb)'},{qty:1,name:'Book (occult lore)'},{qty:1,name:"Scholar's Pack"}] },
-      { label:'Option B — Or uniquement', gold:100, items:[] }
-    ],
-    Wizard: [
-      { label:'Option A', gold:5, items:[{qty:2,name:'Dagger'},{qty:1,name:'Arcane Focus (Quarterstaff)'},{qty:1,name:'Robe'},{qty:1,name:'Spellbook'},{qty:1,name:"Scholar's Pack"}] },
-      { label:'Option B — Or uniquement', gold:55, items:[] }
-    ]
-  };
+  /* STARTING_EQUIP : defini globalement dans joueurs.html avec les autres donnees de regles */
 
   // Normalise le nom de classe vers la clé de STARTING_EQUIP
   function _matchClass(rawClass) {

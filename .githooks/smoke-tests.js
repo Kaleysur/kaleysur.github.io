@@ -40,9 +40,10 @@ function ok(cond, label) {
   if (!cond) failures.push(label);
 }
 
-/* ══════════ joueurs.html ══════════ */
+/* ══════════ joueurs.html + js/rules-2024.js ══════════ */
 {
   const J = staged('joueurs.html');
+  const R = staged('js/rules-2024.js'); // données de règles extraites
   const window = {};
   eval([
     extract(J, 'function mod(score)'),
@@ -50,8 +51,15 @@ function ok(cond, label) {
     extract(J, 'function esc(val)'),
     extract(J, 'function getClasses(c)'),
     extract(J, 'function getTotalLevel(c)'),
-    extract(J, 'const MULTICLASS_SLOTS'),
+    extract(R, 'const MULTICLASS_SLOTS'),
     extract(J, 'function computeMulticlassSlots(c)'),
+    extract(R, 'const STARTING_ARMOR'),
+    extract(R, 'const STARTING_WEAPONS'),
+    extract(R, 'const STARTING_SPELLS'),
+    extract(R, 'const PREPARED_SPELLS'),
+    extract(J, 'function applyStartingGear(c, className, items)'),
+    extract(J, 'function startingMaxHp(c, hitDie, speciesEffects)'),
+    extract(J, 'function startingSpellHint(className)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -90,6 +98,230 @@ function ok(cond, label) {
   ok((() => { const r = rollDiceExpr('d20'); return r.total >= 1 && r.total <= 20; })(), 'rollDiceExpr d20 bornes');
   eq(rollDiceExpr('+3').total, 3, 'rollDiceExpr constante');
   ok(rollDiceExpr('2d6-1').total >= 1, 'rollDiceExpr malus');
+
+  /* ── Cohérence des données de règles 2024 ──
+     Les const d'un eval direct ne fuient pas vers la portée appelante :
+     on les récupère via une IIFE qui les renvoie. */
+  // Le fichier de règles est du JS valide complet : on l'exécute en entier plutôt
+  // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
+  const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
+          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
+          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES } =
+    new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
+      + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
+      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES,'
+      + ' SPELL_PREP_STYLE };')();
+  const SKILL_KEYS = extract(J, 'const SKILLS = [')
+    .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
+
+  // Toutes les classes choisissent leur sous-classe au niveau 3 (PHB 2024)
+  Object.entries(CLASS_DATA).forEach(([cls, d]) => {
+    const first = Object.entries(d.features)
+      .filter(([, fs]) => fs.some(f => f.type === 'subclass'))
+      .map(([l]) => +l).sort((a, b) => a - b)[0];
+    eq(first, 3, `${cls} : sous-classe au niveau 3`);
+    ok(Array.isArray(d.saves) && d.saves.length === 2, `${cls} : 2 jets de sauvegarde`);
+    ok(!!DND_CLASSES[cls], `${cls} : présent dans DND_CLASSES (dé de vie)`);
+    // Compétences de classe : quota cohérent et clés valides
+    ok(d.skillChoices >= 2 && d.skillChoices <= 4, `${cls} : quota de compétences (${d.skillChoices})`);
+    ok(Array.isArray(d.skillList) && d.skillList.length >= d.skillChoices,
+       `${cls} : liste de compétences au moins aussi grande que le quota`);
+    (d.skillList || []).forEach(k =>
+      ok(SKILL_KEYS.includes(k), `${cls} : compétence « ${k} » inconnue`));
+    eq(new Set(d.skillList).size, (d.skillList || []).length, `${cls} : pas de doublon de compétence`);
+  });
+
+  // Backgrounds : clés de compétences valides + origin feat documenté
+  Object.entries(BACKGROUND_DATA).forEach(([bg, d]) => {
+    eq(d.abilities.length, 3, `${bg} : 3 caractéristiques`);
+    ok(!!ORIGIN_FEATS[d.feat], `${bg} : origin feat « ${d.feat} » documenté`);
+    (d.skillKeys || []).forEach(k =>
+      ok(SKILL_KEYS.includes(k), `${bg} : clé de compétence « ${k} » inconnue`));
+    eq((d.skillKeys || []).length, 2, `${bg} : 2 compétences`);
+  });
+
+  // Espèces : vitesse et traits de base présents ; lignées non vides
+  Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
+    ok(typeof d.speed === 'number' && d.speed > 0, `${sp} : vitesse définie`);
+    ok(Array.isArray(d.traits[1]) && d.traits[1].length > 0, `${sp} : traits de niveau 1`);
+    Object.entries(d.lineages || {}).forEach(([ln, lv]) =>
+      ok(Array.isArray(lv[1]) && lv[1].length > 0, `${sp}/${ln} : trait de niveau 1`));
+  });
+
+  // Feats généraux : description non vide
+  Object.entries(GENERAL_FEATS).forEach(([f, d]) =>
+    ok(typeof d.desc === 'string' && d.desc.length > 20, `feat « ${f} » : description`));
+
+  // Équipement de départ : au moins une option par classe jouable
+  Object.entries(STARTING_EQUIP).forEach(([cls, opts]) => {
+    ok(opts.length >= 1, `${cls} : option d'équipement`);
+    opts.forEach(o => ok(typeof o.gold === 'number', `${cls}/${o.label} : bourse`));
+  });
+  // Aucune classe ne doit sortir du créateur les mains vides (l'Artificier l'était)
+  Object.keys(CLASS_DATA).forEach(cls =>
+    ok(!!STARTING_EQUIP[cls], `${cls} : aucun équipement de départ — le créateur laisse la fiche vide`));
+
+  /* ── Équipement de départ → CA et attaques (applyStartingGear) ── */
+  const gear = (cls, optIdx, abils) => {
+    const c = Object.assign({ for:15, dex:14, con:13, int:12, sag:10, cha:8 }, abils);
+    applyStartingGear(c, cls, STARTING_EQUIP[cls][optIdx].items);
+    return c;
+  };
+  // Toute option A doit produire au moins une attaque : sinon un nom d'arme a changé
+  // dans STARTING_EQUIP sans être répercuté dans STARTING_WEAPONS.
+  Object.keys(STARTING_EQUIP).forEach(cls => {
+    const c = gear(cls, 0);
+    ok((c.attaques || []).length >= 1, `${cls} option A : aucune arme reconnue`);
+    (c.attaques || []).forEach(a => {
+      ok(/^\d+d\d+([+-]\d+)?$/.test(a.degats), `${cls}/${a.name} : dégâts mal formés (${a.degats})`);
+      ok(['for','dex'].includes(a.atkType), `${cls}/${a.name} : atkType invalide (${a.atkType})`);
+      ok(a.prof === true, `${cls}/${a.name} : maîtrise attendue`);
+    });
+  });
+  // Armures : le mode doit correspondre à l'armure reçue
+  eq(gear('Cleric', 0).armorConfig.mode, 'medium', 'Clerc : chemise de mailles = intermédiaire');
+  eq(gear('Cleric', 0).armorConfig.baseAC, 13, 'Clerc : CA de base 13');
+  eq(gear('Cleric', 0).armorConfig.shield, true, 'Clerc : bouclier détecté');
+  eq(gear('Fighter', 0).armorConfig.mode, 'heavy', 'Guerrier : cotte de mailles = lourde');
+  eq(gear('Fighter', 0).armorConfig.baseAC, 16, 'Guerrier : CA de base 16');
+  eq(gear('Rogue', 0).armorConfig.mode, 'light', 'Roublard : armure légère');
+  // Défense sans armure : la classe décide quand aucune armure n'est fournie
+  eq(gear('Barbarian', 0).armorConfig.mode, 'unarmoredBarb', 'Barbare : défense sans armure');
+  eq(gear('Monk', 0).armorConfig.mode, 'unarmoredMonk', 'Moine : défense sans armure');
+  eq(gear('Wizard', 0).armorConfig.mode, 'unarmored', 'Magicien : sans armure');
+  // Option « or uniquement » : pas d'armure, pas d'attaque, mais un armorConfig valide
+  const goldOnly = gear('Barbarian', 1);
+  eq(goldOnly.armorConfig.mode, 'unarmoredBarb', 'or seul : la classe décide encore de la CA');
+  eq(goldOnly.armorConfig.shield, false, 'or seul : pas de bouclier');
+  ok(!goldOnly.attaques, 'or seul : aucune attaque inventée');
+  // Dégâts = dé de l'arme + modificateur de la caractéristique utilisée
+  eq(gear('Barbarian', 0, { for:17 }).attaques[0].degats, '1d12+3', 'Hache d\'armes 1d12 + FOR 17');
+  eq(gear('Barbarian', 0, { for:8 }).attaques[0].degats,  '1d12-1', 'Hache d\'armes avec FOR 8');
+  eq(gear('Barbarian', 0, { for:10 }).attaques[0].degats, '1d12',   'Aucun modificateur affiché si 0');
+  // Doublons : 4 haches de jet → une seule ligne d'attaque
+  eq(gear('Barbarian', 0).attaques.length, 2, 'Barbare : haches de jet regroupées en une ligne');
+  // Finesse : la meilleure des deux caractéristiques
+  eq(gear('Rogue', 0, { for:10, dex:17 }).attaques[1].atkType, 'dex', 'Épée courte (finesse) → DEX');
+  eq(gear('Rogue', 0, { for:17, dex:10 }).attaques[1].atkType, 'for', 'Épée courte (finesse) → FOR');
+  // Les armes à distance restent en DEX quelle que soit la FOR
+  eq(gear('Ranger', 0, { for:18, dex:10 }).attaques[2].atkType, 'dex', 'Arc long toujours en DEX');
+  // Focus d'incantation monté sur bâton : reconnu comme arme
+  ok(gear('Wizard', 0).attaques.some(a => a.name === 'Quarterstaff'),
+     'Magicien : « Arcane Focus (Quarterstaff) » compte comme un bâton');
+
+  /* ── PV de départ (startingMaxHp) ── */
+  eq(startingMaxHp({ con:14 }, '1d8',  {}), 10, 'd8 + CON 14 = 10 PV');
+  eq(startingMaxHp({ con:10 }, '1d12', {}), 12, 'd12 + CON 10 = 12 PV');
+  eq(startingMaxHp({ con:6 },  '1d6',  {}),  4, 'd6 + CON 6 = 4 PV');
+  eq(startingMaxHp({ con:1 },  '1d6',  {}),  1, 'PV jamais sous 1');
+  // Robustesse naine : le bonus était affiché sur la fiche mais jamais ajouté
+  eq(startingMaxHp({ con:14 }, '1d8', { hpPerLevel:1 }), 11, 'Nain : +1 PV/niveau appliqué');
+  eq(startingMaxHp({ con:14 }, '1d8', { speed:25 }),     10, 'Un effet sans PV ne change rien');
+  // Toute espèce déclarant hpPerLevel doit être un entier positif
+  Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
+    const h = d.effects?.hpPerLevel;
+    if (h !== undefined) ok(Number.isInteger(h) && h > 0, `${sp} : hpPerLevel invalide (${h})`);
+  });
+
+  /* ── Sorts à choisir après création (startingSpellHint) ── */
+  eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');
+  eq(startingSpellHint('Rogue'),   null, 'Roublard : aucun sort à choisir');
+  ok(/3<\/strong> sorts mineurs/.test(startingSpellHint('Wizard')), 'Magicien : 3 sorts mineurs');
+  ok(/6<\/strong> sorts de niveau 1 pour ton grimoire/.test(startingSpellHint('Wizard')), 'Magicien : grimoire de 6');
+  ok(/4<\/strong> préparés/.test(startingSpellHint('Wizard')), 'Magicien : 4 préparés');
+  ok(/3<\/strong> sorts mineurs/.test(startingSpellHint('Cleric')), 'Clerc : 3 sorts mineurs');
+  ok(!/grimoire/.test(startingSpellHint('Cleric')), 'Clerc : pas de grimoire');
+  // Demi-lanceurs 2024 : pas de sorts mineurs, mais des sorts préparés dès le niveau 1
+  ok(!/mineur/.test(startingSpellHint('Paladin')), 'Paladin : aucun sort mineur');
+  ok(/2<\/strong> sorts de niveau 1 à préparer/.test(startingSpellHint('Paladin')), 'Paladin : 2 sorts préparés');
+  ok(/2<\/strong> sorts de niveau 1 à préparer/.test(startingSpellHint('Ranger')), 'Rôdeur : lanceur dès le niveau 1 (2024)');
+  // Tout lanceur doit déclarer ses sorts mineurs, sinon la fiche sort sans indication
+  Object.keys(PREPARED_SPELLS).forEach(cls => {
+    ok(!!STARTING_SPELLS[cls], `${cls} : sorts de départ non déclarés`);
+    ok(Number.isInteger(STARTING_SPELLS[cls].cantrips), `${cls} : nombre de sorts mineurs invalide`);
+    ok(!!startingSpellHint(cls), `${cls} : lanceur sans rappel de sorts à choisir`);
+  });
+  eq(Object.entries(STARTING_SPELLS).filter(([, s]) => s.spellbook).map(([c]) => c).join(','),
+     'Wizard', 'seul le Magicien démarre avec un grimoire');
+
+  /* ── Langues et outils au choix ── */
+  ok(LANGUAGES.standard.length >= 8 && LANGUAGES.rare.length >= 8, 'listes de langues fournies');
+  ok(!LANGUAGES.standard.includes('Common'), 'le Commun est automatique, pas au choix');
+  ok(!LANGUAGES.rare.includes('Common'), 'le Commun n\'est pas une langue rare');
+  {
+    const all = [...LANGUAGES.standard, ...LANGUAGES.rare];
+    eq(new Set(all).size, all.length, 'aucune langue en double');
+  }
+  // Chaque outil « (choice) » d'un background doit proposer une liste
+  Object.entries(BACKGROUND_DATA).forEach(([bg, d]) => {
+    if (/\(choice\)/.test(d.tool))
+      ok((TOOL_CHOICES[d.tool] || []).length >= 2, `${bg} : « ${d.tool} » sans liste de choix`);
+  });
+  Object.entries(TOOL_CHOICES).forEach(([k, list]) => {
+    eq(new Set(list).size, list.length, `${k} : doublon dans la liste`);
+    ok(list.every(t => !/\(choice\)/.test(t)), `${k} : un choix ne peut pas rester « (choice) »`);
+  });
+
+  // Les descriptions d'incantation ne doivent plus porter la formule 2014
+  // (« mod + niveau ») : depuis 2024 le nombre vient de la table de classe.
+  Object.entries(CLASS_DATA).forEach(([cls, d]) => {
+    Object.values(d.features).flat().forEach(f => {
+      if (!/Spellcasting|Pact Magic/i.test(f.name)) return;
+      ok(!/modifier \+ (half your |your )?\w+ level/i.test(f.desc),
+         `${cls} : description d'incantation encore en formule 2014`);
+    });
+  });
+
+  // Sorts préparés : 20 niveaux, croissance monotone, classe connue
+  Object.entries(PREPARED_SPELLS).forEach(([cls, table]) => {
+    ok(!!CLASS_DATA[cls], `PREPARED_SPELLS : « ${cls} » n'est pas une classe connue`);
+    eq(table.length, 20, `${cls} : table de sorts préparés sur 20 niveaux`);
+    table.forEach((n, i) => {
+      ok(Number.isInteger(n) && n > 0, `${cls} niv.${i + 1} : valeur invalide (${n})`);
+      if (i > 0) ok(n >= table[i - 1], `${cls} niv.${i + 1} : la table doit croître (${table[i-1]} → ${n})`);
+    });
+  });
+  // Tout lanceur (présent dans DND_CLASSES avec une caractéristique d'incantation)
+  // doit avoir une table de préparation — sinon le compteur disparaît en silence.
+  Object.entries(DND_CLASSES).forEach(([cls, info]) => {
+    if (info.sort) ok(!!PREPARED_SPELLS[cls], `${cls} : lanceur sans table de sorts préparés`);
+  });
+
+  // Style de préparation : chaque lanceur déclare quand il peut échanger ses sorts.
+  // Sans entrée, la fiche n'affiche aucune indication et le 📖 du grimoire disparaît.
+  Object.entries(PREPARED_SPELLS).forEach(([cls]) => {
+    ok(!!SPELL_PREP_STYLE[cls], `${cls} : lanceur sans style de préparation déclaré`);
+  });
+  Object.entries(SPELL_PREP_STYLE).forEach(([cls, st]) => {
+    ok(!!CLASS_DATA[cls], `SPELL_PREP_STYLE : « ${cls} » n'est pas une classe connue`);
+    ok(st.swap === 'long' || st.swap === 'level', `${cls} : swap invalide (${st.swap})`);
+    ok(typeof st.book === 'boolean', `${cls} : book doit être un booléen`);
+  });
+  // Le grimoire est propre au Magicien (PHB 2024)
+  eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.book).map(([c]) => c).join(','),
+     'Wizard', 'seul le Magicien a un grimoire');
+  // Liste fixe (échange au niveau) : Barde, Rôdeur, Ensorceleur, Occultiste
+  eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.swap === 'level').map(([c]) => c).sort().join(','),
+     'Bard,Ranger,Sorcerer,Warlock', 'classes à liste fixe (PHB 2024)');
+
+  // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].
+  // Attrape une sous-classe mal imbriquée (elle apparaîtrait comme une fausse classe).
+  Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) => {
+    ok(!!CLASS_DATA[cls], `SUBCLASS_DATA : « ${cls} » n'est pas une classe connue`);
+    Object.entries(subs).forEach(([sub, byLevel]) => {
+      if (/^\d+$/.test(sub)) {
+        // Un nom de sous-classe numérique = un niveau d'imbrication perdu
+        ok(false, `${cls} : « ${sub} » est un niveau, pas une sous-classe — imbrication cassée`);
+        return;
+      }
+      Object.entries(byLevel).forEach(([lvl, feats]) => {
+        ok(/^\d+$/.test(lvl) && +lvl >= 1 && +lvl <= 20, `${cls}/${sub} : niveau « ${lvl} » invalide`);
+        if (!Array.isArray(feats)) { ok(false, `${cls}/${sub} niv.${lvl} : liste de capacités attendue`); return; }
+        ok(feats.length > 0, `${cls}/${sub} niv.${lvl} : liste non vide`);
+        feats.forEach(f => ok(f && f.name && f.desc, `${cls}/${sub} niv.${lvl} : nom + description`));
+      });
+    });
+  });
 }
 
 /* ══════════ dm.html ══════════ */
