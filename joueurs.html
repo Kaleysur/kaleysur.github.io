@@ -4552,8 +4552,8 @@ function renderClassFeatures() {
   title.textContent = validClasses.map(cl => cl.classe + ' ' + cl.niveau).join(' / ') + ' — Class Features';
 
   /* ── Spell slots note (multiclass or single) ── */
-  const FULL_CAST  = ['Bard','Cleric','Druid','Sorcerer','Wizard'];
-  const HALF_CAST  = ['Paladin','Ranger'];
+  const FULL_CAST  = ['Bard','Cleric','Druid','Psion','Sorcerer','Wizard'];
+  const HALF_CAST  = ['Paladin','Psion','Ranger'];
   const ordinals   = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 
   if (classes.length > 1) {
@@ -5359,8 +5359,8 @@ function syncClassesToLegacy(c) {
 
 function computeMulticlassSlots(c) {
   const classes = getClasses(c);
-  const FULL_C  = ['Bard','Cleric','Druid','Sorcerer','Wizard'];
-  const HALF_C  = ['Paladin','Ranger','Artificer'];
+  const FULL_C  = ['Bard','Cleric','Druid','Psion','Sorcerer','Wizard'];
+  const HALF_C  = ['Paladin','Psion','Ranger','Artificer'];
   let eff = 0;
   let hasCaster = false;
   classes.forEach(cl => {
@@ -5380,7 +5380,7 @@ function renderMulticlasses() {
   const classes   = c.classes;
   const container = document.getElementById('mc-classes-container');
   if (!container) return;
-  const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
+  const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Psion','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
   container.innerHTML = '';
   classes.forEach((cl, idx) => {
     const row = document.createElement('div');
@@ -6652,8 +6652,8 @@ function parseDnDBeyondJSON(raw) {
   const currency = { pp:cur.pp||0, gp:cur.gp||0, ep:cur.ep||0, sp:cur.sp||0, cp:cur.cp||0 };
 
   // ── Spell slots (avec Warlock Pact Magic + multi-classing) ────────
-  const HALF_CASTERS = ['Paladin','Ranger','Artificer'];
-  const FULL_CASTERS = ['Bard','Cleric','Druid','Sorcerer','Wizard'];
+  const HALF_CASTERS = ['Paladin','Psion','Ranger','Artificer'];
+  const FULL_CASTERS = ['Bard','Cleric','Druid','Psion','Sorcerer','Wizard'];
   let casterLevel = 0;
   let warlockLevel = 0;
   classesArr.forEach(cl => {
@@ -7041,8 +7041,8 @@ function renderLvlupTab() {
   }
 
   /* ── Per-row calculations ── */
-  const FULL_CAST_CLS  = ['Bard','Cleric','Druid','Sorcerer','Wizard'];
-  const HALF_CAST_CLS  = ['Paladin','Ranger'];
+  const FULL_CAST_CLS  = ['Bard','Cleric','Druid','Psion','Sorcerer','Wizard'];
+  const HALF_CAST_CLS  = ['Paladin','Psion','Ranger'];
   const KNOWN_SPL_CLS  = ['Bard','Ranger','Sorcerer','Warlock'];
   const ordinals = ['','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 
@@ -8236,7 +8236,7 @@ function renderAdminModalTab() {
             <label class="field-label">Class</label>
             <select class="field-input" id="ae-classe">
               <option value="">— Choose —</option>
-              ${['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorcerer','Warlock','Wizard']
+              ${['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Psion','Ranger','Rogue','Sorcerer','Warlock','Wizard']
                 .map(cl => `<option ${c.classe === cl ? 'selected' : ''}>${cl}</option>`).join('')}
             </select>
           </div>

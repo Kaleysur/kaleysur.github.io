@@ -15,6 +15,7 @@ const DND_CLASSES = {
   'Fighter':   { de: '1d10', sort: '' },
   'Monk':      { de: '1d8',  sort: '' },
   'Paladin':   { de: '1d10', sort: 'CHA' },
+  'Psion':     { de: '1d6',  sort: 'INT' },   // Unearthed Arcana 2025 (playtest)
   'Ranger':    { de: '1d10', sort: 'SAG' },
   'Rogue':     { de: '1d8',  sort: '' },
   'Sorcerer':  { de: '1d6',  sort: 'CHA' },
@@ -108,6 +109,10 @@ const STARTING_EQUIP = {
   Paladin: [
     { label:'Option A', gold:9, items:[{qty:1,name:'Chain Mail'},{qty:1,name:'Shield'},{qty:1,name:'Longsword'},{qty:6,name:'Javelin'},{qty:1,name:'Holy Symbol'},{qty:1,name:"Priest's Pack"}] },
     { label:'Option B — Or uniquement', gold:150, items:[] }
+  ],
+  Psion: [
+    { label:'Option A', gold:6, items:[{qty:1,name:'Spear'},{qty:2,name:'Dagger'},{qty:1,name:'Light Crossbow'},{qty:20,name:'Bolt'},{qty:1,name:'Case'},{qty:1,name:"Dungeoneer's Pack"}] },
+    { label:'Option B — Or uniquement', gold:50, items:[] }
   ],
   Ranger: [
     { label:'Option A', gold:7, items:[{qty:1,name:'Studded Leather Armor'},{qty:1,name:'Scimitar'},{qty:1,name:'Shortsword'},{qty:1,name:'Longbow'},{qty:20,name:'Arrow'},{qty:1,name:'Quiver'},{qty:1,name:'Druidic Focus (sprig of mistletoe)'},{qty:1,name:"Explorer's Pack"}] },
@@ -672,6 +677,40 @@ const CLASS_DATA = {
   }
 },
 
+/* ── Psion — Unearthed Arcana 2025 (matériel de playtest, non officiel) ── */
+'Psion': {
+  saves: ['int','sag'],
+  armorProf: 'None',
+  weaponProf: 'Simple weapons',
+  features: {
+    1: [
+      { name:'Spellcasting', type:'feature', desc:"Full spellcaster using Intelligence. Prepare Psion spells; you know 2 cantrips at level 1 (3 at level 10, 4 at level 14). <em>Psionic Spellcasting</em>: your Psion spells need no Verbal or Material component (except costly materials)." },
+      { name:'Psionic Power', type:'feature', desc:"You have Psionic Energy Dice (d6 at level 1, growing to d12; 4 dice at level 1, up to 12). Regain one on a Short Rest, all on a Long Rest. Save DC = your spell save DC. Two powers: <em>Telekinetic Propel</em> (bonus action, push/pull a Large or smaller creature within 30 ft on a failed STR save, 5 ft × the roll) and <em>Telepathic Connection</em> (bonus action, expend a die to extend your 5-ft telepathy by 10 ft × the roll for a number of minutes equal to your level)." },
+      { name:'Subtle Telekinesis', type:'feature', desc:"You know Mage Hand. You can cast it without Somatic components and make the spectral hand Invisible." }
+    ],
+    2: [
+      { name:'Psionic Discipline', type:'feature', desc:"Learn 2 disciplines fuelled by your Psionic Energy Dice (e.g. Destructive Thoughts, Ego Whip, Expanded Awareness, Inerrant Aim). One discipline per turn. You gain 2 more at levels 10 and 17, and can swap one each level." },
+      { name:'Psionic Modes', type:'feature', desc:"Bonus action, 1 minute — <em>Attack Mode</em>: your damage ignores Psychic Resistance and you can expend a die to reroll damage dice up to your INT modifier. <em>Defense Mode</em>: Resistance to Psychic damage, and on a failed INT/WIS/CHA save you can react to expend a die and add the roll. Two uses, regained on a Long Rest." }
+    ],
+    3: [{ name:'Psion Subclass', type:'subclass', desc:"Choose a subclass: Metamorph, Psi Warper, Psykinetic, or Telepath." }],
+    4: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
+    5: [{ name:'Psionic Restoration', type:'feature', desc:"On a Short Rest, regain expended Psionic Energy Dice up to half your number of dice (round down). Once per Long Rest." }],
+    6: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Psion subclass." }],
+    7: [{ name:'Psionic Surge', type:'feature', desc:"When you roll Initiative, you can expend one Hit Point Die to regain an expended use of Psionic Modes." }],
+    8: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
+    10: [
+      { name:'Psionic Discipline', type:'feature', desc:"You learn 2 additional Psionic Disciplines." },
+      { name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Psion subclass." }
+    ],
+    12: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
+    14: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Psion subclass." }],
+    16: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
+    17: [{ name:'Psionic Discipline', type:'feature', desc:"You learn 2 additional Psionic Disciplines." }],
+    19: [{ name:'Epic Boon', type:'epic', desc:"Gain an Epic Boon feat or another feat of your choice. Boon of Energy Resistance is recommended." }],
+    20: [{ name:'Enkindled Lifeforce', type:'feature', desc:"Once per turn, when you expend and roll a Psionic Energy Die for a Psion feature or Discipline, you can expend two Hit Point Dice to roll two extra Psionic Energy Dice and add their results." }]
+  }
+},
+
 'Ranger': {
   saves: ['for','dex'],
   armorProf: 'Light, Medium, Shields',
@@ -1211,6 +1250,61 @@ const SUBCLASS_DATA = {
 
 },
 
+/* ── Psion (Unearthed Arcana 2025 — playtest) ── */
+'Psion': {
+  'Metamorph': {
+    3:[
+      { name:'Metamorph Spells', desc:'Always prepared as you gain levels: Cure Wounds, False Life · Alter Self, Enlarge/Reduce · Vampiric Touch · Polymorph · Contagion.' },
+      { name:'Organic Weapons', desc:'On the Attack action or an Opportunity Attack, reshape a free hand into an organic weapon (INT for attack and damage; Psychic damage optional). <em>Bone Blade</em>: Simple melee, Finesse, 1d8 Piercing, Advantage if an ally is within 5 ft of the target. <em>Flesh Maul</em>: Simple melee, 1d10 Bludgeoning, target has Disadvantage on its next STR or CON save. <em>Viscera Launcher</em>: Simple ranged 30/90, 1d6 Acid, +1d6 Acid once per turn on a hit.' },
+      { name:'Extend Limbs', desc:'Bonus action, expend a Psionic Energy Die: for 1 minute, +5 ft reach, +5 ft Speed, and your Touch-range spells with a casting time of an action reach 10 ft.' }
+    ],
+    6:[
+      { name:'Extra Attack', desc:'Attack twice on the Attack action. You can replace one attack with a Psion cantrip that has a casting time of an action.' },
+      { name:'Quickened Healing', desc:'When you cast Cure Wounds, expend two Psionic Energy Dice to cast it as a Bonus Action; roll one die and add the result to the HP restored.' }
+    ],
+    10:[{ name:'Mutable Form', desc:'Extend Limbs lasts 10 minutes and grants one benefit: <em>Stony Epidermis</em> (Advantage on CON saves for Concentration + Resistance to a chosen damage type), <em>Superior Stride</em> (Dash as a Bonus Action, Climb and Swim Speed equal to your Speed, unarmoured), or <em>Unnatural Flexibility</em> (+2 AC, squeeze through 1-inch spaces, 5 ft of movement to escape restraints or a grapple).' }],
+    14:[{ name:'Life-Bending Weapons', desc:'Once per turn on a hit with your Organic Weapon, expend and roll a Psionic Energy Die: creatures of your choice in a 10-ft Emanation regain HP equal to the roll + your INT modifier, and one creature of your choice there takes that much Necrotic damage.' }],
+  },
+  'Psi Warper': {
+    3:[
+      { name:'Psi Warper Spells', desc:'Always prepared as you gain levels: Jump, Longstrider · Misty Step, Shatter · Blink, Thunder Step · Dimension Door · Far Step.' },
+      { name:'Teleportation', desc:'Cast Misty Step without a spell slot once per Long Rest — or restore that use by expending one Psionic Energy Die (no action required).' },
+      { name:'Warp Propel', desc:'When a target fails its save against your Telekinetic Propel, you can teleport it (instead of pushing) to an unoccupied space you can see within 30 ft, horizontal to you.' }
+    ],
+    6:[
+      { name:'Warp Space', desc:'When you cast Shatter, expend one Psionic Energy Die to widen the Sphere to a 20-ft radius.' },
+      { name:'Teleporter Combat', desc:'Right after casting Misty Step, you can cast a Psion cantrip with a casting time of an action as part of that Bonus Action.' }
+    ],
+    10:[{ name:'Duplicitous Target', desc:'Reaction when a creature you can see attacks you: expend a Psionic Energy Die and swap places with a willing, non-Incapacitated creature within 30 ft. That creature becomes the target of the attack.' }],
+    14:[{ name:'Mass Teleportation', desc:'Magic action, expend four Psionic Energy Dice: teleport up to your INT modifier of Huge or smaller creatures within 30 ft to spaces you can see within 150 ft. An unwilling creature is unaffected on a successful WIS save.' }],
+  },
+  'Psykinetic': {
+    3:[
+      { name:'Psykinetic Spells', desc:'Always prepared as you gain levels: Shield, Telekinetic Crush · Levitate, Telekinetic Grasp · Fly · Telekinesis.' },
+      { name:'Telekinetic Techniques', desc:'When you use Telekinetic Propel, add one effect: <em>Boost</em> (target Speed +10 ft until your next turn), <em>Disorient</em> (no Opportunity Attacks until its next turn), or <em>Telekinetic Bolt</em> (on a failed save, Force damage equal to the die roll).' }
+    ],
+    6:[
+      { name:'Empowered Attack Mode', desc:'While Attack Mode is active you gain a Fly Speed of 60 ft (and can hover), and you add your INT modifier to one damage roll of each Psion spell you cast.' },
+      { name:'Rebounding Field', desc:'When Shield makes a triggering attack miss, expend one Psionic Energy Die: the attacker makes a DEX save. Roll two dice — on a failure it takes that much Force damage and you gain that many Temporary HP; half damage on a success.' }
+    ],
+    10:[{ name:'Enhanced Telekinetic Crush', desc:'When you cast Telekinetic Crush, expend one Psionic Energy Die so the target\'s Speed is halved until the start of your next turn, whether it saves or not.' }],
+    14:[{ name:'Heightened Telekinesis', desc:'When you cast Telekinesis, expend four Psionic Energy Dice to drop Concentration (duration becomes 1 minute) and to target Gargantuan creatures and objects.' }],
+  },
+  'Telepath': {
+    3:[
+      { name:'Telepath Spells', desc:'Always prepared as you gain levels: Charm Person, Detect Thoughts · Hold Person, Suggestion · Confusion · Modify Memory.' },
+      { name:'Mind Infiltrator', desc:'When you cast Detect Thoughts, expend two Psionic Energy Dice so it needs no components or Concentration, and the target doesn\'t notice you probing on a failed WIS save.' },
+      { name:'Telepathic Hub', desc:'Your telepathy has a range of 10 ft. When you expend a die to extend it with Telepathic Connection, you can contact 1 + the number rolled creatures at once for the duration.' }
+    ],
+    6:[
+      { name:'Empowered Defense Mode', desc:'While Defense Mode is active you add 1d4 to every saving throw, and you can extend that benefit to creatures you are telepathically connected with.' },
+      { name:'Potent Thoughts', desc:'You add your INT modifier to the damage of any Psion cantrip.' }
+    ],
+    10:[{ name:'Telepathic Bolstering', desc:'Your telepathy reaches 30 ft. Reaction when you or a creature within that range fails an ability check or misses an attack: expend and roll a Psionic Energy Die and add it to the d20. The die is expended only if the roll then succeeds.' }],
+    14:[{ name:'Scramble Minds', desc:'When you cast Confusion, expend four Psionic Energy Dice to widen the Sphere to a 30-ft radius. Affected creatures roll two d10s and you choose which result governs their turn.' }],
+  },
+},
+
 'Ranger': {
   'Beast Master': {
     3:[{ name:'Primal Companion', desc:'Bond with a Primal Beast (Land, Sea, or Sky). Commands it as a Bonus Action. It uses your PB for attacks. Regains HP = 5× PB on Short Rest or when you use Wild Shape.' }],
@@ -1576,6 +1670,12 @@ const CLASS_RESOURCES = {
     if (lvl >= 2) r.push({ name:'Channel Divinity', used:0, max:lvl>=11?3:lvl>=6?2:1, reset:'short' });
     return r;
   },
+  Psion: lvl => [
+    // Dés d'Énergie Psionique — d6 → d12, 4 → 12 dés (UA 2025)
+    { name:'Psionic Energy Dice', used:0,
+      max:[4,4,4,6,6,6,8,8,8,10,10,10,12,12,12,12,12,12,12,12][Math.min(lvl,20)-1], reset:'long' },
+    { name:'Psionic Modes', used:0, max:2, reset:'long' }
+  ],
   Ranger: lvl => [
     { name:"Hunter's Mark", used:0, max:lvl>=17?3:lvl>=9?2:1, reset:'long' }
   ],
