@@ -4838,13 +4838,17 @@ function renderSpeciesTraits() {
 
   body.innerHTML = `
     <div class="cf-profs">
+      <div class="cf-prof-item"><span class="cf-prof-label">Type:</span> ${data.type || 'Humanoid'}
+        ${data.type && data.type !== 'Humanoid' ? `<span style="color:#888;font-size:0.9em;"> — les sorts qui ciblent les Humanoïdes (Charme-personne, Immobilisation de personne…) ne t'affectent pas</span>` : ''}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Size:</span> ${data.size}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${speedTarget} ft.
         ${speedOk ? `<span class="apply-done">✓ appliquée</span>`
                   : `<button class="apply-btn" id="sp-apply-speed">✓ Appliquer (${speedTarget} ft)</button>`}</div>
+      ${fx.telepathyPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Télépathie:</span>
+        ${fx.telepathyPerLevel} ft/niveau — soit <strong>${fx.telepathyPerLevel * totalLvl} ft</strong> au niveau ${totalLvl}</div>` : ''}
       ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">PV bonus:</span>
         +${fx.hpPerLevel}/niveau — soit <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max au niveau ${totalLvl}
-        <span style="color:#888;font-size:0.9em;">(à inclure dans tes PV max)</span></div>` : ''}
+        <span style="color:#888;font-size:0.9em;">(appliqué à la création — à ajouter toi-même à chaque montée de niveau)</span></div>` : ''}
       ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choisis une lignée (onglet Identity)</div>` : ''}
     </div>
   `;

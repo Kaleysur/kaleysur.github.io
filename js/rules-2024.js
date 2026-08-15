@@ -333,7 +333,7 @@ const BACKGROUND_DATA = {
 const SPECIES_DATA = {
 
 'Aasimar': {
-  size: 'Medium or Small', speed: 30,
+  type: 'Humanoid', size: 'Medium or Small', speed: 30,
   traits: {
     1: [
       { name:'Celestial Resistance', desc:'You have Resistance to Necrotic and Radiant damage.' },
@@ -348,7 +348,7 @@ const SPECIES_DATA = {
 },
 
 'Dragonborn': {
-  size: 'Medium', speed: 30,
+  type: 'Humanoid', size: 'Medium', speed: 30,
   traits: {
     1: [
       { name:'Draconic Ancestry', desc:'Choose a dragon type (Black/Copper: Acid · Blue/Bronze: Lightning · Brass/Gold/Red: Fire · Green: Poison · Silver/White: Cold). It sets your Breath Weapon and Damage Resistance.' },
@@ -363,7 +363,7 @@ const SPECIES_DATA = {
 },
 
 'Dwarf': {
-  size: 'Medium', speed: 30,
+  type: 'Humanoid', size: 'Medium', speed: 30,
   // effects : valeurs mécaniques applicables en un clic à la fiche
   effects: { hpPerLevel: 1 },
   traits: {
@@ -377,7 +377,7 @@ const SPECIES_DATA = {
 },
 
 'Elf': {
-  size: 'Medium', speed: 30,
+  type: 'Humanoid', size: 'Medium', speed: 30,
   traits: {
     1: [
       { name:'Darkvision', desc:'Darkvision 60 ft.' },
@@ -407,7 +407,7 @@ const SPECIES_DATA = {
 },
 
 'Gnome': {
-  size: 'Small', speed: 30,
+  type: 'Humanoid', size: 'Small', speed: 30,
   traits: {
     1: [
       { name:'Darkvision', desc:'Darkvision 60 ft.' },
@@ -425,7 +425,7 @@ const SPECIES_DATA = {
 },
 
 'Goliath': {
-  size: 'Medium', speed: 35,
+  type: 'Humanoid', size: 'Medium', speed: 35,
   effects: { speed: 35 },
   traits: {
     1: [
@@ -439,7 +439,7 @@ const SPECIES_DATA = {
 },
 
 'Halfling': {
-  size: 'Small', speed: 30,
+  type: 'Humanoid', size: 'Small', speed: 30,
   traits: {
     1: [
       { name:'Brave', desc:'Advantage on saves to avoid or end the Frightened condition.' },
@@ -451,7 +451,7 @@ const SPECIES_DATA = {
 },
 
 'Human': {
-  size: 'Medium or Small', speed: 30,
+  type: 'Humanoid', size: 'Medium or Small', speed: 30,
   traits: {
     1: [
       { name:'Resourceful', desc:'You gain Heroic Inspiration whenever you finish a Long Rest.' },
@@ -461,8 +461,24 @@ const SPECIES_DATA = {
   }
 },
 
+/* Kalashtar — Eberron: Forge of the Artificer (2025).
+   Seule espèce non-Humanoïde de la liste : Aberration, donc hors de portée des
+   sorts qui ciblent les Humanoïdes (Charme-personne, Immobilisation de personne…). */
+'Kalashtar': {
+  type: 'Aberration', size: 'Medium', speed: 30,
+  effects: { telepathyPerLevel: 10 },
+  traits: {
+    1: [
+      { name:'Dual Mind', desc:'You have Advantage on Wisdom and Charisma saving throws.' },
+      { name:'Mental Discipline', desc:'You have Resistance to Psychic damage.' },
+      { name:'Mind Link', desc:"You have telepathy with a range in feet equal to 10 times your level. When you're using this trait to speak telepathically to a creature, you can take a Magic action to give that creature the ability to speak telepathically with you for 1 hour or until you take another Magic action to end this effect." },
+      { name:'Severed from Dreams', desc:'You can\'t be the target of the Dream spell. In addition, when you finish a Long Rest, you gain proficiency in one skill of your choice. This proficiency lasts until you finish another Long Rest.' }
+    ]
+  }
+},
+
 'Orc': {
-  size: 'Medium', speed: 30,
+  type: 'Humanoid', size: 'Medium', speed: 30,
   traits: {
     1: [
       { name:'Adrenaline Rush', desc:'Bonus action: take the Dash action and gain Temp HP = your Proficiency Bonus. Uses = PB / Short or Long Rest.' },
@@ -473,7 +489,7 @@ const SPECIES_DATA = {
 },
 
 'Tiefling': {
-  size: 'Medium or Small', speed: 30,
+  type: 'Humanoid', size: 'Medium or Small', speed: 30,
   traits: {
     1: [
       { name:'Darkvision', desc:'Darkvision 60 ft.' },
