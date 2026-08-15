@@ -2659,6 +2659,24 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .wiz-abil-sel:focus { outline: none; }
 .wiz-abil-mod { font-size: 0.7rem; color: #888; margin-top: 0.15rem; }
 .wiz-nav { display: flex; gap: 0.4rem; justify-content: flex-end; margin-top: 1rem; }
+/* Compétences de classe dans l'assistant */
+.wiz-skills { margin-bottom: 0.5rem; }
+.wiz-skills-head { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem; }
+/* Bonus de caractéristiques du background */
+.wiz-abil-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
+.wiz-bg-bonus:not(:empty) {
+  margin-top: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 5px;
+  background: rgba(201,169,110,0.07); border-left: 2px solid var(--gold-dark, #8a6e1a);
+}
+.wiz-bgb-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; font-size: 0.8rem; }
+.wiz-bgb-row strong { color: var(--gold, #c9a227); }
+.wiz-bgb-sel {
+  background: var(--j-input, #0a0703); border: 1px solid var(--j-border-col, #3a2810);
+  color: var(--j-text, #e2cfa0); border-radius: 4px; padding: 0.15rem 0.3rem;
+  font-family: inherit; font-size: 0.78rem;
+}
+.wiz-bgb-warn:not(:empty) { font-size: 0.72rem; color: #e0a050; margin-top: 0.3rem; }
+.wiz-abil-total { font-size: 0.72rem; color: var(--success, #6aba6a); font-family: 'Cinzel', serif; min-height: 1em; }
 @media (max-width: 640px) { .wiz-modal { width: 94vw; padding: 1.2rem; } }
 .lvlrow-expand-btn {
   background: none; border: none; color: #555; cursor: pointer; font-size: 0.75rem;
@@ -11219,6 +11237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <option value="">—</option>${STD_ARRAY.map(v => `<option>${v}</option>`).join('')}
         </select>
         <div class="wiz-abil-mod" id="wiz-mod-${k}">—</div>
+        <div class="wiz-abil-total"></div>
       </div>`).join('');
 
     function refreshAbils() {
@@ -11239,8 +11258,63 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('wiz-abil-note').innerHTML = remaining
         ? `Il reste <strong>${remaining}</strong> valeur${remaining > 1 ? 's' : ''} à placer — tu pourras aussi tout ajuster plus tard dans la fiche.`
         : `<strong>✓ Tableau complet.</strong> Tu peux ajuster les scores à tout moment dans la fiche.`;
+      renderBgBonus();
     }
     abilBox.addEventListener('change', refreshAbils);
+
+    /* ── Bonus du background (+2/+1) — PHB 2024 : à répartir sur ses 3 caractéristiques ── */
+    function renderBgBonus() {
+      const box = document.getElementById('wiz-bg-bonus');
+      const d = BACKGROUND_DATA[selBg.value];
+      if (!d) { box.innerHTML = ''; return; }
+      const opts = sel => d.abilities.map(a =>
+        `<option value="${a}"${sel === a ? ' selected' : ''}>${ABIL_LABEL[a]}</option>`).join('');
+      const cur2 = box.querySelector('[data-bgb="2"]')?.value || d.abilities[0];
+      const cur1 = box.querySelector('[data-bgb="1"]')?.value || d.abilities[1];
+      box.innerHTML = `<div class="wiz-bgb-row">
+          <span class="field-label">${esc(selBg.value)} :</span>
+          <strong>+2</strong> <select class="wiz-bgb-sel" data-bgb="2">${opts(cur2)}</select>
+          <strong>+1</strong> <select class="wiz-bgb-sel" data-bgb="1">${opts(cur1)}</select>
+        </div>
+        <div class="wiz-bgb-warn" id="wiz-bgb-warn"></div>`;
+      const s2 = box.querySelector('[data-bgb="2"]'), s1 = box.querySelector('[data-bgb="1"]');
+      const sync = () => {
+        const same = s2.value === s1.value;
+        document.getElementById('wiz-bgb-warn').textContent =
+          same ? '⚠ Choisis deux caractéristiques différentes (ou +1/+1/+1 à la main dans la fiche).' : '';
+        // Aperçu du total dans les cellules
+        abilBox.querySelectorAll('.wiz-abil-cell').forEach(cell => {
+          const k = cell.querySelector('.wiz-abil-sel').dataset.abil;
+          const base = parseInt(cell.querySelector('.wiz-abil-sel').value) || 0;
+          const bonus = (!same && k === s2.value ? 2 : 0) + (!same && k === s1.value ? 1 : 0);
+          const tot = cell.querySelector('.wiz-abil-total');
+          if (tot) tot.textContent = base && bonus ? `→ ${base + bonus}` : '';
+        });
+      };
+      s2.addEventListener('change', sync); s1.addEventListener('change', sync);
+      sync();
+    }
+
+    /* ── Répartition suggérée selon la classe ── */
+    const SUGGESTED = {   // ordre de priorité des caractéristiques par classe
+      Artificer:['int','con','dex','sag','for','cha'], Barbarian:['for','con','dex','sag','cha','int'],
+      Bard:['cha','dex','con','sag','int','for'],      Cleric:['sag','con','for','cha','dex','int'],
+      Druid:['sag','con','dex','int','cha','for'],     Fighter:['for','con','dex','sag','cha','int'],
+      Monk:['dex','sag','con','for','cha','int'],      Paladin:['for','cha','con','sag','dex','int'],
+      Psion:['int','con','dex','sag','cha','for'],     Ranger:['dex','sag','con','for','int','cha'],
+      Rogue:['dex','con','sag','int','cha','for'],     Sorcerer:['cha','con','dex','sag','int','for'],
+      Warlock:['cha','con','dex','sag','int','for'],   Wizard:['int','con','dex','sag','cha','for'],
+    };
+    document.getElementById('wiz-suggest-abils')?.addEventListener('click', () => {
+      const order = SUGGESTED[selClass.value];
+      if (!order) { showToast('Choisis d\'abord une classe (étape 3)'); return; }
+      order.forEach((k, i) => {
+        const sel = abilBox.querySelector(`[data-abil="${k}"]`);
+        if (sel) sel.value = String(STD_ARRAY[i]);
+      });
+      refreshAbils();
+      showToast(`⚡ Répartition suggérée pour ${selClass.value}`);
+    });
 
     /* ── Aperçus ── */
     /* Reconstruit la liste des lignées — uniquement au changement d'espèce :
@@ -11270,7 +11344,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     selSpecies.addEventListener('change', () => { buildLineageOptions(); previewSpecies(); });
     selLineage.addEventListener('change', previewSpecies);
 
+    /* ── Compétences de classe : chips à quota, comme dans la fiche ── */
+    let wizSkills = new Set();
+    function renderWizSkills() {
+      const box = document.getElementById('wiz-class-skills');
+      const d = CLASS_DATA[selClass.value];
+      if (!d?.skillList) { box.innerHTML = ''; return; }
+      const full = wizSkills.size >= d.skillChoices;
+      box.innerHTML = `<div class="wiz-skills-head">
+          <span class="field-label">Compétences — choisis-en ${d.skillChoices}</span>
+          <span class="cf-skill-count${full ? ' done' : ''}">${wizSkills.size}/${d.skillChoices}</span>
+        </div>
+        <div class="cf-skill-chips">${d.skillList.map(k => {
+          const sk = SKILLS.find(s => s.key === k);
+          const on = wizSkills.has(k);
+          return `<button type="button" class="cf-skill-chip${on ? ' on' : ''}${!on && full ? ' muted' : ''}" data-wiz-skill="${k}">${sk ? sk.label : k}</button>`;
+        }).join('')}</div>`;
+      box.querySelectorAll('[data-wiz-skill]').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const k = chip.dataset.wizSkill;
+          if (wizSkills.has(k)) wizSkills.delete(k);
+          else if (wizSkills.size < d.skillChoices) wizSkills.add(k);
+          renderWizSkills();
+        });
+      });
+    }
+
     function previewClass() {
+      wizSkills = new Set();   // la classe change → on repart de zéro
+      renderWizSkills();
       const box = document.getElementById('wiz-class-preview');
       const d = CLASS_DATA[selClass.value];
       if (!d) { box.innerHTML = ''; return; }
@@ -11332,7 +11434,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       btnNext.style.display = step < TOTAL_STEPS ? '' : 'none';
       btnOk.style.display   = step === TOTAL_STEPS ? '' : 'none';
       if (step === 1) setTimeout(() => nameInp.focus(), 50);
-      if (step === 6) refreshEquip(); // dépend de la classe choisie à l'étape 3
+      if (step === 5) renderBgBonus();  // dépend du background choisi à l'étape 4
+      if (step === 6) refreshEquip();   // dépend de la classe choisie à l'étape 3
     }
     btnNext.addEventListener('click', () => showStep(step + 1));
     btnPrev.addEventListener('click', () => showStep(step - 1));
@@ -11342,7 +11445,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       nameInp.value = '';
       [selSpecies, selLineage, selClass, selBg, selEquip].forEach(s => s.value = '');
       abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
-      ['wiz-species-preview','wiz-class-preview','wiz-bg-preview'].forEach(id =>
+      wizSkills = new Set();
+      ['wiz-species-preview','wiz-class-preview','wiz-bg-preview','wiz-class-skills','wiz-bg-bonus'].forEach(id =>
         document.getElementById(id).innerHTML = '');
       refreshAbils();
       showStep(1);
@@ -11362,9 +11466,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       c.characterName = name;
       c.avatar = newCharSelectedAvatar;
 
-      // Caractéristiques du tableau standard
+      // Caractéristiques du tableau standard + bonus du background (+2/+1, PHB 2024)
+      const bgBox = document.getElementById('wiz-bg-bonus');
+      const b2 = bgBox.querySelector('[data-bgb="2"]')?.value;
+      const b1 = bgBox.querySelector('[data-bgb="1"]')?.value;
+      const bgOk = b2 && b1 && b2 !== b1;   // ignoré si les deux pointent la même caractéristique
       abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => {
-        if (s.value) c[s.dataset.abil] = parseInt(s.value);
+        if (!s.value) return;
+        const k = s.dataset.abil;
+        c[k] = parseInt(s.value)
+             + (bgOk && k === b2 ? 2 : 0)
+             + (bgOk && k === b1 ? 1 : 0);
       });
 
       // Espèce + lignée → vitesse
@@ -11384,6 +11496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cd = CLASS_DATA[selClass.value];
         const saveMap = { for:'saveFor', dex:'saveDex', con:'saveCon', int:'saveInt', sag:'saveSag', cha:'saveCha' };
         Object.entries(saveMap).forEach(([a, k]) => { c[k] = cd.saves.includes(a); });
+        wizSkills.forEach(k => { c[k] = 1; });   // compétences de classe choisies à l'étape 3
         const info = DND_CLASSES[selClass.value] || {};
         c.deVie = info.de || '1d8';
         c.nbDeVie = 1;
@@ -12081,6 +12194,7 @@ document.addEventListener('keydown', e => {
             <label class="auth-label" for="wiz-class">Classe (niveau 1)</label>
             <select class="auth-input" id="wiz-class"></select>
           </div>
+          <div class="wiz-skills" id="wiz-class-skills"></div>
           <div class="wiz-preview" id="wiz-class-preview"></div>
         </div>
 
@@ -12095,10 +12209,12 @@ document.addEventListener('keydown', e => {
 
         <!-- 5 · Caractéristiques -->
         <div class="wiz-step" data-step="5">
-          <div class="field-label" style="margin-bottom:0.5rem;">
-            Répartis le tableau standard <strong style="color:var(--gold);">15 · 14 · 13 · 12 · 10 · 8</strong>
+          <div class="wiz-abil-head">
+            <span class="field-label">Tableau standard <strong style="color:var(--gold);">15·14·13·12·10·8</strong></span>
+            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Placer le tableau selon la classe choisie">⚡ Répartition suggérée</button>
           </div>
           <div class="wiz-abils" id="wiz-abils"></div>
+          <div class="wiz-bg-bonus" id="wiz-bg-bonus"></div>
           <div class="wiz-preview" id="wiz-abil-note"></div>
         </div>
 
