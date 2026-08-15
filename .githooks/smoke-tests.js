@@ -98,9 +98,9 @@ function ok(cond, label) {
   // Le fichier de règles est du JS valide complet : on l'exécute en entier plutôt
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
-          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA } =
+          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
-      + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA };')();
+      + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
 
@@ -146,6 +146,21 @@ function ok(cond, label) {
   Object.entries(STARTING_EQUIP).forEach(([cls, opts]) => {
     ok(opts.length >= 1, `${cls} : option d'équipement`);
     opts.forEach(o => ok(typeof o.gold === 'number', `${cls}/${o.label} : bourse`));
+  });
+
+  // Sorts préparés : 20 niveaux, croissance monotone, classe connue
+  Object.entries(PREPARED_SPELLS).forEach(([cls, table]) => {
+    ok(!!CLASS_DATA[cls], `PREPARED_SPELLS : « ${cls} » n'est pas une classe connue`);
+    eq(table.length, 20, `${cls} : table de sorts préparés sur 20 niveaux`);
+    table.forEach((n, i) => {
+      ok(Number.isInteger(n) && n > 0, `${cls} niv.${i + 1} : valeur invalide (${n})`);
+      if (i > 0) ok(n >= table[i - 1], `${cls} niv.${i + 1} : la table doit croître (${table[i-1]} → ${n})`);
+    });
+  });
+  // Tout lanceur (présent dans DND_CLASSES avec une caractéristique d'incantation)
+  // doit avoir une table de préparation — sinon le compteur disparaît en silence.
+  Object.entries(DND_CLASSES).forEach(([cls, info]) => {
+    if (info.sort) ok(!!PREPARED_SPELLS[cls], `${cls} : lanceur sans table de sorts préparés`);
   });
 
   // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].

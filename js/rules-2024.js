@@ -23,6 +23,24 @@ const DND_CLASSES = {
   'Wizard':    { de: '1d6',  sort: 'INT' },
 };
 
+/* ── Sorts préparés par niveau de classe (PHB 2024) ──
+   En 2024 ce n'est plus « niveau + modificateur » mais une table fixe par classe.
+   Index 0 = niveau 1. Les classes absentes ne préparent pas de sorts. */
+const PREPARED_SPELLS = {
+  // Lanceurs complets « standard »
+  'Bard':      [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22],
+  'Cleric':    [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22],
+  'Druid':     [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22],
+  'Psion':     [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22], // UA 2025
+  'Sorcerer':  [2,4,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22],
+  'Wizard':    [4,5,6,7,9,10,11,12,14,15,16,16,17,18,19,21,22,23,24,25],
+  // Demi-lanceurs et pacte
+  'Warlock':   [2,3,4,5,6,7,8,9,10,10,11,11,12,12,13,13,14,14,15,15],
+  'Paladin':   [2,3,4,5,6,6,7,7,9,9,10,10,11,11,12,12,14,14,15,15],
+  'Ranger':    [2,3,4,5,6,6,7,7,9,9,10,10,11,11,12,12,14,14,15,15],
+  'Artificer': [2,3,4,5,6,6,7,7,9,9,10,10,11,11,12,12,14,14,15,15],
+};
+
 /* ── Spell Slot Tables ── */
 const FULL_CASTER_SLOTS = {
   1:[2,0,0,0,0,0,0,0,0], 2:[3,0,0,0,0,0,0,0,0], 3:[4,2,0,0,0,0,0,0,0],

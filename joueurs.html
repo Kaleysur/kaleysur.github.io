@@ -5980,15 +5980,26 @@ function updateSpellCalcs() {
   document.getElementById('sort-atk').textContent = (bonus + m + atkMod >= 0 ? '+' : '') + (bonus + m + atkMod);
   const dcEl = document.getElementById('vb-hero-dc');
   if (dcEl) dcEl.textContent = 8 + bonus + m + dcMod;
-  // Spell prep counter (only prepared leveled spells, not cantrips)
+  // Compteur de sorts préparés — PHB 2024 : table fixe par classe (plus « niveau + mod »).
+  // En multiclasse chaque classe prépare selon son propre niveau : on additionne.
   if (prepEl) {
     const spells = c.spells || [];
     const leveled  = spells.filter(s => s.level && s.level !== '0' && s.level !== 0);
     const prepared = leveled.filter(s => s.prepared !== false);
-    const primaryLvl = getClasses(c)[0]?.niveau || totalLvl;
-    const maxPrep = Math.max(1, parseInt(primaryLvl) + m);
-    prepEl.textContent = `${prepared.length} / ${maxPrep}`;
-    prepEl.className = 'spell-prep-counter' + (prepared.length > maxPrep ? ' over' : prepared.length > 0 ? ' ok' : '');
+    const maxPrep = getClasses(c).reduce((sum, cl) => {
+      const table = PREPARED_SPELLS[cl.classe];
+      if (!table) return sum;
+      return sum + (table[Math.max(1, Math.min(20, parseInt(cl.niveau) || 1)) - 1] || 0);
+    }, 0);
+    if (maxPrep > 0) {
+      prepEl.style.display = '';
+      prepEl.textContent = `${prepared.length} / ${maxPrep}`;
+      prepEl.title = `Sorts préparés — maximum ${maxPrep} à ce niveau (PHB 2024)`;
+      prepEl.className = 'spell-prep-counter' + (prepared.length > maxPrep ? ' over' : prepared.length > 0 ? ' ok' : '');
+    } else {
+      // Classe sans préparation de sorts (guerrier, roublard…) : compteur masqué
+      prepEl.style.display = 'none';
+    }
   }
 }
 
