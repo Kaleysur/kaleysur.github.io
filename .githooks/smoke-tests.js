@@ -141,12 +141,32 @@ function ok(cond, label) {
   });
 
   // Espèces : vitesse et traits de base présents ; lignées non vides
+  const CREATURE_TYPES = ['Humanoid','Aberration','Construct','Elemental','Fey','Giant','Undead'];
   Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
     ok(typeof d.speed === 'number' && d.speed > 0, `${sp} : vitesse définie`);
+    ok(typeof d.size === 'string' && d.size.length > 0, `${sp} : taille définie`);
+    // Le type conditionne les sorts qui ciblent les Humanoïdes : jamais implicite
+    ok(CREATURE_TYPES.includes(d.type), `${sp} : type de créature manquant ou inconnu (${d.type})`);
     ok(Array.isArray(d.traits[1]) && d.traits[1].length > 0, `${sp} : traits de niveau 1`);
+    Object.values(d.traits).flat().forEach(t =>
+      ok(t.name && typeof t.desc === 'string' && t.desc.length > 15, `${sp}/${t.name} : description trop courte`));
     Object.entries(d.lineages || {}).forEach(([ln, lv]) =>
       ok(Array.isArray(lv[1]) && lv[1].length > 0, `${sp}/${ln} : trait de niveau 1`));
   });
+  // Kalashtar (Eberron: Forge of the Artificer) — la seule Aberration jouable
+  {
+    const k = SPECIES_DATA.Kalashtar;
+    ok(!!k, 'Kalashtar présent');
+    eq(k.type, 'Aberration', 'Kalashtar : Aberration, pas Humanoïde');
+    eq(k.speed, 30, 'Kalashtar : 30 ft');
+    eq(k.effects.telepathyPerLevel, 10, 'Kalashtar : télépathie 10 ft/niveau');
+    ['Dual Mind','Mental Discipline','Mind Link','Severed from Dreams'].forEach(t =>
+      ok(k.traits[1].some(x => x.name === t), `Kalashtar : trait « ${t} »`));
+    eq(k.traits[1].length, 4, 'Kalashtar : 4 traits, pas un de plus');
+    ok(!k.lineages, 'Kalashtar : aucune lignée');
+  }
+  eq(Object.values(SPECIES_DATA).filter(d => d.type !== 'Humanoid').length, 1,
+     'une seule espèce non-Humanoïde pour l\'instant');
 
   // Feats généraux : description non vide
   Object.entries(GENERAL_FEATS).forEach(([f, d]) =>
