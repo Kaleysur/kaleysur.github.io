@@ -172,6 +172,11 @@
     .spell-prep-counter { font-size:0.75rem; padding:0.15rem 0.55rem; border-radius:5px; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); color:#888; font-family:'Cinzel',serif; }
     .spell-prep-counter.ok  { border-color:#3a6a3a; color:#8aba8a; }
     .spell-prep-counter.over { border-color:#6a3a3a; color:#e07070; }
+    /* ── Style de préparation (règles 2024) ── */
+    .prep-style-note { font-size:0.7rem; line-height:1.5; color:#7a7a8a; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-left:2px solid var(--gold-dark,#8a6a3a); border-radius:5px; padding:0.4rem 0.6rem; margin-bottom:0.6rem; }
+    .prep-style-note:empty { display:none; }
+    .prep-style-note strong { color:var(--gold,#c9a96e); font-weight:600; }
+    .prep-style-note em { color:#9a9aaa; font-style:italic; }
     /* ── Jack of All Trades ── */
     .jat-toggle { display:flex; align-items:center; gap:0.35rem; margin-top:0.3rem; font-size:0.68rem; color:#555; cursor:pointer; user-select:none; }
     .jat-toggle input { accent-color:var(--gold-dark); width:12px; height:12px; cursor:pointer; }
@@ -3310,6 +3315,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <div class="conc-badge-dot"></div>
             <span>Concentrating — breaking concentration ends this spell</span>
           </div>
+          <div class="prep-style-note" id="prep-style-note"></div>
           <div class="sheet-grid" style="margin-bottom:0.75rem;">
             <div class="field-group">
               <label class="field-label">Spellcasting Class</label>
@@ -6021,6 +6027,26 @@ function updateSpellCalcs() {
   }
 }
 
+/* Style de préparation : la 2024 a supprimé les « sorts connus » — toutes les classes
+   préparent. Ce qui distingue vraiment les listes, c'est QUAND on peut les échanger. */
+function renderPrepStyle() {
+  const noteEl = document.getElementById('prep-style-note');
+  if (!noteEl) return;
+  const styles = getClasses(C())
+    .map(cl => ({ cls: cl.classe, st: SPELL_PREP_STYLE[cl.classe] }))
+    .filter(x => x.st);
+  if (!styles.length) { noteEl.innerHTML = ''; return; }
+  noteEl.innerHTML = styles.map(({ cls, st }) => {
+    const swap = st.swap === 'long'
+      ? 'sorts <strong>préparés</strong> — tu changes ta sélection à chaque <strong>repos long</strong>'
+      : 'liste <strong>fixe</strong> — tu n\'échanges un sort qu\'en <strong>montant de niveau</strong>';
+    const book = st.book
+      ? ' · 📖 = dans ton <em>grimoire</em> mais pas préparé aujourd\'hui'
+      : '';
+    return `<div>✦ <strong>${esc(cls)}</strong> — ${swap}${book}</div>`;
+  }).join('');
+}
+
 /* ── Attaques ── */
 function calcAtkBonus(atk) {
   const c = C(); const profBonus = pb(getTotalLevel(c));
@@ -7473,6 +7499,11 @@ function renderSpells() {
   const spells = C().spells || [];
   const filterQ = (document.getElementById('spell-filter')?.value || '').toLowerCase().trim();
 
+  // Grimoire (Magicien) : les sorts non préparés restent connus/accessibles
+  const hasBook = typeof SPELL_PREP_STYLE !== 'undefined'
+    && getClasses(C()).some(cl => SPELL_PREP_STYLE[cl.classe]?.book);
+  renderPrepStyle();
+
   // Group by level
   const groups = {};
   spells.forEach((s, i) => {
@@ -7512,7 +7543,11 @@ function renderSpells() {
     const lvlLabel = isCantrip ? '✧ Cantrips' : `✦ Level ${lvl}`;
     const countLabel = isCantrip
       ? `${entries.length}`
-      : (_spellPrepFilter ? `${entries.length}` : `${preparedCount}/${entries.length} prepared`);
+      : (_spellPrepFilter
+          ? `${entries.length}`
+          : (hasBook
+              ? `${preparedCount} préparé${preparedCount > 1 ? 's' : ''} · ${entries.length - preparedCount} au grimoire`
+              : `${preparedCount}/${entries.length} prepared`));
     hdr.innerHTML = `<td colspan="10">${lvlLabel}<span class="spell-lvl-count">${countLabel}</span></td>`;
     frag.appendChild(hdr);
 
@@ -7525,7 +7560,7 @@ function renderSpells() {
       // Prepared toggle cell
       const prepCell = isCantrip
         ? `<td style="text-align:center;"><span style="color:#555;font-size:0.7rem;" title="Cantrips are always available">✦</span></td>`
-        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared?'Prepared — click to unprepare':'Not prepared — click to prepare'}">${isPrepared?'★':'☆'}</button></td>`;
+        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared ? 'Préparé — cliquer pour retirer' : (hasBook ? 'Dans le grimoire — cliquer pour préparer' : 'Non préparé — cliquer pour préparer')}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
 
       const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Lancer le sort (consomme un emplacement niv.${esc(s.level||'1')}+)">⚡</button>` : '';
       const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Lancer ${esc(s.degat)}">🎲</button>` : '';

@@ -98,9 +98,10 @@ function ok(cond, label) {
   // Le fichier de règles est du JS valide complet : on l'exécute en entier plutôt
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
-          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS } =
+          STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
-      + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS };')();
+      + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
+      + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
 
@@ -162,6 +163,23 @@ function ok(cond, label) {
   Object.entries(DND_CLASSES).forEach(([cls, info]) => {
     if (info.sort) ok(!!PREPARED_SPELLS[cls], `${cls} : lanceur sans table de sorts préparés`);
   });
+
+  // Style de préparation : chaque lanceur déclare quand il peut échanger ses sorts.
+  // Sans entrée, la fiche n'affiche aucune indication et le 📖 du grimoire disparaît.
+  Object.entries(PREPARED_SPELLS).forEach(([cls]) => {
+    ok(!!SPELL_PREP_STYLE[cls], `${cls} : lanceur sans style de préparation déclaré`);
+  });
+  Object.entries(SPELL_PREP_STYLE).forEach(([cls, st]) => {
+    ok(!!CLASS_DATA[cls], `SPELL_PREP_STYLE : « ${cls} » n'est pas une classe connue`);
+    ok(st.swap === 'long' || st.swap === 'level', `${cls} : swap invalide (${st.swap})`);
+    ok(typeof st.book === 'boolean', `${cls} : book doit être un booléen`);
+  });
+  // Le grimoire est propre au Magicien (PHB 2024)
+  eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.book).map(([c]) => c).join(','),
+     'Wizard', 'seul le Magicien a un grimoire');
+  // Liste fixe (échange au niveau) : Barde, Rôdeur, Ensorceleur, Occultiste
+  eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.swap === 'level').map(([c]) => c).sort().join(','),
+     'Bard,Ranger,Sorcerer,Warlock', 'classes à liste fixe (PHB 2024)');
 
   // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].
   // Attrape une sous-classe mal imbriquée (elle apparaîtrait comme une fausse classe).

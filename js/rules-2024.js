@@ -41,6 +41,25 @@ const PREPARED_SPELLS = {
   'Artificer': [2,3,4,5,6,6,7,7,9,9,10,10,11,11,12,12,14,14,15,15],
 };
 
+/* ── Style de préparation des sorts (PHB 2024) ──
+   La 2024 a supprimé les « sorts connus » : toutes les classes préparent des sorts.
+   Ce qui change, c'est QUAND on peut les échanger — et le Magicien garde un grimoire.
+     swap : 'long'  → échange à chaque repos long
+            'level' → liste fixe, échange seulement en montant de niveau
+     book : true    → les sorts non préparés restent accessibles (grimoire) */
+const SPELL_PREP_STYLE = {
+  'Artificer': { swap:'long',  book:false },
+  'Cleric':    { swap:'long',  book:false },
+  'Druid':     { swap:'long',  book:false },
+  'Paladin':   { swap:'long',  book:false },
+  'Psion':     { swap:'long',  book:false },   // UA 2025
+  'Wizard':    { swap:'long',  book:true  },   // grimoire + sorts préparés du jour
+  'Bard':      { swap:'level', book:false },
+  'Ranger':    { swap:'level', book:false },
+  'Sorcerer':  { swap:'level', book:false },
+  'Warlock':   { swap:'level', book:false },
+};
+
 /* ── Spell Slot Tables ── */
 const FULL_CASTER_SLOTS = {
   1:[2,0,0,0,0,0,0,0,0], 2:[3,0,0,0,0,0,0,0,0], 3:[4,2,0,0,0,0,0,0,0],
