@@ -112,6 +112,13 @@ function ok(cond, label) {
     eq(first, 3, `${cls} : sous-classe au niveau 3`);
     ok(Array.isArray(d.saves) && d.saves.length === 2, `${cls} : 2 jets de sauvegarde`);
     ok(!!DND_CLASSES[cls], `${cls} : présent dans DND_CLASSES (dé de vie)`);
+    // Compétences de classe : quota cohérent et clés valides
+    ok(d.skillChoices >= 2 && d.skillChoices <= 4, `${cls} : quota de compétences (${d.skillChoices})`);
+    ok(Array.isArray(d.skillList) && d.skillList.length >= d.skillChoices,
+       `${cls} : liste de compétences au moins aussi grande que le quota`);
+    (d.skillList || []).forEach(k =>
+      ok(SKILL_KEYS.includes(k), `${cls} : compétence « ${k} » inconnue`));
+    eq(new Set(d.skillList).size, (d.skillList || []).length, `${cls} : pas de doublon de compétence`);
   });
 
   // Backgrounds : clés de compétences valides + origin feat documenté

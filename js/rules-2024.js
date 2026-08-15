@@ -401,6 +401,7 @@ const CLASS_DATA = {
 
 'Barbarian': {
   saves: ['for','con'],
+  skillChoices: 2, skillList: ['animaux','athletisme','intimidation','nature','perception','survie'],
   armorProf: 'Light, Medium, Shields',
   weaponProf: 'Simple and Martial weapons',
   features: {
@@ -445,6 +446,7 @@ const CLASS_DATA = {
 
 'Bard': {
   saves: ['dex','cha'],
+  skillChoices: 3, skillList: ['acrobaties','animaux','arcanes','athletisme','discret','duperie','histoire','intimidation','investigation','medecine','nature','perception','performance','persuasion','prestidig','religion','survie','perspicacite'],
   armorProf: 'Light armor',
   weaponProf: 'Simple weapons, Hand crossbow, Longsword, Rapier, Shortsword',
   features: {
@@ -485,6 +487,7 @@ const CLASS_DATA = {
 
 'Cleric': {
   saves: ['sag','cha'],
+  skillChoices: 2, skillList: ['histoire','perspicacite','medecine','persuasion','religion'],
   armorProf: 'Light, Medium, Shields',
   weaponProf: 'Simple weapons',
   features: {
@@ -514,6 +517,7 @@ const CLASS_DATA = {
 
 'Druid': {
   saves: ['int','sag'],
+  skillChoices: 2, skillList: ['arcanes','animaux','perspicacite','medecine','nature','perception','religion','survie'],
   armorProf: 'Light, Medium, Shields (non-metal)',
   weaponProf: 'Simple weapons',
   features: {
@@ -549,6 +553,7 @@ const CLASS_DATA = {
 
 'Fighter': {
   saves: ['for','con'],
+  skillChoices: 2, skillList: ['acrobaties','animaux','athletisme','histoire','perspicacite','intimidation','persuasion','perception','survie'],
   armorProf: 'All armor, Shields',
   weaponProf: 'Simple and Martial weapons',
   features: {
@@ -590,6 +595,7 @@ const CLASS_DATA = {
 
 'Monk': {
   saves: ['for','dex'],
+  skillChoices: 2, skillList: ['acrobaties','athletisme','histoire','perspicacite','religion','discret'],
   armorProf: 'None',
   weaponProf: 'Simple weapons, Shortsword',
   features: {
@@ -640,6 +646,7 @@ const CLASS_DATA = {
 
 'Paladin': {
   saves: ['sag','cha'],
+  skillChoices: 2, skillList: ['athletisme','perspicacite','intimidation','medecine','persuasion','religion'],
   armorProf: 'All armor, Shields',
   weaponProf: 'Simple and Martial weapons',
   features: {
@@ -680,6 +687,7 @@ const CLASS_DATA = {
 /* ── Psion — Unearthed Arcana 2025 (matériel de playtest, non officiel) ── */
 'Psion': {
   saves: ['int','sag'],
+  skillChoices: 2, skillList: ['arcanes','perspicacite','intimidation','investigation','medecine','perception','persuasion'],
   armorProf: 'None',
   weaponProf: 'Simple weapons',
   features: {
@@ -713,6 +721,7 @@ const CLASS_DATA = {
 
 'Ranger': {
   saves: ['for','dex'],
+  skillChoices: 3, skillList: ['animaux','athletisme','perspicacite','investigation','nature','perception','discret','survie'],
   armorProf: 'Light, Medium, Shields',
   weaponProf: 'Simple and Martial weapons',
   features: {
@@ -749,6 +758,7 @@ const CLASS_DATA = {
 
 'Rogue': {
   saves: ['dex','int'],
+  skillChoices: 4, skillList: ['acrobaties','athletisme','duperie','perspicacite','intimidation','investigation','perception','persuasion','prestidig','discret'],
   armorProf: 'Light armor',
   weaponProf: 'Simple weapons, Hand crossbow, Longsword, Rapier, Shortsword',
   features: {
@@ -791,6 +801,7 @@ const CLASS_DATA = {
 
 'Sorcerer': {
   saves: ['con','cha'],
+  skillChoices: 2, skillList: ['arcanes','duperie','perspicacite','intimidation','persuasion','religion'],
   armorProf: 'None',
   weaponProf: 'Simple weapons',
   features: {
@@ -820,6 +831,7 @@ const CLASS_DATA = {
 
 'Warlock': {
   saves: ['sag','cha'],
+  skillChoices: 2, skillList: ['arcanes','duperie','histoire','intimidation','investigation','nature','religion'],
   armorProf: 'Light armor',
   weaponProf: 'Simple weapons',
   features: {
@@ -849,6 +861,7 @@ const CLASS_DATA = {
 
 'Wizard': {
   saves: ['int','sag'],
+  skillChoices: 2, skillList: ['arcanes','histoire','perspicacite','investigation','medecine','religion'],
   armorProf: 'None',
   weaponProf: 'Simple weapons',
   features: {
@@ -879,6 +892,7 @@ const CLASS_DATA = {
 
 'Artificer': {
   saves: ['con','int'],
+  skillChoices: 2, skillList: ['arcanes','histoire','investigation','medecine','nature','perception','prestidig'],
   armorProf: 'Light, Medium, Shields',
   weaponProf: 'Simple weapons, Hand crossbow, Heavy crossbow',
   features: {

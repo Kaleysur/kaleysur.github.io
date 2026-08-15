@@ -2605,6 +2605,25 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .cf-subclass-alert strong { color: var(--gold, #c9a227); }
 .cf-alert-hint { color: #888; font-size: 0.9em; font-style: italic; }
+/* ── Choix des compétences de classe ── */
+.cf-skills-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+.cf-skill-count {
+  font-size: 0.7rem; padding: 0.05rem 0.4rem; border-radius: 8px;
+  background: rgba(255,255,255,0.06); color: #999; font-family: 'Cinzel', serif;
+}
+.cf-skill-count.done { background: rgba(106,186,106,0.15); color: var(--success, #6aba6a); }
+.cf-skill-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; width: 100%; margin-top: 0.3rem; }
+.cf-skill-chip {
+  font-size: 0.7rem; padding: 0.12rem 0.5rem; border-radius: 10px; cursor: pointer;
+  background: transparent; border: 1px solid var(--j-border-col, #3a2810);
+  color: #999; font-family: inherit; transition: all 0.12s;
+}
+.cf-skill-chip:hover { border-color: var(--gold-dark, #8a6e1a); color: var(--gold, #c9a227); }
+.cf-skill-chip.on {
+  background: rgba(201,169,110,0.18); border-color: var(--gold-dark, #8a6e1a);
+  color: var(--gold, #c9a227); font-weight: 600;
+}
+.cf-skill-chip.muted { opacity: 0.45; }
 
 /* ── Assistant de création de personnage ── */
 .wiz-modal { width: 460px; }
@@ -4608,6 +4627,25 @@ function renderClassFeatures() {
     return lvl >= 3 && !sub;
   });
 
+  /* Compétences de classe : chips cliquables qui cochent la maîtrise dans la fiche.
+     Seule la classe principale accorde ses compétences (règle du multiclassage). */
+  const skillPick = (() => {
+    if (!data.skillList) return '';
+    const chosen = data.skillList.filter(k => (parseInt(c[k]) || 0) >= 1);
+    const full   = chosen.length >= data.skillChoices;
+    const chips  = data.skillList.map(k => {
+      const sk = SKILLS.find(s => s.key === k);
+      const on = (parseInt(c[k]) || 0) >= 1;
+      return `<button class="cf-skill-chip${on ? ' on' : ''}${!on && full ? ' muted' : ''}"
+        data-cf-skill="${k}" title="${on ? 'Retirer la maîtrise' : 'Cocher la maîtrise'}">${sk ? sk.label : k}</button>`;
+    }).join('');
+    return `<div class="cf-prof-item cf-skills-row">
+      <span class="cf-prof-label">Skills:</span>
+      <span class="cf-skill-count${full ? ' done' : ''}">${chosen.length}/${data.skillChoices}</span>
+      <div class="cf-skill-chips">${chips}</div>
+    </div>`;
+  })();
+
   body.innerHTML = `
     ${pending.length ? `<div class="cf-subclass-alert">⚠ Sous-classe à choisir —
       ${pending.map(cl => `<strong>${esc(cl.classe)} ${cl.niveau}</strong>`).join(', ')}
@@ -4616,10 +4654,30 @@ function renderClassFeatures() {
       <div class="cf-prof-item"><span class="cf-prof-label">Saving Throws:</span> ${data.saves.map(s=>s.toUpperCase()).join(' &amp; ')}</div>
       ${data.armorProf  ? `<div class="cf-prof-item"><span class="cf-prof-label">Armor:</span> ${data.armorProf}</div>` : ''}
       ${data.weaponProf ? `<div class="cf-prof-item"><span class="cf-prof-label">Weapons:</span> ${data.weaponProf}</div>` : ''}
+      ${skillPick}
     </div>
     <div class="cf-progress-bar"><div class="cf-progress-fill" style="width:${Math.round(totalLvl/20*100)}%"></div></div>
     <div class="cf-progress-label">Total level ${totalLvl} / 20</div>
   `;
+
+  /* Chips de compétences : bascule la maîtrise, refuse d'en cocher plus que le quota */
+  body.querySelectorAll('[data-cf-skill]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const k  = chip.dataset.cfSkill;
+      const on = (parseInt(c[k]) || 0) >= 1;
+      if (on) {
+        c[k] = 0;
+      } else {
+        const chosen = data.skillList.filter(x => (parseInt(c[x]) || 0) >= 1).length;
+        if (chosen >= data.skillChoices) {
+          showToast(`Déjà ${data.skillChoices} compétence${data.skillChoices > 1 ? 's' : ''} — retires-en une d'abord`);
+          return;
+        }
+        c[k] = 1;
+      }
+      renderSkills(); renderPassiveSkills(); renderClassFeatures(); triggerSave();
+    });
+  });
 
   /* ── Features for each class ── */
   validClasses.forEach(clEntry => {
