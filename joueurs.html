@@ -12060,8 +12060,8 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
        <button class="btn btn-sm" id="lvlup-hp-roll">🎲 Lancer ${plan.hitDie}</button>
        <span class="lvlup-hp-pick" id="lvlup-hp-pick">+${chosenHp} PV</span>`;
     $('lvlup-hp-detail').innerHTML =
-      `${plan.hitDie} + <strong>${plan.conMod >= 0 ? '+' : ''}${plan.conMod}</strong> CON`
-      + (plan.speciesHp ? ` + <strong>+${plan.speciesHp}</strong> espèce` : '')
+      `${plan.hitDie} ${plan.conMod < 0 ? '−' : '+'} <strong>${Math.abs(plan.conMod)}</strong> CON`
+      + (plan.speciesHp ? ` + <strong>${plan.speciesHp}</strong> espèce` : '')
       + ` — entre ${plan.minHp} et ${plan.maxHp} PV.`;
     $('lvlup-hp-avg').addEventListener('click', () => { chosenHp = plan.avgHp; $('lvlup-hp-pick').textContent = `+${chosenHp} PV`; });
     $('lvlup-hp-roll').addEventListener('click', () => {
