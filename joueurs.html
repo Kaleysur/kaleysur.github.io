@@ -986,6 +986,36 @@
       overflow: hidden;
     }
     .char-selector-dropdown.open { display: block; }
+    /* Supprimer un personnage : discret au repos, rouge au survol.
+       Toujours présent au doigt (mobile), où il n'y a pas de survol. */
+    .char-sel-del {
+      background: none; border: none; color: #4a4a52; cursor: pointer;
+      font-size: 0.78rem; line-height: 1; padding: 0.25rem 0.3rem; margin-left: 0.2rem;
+      border-radius: 4px; opacity: 0; transition: opacity 0.12s, color 0.12s, background 0.12s;
+      flex-shrink: 0;
+    }
+    .char-sel-item:hover .char-sel-del { opacity: 1; }
+    .char-sel-del:hover { color: var(--danger, #c97a7a); background: rgba(201,122,122,0.12); }
+    .char-sel-del:focus-visible { opacity: 1; outline: 1px solid var(--danger, #c97a7a); }
+    /* Sans survol : bouton visible en permanence et cible assez grande pour le doigt */
+    @media (hover: none) {
+      .char-sel-del { opacity: 0.65; padding: 0.6rem 0.55rem; font-size: 0.9rem; }
+    }
+    /* Toast d'annulation après suppression */
+    .char-undo-toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 0.9rem; z-index: 10000;
+      background: #2a1a1a; border: 1px solid #6a3a3a; color: #d9a8a8;
+      padding: 0.55rem 0.7rem 0.55rem 1.1rem; border-radius: 6px; font-size: 0.82rem;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5); transition: opacity 0.4s;
+    }
+    .char-undo-toast button {
+      background: none; border: 1px solid #6a3a3a; color: #e0b0b0; cursor: pointer;
+      font-family: inherit; font-size: 0.78rem; padding: 0.22rem 0.6rem; border-radius: 4px;
+      transition: background 0.12s;
+    }
+    .char-undo-toast button:hover { background: rgba(201,122,122,0.18); }
+    @media (max-width: 600px) { .char-undo-toast { left: 0.75rem; right: 0.75rem; transform: none; justify-content: space-between; } }
     .char-sel-item {
       display: flex; align-items: center; gap: 10px;
       padding: 9px 14px; cursor: pointer;
@@ -1903,7 +1933,7 @@
   .top-nav, .sidebar, .sidebar-overlay, #char-bg-layer,
   #dice-toast, #rest-toast, .chat-panel, .vb-topbar .btn,
   .tab-bar, #btn-layout-edit, #save-badge, .conn-indicator,
-  .undo-toast, #sw-update-banner,
+  .char-undo-toast, #sw-update-banner,
   .btn-gold, #btn-logout, #hp-log-toggle, #hp-log,
   .vb-rest-btns, #layout-toolbar, .sec-col-btn,
   .death-save-roll-btn, #death-save-roll-btn,
@@ -4368,7 +4398,11 @@ function loadSession()  { return localStorage.getItem('kaleysur_user'); }
 function clearSession() { localStorage.removeItem('kaleysur_user'); }
 
 /* ── Données vides ── */
-function newCharId() { return 'c' + Date.now(); }
+/* Date.now() seul n'est pas unique : deux créations dans la même milliseconde
+   (double-clic sur « Créer », import en boucle) produisaient le même id et le
+   second personnage écrasait le premier en silence. */
+let _charIdSeq = 0;
+function newCharId() { return 'c' + Date.now() + '_' + (++_charIdSeq); }
 
 function emptyCharacter() {
   return {
@@ -5338,7 +5372,12 @@ function renderCharSelector() {
         <div class="char-sel-item-sub">${classStr}</div>
       </div>
       ${isActive ? '<span style="color:var(--gold);font-size:0.7rem;">✦</span>' : ''}
+      <button class="char-sel-del" data-del-char="${id}" title="Supprimer ce personnage" aria-label="Supprimer ${esc(c.characterName || 'ce personnage')}">✕</button>
     `;
+    item.querySelector('[data-del-char]').addEventListener('click', e => {
+      e.stopPropagation();
+      deleteCharacter(id);
+    });
     item.addEventListener('click', () => {
       playerData.activeCharId = id;
       closeCharSelector();
@@ -5361,6 +5400,75 @@ function renderCharSelector() {
   dd.appendChild(addItem);
 }
 
+/* ── Suppression d'un personnage ──
+   Action irréversible une fois la sauvegarde partie : on nomme précisément ce
+   qui va disparaître, puis on laisse une fenêtre d'annulation. */
+function deleteCharacter(id) {
+  const chars = playerData?.characters || {};
+  const slot  = chars[id];
+  if (!slot) return;
+  if (Object.keys(chars).length <= 1) {
+    showToast('⚠ Impossible : il doit rester au moins un personnage.');
+    return;
+  }
+  const c    = slot.character || {};
+  const nom  = c.characterName || slot.name || 'Sans nom';
+  const desc = [
+    getClasses(c).filter(cl => cl.classe).map(cl => `${cl.classe} ${cl.niveau}`).join(' / '),
+    c.species,
+  ].filter(Boolean).join(' · ');
+
+  if (!confirm(
+    `Supprimer « ${nom} » ?\n${desc ? desc + '\n' : ''}\n`
+    + `Sa fiche, son inventaire et ses notes seront effacés.\n`
+    + `Tu pourras annuler pendant quelques secondes.`
+  )) return;
+
+  // Position d'origine conservée pour restaurer l'ordre à l'identique
+  const ordre    = Object.keys(chars);
+  const position = ordre.indexOf(id);
+  const etaitActif = playerData.activeCharId === id;
+
+  delete playerData.characters[id];
+  if (etaitActif) playerData.activeCharId = Object.keys(playerData.characters)[0];
+  closeCharSelector();
+  renderCharCards(); renderCharSelector(); renderAll();
+  if (etaitActif) { applyCharTheme(); applyCharBg(C()); }
+  triggerSave();
+
+  showCharUndoToast(`🗑 « ${nom} » supprimé`, () => {
+    // Réinsertion à sa place d'origine
+    const rest = Object.entries(playerData.characters);
+    rest.splice(position, 0, [id, slot]);
+    playerData.characters = Object.fromEntries(rest);
+    if (etaitActif) playerData.activeCharId = id;
+    renderCharCards(); renderCharSelector(); renderAll();
+    applyCharTheme(); applyCharBg(C());
+    triggerSave();
+    showToast(`✦ « ${nom} » restauré`);
+  });
+}
+
+/* Toast avec bouton d'annulation — 12 s, puis la suppression est définitive.
+   Nom et identifiants distincts de showUndoToast() (undo d'import D&D Beyond),
+   qui est déclarée plus bas et écraserait celle-ci. */
+function showCharUndoToast(msg, onUndo) {
+  document.getElementById('char-undo-toast')?.remove();
+  const t = document.createElement('div');
+  t.id = 'char-undo-toast';
+  t.className = 'char-undo-toast';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '↶ Annuler';
+  const label = document.createElement('span');
+  label.textContent = msg;
+  t.append(label, btn);
+  document.body.appendChild(t);
+  const close = () => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); };
+  btn.addEventListener('click', () => { close(); onUndo(); });
+  setTimeout(close, 12000);
+}
+
 function closeCharSelector() {
   document.getElementById('char-selector-btn')?.classList.remove('open');
   document.getElementById('char-selector-dropdown')?.classList.remove('open');
@@ -5378,7 +5486,7 @@ function renderCharCards() {
     const pvCur = parseInt(c.pvActuel) || 0;
     const pct   = pvMax > 0 ? Math.min(100, Math.round(pvCur / pvMax * 100)) : 0;
     let hpColor = '#6aba6a';
-    if (pct < 50) hpcolor = '#c9a227';
+    if (pct < 50) hpColor = '#c9a227';
     if (pct < 25) hpColor = '#c97a7a';
 
     const card = document.createElement('div');
@@ -5430,21 +5538,11 @@ function renderCharCards() {
   addCard.addEventListener('click', () => openNewCharModal());
   grid.appendChild(addCard);
 
-  // Boutons supprimer
+  // Boutons supprimer — même chemin que le sélecteur (confirmation + annulation)
   grid.querySelectorAll('[data-del-char]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const chars = playerData.characters || {};
-      if (Object.keys(chars).length <= 1) { alert('Tu dois garder au moins un personnage.'); return; }
-      const id = btn.dataset.delChar;
-      const slot = chars[id];
-      if (!confirm('Delete "' + (slot?.name || 'this character') + '"? This cannot be undone.')) return;
-      delete playerData.characters[id];
-      if (playerData.activeCharId === id) playerData.activeCharId = Object.keys(playerData.characters)[0];
-      renderCharCards();
-      renderCharSelector();
-      renderAll();
-      triggerSave();
+      deleteCharacter(btn.dataset.delChar);
     });
   });
   renderCharSelector();
@@ -8553,7 +8651,7 @@ async function renderAdminPanel() {
       const pct    = pvMax > 0 ? Math.min(100, Math.round(pvCur / pvMax * 100)) : 0;
       const isDead = pvMax > 0 && pvCur <= 0;
       let hpColor  = '#6aba6a';
-      if (pct < 50) hpcolor = '#c9a227';
+      if (pct < 50) hpColor = '#c9a227';
       if (pct < 25) hpColor = '#c97a7a';
       if (isDead)   hpColor = '#c97a7a';
 
