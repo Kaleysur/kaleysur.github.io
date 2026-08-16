@@ -57,6 +57,20 @@ function ok(cond, label) {
     extract(R, 'const STARTING_WEAPONS'),
     extract(R, 'const STARTING_SPELLS'),
     extract(R, 'const PREPARED_SPELLS'),
+    extract(R, 'const CLASS_DATA'),
+    extract(R, 'const SUBCLASS_DATA'),
+    extract(R, 'const SPECIES_DATA'),
+    extract(R, 'const DND_CLASSES'),
+    extract(R, 'const ASI_LEVELS'),
+    extract(R, 'const GENERAL_FEATS'),
+    extract(R, 'const CLASS_RESOURCES'),
+    extract(R, 'const MULTICLASS_PREREQ'),
+    extract(J, 'function syncClassesToLegacy(c)'),
+    extract(J, 'function abilKeysFromFeat(abilStr)'),
+    extract(J, 'function preparedTotal(c)'),
+    extract(J, 'function multiclassPrereqCheck(c, className)'),
+    extract(J, 'function planLevelUp(c, className)'),
+    extract(J, 'function applyLevelUp(c, plan, choices)'),
     extract(J, 'function applyStartingGear(c, className, items)'),
     extract(J, 'function startingMaxHp(c, hitDie, speciesEffects)'),
     extract(J, 'function startingSpellHint(className)'),
@@ -106,10 +120,10 @@ function ok(cond, label) {
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
-          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES } =
+          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
-      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES,'
+      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -243,6 +257,194 @@ function ok(cond, label) {
     if (h !== undefined) ok(Number.isInteger(h) && h > 0, `${sp} : hpPerLevel invalide (${h})`);
   });
 
+  /* ── Montée de niveau (planLevelUp / applyLevelUp) ── */
+  const hero = (over) => Object.assign({
+    for:14, dex:14, con:14, int:14, sag:14, cha:14, pvMax:20, pvActuel:20, nbDeVie:2,
+  }, over);
+
+  // Caractéristiques des dons : chaque libellé doit se traduire en clés valides
+  eq(abilKeysFromFeat('CHA'), ['cha'], 'abilKeysFromFeat simple');
+  eq(abilKeysFromFeat('FOR or DEX'), ['for','dex'], 'abilKeysFromFeat « or »');
+  eq(abilKeysFromFeat('FOR, DEX or SAG'), ['for','dex','sag'], 'abilKeysFromFeat liste');
+  eq(abilKeysFromFeat('choice').length, 6, 'abilKeysFromFeat « choice »');
+  Object.entries(GENERAL_FEATS).forEach(([name, f]) => {
+    if (!f.asi) return;
+    const keys = abilKeysFromFeat(f.abil);
+    ok(keys.length > 0, `don « ${name} » : abil « ${f.abil} » illisible`);
+    keys.forEach(k => ok(['for','dex','con','int','sag','cha'].includes(k),
+      `don « ${name} » : clé « ${k} » invalide`));
+  });
+
+  // PV : moyenne PHB = dé/2 + 1, plus CON, plus le bonus d'espèce
+  {
+    const c = hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:1}], con:14 });
+    const p = planLevelUp(c, 'Fighter');
+    eq(p.avgHp, 8,  'd10 : moyenne 6 (= 10/2 + 1) + CON 2');
+    eq(p.maxHp, 12, 'd10 max 10 + CON 2');
+    eq(p.minHp, 3,  'd10 min 1 + CON 2');
+  }
+  {
+    const c = hero({ classes:[{classe:'Wizard',sousClasse:'',niveau:1}], con:14, species:'Dwarf' });
+    const p = planLevelUp(c, 'Wizard');
+    eq(p.speciesHp, 1, 'Nain : +1 PV/niveau pris en compte');
+    eq(p.avgHp, 7, 'd6 moyenne 4 + CON 2 + Nain 1');
+  }
+
+  // Sous-classe : requise au niveau 3, et seulement si aucune n'est choisie
+  {
+    const c2 = hero({ classes:[{classe:'Cleric',sousClasse:'',niveau:2}] });
+    ok(planLevelUp(c2, 'Cleric').needsSubclass, 'sous-classe requise en montant au niveau 3');
+    const c3 = hero({ classes:[{classe:'Cleric',sousClasse:'Life Domain',niveau:3}] });
+    ok(!planLevelUp(c3, 'Cleric').needsSubclass, 'sous-classe déjà choisie : plus demandée');
+    const c1 = hero({ classes:[{classe:'Cleric',sousClasse:'',niveau:1}] });
+    ok(!planLevelUp(c1, 'Cleric').needsSubclass, 'pas de sous-classe au niveau 2');
+  }
+
+  // ASI : lu dans la table de la classe, sur le niveau DE CLASSE
+  [3,7,9,11,15].forEach(l => ok(planLevelUp(hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:l}] }), 'Rogue').isAsi,
+    `Roublard : ASI en montant au niveau ${l + 1}`));
+  [1,4,5,13,18].forEach(l => ok(!planLevelUp(hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:l}] }), 'Rogue').isAsi,
+    `Roublard : pas d'ASI en montant au niveau ${l + 1}`));
+  // Le Guerrier en a deux de plus (6 et 14) — une liste generique les raterait
+  [3,5,7,11,13,15].forEach(l => ok(planLevelUp(hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:l}] }), 'Fighter').isAsi,
+    `Guerrier : ASI en montant au niveau ${l + 1}`));
+  // Niveau 19 : don epique en 2024, pas un ASI
+  Object.keys(CLASS_DATA).forEach(cls => {
+    const p19 = planLevelUp(hero({ classes:[{classe:cls,sousClasse:'',niveau:18}] }), cls);
+    ok(!p19.isAsi, `${cls} : le niveau 19 est un don epique, pas un ASI`);
+    ok(p19.newFeatures.some(f => f.type === 'epic'), `${cls} : don epique au niveau 19`);
+  });
+  // Chaque classe a au minimum les ASI de base
+  Object.entries(CLASS_DATA).forEach(([cls, d]) => {
+    const lv = Object.entries(d.features).filter(([, fs]) => fs.some(f => f.type === 'asi')).map(([l]) => +l);
+    [4,8,12,16].forEach(n => ok(lv.includes(n), `${cls} : ASI manquant au niveau ${n}`));
+  });
+  // Multiclasse : un Guerrier 3 / Magicien 3 qui monte Guerrier 4 a bien son ASI
+  ok(planLevelUp(hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:3},{classe:'Wizard',sousClasse:'School of Evocation',niveau:3}] }), 'Fighter').isAsi,
+     'ASI calculé sur le niveau de classe, pas le total');
+
+  // Bornes
+  eq(planLevelUp(hero({ classes:[{classe:'Bard',sousClasse:'College of Lore',niveau:20}] }), 'Bard').ok, false, 'niveau 21 refusé');
+  eq(planLevelUp(hero({}), 'Sorceror').ok, false, 'classe inconnue refusée');
+  eq(planLevelUp(hero({ classes:[{classe:'Bard',sousClasse:'College of Lore',niveau:20}] }), 'Wizard').ok, false,
+     'niveau total 20 : plus de multiclassage');
+
+  // Application : niveau, PV, dés de vie, sous-classe
+  {
+    const c = hero({ classes:[{classe:'Wizard',sousClasse:'',niveau:2}], con:14, pvMax:14, pvActuel:9, nbDeVie:2 });
+    const r = applyLevelUp(c, planLevelUp(c, 'Wizard'), { hp:5, subclass:'School of Evocation' });
+    ok(r.ok, 'montée appliquée');
+    eq(c.classes[0].niveau, 3, 'niveau de classe incrémenté');
+    eq(c.classes[0].sousClasse, 'School of Evocation', 'sous-classe écrite');
+    eq(c.pvMax, 19, 'PV max +5');
+    eq(c.pvActuel, 14, 'PV actuels suivent le gain');
+    eq(c.nbDeVie, 3, 'dé de vie ajouté');
+    eq(c.niveau, 3, 'champ legacy synchronisé');
+  }
+  // Sans choix de PV, on prend la moyenne
+  {
+    const c = hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:1}], con:14, pvMax:12 });
+    applyLevelUp(c, planLevelUp(c, 'Fighter'), {});
+    eq(c.pvMax, 20, 'PV : moyenne par défaut (+8)');
+  }
+  // ASI : +2, ou +1/+1, plafonné à 20
+  {
+    const c = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], dex:16, con:12 });
+    applyLevelUp(c, planLevelUp(c, 'Rogue'), { asiMode:'abil', asiA:'dex' });
+    eq(c.dex, 18, 'ASI +2');
+  }
+  {
+    const c = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], dex:16, con:12 });
+    applyLevelUp(c, planLevelUp(c, 'Rogue'), { asiMode:'abil', asiA:'dex', asiB:'con' });
+    eq([c.dex, c.con], [17, 13], 'ASI +1/+1');
+  }
+  {
+    const c = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], dex:19 });
+    applyLevelUp(c, planLevelUp(c, 'Rogue'), { asiMode:'abil', asiA:'dex' });
+    eq(c.dex, 20, 'ASI plafonné à 20');
+  }
+  // Don : enregistré dans les capacités + son +1 de caractéristique
+  {
+    const c = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], dex:16 });
+    applyLevelUp(c, planLevelUp(c, 'Rogue'), { asiMode:'feat', feat:'Crossbow Expert', featAbil:'dex' });
+    eq(c.dex, 17, 'don : +1 appliqué');
+    eq(c.customFeatures.length, 1, 'don enregistré dans les capacités');
+    eq(c.customFeatures[0].name, 'Crossbow Expert', 'nom du don');
+    ok(/Rogue 4/.test(c.customFeatures[0].source), 'source du don datée du niveau');
+  }
+  // Multiclassage : nouvelle classe au niveau 1, l'ancienne intacte
+  {
+    const c = hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:5}], int:14, for:15, pvMax:44 });
+    const p = planLevelUp(c, 'Wizard');
+    ok(p.isNewClass, 'multiclassage détecté');
+    eq(p.toLevel, 1, 'la nouvelle classe démarre au niveau 1');
+    applyLevelUp(c, p, {});
+    eq(c.classes.length, 2, 'deux classes');
+    eq(c.classes[0].niveau, 5, 'la classe d\'origine ne bouge pas');
+    eq(c.classes[1].niveau, 1, 'la nouvelle est au niveau 1');
+    eq(getTotalLevel(c), 6, 'niveau total 6');
+  }
+  // Prérequis de multiclassage (13 des deux côtés)
+  {
+    const faible = hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:5}], for:15, int:10 });
+    const p = planLevelUp(faible, 'Wizard');
+    eq(p.prereq.ok, false, 'INT 10 : prérequis Magicien non rempli');
+    ok(/Wizard/.test(p.prereq.missing.join(' ')), 'la classe manquante est nommée');
+    const fort = hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:5}], for:15, int:13 });
+    eq(planLevelUp(fort, 'Wizard').prereq.ok, true, 'INT 13 : prérequis rempli');
+    // Guerrier : FOR *ou* DEX suffit
+    const dexOnly = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], for:8, dex:16 });
+    eq(planLevelUp(dexOnly, 'Fighter').prereq.ok, true, 'Guerrier : DEX seule suffit');
+    // Monter sa propre classe ne déclenche aucune vérification
+    eq(planLevelUp(hero({ classes:[{classe:'Wizard',sousClasse:'School of Evocation',niveau:3}], int:8 }), 'Wizard').prereq, null,
+       'pas de prérequis quand on monte sa classe');
+  }
+  // Toute classe jouable doit avoir des prérequis déclarés
+  Object.keys(CLASS_DATA).forEach(cls => {
+    ok(!!MULTICLASS_PREREQ[cls], `${cls} : prérequis de multiclassage manquants`);
+    (MULTICLASS_PREREQ[cls]?.abils || []).forEach(a =>
+      ok(['for','dex','con','int','sag','cha'].includes(a), `${cls} : caractéristique « ${a} » invalide`));
+  });
+  // Ressources : mises à l'échelle sans oublier ce qui est déjà dépensé
+  {
+    const c = hero({ classes:[{classe:'Barbarian',sousClasse:'',niveau:2}], con:16,
+                     resources:[{name:'Rages',used:1,max:2,reset:'long'}] });
+    applyLevelUp(c, planLevelUp(c, 'Barbarian'), { subclass:'Path of the Berserker' });
+    eq(c.resources.length, 1, 'une seule entrée Rages');
+    eq(c.resources[0].max, 3, 'Rages passent à 3 au niveau 3');
+    eq(c.resources[0].used, 1, 'la consommation est préservée');
+  }
+  // Un nom de sous-classe ou de don invalide est refuse, sans rien ecrire
+  {
+    const c = hero({ classes:[{classe:'Cleric',sousClasse:'',niveau:2}], pvMax:16 });
+    const r = applyLevelUp(c, planLevelUp(c, 'Cleric'), { subclass:'Domaine bidon' });
+    eq(r.ok, false, 'sous-classe inconnue refusee');
+    eq(c.classes[0].niveau, 2, 'niveau inchange apres un refus');
+    eq(c.pvMax, 16, 'PV inchanges apres un refus');
+  }
+  {
+    const c = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], pvMax:24 });
+    const r = applyLevelUp(c, planLevelUp(c, 'Rogue'), { asiMode:'feat', feat:'Don Inexistant' });
+    eq(r.ok, false, 'don inconnu refuse');
+    eq(c.pvMax, 24, 'PV inchanges apres un refus de don');
+  }
+  // Chaque sous-classe proposee par le plan doit exister dans les donnees
+  Object.keys(CLASS_DATA).forEach(cls => {
+    const c = hero({ classes:[{classe:cls,sousClasse:'',niveau:2}] });
+    const p = planLevelUp(c, cls);
+    ok(p.subOptions.length >= 2, `${cls} : au moins deux sous-classes proposees`);
+    p.subOptions.forEach(s2 => ok(!!SUBCLASS_DATA[cls][s2], `${cls}/${s2} : sous-classe fantome`));
+  });
+
+  // Le Level Plan sert de journal : pas de second registre
+  {
+    const c = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], dex:16 });
+    applyLevelUp(c, planLevelUp(c, 'Rogue'), { hp:7, asiMode:'abil', asiA:'dex', asiB:'con' });
+    eq(c.levelPlan.rows[3].cls, 'Rogue', 'journal : classe du niveau 4');
+    eq(c.levelPlan.rows[3].hp, 7, 'journal : PV gagnés');
+    eq(c.levelPlan.rows[3].asi, '+1 DEX / +1 CON', 'journal : décision ASI');
+  }
+
   /* ── Sorts à choisir après création (startingSpellHint) ── */
   eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');
   eq(startingSpellHint('Rogue'),   null, 'Roublard : aucun sort à choisir');
@@ -323,6 +525,17 @@ function ok(cond, label) {
   // Liste fixe (échange au niveau) : Barde, Rôdeur, Ensorceleur, Occultiste
   eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.swap === 'level').map(([c]) => c).sort().join(','),
      'Bard,Ranger,Sorcerer,Warlock', 'classes à liste fixe (PHB 2024)');
+
+  // La premiere capacite d'une sous-classe tombe au niveau 3 (PHB 2024).
+  // Un reliquat 2014 (niveau 2 pour Druide/Magicien) laisserait le joueur sans
+  // aucune capacite entre le niveau 3 et le niveau 6.
+  Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) => {
+    Object.entries(subs).forEach(([sub, byLevel]) => {
+      const levels = Object.keys(byLevel).map(Number).filter(n => !isNaN(n)).sort((a, b) => a - b);
+      if (!levels.length) return;
+      eq(levels[0], 3, `${cls}/${sub} : premiere capacite au niveau ${levels[0]} au lieu de 3`);
+    });
+  });
 
   // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].
   // Attrape une sous-classe mal imbriquée (elle apparaîtrait comme une fausse classe).

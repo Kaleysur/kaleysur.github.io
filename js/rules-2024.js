@@ -268,7 +268,7 @@ const GENERAL_FEATS = {
   'Martial Weapon Training': { asi:true, abil:'FOR or DEX', prereq:'', desc:"Gain proficiency with Martial weapons." },
   'Medium Armor Master':{ asi:true, abil:'FOR or DEX', prereq:'Medium armor proficiency', desc:"Wearing Medium armor doesn't impose Disadvantage on Stealth, and you can add 3 (instead of 2) to your AC from DEX." },
   'Moderately Armored': { asi:true, abil:'FOR or DEX', prereq:'Light armor proficiency', desc:"Gain proficiency with Medium armor." },
-  'Mounted Combatant':  { asi:true, abil:'FOR, DEX or WIS', prereq:'', desc:"Advantage on melee attacks against unmounted creatures smaller than your mount. Your mount takes no damage on a successful DEX save (half on failure). You can force an attack targeting your mount to target you instead." },
+  'Mounted Combatant':  { asi:true, abil:'FOR, DEX or SAG', prereq:'', desc:"Advantage on melee attacks against unmounted creatures smaller than your mount. Your mount takes no damage on a successful DEX save (half on failure). You can force an attack targeting your mount to target you instead." },
   'Observant':          { asi:true, abil:'INT or SAG', prereq:'INT or SAG 13+', desc:"As a Bonus Action, make a WIS (Perception) or INT (Investigation) check (PB/Long Rest). You can read lips if you can see a creature's mouth and know the language." },
   'Piercer':            { asi:true, abil:'FOR or DEX', prereq:'FOR or DEX 13+', desc:"Once per turn when you deal Piercing damage, reroll one damage die. On a Critical Hit, roll one additional damage die." },
   'Poisoner':           { asi:true, abil:'DEX or INT', prereq:'', desc:"Proficiency with the Poisoner's Kit. Apply poison as a Bonus Action. Your poisons ignore Resistance to Poison. Craft doses that deal 2d8 Poison damage (CON save DC 14 or Poisoned)." },
@@ -289,6 +289,26 @@ const GENERAL_FEATS = {
   'Weapon Master':      { asi:true, abil:'FOR or DEX', prereq:'', desc:"You gain the Mastery property for one kind of weapon you're proficient with; you can change it on a Long Rest." },
 };
 const ASI_LEVELS = [4, 8, 12, 16, 19];
+
+/* ── Prérequis de multiclassage (PHB 2024) ──
+   Il faut 13 dans chacune des caractéristiques listées, à la fois pour la classe
+   qu'on quitte et pour celle qu'on prend. `any: true` = une seule suffit. */
+const MULTICLASS_PREREQ = {
+  'Artificer':  { abils:['int'] },
+  'Barbarian':  { abils:['for'] },
+  'Bard':       { abils:['cha'] },
+  'Cleric':     { abils:['sag'] },
+  'Druid':      { abils:['sag'] },
+  'Fighter':    { abils:['for','dex'], any:true },
+  'Monk':       { abils:['dex','sag'] },
+  'Paladin':    { abils:['for','cha'] },
+  'Psion':      { abils:['int'] },
+  'Ranger':     { abils:['dex','sag'] },
+  'Rogue':      { abils:['dex'] },
+  'Sorcerer':   { abils:['cha'] },
+  'Warlock':    { abils:['cha'] },
+  'Wizard':     { abils:['int'] },
+};
 
 /* ════════════════════════════════════════════════════════════
    D&D 2024 BACKGROUNDS (PHB) — chaque background donne :
@@ -1043,7 +1063,7 @@ const CLASS_DATA = {
     15: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Artificer Specialist." }],
     16: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
     18: [{ name:'Magic Item Master', type:'feature', desc:"You can now attune to up to 7 magic items at once." }],
-    19: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
+    19: [{ name:'Epic Boon', type:'epic', desc:"Gain an Epic Boon feat or another feat of your choice." }],
     20: [{ name:'Soul of Artifice', type:'feature', desc:"You gain a +1 bonus to all saving throws for each magic item you are currently attuned to. If reduced to 0 HP, use your Reaction to end one Artificer Infusion and drop to 1 HP instead." }]
   }
 }
@@ -1196,7 +1216,7 @@ const SUBCLASS_DATA = {
 
 'Druid': {
   'Circle of the Land': {
-    2:[
+    3:[
       { name:'Circle Spells', desc:'Choose a terrain (Arctic, Coast, Desert, Forest, Grassland, Mountain, Swamp, Underdark). You always have terrain-specific spells prepared.' },
       { name:'Natural Recovery', desc:'Once per day after a Short Rest, recover spell slots totaling up to half your Druid level (rounded up). Cannot recover 6th+ slots.' }
     ],
@@ -1205,7 +1225,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Nature\'s Sanctuary', desc:'Beasts and Plants must make WIS save to attack you, or they must choose a new target.' }],
   },
   'Circle of the Moon': {
-    2:[
+    3:[
       { name:'Circle Forms', desc:'Wild Shape as a Bonus Action. Transform into Beasts with CR = Druid level ÷ 3 (min CR 1). Gain temp HP = 3× Beast\'s CR.' },
       { name:'Combat Wild Shape', desc:'While in Wild Shape, Bonus Action: expend a spell slot to regain 1d8 HP per slot level.' }
     ],
@@ -1214,7 +1234,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Beast Spells (Moon)', desc:'Cast Druid spells in Wild Shape form as long as the form has a mouth and equivalent hands.' }],
   },
   'Circle of the Sea': {
-    2:[
+    3:[
       { name:'Wrath of the Sea', desc:'Bonus Action: summon water spirits in a 5-ft sphere within 60 ft for 1 minute (Concentration). Creatures starting turn inside make CON save or take 1d6+WIS Cold and are pushed 15 ft.' },
       { name:'Ocean\'s Gift', desc:'Breathe underwater. Gain a Swim speed equal to your walking speed.' }
     ],
@@ -1223,7 +1243,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Oceanic Gift', desc:'Cast Control Water once per Long Rest without a spell slot.' }],
   },
   'Circle of Stars': {
-    2:[
+    3:[
       { name:'Star Map', desc:'Your spellbook is a star chart. You can cast Guidance and Guiding Bolt (WIS mod uses/Long Rest) without spell slots. Both are always prepared.' },
       { name:'Starry Form', desc:'Wild Shape → starry form instead of a Beast: Archer (Bonus Action ranged attack, 1d8+WIS Radiant), Chalice (healing spells also heal self or ally for 1d8+WIS), Dragon (advantage on Concentration saves; spells deal +10 Radiant).' }
     ],
@@ -1232,7 +1252,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Full of Stars', desc:'While in Starry Form, gain resistance to Bludgeoning, Piercing, and Slashing damage.' }],
   },
   'Circle of Wildfire': {
-    2:[
+    3:[
       { name:'Summon Wildfire Spirit', desc:'Expend a Wild Shape use to summon a wildfire spirit in an unoccupied space within 30 ft. It acts on your initiative, deals fire, and can move 30 ft. Its attacks count as magical.' },
       { name:'Wildfire Spells', desc:'Always prepared: Burning Hands, Cure Wounds (1st); Flaming Sphere, Scorching Ray (3rd); Plant Growth, Revivify (5th); Aura of Life, Fire Shield (7th); Flame Strike, Mass Cure Wounds (9th).' }
     ],
@@ -1634,7 +1654,7 @@ const SUBCLASS_DATA = {
 
 'Wizard': {
   'School of Abjuration': {
-    2:[
+    3:[
       { name:'Abjuration Savant', desc:'Abjuration spells cost half gold and time to copy into your spellbook.' },
       { name:'Arcane Ward', desc:'Casting an Abjuration spell of 1st+ level creates/restores a ward with HP = 2×level + INT mod. Absorbs damage directed at you. Restore it by casting Abjuration spells (restores 2× spell level HP).' }
     ],
@@ -1643,7 +1663,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Spell Resistance', desc:'Advantage on saves vs spells. Resistance to spell damage.' }],
   },
   'School of Conjuration': {
-    2:[
+    3:[
       { name:'Conjuration Savant', desc:'Conjuration spells cost half gold and time to copy.' },
       { name:'Minor Conjuration', desc:'Action: conjure a Tiny nonmagical object (worth ≤25 gp) for 1 hour. Disappears if you move 5+ ft from it.' }
     ],
@@ -1652,7 +1672,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Durable Summons', desc:'Creatures you conjure or create with Conjuration spells gain 30 temp HP.' }],
   },
   'School of Divination': {
-    2:[
+    3:[
       { name:'Divination Savant', desc:'Divination spells cost half gold and time to copy.' },
       { name:'Portent', desc:'After a Long Rest, roll 2 d20s. Before your next Long Rest, replace any d20 roll you or a visible creature makes with one of your Portent dice (before the roll).' }
     ],
@@ -1661,7 +1681,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Greater Portent', desc:'You now roll 3 Portent dice after a Long Rest instead of 2.' }],
   },
   'School of Enchantment': {
-    2:[
+    3:[
       { name:'Enchantment Savant', desc:'Enchantment spells cost half gold and time to copy.' },
       { name:'Hypnotic Gaze', desc:'Action: charm a creature within 5 ft (WIS save). It is Incapacitated, speed 0. Maintain as a Bonus Action each turn for up to 1 minute.' }
     ],
@@ -1670,7 +1690,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Alter Memories', desc:'Charm a creature with an Enchantment spell: it forgets INT mod hours of memories (CON save to resist).' }],
   },
   'School of Evocation': {
-    2:[
+    3:[
       { name:'Evocation Savant', desc:'Evocation spells cost half gold and time to copy.' },
       { name:'Sculpt Spells', desc:'When casting an Evocation spell, choose up to INT mod creatures you can see. They auto-succeed on saves and take no damage from the spell.' }
     ],
@@ -1679,7 +1699,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Overchannel', desc:'Evocation spell of 5th level or lower: deal maximum damage. 2nd+ use before Long Rest: take 2d12 Necrotic per spell level.' }],
   },
   'School of Illusion': {
-    2:[
+    3:[
       { name:'Illusion Savant', desc:'Illusion spells cost half gold and time to copy.' },
       { name:'Improved Minor Illusion', desc:'Know Minor Illusion. When you cast it, create both a sound and an image in a single casting.' }
     ],
@@ -1688,7 +1708,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Illusory Reality', desc:'When you cast a 1st+ Illusion spell, choose one nonliving object in the illusion to become real for 1 minute.' }],
   },
   'School of Necromancy': {
-    2:[
+    3:[
       { name:'Necromancy Savant', desc:'Necromancy spells cost half gold and time to copy.' },
       { name:'Grim Harvest', desc:'When you kill a creature with a spell, regain HP = 2× spell level (or 3× if Necromancy). No Constructs or Undead.' }
     ],
@@ -1697,7 +1717,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Command Undead', desc:'Action: one undead within 60 ft makes WIS save or comes under your control for 24 hours. INT ≥ 8 = advantage on save.' }],
   },
   'School of Transmutation': {
-    2:[
+    3:[
       { name:'Transmutation Savant', desc:'Transmutation spells cost half gold and time to copy.' },
       { name:'Minor Alchemy', desc:'Over 10 minutes, temporarily transform 1 cubic foot of nonmagical material into another basic material. Reverts after 1 hour.' }
     ],
@@ -1706,7 +1726,7 @@ const SUBCLASS_DATA = {
     14:[{ name:'Master Transmuter', desc:'Destroy your Transmuter\'s Stone for one of: reshape matter (5-ft cube), cure all diseases and poisons on one creature, cast Raise Dead, or reduce target\'s age by 2d10 years.' }],
   },
   'Bladesinger': {
-    2:[
+    3:[
       { name:'Training in War and Song', desc:'You gain proficiency with a one-handed melee weapon of your choice and Performance. You can use INT instead of STR or DEX for attack and damage rolls with your chosen weapon while Bladesinging.' },
       { name:'Bladesong', desc:'Bonus Action: activate Bladesong for 1 minute (can\'t wear medium/heavy armor or use shields, and can\'t cast two-handed spells). While active, gain +INT mod to AC, +10 ft walking speed, Advantage on Acrobatics, and +INT mod to CON saves to maintain Concentration. 2×/Short Rest.' }
     ],

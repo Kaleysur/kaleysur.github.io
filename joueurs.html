@@ -2630,6 +2630,39 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .cf-skill-chip.muted { opacity: 0.45; }
 
+/* ── Assistant de montée de niveau ── */
+.lvlup-modal { width: 480px; max-height: 88vh; overflow-y: auto; }
+.lvlup-headline {
+  font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold, #c9a227);
+  text-align: center; margin: 0.7rem 0 0.2rem;
+}
+.lvlup-headline .lvlup-sub { display: block; font-family: inherit; font-size: 0.72rem; color: #8a8a9a; margin-top: 0.2rem; }
+.lvlup-warn {
+  font-size: 0.72rem; color: #d9a441; line-height: 1.45;
+  background: rgba(217,164,65,0.07); border-left: 2px solid #d9a441;
+  padding: 0.4rem 0.6rem; border-radius: 0 4px 4px 0; margin-top: 0.5rem;
+}
+.lvlup-warn:empty { display: none; }
+.lvlup-block { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--j-border-col, #3a2810); }
+.lvlup-block-title {
+  font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--gold-dark, #8a6e1a); margin-bottom: 0.5rem;
+}
+.lvlup-req { color: #7a7a8a; text-transform: none; letter-spacing: 0; font-size: 0.9em; }
+.lvlup-hp-row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
+.lvlup-hp-detail { font-size: 0.72rem; color: #7a7a8a; margin-top: 0.4rem; line-height: 1.45; }
+.lvlup-hp-detail strong { color: var(--gold, #c9a227); }
+.lvlup-hp-pick { font-family: 'Cinzel', serif; color: var(--gold, #c9a227); font-size: 0.85rem; margin-left: 0.3rem; }
+.lvlup-asi-tabs { display: flex; gap: 0.3rem; margin-bottom: 0.55rem; }
+.lvlup-tab {
+  flex: 1; font-size: 0.74rem; padding: 0.28rem 0.5rem; border-radius: 4px; cursor: pointer;
+  background: none; border: 1px solid var(--j-border-col, #3a2810); color: #888;
+  font-family: inherit; transition: all 0.12s;
+}
+.lvlup-tab:hover { border-color: var(--gold-dark, #8a6e1a); color: var(--gold-dark, #8a6e1a); }
+.lvlup-tab.active { border-color: var(--gold-dark, #8a6e1a); background: rgba(201,169,110,0.12); color: var(--gold, #c9a227); }
+.lvlup-asi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+
 /* ── Assistant de création de personnage ── */
 .wiz-modal { width: 460px; }
 .wiz-steps { display: flex; gap: 0.3rem; margin-bottom: 1rem; }
@@ -3411,7 +3444,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <div class="field-group" style="grid-column:span 2;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
                 <label class="field-label">Classes &amp; Levels</label>
-                <button class="btn btn-sm btn-gold" id="btn-add-mc-class" type="button">+ Add Class</button>
+                <div style="display:flex;gap:0.35rem;">
+                  <button class="btn btn-sm btn-gold" id="btn-level-up" type="button" title="Assistant : PV, sous-classe, ASI/don, ressources">⬆ Monter de niveau</button>
+                  <button class="btn btn-sm" id="btn-add-mc-class" type="button">+ Add Class</button>
+                </div>
               </div>
               <div id="mc-classes-container"></div>
               <div style="margin-top:0.45rem;font-size:0.82rem;color:#888;">
@@ -7735,6 +7771,210 @@ const ARMOR_PRESETS = {
   ],
 };
 
+/* ════════════════════════════════════════════════
+   MONTÉE DE NIVEAU
+   planLevelUp() calcule ce qui va changer sans rien toucher ;
+   applyLevelUp() écrit sur la fiche. Les deux sont purs sur `c`,
+   donc rejouables hors navigateur par les smoke-tests.
+   ════════════════════════════════════════════════ */
+
+/* « FOR, DEX or SAG » → ['for','dex','sag'] ; « choice » → les six. */
+function abilKeysFromFeat(abilStr) {
+  const MAP = { FOR:'for', STR:'for', DEX:'dex', CON:'con', INT:'int', SAG:'sag', WIS:'sag', CHA:'cha' };
+  if (!abilStr || abilStr === 'choice') return ['for','dex','con','int','sag','cha'];
+  return abilStr.split(/,| or /).map(s => MAP[s.trim().toUpperCase()]).filter(Boolean);
+}
+
+/* Décrit la montée d'un niveau dans `className` sans modifier le personnage. */
+function planLevelUp(c, className) {
+  const classes = getClasses(c);
+  const idx     = classes.findIndex(cl => cl.classe === className);
+  const known   = typeof CLASS_DATA !== 'undefined' && CLASS_DATA[className];
+  if (!known) return { ok:false, error:`Classe inconnue : ${className}` };
+
+  const fromLevel = idx >= 0 ? (parseInt(classes[idx].niveau) || 1) : 0;
+  const toLevel   = fromLevel + 1;
+  if (toLevel > 20) return { ok:false, error:`${className} est déjà au niveau 20.` };
+  const totalBefore = getTotalLevel(c);
+  // Un multiclassage part du niveau 1 : le total ne bouge que d'un cran dans tous les cas
+  const totalAfter  = totalBefore + 1;
+  if (totalAfter > 20) return { ok:false, error:'Niveau total 20 atteint.' };
+
+  const info      = (typeof DND_CLASSES !== 'undefined' && DND_CLASSES[className]) || {};
+  const hitDie    = info.de || '1d8';
+  const hitDieNum = parseInt(hitDie.replace('1d', '')) || 8;
+  const conMod    = Math.floor(((parseInt(c.con) || 10) - 10) / 2);
+  const speciesFx = (typeof SPECIES_DATA !== 'undefined' && SPECIES_DATA[c.species]) || null;
+  const fx        = Object.assign({}, speciesFx?.effects, speciesFx?.lineages?.[c.lineage]?.effects || {});
+  const speciesHp = parseInt(fx.hpPerLevel) || 0;
+
+  // Sous-classe : choisie au niveau 3 pour toutes les classes (PHB 2024)
+  const currentSub  = idx >= 0 ? (classes[idx].sousClasse || '') : '';
+  const subOptions  = (typeof SUBCLASS_DATA !== 'undefined' && SUBCLASS_DATA[className])
+    ? Object.keys(SUBCLASS_DATA[className]) : [];
+  const needsSubclass = toLevel >= 3 && !currentSub && subOptions.length > 0;
+
+  // ASI/don : lu dans la table de la classe, pas dans une liste générique —
+  // le Guerrier en a aussi aux niveaux 6 et 14, le Roublard au 10, et le niveau 19
+  // est un don épique (type 'epic'), pas un ASI, depuis 2024.
+  const isAsi = (CLASS_DATA[className].features?.[toLevel] || []).some(f => f.type === 'asi');
+
+  // Capacités débloquées à ce niveau de classe (+ celles de la sous-classe)
+  const clsFeatures = (CLASS_DATA[className].features?.[toLevel] || []).map(f => ({ ...f, source: className }));
+  const subName     = currentSub && currentSub !== '__custom__' ? currentSub : '';
+  const subFeatures = (subName && SUBCLASS_DATA?.[className]?.[subName]?.[toLevel] || [])
+    .map(f => ({ ...f, source: subName }));
+
+  return {
+    ok: true, className, classIdx: idx, isNewClass: idx < 0,
+    fromLevel, toLevel, totalBefore, totalAfter,
+    hitDie, hitDieNum, conMod, speciesHp,
+    avgHp:  Math.max(1, Math.floor(hitDieNum / 2) + 1 + conMod + speciesHp),
+    maxHp:  Math.max(1, hitDieNum + conMod + speciesHp),
+    minHp:  Math.max(1, 1 + conMod + speciesHp),
+    needsSubclass, subOptions, isAsi,
+    newFeatures: [...clsFeatures, ...subFeatures],
+    pbBefore: pb(totalBefore), pbAfter: pb(totalAfter),
+    preparedBefore: preparedTotal(c),
+    // Multiclassage : 13 requis des deux côtés (on prévient, on ne bloque pas —
+    // certaines tables l'ignorent volontairement)
+    prereq: idx < 0 ? multiclassPrereqCheck(c, className) : null,
+  };
+}
+
+/* Vérifie les prérequis de multiclassage vers `className` : la classe d'origine
+   ET la nouvelle demandent chacune 13 dans leurs caractéristiques. */
+function multiclassPrereqCheck(c, className) {
+  if (typeof MULTICLASS_PREREQ === 'undefined') return null;
+  const LABEL = { for:'FOR', dex:'DEX', con:'CON', int:'INT', sag:'SAG', cha:'CHA' };
+  const missing = [];
+  const check = (cls) => {
+    const req = MULTICLASS_PREREQ[cls];
+    if (!req) return;
+    const met = req.any
+      ? req.abils.some(a => (parseInt(c[a]) || 10) >= 13)
+      : req.abils.every(a => (parseInt(c[a]) || 10) >= 13);
+    if (!met) missing.push(`${cls} : ${req.abils.map(a => LABEL[a]).join(req.any ? ' ou ' : ' et ')} 13+`);
+  };
+  getClasses(c).forEach(cl => check(cl.classe));
+  check(className);
+  return missing.length ? { ok:false, missing } : { ok:true, missing:[] };
+}
+
+/* Total de sorts préparés toutes classes confondues (tables 2024). */
+function preparedTotal(c) {
+  if (typeof PREPARED_SPELLS === 'undefined') return 0;
+  return getClasses(c).reduce((sum, cl) => {
+    const t = PREPARED_SPELLS[cl.classe];
+    if (!t) return sum;
+    return sum + (t[Math.max(1, Math.min(20, parseInt(cl.niveau) || 1)) - 1] || 0);
+  }, 0);
+}
+
+/* Applique la montée. `choices` : { hp, subclass, asiMode:'abil'|'feat',
+   asiA, asiB, feat, featAbil }. Renvoie un journal de ce qui a changé. */
+function applyLevelUp(c, plan, choices) {
+  if (!plan?.ok) return { ok:false, error: plan?.error || 'Plan invalide' };
+  const ch  = choices || {};
+  const log = [];
+
+  // ── Validations AVANT toute écriture : un échec en cours de route laisserait
+  //    le personnage à moitié monté (niveau incrémenté, PV pas encore ajoutés). ──
+  if (plan.needsSubclass && ch.subclass && !plan.subOptions.includes(ch.subclass)) {
+    return { ok:false, error:`Sous-classe inconnue pour ${plan.className} : ${ch.subclass}` };
+  }
+  if (plan.isAsi && ch.asiMode === 'feat' && ch.feat
+      && typeof GENERAL_FEATS !== 'undefined' && !GENERAL_FEATS[ch.feat]) {
+    return { ok:false, error:`Don inconnu : ${ch.feat}` };
+  }
+
+  // ── Niveau ──
+  c.classes = getClasses(c).map(cl => ({ ...cl }));
+  if (plan.isNewClass) {
+    c.classes.push({ classe: plan.className, sousClasse:'', niveau:1, customSousClasse:'' });
+    log.push(`${plan.className} ajouté au niveau 1 (multiclassage)`);
+  } else {
+    c.classes[plan.classIdx].niveau = plan.toLevel;
+    log.push(`${plan.className} niveau ${plan.fromLevel} → ${plan.toLevel}`);
+  }
+  const idx = plan.isNewClass ? c.classes.length - 1 : plan.classIdx;
+
+  // ── PV ── on ajoute un delta : la fiche peut avoir été retouchée à la main
+  const gain = Math.max(1, parseInt(ch.hp) || plan.avgHp);
+  c.pvMax    = (parseInt(c.pvMax) || 0) + gain;
+  c.pvActuel = (parseInt(c.pvActuel) || 0) + gain;   // on monte de niveau reposé
+  log.push(`+${gain} PV max (total ${c.pvMax})`);
+
+  // ── Dés de vie ──
+  c.nbDeVie = (parseInt(c.nbDeVie) || 0) + 1;
+
+  // ── Sous-classe (déjà validée plus haut) ──
+  if (plan.needsSubclass && ch.subclass) {
+    c.classes[idx].sousClasse = ch.subclass;
+    log.push(`Sous-classe : ${ch.subclass}`);
+  }
+
+  // ── ASI ou don ──
+  if (plan.isAsi) {
+    if (ch.asiMode === 'feat' && ch.feat) {
+      const f = (typeof GENERAL_FEATS !== 'undefined' && GENERAL_FEATS[ch.feat]) || null;
+      c.customFeatures = c.customFeatures || [];
+      c.customFeatures.push({
+        name: ch.feat, source: `Don — ${plan.className} ${plan.toLevel}`,
+        desc: f?.desc || '', _open:false
+      });
+      log.push(`Don : ${ch.feat}`);
+      // Les dons généraux 2024 donnent aussi +1 dans une caractéristique
+      if (f?.asi && ch.featAbil) {
+        c[ch.featAbil] = Math.min(20, (parseInt(c[ch.featAbil]) || 10) + 1);
+        log.push(`+1 ${ch.featAbil.toUpperCase()} (${ch.feat})`);
+      }
+    } else {
+      // +2 sur une caractéristique, ou +1/+1 sur deux — plafond 20
+      const bump = (k, n) => {
+        if (!k) return;
+        const before = parseInt(c[k]) || 10;
+        c[k] = Math.min(20, before + n);
+        if (c[k] !== before) log.push(`${k.toUpperCase()} ${before} → ${c[k]}`);
+      };
+      if (ch.asiA && ch.asiB && ch.asiA !== ch.asiB) { bump(ch.asiA, 1); bump(ch.asiB, 1); }
+      else bump(ch.asiA, 2);
+    }
+  }
+
+  syncClassesToLegacy(c);
+
+  // ── Ressources de classe ── on re-dérive en conservant la consommation
+  if (typeof CLASS_RESOURCES !== 'undefined' && CLASS_RESOURCES[plan.className]) {
+    const used = new Map((c.resources || []).map(r => [r.name, r.used]));
+    const fresh = CLASS_RESOURCES[plan.className](c.classes[idx].niveau).map(r => ({ ...r }));
+    // On ne remplace que les ressources de cette classe, les autres (multiclasse) restent
+    const keep = (c.resources || []).filter(r => !fresh.some(f => f.name === r.name));
+    c.resources = [...keep, ...fresh.map(r => ({ ...r, used: used.get(r.name) ?? 0 }))];
+  }
+
+  // ── Journal : on alimente le Level Plan existant plutôt que d'ouvrir un second registre ──
+  if (!c.levelPlan || !Array.isArray(c.levelPlan.rows)) {
+    c.levelPlan = { rows: Array(20).fill(null).map(() => ({ cls:'', hp:null, asi:'', spells:'', notes:'' })), _open:[] };
+  }
+  const row = c.levelPlan.rows[plan.totalAfter - 1];
+  if (row) {
+    row.cls = plan.className;
+    row.hp  = gain;
+    if (plan.isAsi) row.asi = ch.asiMode === 'feat'
+      ? `Don : ${ch.feat || ''}` + (ch.featAbil ? ` (+1 ${ch.featAbil.toUpperCase()})` : '')
+      : (ch.asiA && ch.asiB && ch.asiA !== ch.asiB
+          ? `+1 ${ch.asiA.toUpperCase()} / +1 ${ch.asiB.toUpperCase()}`
+          : `+2 ${(ch.asiA || '').toUpperCase()}`);
+  }
+
+  if (plan.pbAfter > plan.pbBefore) log.push(`Bonus de maîtrise +${plan.pbBefore} → +${plan.pbAfter}`);
+  const prepAfter = preparedTotal(c);
+  if (prepAfter > plan.preparedBefore) log.push(`Sorts préparés ${plan.preparedBefore} → ${prepAfter}`);
+
+  return { ok:true, log, gain, totalLevel: getTotalLevel(c) };
+}
+
 /* ── Ce qu'un lanceur doit encore choisir après la création ──
    Le créateur ne sélectionne pas les sorts (ce serait un second assistant) : il
    dit au moins combien il en faut, sinon la fiche sort avec une liste vide et
@@ -11016,6 +11256,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-layout-edit')?.addEventListener('click', toggleLayoutEdit);
 
   /* ── Add multiclass button ── */
+  document.getElementById('btn-level-up')?.addEventListener('click', () => window.openLevelUpModal?.());
+
   document.getElementById('btn-add-mc-class')?.addEventListener('click', () => {
     const c = C(); if (!c) return;
     migrateToMulticlass(c);
@@ -11768,6 +12010,194 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 }); // end DOMContentLoaded
 
+/* ════════════════════════════════════════════════
+   Assistant de montée de niveau — interface
+   La logique vit dans planLevelUp/applyLevelUp ; ici on ne fait que la piloter.
+   ════════════════════════════════════════════════ */
+/* Le markup de la modal se trouve plus bas dans le document que ce script :
+   on attend le DOM, sinon l'IIFE sort en silence et le bouton ne fait rien. */
+document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
+  const overlay = document.getElementById('lvlup-modal-overlay');
+  if (!overlay) return;
+  const ABIL = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
+  const $ = id => document.getElementById(id);
+  let plan = null, chosenHp = null, asiMode = 'abil';
+
+  const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk',
+                      'Paladin','Psion','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
+
+  function refresh() {
+    const c = C();
+    plan = planLevelUp(c, $('lvlup-class').value);
+    const okBtn = $('lvlup-confirm');
+
+    if (!plan.ok) {
+      $('lvlup-headline').innerHTML = `<span style="color:#e07070;">${esc(plan.error)}</span>`;
+      ['lvlup-prereq','lvlup-hp-row','lvlup-hp-detail'].forEach(id => $(id).innerHTML = '');
+      ['lvlup-sub-block','lvlup-asi-block','lvlup-new-block'].forEach(id => $(id).style.display = 'none');
+      okBtn.disabled = true;
+      return;
+    }
+    okBtn.disabled = false;
+
+    // Titre
+    $('lvlup-headline').innerHTML = plan.isNewClass
+      ? `${esc(plan.className)} niveau 1 <span class="lvlup-sub">multiclassage — niveau total ${plan.totalBefore} → ${plan.totalAfter}</span>`
+      : `${esc(plan.className)} ${plan.fromLevel} → ${plan.toLevel}`
+        + `<span class="lvlup-sub">niveau total ${plan.totalBefore} → ${plan.totalAfter}`
+        + (plan.pbAfter > plan.pbBefore ? ` · maîtrise +${plan.pbBefore} → +${plan.pbAfter}` : '') + `</span>`;
+
+    // Prérequis de multiclassage
+    $('lvlup-prereq').innerHTML = (plan.prereq && !plan.prereq.ok)
+      ? `⚠ Prérequis de multiclassage non remplis — ${plan.prereq.missing.join(' ; ')}.
+         Tu peux continuer, mais ce n'est pas conforme aux règles 2024.`
+      : '';
+
+    // PV
+    if (chosenHp === null) chosenHp = plan.avgHp;
+    $('lvlup-hp-row').innerHTML =
+      `<button class="btn btn-sm btn-gold" id="lvlup-hp-avg">⊘ Moyenne (+${plan.avgHp})</button>
+       <button class="btn btn-sm" id="lvlup-hp-roll">🎲 Lancer ${plan.hitDie}</button>
+       <span class="lvlup-hp-pick" id="lvlup-hp-pick">+${chosenHp} PV</span>`;
+    $('lvlup-hp-detail').innerHTML =
+      `${plan.hitDie} ${plan.conMod < 0 ? '−' : '+'} <strong>${Math.abs(plan.conMod)}</strong> CON`
+      + (plan.speciesHp ? ` + <strong>${plan.speciesHp}</strong> espèce` : '')
+      + ` — entre ${plan.minHp} et ${plan.maxHp} PV.`;
+    $('lvlup-hp-avg').addEventListener('click', () => { chosenHp = plan.avgHp; $('lvlup-hp-pick').textContent = `+${chosenHp} PV`; });
+    $('lvlup-hp-roll').addEventListener('click', () => {
+      const r = rollDiceExpr(plan.hitDie);
+      chosenHp = Math.max(1, r.total + plan.conMod + plan.speciesHp);
+      showDamageRoll(`PV niveau ${plan.totalAfter} · ${plan.hitDie}`, r);
+      $('lvlup-hp-pick').textContent = `+${chosenHp} PV`;
+    });
+
+    // Sous-classe
+    const subBlock = $('lvlup-sub-block');
+    subBlock.style.display = plan.needsSubclass ? '' : 'none';
+    if (plan.needsSubclass) {
+      $('lvlup-sub').innerHTML = '<option value="">— Choisir —</option>'
+        + plan.subOptions.map(s => `<option>${esc(s)}</option>`).join('');
+      $('lvlup-sub-preview').innerHTML = '';
+    }
+
+    // ASI / don
+    const asiBlock = $('lvlup-asi-block');
+    asiBlock.style.display = plan.isAsi ? '' : 'none';
+    if (plan.isAsi) {
+      // Une caractéristique déjà à 20 ne peut plus monter : on le dit au lieu de perdre le gain
+      const opt = (sel) => ABIL.map(([k, l]) => {
+        const v = parseInt(C()[k]) || 10;
+        return `<option value="${k}"${sel === k ? ' selected' : ''}${v >= 20 ? ' disabled' : ''}>${l} ${v}${v >= 20 ? ' (max)' : ''}</option>`;
+      }).join('');
+      $('lvlup-asi-a').innerHTML = '<option value="">— +2 ici, ou +1/+1 —</option>' + opt();
+      $('lvlup-asi-b').innerHTML = '<option value="">— aucune (donc +2) —</option>' + opt();
+      $('lvlup-feat').innerHTML = '<option value="">— Choisir un don —</option>'
+        + Object.keys(GENERAL_FEATS).filter(f => f !== 'Ability Score Improvement')
+            .map(f => `<option>${esc(f)}</option>`).join('');
+      syncAsiNote();
+    }
+
+    // Nouveautés
+    const feats = plan.newFeatures;
+    $('lvlup-new-block').style.display = feats.length ? '' : 'none';
+    if (feats.length) $('lvlup-new').innerHTML = feats.map(f =>
+      `<div class="wiz-trait"><span class="wiz-trait-name">${esc(f.name)}</span>
+        <span style="color:#888;font-size:0.9em;">(${esc(f.source)})</span> — ${esc(f.desc || '')}</div>`).join('');
+  }
+
+  function syncAsiNote() {
+    const a = $('lvlup-asi-a').value, b = $('lvlup-asi-b').value;
+    $('lvlup-asi-note').innerHTML = !a ? 'Choisis au moins une caractéristique.'
+      : (b && b !== a) ? `<strong>+1</strong> ${a.toUpperCase()} et <strong>+1</strong> ${b.toUpperCase()}`
+      : (b && b === a) ? '⚠ Deux fois la même — ce sera un simple +2.'
+      : `<strong>+2</strong> ${a.toUpperCase()}`;
+  }
+  $('lvlup-asi-a').addEventListener('change', syncAsiNote);
+  $('lvlup-asi-b').addEventListener('change', syncAsiNote);
+
+  // Onglets caractéristiques / don
+  overlay.querySelectorAll('[data-asimode]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      asiMode = btn.dataset.asimode;
+      overlay.querySelectorAll('[data-asimode]').forEach(b => b.classList.toggle('active', b === btn));
+      $('lvlup-asi-abil').style.display = asiMode === 'abil' ? '' : 'none';
+      $('lvlup-asi-feat').style.display = asiMode === 'feat' ? '' : 'none';
+    }));
+
+  // Description du don + caractéristique associée
+  $('lvlup-feat').addEventListener('change', () => {
+    const f = GENERAL_FEATS[$('lvlup-feat').value];
+    const wrap = $('lvlup-feat-abil-wrap');
+    if (!f) { $('lvlup-feat-desc').innerHTML = ''; wrap.style.display = 'none'; return; }
+    $('lvlup-feat-desc').innerHTML =
+      (f.prereq ? `<div style="color:#d9a441;">Prérequis : ${esc(f.prereq)}</div>` : '') + esc(f.desc);
+    // Les dons généraux 2024 accordent +1 : on fait choisir dans quelle carac.
+    if (f.asi) {
+      const keys = abilKeysFromFeat(f.abil);
+      wrap.style.display = '';
+      $('lvlup-feat-abil').innerHTML = keys.map(k => {
+        const v = parseInt(C()[k]) || 10;
+        return `<option value="${k}"${v >= 20 ? ' disabled' : ''}>${k.toUpperCase()} ${v}${v >= 20 ? ' (max)' : ''}</option>`;
+      }).join('');
+    } else wrap.style.display = 'none';
+  });
+
+  $('lvlup-sub').addEventListener('change', () => {
+    const feats = SUBCLASS_DATA?.[plan?.className]?.[$('lvlup-sub').value]?.[plan.toLevel] || [];
+    $('lvlup-sub-preview').innerHTML = feats.map(f =>
+      `<div class="wiz-trait"><span class="wiz-trait-name">${esc(f.name)}</span> — ${esc(f.desc || '')}</div>`).join('');
+  });
+
+  $('lvlup-class').addEventListener('change', () => { chosenHp = null; refresh(); });
+  $('lvlup-cancel').addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) overlay.classList.remove('open');
+  });
+
+  $('lvlup-confirm').addEventListener('click', () => {
+    if (!plan?.ok) return;
+    if (plan.needsSubclass && !$('lvlup-sub').value) {
+      showToast('⚠ Choisis ta sous-classe — elle est requise au niveau 3.');
+      return;
+    }
+    if (plan.isAsi && asiMode === 'abil' && !$('lvlup-asi-a').value) {
+      showToast('⚠ Choisis au moins une caractéristique à améliorer.');
+      return;
+    }
+    if (plan.isAsi && asiMode === 'feat' && !$('lvlup-feat').value) {
+      showToast('⚠ Choisis un don, ou bascule sur Caractéristiques.');
+      return;
+    }
+    const res = applyLevelUp(C(), plan, {
+      hp: chosenHp, subclass: $('lvlup-sub').value, asiMode,
+      asiA: $('lvlup-asi-a').value, asiB: $('lvlup-asi-b').value,
+      feat: $('lvlup-feat').value, featAbil: $('lvlup-feat-abil').value,
+    });
+    overlay.classList.remove('open');
+    if (!res.ok) { showToast('⚠ ' + res.error); return; }
+    renderAll(); renderCharCards(); renderCharSelector(); triggerSave();
+    showToast(`⬆ Niveau ${res.totalLevel} — ${res.log.join(' · ')}`);
+  });
+
+  window.openLevelUpModal = function () {
+    if (!playerData) return;
+    const c = C();
+    const cur = getClasses(c).map(cl => cl.classe).filter(Boolean);
+    $('lvlup-class').innerHTML =
+        `<optgroup label="Tes classes">${cur.map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`
+      + `<optgroup label="Multiclasser">${CLASS_LIST.filter(n => !cur.includes(n))
+            .map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`;
+    chosenHp = null;
+    asiMode = 'abil';
+    overlay.querySelectorAll('[data-asimode]').forEach(b => b.classList.toggle('active', b.dataset.asimode === 'abil'));
+    $('lvlup-asi-abil').style.display = ''; $('lvlup-asi-feat').style.display = 'none';
+    $('lvlup-feat-desc').innerHTML = ''; $('lvlup-feat-abil-wrap').style.display = 'none';
+    refresh();
+    overlay.classList.add('open');
+  };
+});
+
 /* ── Fonction globale : ouvrir le modal nouveau personnage ── */
 function openNewCharModal() {
   const overlay = document.getElementById('new-char-modal-overlay');
@@ -12470,6 +12900,69 @@ document.addEventListener('keydown', e => {
           <button class="btn btn-sm" id="wiz-prev" style="display:none;">‹ Retour</button>
           <button class="btn btn-sm btn-gold" id="wiz-next">Suivant ›</button>
           <button class="btn btn-sm btn-gold" id="new-char-confirm" style="display:none;">✦ Créer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Modal Montée de niveau ── -->
+    <div class="new-char-modal-overlay" id="lvlup-modal-overlay">
+      <div class="new-char-modal lvlup-modal">
+        <h3>⬆ Montée de niveau</h3>
+
+        <div class="auth-field">
+          <label class="auth-label" for="lvlup-class">Classe à monter</label>
+          <select class="auth-input" id="lvlup-class"></select>
+        </div>
+        <div class="lvlup-headline" id="lvlup-headline"></div>
+        <div class="lvlup-warn" id="lvlup-prereq"></div>
+
+        <!-- PV -->
+        <div class="lvlup-block">
+          <div class="lvlup-block-title">Points de vie</div>
+          <div class="lvlup-hp-row" id="lvlup-hp-row"></div>
+          <div class="lvlup-hp-detail" id="lvlup-hp-detail"></div>
+        </div>
+
+        <!-- Sous-classe (niveau 3) -->
+        <div class="lvlup-block" id="lvlup-sub-block" style="display:none;">
+          <div class="lvlup-block-title">Sous-classe <span class="lvlup-req">requise au niveau 3</span></div>
+          <select class="auth-input" id="lvlup-sub"></select>
+          <div class="wiz-preview" id="lvlup-sub-preview"></div>
+        </div>
+
+        <!-- ASI / don -->
+        <div class="lvlup-block" id="lvlup-asi-block" style="display:none;">
+          <div class="lvlup-block-title">Amélioration de caractéristiques <span class="lvlup-req">ou don</span></div>
+          <div class="lvlup-asi-tabs">
+            <button type="button" class="lvlup-tab active" data-asimode="abil">Caractéristiques</button>
+            <button type="button" class="lvlup-tab" data-asimode="feat">Don</button>
+          </div>
+          <div id="lvlup-asi-abil">
+            <div class="lvlup-asi-row">
+              <select class="auth-input" id="lvlup-asi-a"></select>
+              <select class="auth-input" id="lvlup-asi-b"></select>
+            </div>
+            <div class="lvlup-hp-detail" id="lvlup-asi-note"></div>
+          </div>
+          <div id="lvlup-asi-feat" style="display:none;">
+            <select class="auth-input" id="lvlup-feat"></select>
+            <div class="auth-field" id="lvlup-feat-abil-wrap" style="display:none;margin-top:0.5rem;">
+              <label class="auth-label" for="lvlup-feat-abil">+1 dans</label>
+              <select class="auth-input" id="lvlup-feat-abil"></select>
+            </div>
+            <div class="wiz-preview" id="lvlup-feat-desc"></div>
+          </div>
+        </div>
+
+        <!-- Nouveautés -->
+        <div class="lvlup-block" id="lvlup-new-block" style="display:none;">
+          <div class="lvlup-block-title">Ce que tu débloques</div>
+          <div class="wiz-preview" id="lvlup-new"></div>
+        </div>
+
+        <div class="new-char-btn-row">
+          <button class="btn btn-sm" id="lvlup-cancel">Annuler</button>
+          <button class="btn btn-sm btn-gold" id="lvlup-confirm">⬆ Monter de niveau</button>
         </div>
       </div>
     </div>
