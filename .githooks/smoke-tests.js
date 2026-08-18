@@ -74,6 +74,29 @@ function ok(cond, label) {
     extract(J, 'function applyStartingGear(c, className, items)'),
     extract(J, 'function startingMaxHp(c, hitDie, speciesEffects)'),
     extract(J, 'function startingSpellHint(className)'),
+    extract(J, 'const SIZE_CARRY_MULT'),
+    extract(J, 'function carryCapacity(c)'),
+    extract(J, 'function coinWeight(currency)'),
+    extract(J, 'function inventoryWeight(inv)'),
+    extract(J, 'const ARMOR_PRESETS'),
+    extract(J, 'function isShieldItem(item)'),
+    extract(J, 'function armorFromItem(item)'),
+    extract(J, 'function isEquippable(item)'),
+    extract(J, 'function defaultArmorConfig(c)'),
+    extract(J, 'function equippedArmorMismatch(c, inv)'),
+    extract(J, 'const ATTUNE_MAX'),
+    extract(J, 'function isAttunable(item)'),
+    extract(J, 'function attunedItems(inv)'),
+    extract(J, 'function migrateAttunement(inv)'),
+    extract(J, 'function isProficientWith(c, weaponCat)'),
+    extract(J, 'function attackFromItem(item, c)'),
+    extract(J, 'function syncAttackForItem(c, item, equipped)'),
+    extract(J, 'const COIN_RATE'),
+    extract(J, 'function purseValue(currency)'),
+    extract(J, 'function itemsValue(items)'),
+    extract(J, 'function fmtGp(v)'),
+    extract(J, 'function searchNotes(pages, query)'),
+    extract(J, 'function diffNotes(local, distant)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -120,10 +143,10 @@ function ok(cond, label) {
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
-          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ } =
+          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
-      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ,'
+      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -444,6 +467,184 @@ function ok(cond, label) {
     eq(c.levelPlan.rows[3].hp, 7, 'journal : PV gagnés');
     eq(c.levelPlan.rows[3].asi, '+1 DEX / +1 CON', 'journal : décision ASI');
   }
+
+  /* -- Encombrement : capacite, poids des pieces, total de l'inventaire -- */
+  eq(carryCapacity({ for:10, species:'Human' }), 150, 'capacite FOR 10');
+  eq(carryCapacity({ for:18, species:'Dwarf' }), 270, 'capacite FOR 18');
+  eq(carryCapacity({}), 150, 'sans FOR : 10 par defaut');
+  eq(carryCapacity({ for:12, species:'EspeceInconnue' }), 180, 'espece inconnue : taille Medium');
+  // Toute espece jouable doit donner une capacite exploitable
+  Object.keys(SPECIES_DATA).forEach(sp =>
+    ok(carryCapacity({ for:10, species:sp }) > 0, `${sp} : capacite de charge invalide`));
+  eq(coinWeight({ gp:50 }), 1, '50 pieces = 1 lb');
+  eq(coinWeight({ pp:10, gp:20, sp:20 }), 1, 'pieces melangees');
+  eq(coinWeight({}), 0, 'aucune piece');
+  eq(inventoryWeight({ items:[{ name:'Javelin', qty:4, weight:2 }], currency:{} }).total, 8,
+     'le poids est multiplie par la quantite');
+  eq(inventoryWeight({ items:[{ name:'X', qty:1 }], currency:{} }),
+     { total:0, sansPoids:1, coins:0 }, 'objet sans poids : compte comme non renseigne, pas 0');
+  eq(inventoryWeight({ items:[{ name:'Y', weight:2.5 }], currency:{} }).total, 2.5,
+     'quantite absente = 1');
+  eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
+  eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+  /* -- Valeur du butin -- */
+  eq(purseValue({ gp:100 }), 100, 'bourse en po');
+  eq(purseValue({ pp:1, gp:1, ep:1, sp:1, cp:1 }), 11.61, 'toutes les denominations');
+  eq(purseValue({}), 0, 'bourse vide');
+  eq(itemsValue([{ name:'A', cost:15, qty:2 }]), { total:30, sansPrix:0 }, 'prix multiplie par la quantite');
+  eq(itemsValue([{ name:'A', cost:15 }, { name:'B' }]), { total:15, sansPrix:1 },
+     'objet sans prix signale, pas compte a zero');
+  eq(itemsValue([{ name:'A', cost:2.5 }]), { total:2.5, sansPrix:0 }, 'quantite absente = 1');
+  eq(itemsValue([]), { total:0, sansPrix:0 }, 'inventaire vide');
+  eq(fmtGp(15), '15', 'pas de decimale inutile');
+  eq(fmtGp(0.5), '0.5', 'decimale conservee');
+  eq(fmtGp(15.006), '15.01', 'arrondi au centieme');
+
+  /* -- Filet de securite sur conflit : ce que le local avait en plus -- */
+  {
+    const mk = (nom, notes) => ({ characters:{ c1:{ character:{ characterName:nom }, notes } } });
+    eq(diffNotes(mk('Thorin', [{ content:'aaa' }, { content:'bbb' }]), mk('Thorin', [{ content:'aaa' }])),
+       [{ nom:'Thorin', pagesEnPlus:1, caracteresEnPlus:3 }], 'page en plus cote local');
+    eq(diffNotes(mk('Thorin', [{ content:'aaaaa' }]), mk('Thorin', [{ content:'aaa' }])),
+       [{ nom:'Thorin', pagesEnPlus:0, caracteresEnPlus:2 }], 'texte en plus cote local');
+    eq(diffNotes(mk('Thorin', [{ content:'aaa' }]), mk('Thorin', [{ content:'aaa' }])), [],
+       'versions identiques : rien a signaler');
+    eq(diffNotes(mk('Thorin', [{ content:'a' }]), mk('Thorin', [{ content:'aaaa' }])), [],
+       'distant plus riche : on ne reclame rien');
+    eq(diffNotes(mk('Thorin', [{ content:'aaa' }]), { characters:{} }),
+       [{ nom:'Thorin', pagesEnPlus:1, caracteresEnPlus:3 }], 'personnage absent du distant');
+    eq(diffNotes({}, {}), [], 'donnees vides');
+    eq(diffNotes(mk('Thorin', null), mk('Thorin', null)), [], 'notes absentes');
+  }
+
+  /* -- Recherche dans les notes -- */
+  {
+    const pages = [
+      { name:'Session 1', content:'Nous avons rencontre Elara a Ouestvir. Elara nous a parle du culte.' },
+      { name:'PNJ',       content:'Elara — pretresse. Bram — forgeron.' },
+      { name:'Elara',     content:'Rien ici.' },
+      { name:'Vide',      content:'' },
+    ];
+    const r = searchNotes(pages, 'elara');
+    eq(r.length, 3, 'trois pages concernees');
+    eq(r[0].total, 2, 'occurrences comptees dans la page');
+    eq(r[0].hits[0].motif, 'Elara', 'la casse d origine est conservee dans l extrait');
+    eq(r[2].dansTitre, true, 'trouve dans le titre seul');
+    eq(r[2].hits.length, 0, 'titre seul : aucun extrait');
+    eq(searchNotes(pages, 'e'), [], 'requete d un seul caractere ignoree');
+    eq(searchNotes(pages, ''), [], 'requete vide');
+    eq(searchNotes(pages, 'dragon'), [], 'aucun resultat');
+    eq(searchNotes(pages, 'ELARA').length, 3, 'recherche insensible a la casse');
+    eq(searchNotes(null, 'test'), [], 'pages absentes');
+    eq(searchNotes(pages, '  elara  ').length, 3, 'espaces autour de la requete ignores');
+    const many = searchNotes([{ name:'X', content:'orc orc orc orc orc' }], 'orc');
+    eq(many[0].hits.length, 3, 'au plus trois extraits affiches');
+    eq(many[0].total, 5, 'mais le total reste exact');
+  }
+
+  /* -- Une arme equipee devient une ligne d'attaque -- */
+  {
+    const guerrier = { for:16, dex:12, classes:[{ classe:'Fighter', niveau:5 }] };
+    const magicien = { for:8,  dex:14, classes:[{ classe:'Wizard',  niveau:5 }] };
+    const roublard = { for:10, dex:18, classes:[{ classe:'Rogue',   niveau:5 }] };
+    eq(attackFromItem({ name:'Longsword', dmg:'1d8', dmgType:'Slashing', weaponCat:'martial' }, guerrier),
+       { name:'Longsword', degats:'1d8+3', typeDegat:'Slashing', atkType:'for', prof:true, bonus:'', fromItem:'Longsword' },
+       'arme du compendium -> ligne d attaque');
+    eq(attackFromItem({ name:'Rapier', dmg:'1d8', finesse:true }, roublard).atkType, 'dex',
+       'finesse : la meilleure des deux caracteristiques');
+    eq(attackFromItem({ name:'Rapier', dmg:'1d8', finesse:true }, guerrier).atkType, 'for',
+       'finesse : FOR quand elle est meilleure');
+    eq(attackFromItem({ name:'Longbow', dmg:'1d8', ranged:true }, guerrier).atkType, 'dex',
+       'arme a distance : toujours DEX');
+    // Maitrise deduite de la classe : un magicien n'est pas maitre d'une arme martiale
+    eq(attackFromItem({ name:'Greataxe', dmg:'1d12', weaponCat:'martial' }, magicien).prof, false,
+       'magicien : pas maitre des armes martiales');
+    eq(attackFromItem({ name:'Dagger', dmg:'1d4', weaponCat:'simple' }, magicien).prof, true,
+       'magicien : maitre des armes simples');
+    eq(isProficientWith({ classes:[{ classe:'ClasseInconnue' }] }, 'martial'), true,
+       'classe inconnue : aucun malus invente');
+    // Repli sur STARTING_WEAPONS quand l'objet n'a pas ete importe du compendium
+    eq(attackFromItem({ name:'Greataxe' }, guerrier).degats, '1d12+3',
+       'arme saisie a la main : repli sur les armes connues');
+    eq(attackFromItem({ name:'Rope, Hempen' }, guerrier), null, 'un objet quelconque ne cree pas d attaque');
+    eq(attackFromItem({ name:'Chain Mail' }, guerrier), null, 'une armure ne cree pas d attaque');
+    // Ajout / retrait sans toucher aux lignes saisies a la main
+    const c2 = { for:16, dex:12, classes:[{ classe:'Fighter', niveau:5 }],
+                 attaques:[{ name:'Poing', degats:'1', atkType:'for' }] };
+    syncAttackForItem(c2, { name:'Longsword', dmg:'1d8' }, true);
+    eq(c2.attaques.length, 2, 'attaque ajoutee a l equipement');
+    syncAttackForItem(c2, { name:'Longsword', dmg:'1d8' }, true);
+    eq(c2.attaques.length, 2, 'pas de doublon si deja presente');
+    syncAttackForItem(c2, { name:'Longsword', dmg:'1d8' }, false);
+    eq(c2.attaques.length, 1, 'attaque retiree au deshabillage');
+    eq(c2.attaques[0].name, 'Poing', 'les attaques saisies a la main sont preservees');
+    eq(syncAttackForItem(c2, { name:'Rope' }, true), null, 'un objet non-arme ne touche a rien');
+  }
+
+  /* -- Lien magique : migration des anciens emplacements, plafond de 3 -- */
+  const ATTUNE_MAX_T = new Function(extract(J, 'const ATTUNE_MAX') + '; return ATTUNE_MAX;')();
+  eq(ATTUNE_MAX_T, 3, 'trois liens au maximum');
+  eq(isAttunable({ name:'X', attune:true }), true, 'objet du compendium liable');
+  eq(isAttunable({ name:'X', cat:'magique' }), true, 'objet magique liable');
+  eq(isAttunable({ name:'Rope', cat:'equipement' }), false, 'objet ordinaire non liable');
+  {
+    // L'ancien format (3 champs texte) doit se transferer sans rien perdre
+    const inv = { items:[{ name:'Cloak of Protection', cat:'magique' }],
+                  attunement:[{ name:'Cloak of Protection', active:true },
+                              { name:'Ring of Jumping', active:false },
+                              { name:'', active:false }] };
+    eq(migrateAttunement(inv), 2, 'deux emplacements nommes repris');
+    eq(inv.items[0].attuned, true, 'objet existant : lien conserve');
+    eq(inv.items.length, 2, 'objet absent de l inventaire : cree');
+    eq(inv.items[1].name, 'Ring of Jumping', 'nom repris tel quel');
+    eq('attunement' in inv, false, 'ancienne cle supprimee');
+    eq(migrateAttunement(inv), 0, 'migration idempotente');
+  }
+  eq(migrateAttunement({ items:[] }), 0, 'inventaire sans ancien format');
+  eq(migrateAttunement(null), 0, 'inventaire absent');
+  eq(attunedItems({ items:[{ attuned:true }, {}, { attuned:true }] }).length, 2, 'comptage des liens');
+
+  /* -- Objets equipes : l'inventaire pilote la CA -- */
+  const ARMOR_PRESETS_T = new Function(extract(J, 'const ARMOR_PRESETS') + '; return ARMOR_PRESETS;')();
+  eq(isShieldItem({ name:'Shield' }), true, 'bouclier reconnu');
+  eq(isShieldItem({ name:'Shield, +1' }), true, 'bouclier magique reconnu');
+  eq(isShieldItem({ name:'Bouclier' }), true, 'bouclier en francais');
+  eq(isShieldItem({ name:'Shielded Boots' }), false, 'pas de faux positif sur un mot compose');
+  eq(isShieldItem({ name:'Longsword' }), false, 'une arme n est pas un bouclier');
+  eq(isShieldItem({ name:'Pavois', shield:true }), true, 'donnee du compendium prioritaire');
+  // Resolution d'une armure : compendium, puis tables connues, puis rien
+  eq(armorFromItem({ name:'Elven Chain', armorType:'medium', ac:13 }),
+     { mode:'medium', baseAC:13, armorName:'Elven Chain' }, 'armure du compendium');
+  eq(armorFromItem({ name:'Chain Mail' }),
+     { mode:'heavy', baseAC:16, armorName:'Chain Mail' }, 'armure connue par son nom');
+  eq(armorFromItem({ name:'Studded Leather Armor' }),
+     { mode:'light', baseAC:12, armorName:'Studded Leather' }, 'armure reconnue par contenu');
+  eq(armorFromItem({ name:'Shield' }), null, 'un bouclier n est pas une armure');
+  eq(armorFromItem({ name:'Rope' }), null, 'un objet quelconque n est pas une armure');
+  // Toute armure de depart doit se resoudre, sinon l'equipement ne ferait rien
+  Object.keys(STARTING_ARMOR).forEach(n =>
+    ok(!!armorFromItem({ name:n }), `${n} : armure de depart non resolue`));
+  // Tous les presets de la fiche aussi
+  ['light','medium','heavy'].forEach(m => ARMOR_PRESETS_T[m].forEach(p2 =>
+    eq(armorFromItem({ name:p2.name })?.mode, m, `${p2.name} : type d armure attendu ${m}`)));
+  // Retrait : on rend a la classe sa defense sans armure
+  eq(defaultArmorConfig({ classes:[{ classe:'Barbarian', niveau:3 }] }).mode, 'unarmoredBarb',
+     'barbare : defense sans armure');
+  eq(defaultArmorConfig({ classes:[{ classe:'Monk', niveau:3 }] }).mode, 'unarmoredMonk',
+     'moine : defense sans armure');
+  eq(defaultArmorConfig({ classes:[{ classe:'Fighter', niveau:3 }] }).mode, 'unarmored',
+     'guerrier : simplement sans armure');
+  // Incoherence entre l'armure configuree et ce qui est reellement porte
+  eq(equippedArmorMismatch({ armorConfig:{ mode:'heavy', armorName:'Plate' } }, { items:[] }), 'Plate',
+     'armure portee sans objet correspondant : signalee');
+  eq(equippedArmorMismatch({ armorConfig:{ mode:'heavy', armorName:'Chain Mail' } },
+     { items:[{ name:'Chain Mail', equipped:true }] }), null, 'armure equipee : rien a signaler');
+  eq(equippedArmorMismatch({ armorConfig:{ mode:'unarmored' } }, { items:[] }), null,
+     'sans armure : rien a signaler');
+  eq(isEquippable({ name:'Rope', cat:'equipement' }), false, 'une corde ne s equipe pas');
+  ok(isEquippable({ name:'Longsword', cat:'arme' }), 'une arme s equipe');
+  ok(isEquippable({ name:'Chain Mail' }), 'une armure s equipe');
 
   /* ── Sorts à choisir après création (startingSpellHint) ── */
   eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');

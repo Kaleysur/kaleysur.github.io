@@ -31,6 +31,27 @@ for (const f of staged) {
     }
   } catch { /* fichier supprimé/binaire : ignorer */ }
 }
+/* Caracteres de controle parasites : un \b ou \f ecrit litteralement dans le
+   source (accident d'echappement lors d'une edition scriptee) passe la syntaxe
+   mais casse silencieusement les regex qui le contiennent. */
+const CTRL = /[\x07\x08\x0b\x0c]/g;
+for (const f of staged) {
+  if (f.startsWith('.claude/')) continue;
+  if (!/\.(html|js|json|css)$/.test(f)) continue;
+  try {
+    const txt = stagedContent(f);
+    const hits = [...txt.matchAll(CTRL)];
+    if (hits.length) {
+      console.error(`✗ ${f} — ${hits.length} caractere(s) de controle parasite(s) :`);
+      hits.slice(0, 3).forEach(m => {
+        const line = txt.slice(0, m.index).split('\n').length;
+        console.error(`   ligne ${line} : ...${JSON.stringify(txt.slice(Math.max(0, m.index - 40), m.index + 20))}`);
+      });
+      errors++;
+    }
+  } catch { /* fichier supprime/binaire */ }
+}
+
 if (errors) {
   console.error(`\n${errors} erreur(s) de syntaxe — commit annulé.`);
   process.exit(1);

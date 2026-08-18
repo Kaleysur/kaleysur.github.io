@@ -268,6 +268,24 @@
     .currency-label { font-size:0.7rem; color:#888; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem; }
 
     /* ── Notes multi-pages ── */
+    .notes-search { background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:4px; color:var(--j-text,#e8e0d0); font-size:0.76rem; padding:0.3rem 0.5rem; font-family:inherit; box-sizing:border-box; }
+    .notes-search:focus { outline:none; border-color:var(--gold-dark); }
+    .notes-results { padding:0 0.4rem 0.4rem; overflow-y:auto; }
+    .notes-results:empty { display:none; }
+    .notes-res { padding:0.35rem 0.45rem; margin-bottom:0.3rem; border-radius:3px; cursor:pointer; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); transition:border-color 0.12s; }
+    .notes-res:hover { border-color:var(--gold-dark,#8a6e1a); }
+    .notes-res-title { font-family:'Cinzel',serif; font-size:0.72rem; color:var(--gold,#c9a227); display:flex; align-items:center; gap:0.35rem; }
+    .notes-res-count { font-family:inherit; font-size:0.62rem; color:#7a7a82; background:rgba(255,255,255,0.06); padding:0 0.3rem; border-radius:8px; }
+    .notes-res-snip { font-size:0.7rem; color:#8a8a92; line-height:1.45; margin-top:0.2rem; white-space:pre-wrap; word-break:break-word; }
+    .notes-res-snip mark { background:rgba(201,162,39,0.28); color:var(--gold,#c9a227); padding:0 1px; border-radius:2px; }
+    .conflict-banner { position:fixed; left:50%; transform:translateX(-50%); bottom:1.5rem; z-index:10001; max-width:min(560px, calc(100vw - 2rem)); display:flex; flex-direction:column; gap:0.6rem; background:#2a2410; border:1px solid #6a5a20; border-left:3px solid #d9a441; border-radius:6px; padding:0.75rem 1rem; box-shadow:0 6px 28px rgba(0,0,0,0.6); font-size:0.8rem; color:#e2cfa0; line-height:1.5; }
+    .conflict-banner strong { color:#d9a441; }
+    .conflict-detail { color:#a89060; font-size:0.74rem; }
+    .conflict-actions { display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap; }
+    .conflict-banner button { background:none; border:1px solid #6a5a20; color:#e2cfa0; cursor:pointer; font-family:inherit; font-size:0.76rem; padding:0.3rem 0.75rem; border-radius:4px; transition:background 0.12s; }
+    .conflict-banner button:hover { background:rgba(217,164,65,0.15); }
+    .conflict-banner #conflict-restore { border-color:#d9a441; color:#d9a441; }
+    .notes-res-empty { font-size:0.72rem; color:#55555c; font-style:italic; padding:0.3rem 0.45rem; }
     .notes-editor { width:100%; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:6px; color:var(--j-text,#e8e0d0); font-size:0.9rem; padding:0.75rem; box-sizing:border-box; font-family:'Lora',serif; line-height:1.6; resize:vertical; min-height:260px; flex:1; }
     .notes-editor:focus { outline:none; border-color:var(--gold-dark); }
     .notes-section-wrap { display:flex; gap:0; padding:0 !important; overflow:hidden; min-height:380px; }
@@ -289,6 +307,7 @@
       .notes-section-wrap { flex-direction:column; min-height:unset; }
       .notes-pages-sidebar { width:100%; border-right:none; border-bottom:1px solid var(--j-border-col,#2a2a3a); }
       .notes-pages-list { display:flex; flex-direction:row; flex-wrap:wrap; gap:0.3rem; padding:0.4rem; max-height:70px; overflow-x:auto; overflow-y:hidden; }
+      .notes-search { width:calc(100% - 0.8rem); margin:0 0.4rem 0.3rem; }
       .notes-page-item { border-left:none; border-bottom:2px solid transparent; padding:0.3rem 0.6rem; white-space:nowrap; flex-shrink:0; }
       .notes-page-item.active { border-left:none; border-bottom-color:var(--gold); }
     }
@@ -513,6 +532,49 @@
     .ration-actions { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.2rem; }
     .ration-day-btn { font-size:0.75rem; padding:0.3rem 0.75rem; }
     /* ── Catégories inventaire ── */
+    /* Encombrement */
+    .inv-enc { background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-left:2px solid var(--gold-dark,#8a6e1a); border-radius:0 4px 4px 0; padding:0.45rem 0.7rem; margin-bottom:0.5rem; font-size:0.74rem; }
+    .inv-enc:empty { display:none; }
+    .inv-enc.warn { border-left-color:#d9a441; }
+    .inv-enc.over { border-left-color:var(--danger,#c97a7a); }
+    .inv-enc.off  { border-left-color:#3a3a44; color:#6a6a72; font-style:italic; }
+    .inv-enc-head { display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
+    .inv-enc-label { letter-spacing:0.07em; text-transform:uppercase; color:#a88a3a; font-size:0.68rem; }
+    .inv-enc.off .inv-enc-label { color:inherit; text-transform:none; letter-spacing:0; font-size:0.74rem; }
+    .inv-enc-head strong { color:var(--j-text,#e2cfa0); font-family:'Cinzel',serif; }
+    .inv-enc.over .inv-enc-head strong { color:var(--danger,#c97a7a); }
+    .inv-enc-flag { color:var(--danger,#c97a7a); font-size:0.7rem; }
+    .inv-enc-track { height:4px; background:rgba(255,255,255,0.07); border-radius:2px; margin:0.35rem 0 0.3rem; overflow:hidden; }
+    .inv-enc-bar { height:100%; background:var(--gold-dark,#8a6e1a); transition:width 0.25s; }
+    .inv-enc.warn .inv-enc-bar { background:#d9a441; }
+    .inv-enc.over .inv-enc-bar { background:var(--danger,#c97a7a); }
+    .inv-enc-detail { color:#7a7a82; font-size:0.7rem; }
+    .inv-enc-missing { color:#a88a3a; }
+    .inv-enc-toggle { display:flex; align-items:center; gap:0.4rem; font-size:0.72rem; color:#7a7a82; cursor:pointer; user-select:none; margin-bottom:0.7rem; }
+    .inv-enc-toggle input { accent-color:var(--gold-dark); width:13px; height:13px; cursor:pointer; }
+    .inv-enc-toggle-hint { color:#55555c; font-size:0.68rem; }
+    .inv-val { display:flex; align-items:baseline; gap:0.5rem; flex-wrap:wrap; font-size:0.74rem; margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid var(--j-border-col,#2a2a3a); }
+    .inv-val:empty { display:none; }
+    .inv-val-label { letter-spacing:0.07em; text-transform:uppercase; color:#a88a3a; font-size:0.68rem; }
+    .inv-val strong { color:var(--gold,#c9a227); font-family:'Cinzel',serif; }
+    .inv-val-detail { color:#7a7a82; font-size:0.7rem; }
+    .inv-val-missing { color:#a88a3a; }
+    /* Objets equipes */
+    .inv-equip-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#55555c; cursor:pointer; font-size:0.72rem; line-height:1; padding:0.18rem 0.32rem; border-radius:3px; margin-right:0.25rem; transition:all 0.12s; }
+    .inv-equip-btn:hover { border-color:var(--gold-dark,#8a6e1a); color:var(--gold,#c9a227); }
+    .inv-equip-btn.on { border-color:var(--gold-dark,#8a6e1a); background:rgba(201,169,110,0.14); color:var(--gold,#c9a227); }
+    .inv-row-equipped td { background:rgba(201,169,110,0.05); }
+    .inv-row-equipped [data-ik="name"] { color:var(--gold,#c9a227); }
+    .wa-mismatch { font-size:0.7rem; color:#d9a441; line-height:1.4; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid var(--j-border-col,#2a2a3a); }
+    /* Sur petit ecran la colonne Lb ecrasait le nom de l'objet (37 px). Le poids
+       se saisit une fois a l'import ; le total reste lisible dans la barre. */
+    @media (max-width: 700px) {
+      /* Lb : le poids se saisit une fois, le total reste dans la barre.
+         Category : deja filtrable par les onglets juste au-dessus.
+         Sans ca, le nom de l'objet tombait a 67 px. */
+      .inv-table thead th:nth-child(4), .inv-table tbody td:nth-child(4),
+      .inv-table thead th:nth-child(5), .inv-table tbody td:nth-child(5) { display:none; }
+    }
     .inv-cat-tabs { display:flex; gap:0; margin-bottom:0.75rem; border-bottom:1px solid var(--j-border-col,#2a2a3a); flex-wrap:wrap; }
     .inv-cat-tab { padding:0.3rem 0.7rem; background:none; border:none; border-bottom:2px solid transparent; color:#666; font-size:0.72rem; cursor:pointer; font-family:'Cinzel',serif; letter-spacing:0.04em; transition:all var(--transition); white-space:nowrap; }
     .inv-cat-tab:hover { color:#aaa; }
@@ -522,7 +584,32 @@
     /* ── Attunement ── */
     .attunement-section { margin-top:0.85rem; padding-top:0.75rem; border-top:1px solid #2a1e0a; }
     .attunement-label { font-family:'Cinzel',serif; font-size:0.62rem; color:var(--gold-dark); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.5rem; }
-    .attunement-slots { display:flex; flex-direction:column; gap:0.35rem; }
+    .attunement-slots { display:flex; flex-direction:column; gap:0.3rem; }
+    .attune-count { font-family:'Cinzel',serif; color:#c090e8; letter-spacing:0; text-transform:none; margin-left:0.3rem; }
+    .attune-count.full { color:#e8a0a0; }
+    .attune-item { font-size:0.78rem; color:#c090e8; padding:0.18rem 0.45rem; background:rgba(122,74,170,0.1); border-left:2px solid #7a4aaa; border-radius:0 3px 3px 0; }
+    .attune-empty { font-size:0.72rem; color:#55555c; font-style:italic; }
+    .inv-attune-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#55555c; cursor:pointer; font-size:0.72rem; line-height:1; padding:0.18rem 0.32rem; border-radius:3px; margin-right:0.25rem; transition:all 0.12s; }
+    .inv-attune-btn:hover { border-color:#7a4aaa; color:#c090e8; }
+    .inv-attune-btn.on { border-color:#7a4aaa; background:rgba(122,74,170,0.16); color:#c090e8; }
+    .inv-use-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#55555c; cursor:pointer; font-size:0.72rem; line-height:1; padding:0.18rem 0.32rem; border-radius:3px; margin-right:0.25rem; transition:all 0.12s; }
+    .inv-use-btn:hover { border-color:#6aba6a; color:#8aba8a; }
+    .inv-row-attuned [data-ik="name"] { color:#c090e8; }
+    /* Mobile : la derniere colonne peut porter jusqu'a 4 boutons. On leur donne
+       une vraie cible tactile et on repartit le reste au profit du nom. */
+    @media (max-width: 700px) {
+      .inv-attune-btn, .inv-use-btn, .inv-equip-btn {
+        padding:0.42rem 0.4rem; font-size:0.88rem; margin-right:0.1rem;
+      }
+      .inv-table td:last-child, .inv-table th:last-child { white-space:nowrap; width:1%; }
+      /* Sans table-layout:fixed les pourcentages sont ignores et le contenu
+         de la description mange la place du nom. */
+      .inv-table { table-layout:fixed; width:100%; }
+      .inv-table thead th:nth-child(1) { width:44px; }
+      .inv-table thead th:nth-child(2) { width:46%; }
+      .inv-table thead th:nth-child(3) { width:auto; }
+      .inv-table .inv-inp { font-size:0.76rem; padding:0.2rem 0.25rem; }
+    }
     .attunement-slot { display:flex; align-items:center; gap:0.5rem; }
     .attunement-slot input[type=text] { flex:1; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:4px; color:var(--j-text,#e8e0d0); font-size:0.8rem; padding:0.25rem 0.45rem; transition:border-color var(--transition); }
     .attunement-slot input[type=text]:focus { outline:none; border-color:var(--gold-dark); }
@@ -986,6 +1073,36 @@
       overflow: hidden;
     }
     .char-selector-dropdown.open { display: block; }
+    /* Supprimer un personnage : discret au repos, rouge au survol.
+       Toujours présent au doigt (mobile), où il n'y a pas de survol. */
+    .char-sel-del {
+      background: none; border: none; color: #4a4a52; cursor: pointer;
+      font-size: 0.78rem; line-height: 1; padding: 0.25rem 0.3rem; margin-left: 0.2rem;
+      border-radius: 4px; opacity: 0; transition: opacity 0.12s, color 0.12s, background 0.12s;
+      flex-shrink: 0;
+    }
+    .char-sel-item:hover .char-sel-del { opacity: 1; }
+    .char-sel-del:hover { color: var(--danger, #c97a7a); background: rgba(201,122,122,0.12); }
+    .char-sel-del:focus-visible { opacity: 1; outline: 1px solid var(--danger, #c97a7a); }
+    /* Sans survol : bouton visible en permanence et cible assez grande pour le doigt */
+    @media (hover: none) {
+      .char-sel-del { opacity: 0.65; padding: 0.6rem 0.55rem; font-size: 0.9rem; }
+    }
+    /* Toast d'annulation après suppression */
+    .char-undo-toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 0.9rem; z-index: 10000;
+      background: #2a1a1a; border: 1px solid #6a3a3a; color: #d9a8a8;
+      padding: 0.55rem 0.7rem 0.55rem 1.1rem; border-radius: 6px; font-size: 0.82rem;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5); transition: opacity 0.4s;
+    }
+    .char-undo-toast button {
+      background: none; border: 1px solid #6a3a3a; color: #e0b0b0; cursor: pointer;
+      font-family: inherit; font-size: 0.78rem; padding: 0.22rem 0.6rem; border-radius: 4px;
+      transition: background 0.12s;
+    }
+    .char-undo-toast button:hover { background: rgba(201,122,122,0.18); }
+    @media (max-width: 600px) { .char-undo-toast { left: 0.75rem; right: 0.75rem; transform: none; justify-content: space-between; } }
     .char-sel-item {
       display: flex; align-items: center; gap: 10px;
       padding: 9px 14px; cursor: pointer;
@@ -1903,7 +2020,7 @@
   .top-nav, .sidebar, .sidebar-overlay, #char-bg-layer,
   #dice-toast, #rest-toast, .chat-panel, .vb-topbar .btn,
   .tab-bar, #btn-layout-edit, #save-badge, .conn-indicator,
-  .undo-toast, #sw-update-banner,
+  .char-undo-toast, #sw-update-banner,
   .btn-gold, #btn-logout, #hp-log-toggle, #hp-log,
   .vb-rest-btns, #layout-toolbar, .sec-col-btn,
   .death-save-roll-btn, #death-save-roll-btn,
@@ -2645,8 +2762,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .lvlup-warn:empty { display: none; }
 .lvlup-block { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--j-border-col, #3a2810); }
 .lvlup-block-title {
+  /* --gold-dark ne donne que 3.99:1 sur le fond de la modal, sous le seuil AA
+     de 4.5 pour du texte de 11 px. Ce ton monte à 5.87:1 en restant discret. */
   font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--gold-dark, #8a6e1a); margin-bottom: 0.5rem;
+  color: #a88a3a; margin-bottom: 0.5rem;
 }
 .lvlup-req { color: #7a7a8a; text-transform: none; letter-spacing: 0; font-size: 0.9em; }
 .lvlup-hp-row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
@@ -2662,6 +2781,14 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .lvlup-tab:hover { border-color: var(--gold-dark, #8a6e1a); color: var(--gold-dark, #8a6e1a); }
 .lvlup-tab.active { border-color: var(--gold-dark, #8a6e1a); background: rgba(201,169,110,0.12); color: var(--gold, #c9a227); }
 .lvlup-asi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+/* Au doigt, les boutons d'action des modales (créateur et montée de niveau)
+   tombaient à 25 px de haut. On les remonte à 38 px : ce sont des actions qui
+   valident ou annulent, elles ne doivent pas se rater. */
+@media (hover: none), (max-width: 600px) {
+  .new-char-btn-row .btn,
+  .lvlup-hp-row .btn,
+  .lvlup-tab { min-height: 38px; padding-top: 0.4rem; padding-bottom: 0.4rem; }
+}
 
 /* ── Assistant de création de personnage ── */
 .wiz-modal { width: 460px; }
@@ -3546,36 +3673,28 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <button class="btn btn-sm" id="btn-open-compendium-item" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
           <button class="btn btn-sm btn-gold" id="btn-add-item">+ Add</button>
         </div>
+        <div class="inv-enc" id="inv-encumbrance"></div>
+        <label class="inv-enc-toggle">
+          <input type="checkbox" id="inv-ignore-encumbrance">
+          Ignorer l'encombrement
+          <span class="inv-enc-toggle-hint">(beaucoup de tables ne suivent pas la regle)</span>
+        </label>
         <table class="inv-table">
           <thead><tr>
-            <th style="width:10%">Qty</th>
-            <th style="width:28%">Name</th>
-            <th style="width:32%">Description</th>
-            <th style="width:18%">Category</th>
-            <th style="width:12%"></th>
+            <th style="width:9%">Qty</th>
+            <th style="width:26%">Name</th>
+            <th style="width:28%">Description</th>
+            <th style="width:11%" title="Poids unitaire en livres">Lb</th>
+            <th style="width:16%">Category</th>
+            <th style="width:10%"></th>
           </tr></thead>
           <tbody id="inv-tbody"></tbody>
         </table>
+        <div class="inv-val" id="inv-value"></div>
         <!-- Attunement -->
         <div class="attunement-section">
-          <div class="attunement-label">⟡ Attunement (max 3)</div>
-          <div class="attunement-slots" id="attunement-slots">
-            <div class="attunement-slot">
-              <input type="checkbox" class="attunement-slot-check" data-at="0">
-              <input type="text" class="attunement-slot-inp" data-at="0" placeholder="Magic item 1…">
-              <span class="attunement-slot-label" id="at-label-0">free</span>
-            </div>
-            <div class="attunement-slot">
-              <input type="checkbox" class="attunement-slot-check" data-at="1">
-              <input type="text" class="attunement-slot-inp" data-at="1" placeholder="Magic item 2…">
-              <span class="attunement-slot-label" id="at-label-1">free</span>
-            </div>
-            <div class="attunement-slot">
-              <input type="checkbox" class="attunement-slot-check" data-at="2">
-              <input type="text" class="attunement-slot-inp" data-at="2" placeholder="Magic item 3…">
-              <span class="attunement-slot-label" id="at-label-2">free</span>
-            </div>
-          </div>
+          <div class="attunement-label">⟡ Lien magique <span class="attune-count" id="attunement-count">0 / 3</span></div>
+          <div class="attunement-slots" id="attunement-slots"></div>
         </div>
       </div>
       <div class="sheet-section">
@@ -3603,7 +3722,9 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <span>Pages</span>
             <button class="notes-add-page-btn" id="btn-add-note-page" title="Nouvelle page">+</button>
           </div>
+          <input type="search" class="notes-search" id="notes-search" placeholder="Chercher dans toutes les pages…" autocomplete="off">
           <div class="notes-pages-list" id="notes-pages-list"></div>
+          <div class="notes-results" id="notes-results"></div>
         </div>
         <!-- Éditeur -->
         <div class="notes-editor-wrap">
@@ -4368,7 +4489,11 @@ function loadSession()  { return localStorage.getItem('kaleysur_user'); }
 function clearSession() { localStorage.removeItem('kaleysur_user'); }
 
 /* ── Données vides ── */
-function newCharId() { return 'c' + Date.now(); }
+/* Date.now() seul n'est pas unique : deux créations dans la même milliseconde
+   (double-clic sur « Créer », import en boucle) produisaient le même id et le
+   second personnage écrasait le premier en silence. */
+let _charIdSeq = 0;
+function newCharId() { return 'c' + Date.now() + '_' + (++_charIdSeq); }
 
 function emptyCharacter() {
   return {
@@ -4429,6 +4554,76 @@ function currentNotePage() {
   return pages[activeNotesPageIdx] || pages[0];
 }
 function NOTES() { return currentNotePage()?.content || ''; }
+
+/* ── Recherche dans les notes ──
+   Cherche dans le titre ET le contenu de toutes les pages du personnage, et
+   renvoie un extrait autour de chaque occurrence. Fonction pure : testable. */
+function searchNotes(pages, query) {
+  const q = (query || '').trim().toLowerCase();
+  if (q.length < 2) return [];
+  const res = [];
+  (pages || []).forEach((page, idx) => {
+    const titre = page?.name || '';
+    const texte = page?.content || '';
+    const dansTitre = titre.toLowerCase().includes(q);
+    const bas = texte.toLowerCase();
+    const hits = [];
+    let from = 0;
+    while (hits.length < 3) {
+      const i = bas.indexOf(q, from);
+      if (i === -1) break;
+      // Extrait cadre sur l'occurrence, coupe aux limites de mots quand possible
+      const debut = Math.max(0, i - 35);
+      const fin   = Math.min(texte.length, i + q.length + 45);
+      hits.push({
+        pos: i,
+        avant: (debut > 0 ? '…' : '') + texte.slice(debut, i),
+        motif: texte.slice(i, i + q.length),
+        apres: texte.slice(i + q.length, fin) + (fin < texte.length ? '…' : ''),
+      });
+      from = i + q.length;
+    }
+    if (dansTitre || hits.length) {
+      res.push({ idx, titre: titre || `Page ${idx + 1}`, dansTitre, hits,
+                 total: hits.length ? bas.split(q).length - 1 : 0 });
+    }
+  });
+  return res;
+}
+
+function renderNotesSearch() {
+  const box = document.getElementById('notes-results');
+  const inp = document.getElementById('notes-search');
+  const list = document.getElementById('notes-pages-list');
+  if (!box || !inp) return;
+  const q = inp.value;
+  const res = searchNotes(getNotePages(), q);
+  const actif = q.trim().length >= 2;
+  if (list) list.style.display = actif ? 'none' : '';
+  if (!actif) { box.innerHTML = ''; return; }
+  if (!res.length) {
+    box.innerHTML = `<div class="notes-res-empty">Aucun résultat pour « ${esc(q.trim())} »</div>`;
+    return;
+  }
+  box.innerHTML = res.map(r =>
+      `<div class="notes-res" data-note-page="${r.idx}">`
+    + `<div class="notes-res-title">${esc(r.titre)}`
+    + (r.total > 1 ? `<span class="notes-res-count">${r.total}</span>` : '')
+    + (r.dansTitre && !r.hits.length ? `<span class="notes-res-count">titre</span>` : '')
+    + `</div>`
+    + r.hits.map(h => `<div class="notes-res-snip">${esc(h.avant)}<mark>${esc(h.motif)}</mark>${esc(h.apres)}</div>`).join('')
+    + `</div>`).join('');
+  box.querySelectorAll('[data-note-page]').forEach(el =>
+    el.addEventListener('click', () => {
+      saveCurrentNoteContent();
+      activeNotesPageIdx = parseInt(el.dataset.notePage);
+      inp.value = '';
+      renderNotesSearch();
+      renderNotesPages();
+      loadCurrentNoteInEditor();
+      document.getElementById('notes-editor')?.focus();
+    }));
+}
 
 function renderNotesPages() {
   const pages = getNotePages();
@@ -4494,6 +4689,83 @@ function updateConnIndicator(state) {
   if (state === 'local')   { el.textContent = '⚠ Local';       el.className = 'conn-indicator local';   el.title = 'Échec cloud — données sauvées localement uniquement'; }
 }
 
+/* ── Filet de securite en cas de conflit ──
+   Quand une ecriture concurrente est refusee (autre appareil, admin MJ), on
+   rechargeait le distant PAR-DESSUS l'etat local : tout ce qui n'etait pas
+   encore parti — typiquement des notes en cours de frappe — disparaissait sans
+   un mot, et le cache local etait ecrase au login suivant.
+   On garde desormais une copie avant d'ecraser, et on le dit. */
+function conflictKey(u) { return 'kaleysur_conflict_' + u; }
+
+function saveConflictSnapshot(user, json) {
+  try { localStorage.setItem(conflictKey(user), `{"ts":${Date.now()},"data":${json}}`); return true; }
+  catch (e) { return false; }
+}
+
+function getConflictSnapshot(user) {
+  try { return JSON.parse(localStorage.getItem(conflictKey(user)) || 'null'); }
+  catch (e) { return null; }
+}
+
+function clearConflictSnapshot(user) {
+  try { localStorage.removeItem(conflictKey(user)); } catch (e) {}
+}
+
+/* Compare deux jeux de donnees et resume ce que le local avait en plus.
+   Sert a dire au joueur ce qu'il risque de perdre, pas a fusionner tout seul. */
+function diffNotes(local, distant) {
+  const out = [];
+  Object.entries(local?.characters || {}).forEach(([id, slot]) => {
+    const nom = slot?.character?.characterName || slot?.name || id;
+    const a = Array.isArray(slot?.notes) ? slot.notes : [];
+    const b = Array.isArray(distant?.characters?.[id]?.notes) ? distant.characters[id].notes : [];
+    const pagesEnPlus = Math.max(0, a.length - b.length);
+    const carA = a.reduce((t, p) => t + (p?.content || '').length, 0);
+    const carB = b.reduce((t, p) => t + (p?.content || '').length, 0);
+    if (pagesEnPlus > 0 || carA > carB) {
+      out.push({ nom, pagesEnPlus, caracteresEnPlus: Math.max(0, carA - carB) });
+    }
+  });
+  return out;
+}
+
+/* Banniere de recuperation — persistante, elle ne disparait pas toute seule. */
+function showConflictBanner(user) {
+  const snap = getConflictSnapshot(user);
+  if (!snap) return;
+  document.getElementById('conflict-banner')?.remove();
+  const perdu = diffNotes(snap.data, playerData);
+  const detail = perdu.length
+    ? perdu.map(p => `${p.nom} : ${p.pagesEnPlus ? p.pagesEnPlus + ' page(s), ' : ''}${p.caracteresEnPlus} caractere(s) de notes`).join(' — ')
+    : 'aucune difference detectee dans les notes';
+  const el = document.createElement('div');
+  el.id = 'conflict-banner';
+  el.className = 'conflict-banner';
+  el.innerHTML =
+      `<div><strong>Version d'un autre appareil chargee.</strong> Ta version locale a ete mise de cote : `
+    + `<span class="conflict-detail">${esc(detail)}</span></div>`
+    + `<div class="conflict-actions">`
+    + `<button type="button" id="conflict-restore">Restaurer ma version</button>`
+    + `<button type="button" id="conflict-dismiss">Garder celle-ci</button></div>`;
+  document.body.appendChild(el);
+  el.querySelector('#conflict-restore').addEventListener('click', () => {
+    const s2 = getConflictSnapshot(user);
+    if (!s2?.data) return;
+    // On repart du _rev distant courant pour que la restauration soit acceptee
+    const rev = playerData?._rev;
+    playerData = s2.data;
+    playerData._rev = rev;
+    clearConflictSnapshot(user);
+    el.remove();
+    renderAll(); renderCharCards(); renderCharSelector(); triggerSave();
+    showToast('✦ Ta version a ete restauree');
+  });
+  el.querySelector('#conflict-dismiss').addEventListener('click', () => {
+    clearConflictSnapshot(user);
+    el.remove();
+  });
+}
+
 function triggerSave() {
   _saveScheduledAt = Date.now(); // marquer qu'une sauvegarde est en attente
   const badge = document.getElementById('save-badge');
@@ -4514,7 +4786,9 @@ function triggerSave() {
       const res = await sbUpdateDataGuarded(currentUser, _json, prevRev);
       if (res === 'conflict') {
         // Écriture concurrente (autre appareil / admin DM) : on recharge le distant
-        // plutôt que de l'écraser silencieusement.
+        // plutôt que de l'écraser. Mais on met notre version de côté d'abord :
+        // sans ça, des notes en cours de frappe disparaissaient sans un mot.
+        saveConflictSnapshot(currentUser, _json);
         try {
           const row = await sbGetPlayer(currentUser);
           if (row?.data) {
@@ -4524,6 +4798,7 @@ function triggerSave() {
         } catch {}
         badge.textContent = '⚠ Synchronisé depuis un autre appareil'; badge.className = 'save-badge err';
         setTimeout(() => { badge.textContent = ''; badge.className = 'save-badge'; }, 4000);
+        showConflictBanner(currentUser);
         return;
       }
       _lastSaveAt = Date.now();
@@ -5271,6 +5546,9 @@ async function openDashboard() {
   showScreen('screen-dashboard');
   renderDashboard();
   startRealtime(currentUser);
+  // Une copie mise de cote lors d'un conflit precedent attend peut-etre une
+  // decision : on la represente plutot que de la laisser mourir en silence.
+  if (getConflictSnapshot(currentUser)) setTimeout(() => showConflictBanner(currentUser), 600);
   migrateImagesToStorage(); // async, non bloquant — convertit les base64 existants en URL Storage
   applyLayout();
   buildSecTabBar();
@@ -5338,7 +5616,12 @@ function renderCharSelector() {
         <div class="char-sel-item-sub">${classStr}</div>
       </div>
       ${isActive ? '<span style="color:var(--gold);font-size:0.7rem;">✦</span>' : ''}
+      <button class="char-sel-del" data-del-char="${id}" title="Supprimer ce personnage" aria-label="Supprimer ${esc(c.characterName || 'ce personnage')}">✕</button>
     `;
+    item.querySelector('[data-del-char]').addEventListener('click', e => {
+      e.stopPropagation();
+      deleteCharacter(id);
+    });
     item.addEventListener('click', () => {
       playerData.activeCharId = id;
       closeCharSelector();
@@ -5361,6 +5644,75 @@ function renderCharSelector() {
   dd.appendChild(addItem);
 }
 
+/* ── Suppression d'un personnage ──
+   Action irréversible une fois la sauvegarde partie : on nomme précisément ce
+   qui va disparaître, puis on laisse une fenêtre d'annulation. */
+function deleteCharacter(id) {
+  const chars = playerData?.characters || {};
+  const slot  = chars[id];
+  if (!slot) return;
+  if (Object.keys(chars).length <= 1) {
+    showToast('⚠ Impossible : il doit rester au moins un personnage.');
+    return;
+  }
+  const c    = slot.character || {};
+  const nom  = c.characterName || slot.name || 'Sans nom';
+  const desc = [
+    getClasses(c).filter(cl => cl.classe).map(cl => `${cl.classe} ${cl.niveau}`).join(' / '),
+    c.species,
+  ].filter(Boolean).join(' · ');
+
+  if (!confirm(
+    `Supprimer « ${nom} » ?\n${desc ? desc + '\n' : ''}\n`
+    + `Sa fiche, son inventaire et ses notes seront effacés.\n`
+    + `Tu pourras annuler pendant quelques secondes.`
+  )) return;
+
+  // Position d'origine conservée pour restaurer l'ordre à l'identique
+  const ordre    = Object.keys(chars);
+  const position = ordre.indexOf(id);
+  const etaitActif = playerData.activeCharId === id;
+
+  delete playerData.characters[id];
+  if (etaitActif) playerData.activeCharId = Object.keys(playerData.characters)[0];
+  closeCharSelector();
+  renderCharCards(); renderCharSelector(); renderAll();
+  if (etaitActif) { applyCharTheme(); applyCharBg(C()); }
+  triggerSave();
+
+  showCharUndoToast(`🗑 « ${nom} » supprimé`, () => {
+    // Réinsertion à sa place d'origine
+    const rest = Object.entries(playerData.characters);
+    rest.splice(position, 0, [id, slot]);
+    playerData.characters = Object.fromEntries(rest);
+    if (etaitActif) playerData.activeCharId = id;
+    renderCharCards(); renderCharSelector(); renderAll();
+    applyCharTheme(); applyCharBg(C());
+    triggerSave();
+    showToast(`✦ « ${nom} » restauré`);
+  });
+}
+
+/* Toast avec bouton d'annulation — 12 s, puis la suppression est définitive.
+   Nom et identifiants distincts de showUndoToast() (undo d'import D&D Beyond),
+   qui est déclarée plus bas et écraserait celle-ci. */
+function showCharUndoToast(msg, onUndo) {
+  document.getElementById('char-undo-toast')?.remove();
+  const t = document.createElement('div');
+  t.id = 'char-undo-toast';
+  t.className = 'char-undo-toast';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = '↶ Annuler';
+  const label = document.createElement('span');
+  label.textContent = msg;
+  t.append(label, btn);
+  document.body.appendChild(t);
+  const close = () => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); };
+  btn.addEventListener('click', () => { close(); onUndo(); });
+  setTimeout(close, 12000);
+}
+
 function closeCharSelector() {
   document.getElementById('char-selector-btn')?.classList.remove('open');
   document.getElementById('char-selector-dropdown')?.classList.remove('open');
@@ -5378,7 +5730,7 @@ function renderCharCards() {
     const pvCur = parseInt(c.pvActuel) || 0;
     const pct   = pvMax > 0 ? Math.min(100, Math.round(pvCur / pvMax * 100)) : 0;
     let hpColor = '#6aba6a';
-    if (pct < 50) hpcolor = '#c9a227';
+    if (pct < 50) hpColor = '#c9a227';
     if (pct < 25) hpColor = '#c97a7a';
 
     const card = document.createElement('div');
@@ -5430,21 +5782,11 @@ function renderCharCards() {
   addCard.addEventListener('click', () => openNewCharModal());
   grid.appendChild(addCard);
 
-  // Boutons supprimer
+  // Boutons supprimer — même chemin que le sélecteur (confirmation + annulation)
   grid.querySelectorAll('[data-del-char]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      const chars = playerData.characters || {};
-      if (Object.keys(chars).length <= 1) { alert('Tu dois garder au moins un personnage.'); return; }
-      const id = btn.dataset.delChar;
-      const slot = chars[id];
-      if (!confirm('Delete "' + (slot?.name || 'this character') + '"? This cannot be undone.')) return;
-      delete playerData.characters[id];
-      if (playerData.activeCharId === id) playerData.activeCharId = Object.keys(playerData.characters)[0];
-      renderCharCards();
-      renderCharSelector();
-      renderAll();
-      triggerSave();
+      deleteCharacter(btn.dataset.delChar);
     });
   });
   renderCharSelector();
@@ -5620,6 +5962,7 @@ function _renderTab(tabId) {
 
 function renderAll() {
   migrateToMulticlass(C());
+  migrateAttunement(INV());
   fillFields();
   populateSpeciesUI();
   populateBackgroundUI();
@@ -8119,6 +8462,243 @@ function calcAndSetAC() {
   if (heroCA) heroCA.textContent = (base + (typeof getMod === 'function' ? (getMod('ac')||0) : 0));
 }
 
+/* ── Objets equipes : l'inventaire pilote la CA ──
+   Jusqu'ici « Worn Armor » etait un systeme parallele : on pouvait porter une
+   cotte de mailles sans la posseder. Equiper une armure depuis l'inventaire
+   ecrit desormais c.armorConfig, et la CA se recalcule seule. */
+
+/* Un objet est-il un bouclier ? (donnee du compendium, ou le nom) */
+function isShieldItem(item) {
+  return !!item && (item.shield === true || /(^|[^a-z])(shield|bouclier)([^a-z]|$)/.test((item.name || '').toLowerCase()));
+}
+
+/* Resout un objet d'inventaire en configuration d'armure, ou null si ce n'en
+   est pas une. Trois sources, de la plus fiable a la plus approximative :
+   les donnees du compendium, les tables d'armures connues, puis rien. */
+function armorFromItem(item) {
+  if (!item || isShieldItem(item)) return null;
+  const nom = (item.name || '').trim();
+  if (item.armorType && item.ac) {
+    return { mode: item.armorType, baseAC: parseInt(item.ac), armorName: nom };
+  }
+  // Armures de depart (« Leather Armor », « Chain Mail »…)
+  if (typeof STARTING_ARMOR !== 'undefined' && STARTING_ARMOR[nom]) {
+    const a = STARTING_ARMOR[nom];
+    return { mode: a.mode, baseAC: a.baseAC, armorName: a.armorName || nom };
+  }
+  // Presets de la fiche, par nom exact ou contenu (« Leather » dans « Leather Armor »)
+  for (const mode of ['light', 'medium', 'heavy']) {
+    const p = ARMOR_PRESETS[mode].find(x => x.name === nom || nom.includes(x.name));
+    if (p) return { mode, baseAC: p.baseAC, armorName: p.name };
+  }
+  return null;
+}
+
+/* ── Une arme equipee devient une ligne d'attaque ──
+   Ajouter une epee depuis le compendium obligeait a la ressaisir a la main dans
+   l'onglet Attaques. On la construit desormais a partir des donnees de l'objet. */
+
+/* Le personnage maitrise-t-il cette categorie d'arme ?
+   weaponProf est du texte libre par classe (« Simple and Martial weapons »). */
+function isProficientWith(c, weaponCat) {
+  const profs = getClasses(c)
+    .map(cl => (typeof CLASS_DATA !== 'undefined' && CLASS_DATA[cl.classe]?.weaponProf) || '')
+    .join(' ').toLowerCase();
+  if (!profs) return true;                      // classe inconnue : on n'invente pas un malus
+  if (/martial/.test(profs)) return true;       // martial couvre aussi simple
+  if (weaponCat === 'martial') return false;
+  return /simple/.test(profs) || !weaponCat;
+}
+
+/* Construit la ligne d'attaque d'un objet, ou null si ce n'est pas une arme.
+   Les donnees du compendium priment ; sinon on retombe sur STARTING_WEAPONS. */
+function attackFromItem(item, c) {
+  if (!item) return null;
+  const nom = (item.name || '').trim();
+  let dmg = item.dmg, type = item.dmgType, finesse = !!item.finesse, ranged = !!item.ranged;
+  let cat = item.weaponCat;
+
+  if (!dmg && typeof STARTING_WEAPONS !== 'undefined') {
+    const key = STARTING_WEAPONS[nom] ? nom
+              : Object.keys(STARTING_WEAPONS).find(w => nom.includes(w));
+    if (key) {
+      const w = STARTING_WEAPONS[key];
+      dmg = w.dmg; type = w.type; finesse = !!w.finesse;
+      ranged = w.abil === 'dex';
+    }
+  }
+  if (!dmg) return null;
+
+  const m = k => Math.floor(((parseInt(c[k]) || 10) - 10) / 2);
+  // Distance : toujours DEX. Finesse : la meilleure des deux. Sinon FOR.
+  const abil = ranged ? 'dex' : (finesse ? (m('dex') > m('for') ? 'dex' : 'for') : 'for');
+  const bonus = m(abil);
+  return {
+    name: nom,
+    degats: dmg + (bonus ? (bonus > 0 ? '+' : '') + bonus : ''),
+    typeDegat: type || '',
+    atkType: abil,
+    prof: isProficientWith(c, cat),
+    bonus: '',
+    fromItem: nom,                 // marque l'origine : seules ces lignes sont retirees
+  };
+}
+
+/* Ajoute / retire la ligne d'attaque liee a un objet. */
+function syncAttackForItem(c, item, equipped) {
+  const atk = attackFromItem(item, c);
+  if (!atk) return null;
+  c.attaques = c.attaques || [];
+  const i = c.attaques.findIndex(a => a.fromItem === atk.fromItem);
+  if (equipped) {
+    if (i >= 0) return null;
+    c.attaques.push(atk);
+    return `attaque ajoutee`;
+  }
+  if (i < 0) return null;
+  c.attaques.splice(i, 1);
+  return `attaque retiree`;
+}
+
+/* Un objet est-il equipable ? (sinon on n'affiche pas le bouton) */
+function isEquippable(item) {
+  return !!armorFromItem(item) || isShieldItem(item)
+      || item?.cat === 'arme' || item?.cat === 'armure' || !!item?.dmg;
+}
+
+/* Equipe / retire un objet. Une seule armure a la fois ; le bouclier est
+   independant. Renvoie un message pour le toast, ou null si rien n'a change. */
+function toggleEquip(idx) {
+  const items = INV().items || [];
+  const it = items[idx];
+  if (!it) return null;
+  const c = C();
+  const armure  = armorFromItem(it);
+  const bouclier = isShieldItem(it);
+
+  if (it.equipped) {
+    it.equipped = false;
+    if (armure)  { c.armorConfig = defaultArmorConfig(c); }
+    if (bouclier) { c.armorConfig = c.armorConfig || defaultArmorConfig(c); c.armorConfig.shield = false; }
+    const note = syncAttackForItem(c, it, false);
+    return `${it.name || 'Objet'} retire` + (note ? ` — ${note}` : '');
+  }
+
+  it.equipped = true;
+  if (armure) {
+    // Une seule armure portee : on retire l'autre sans rien dire d'autre
+    items.forEach((o, i) => { if (i !== idx && o.equipped && armorFromItem(o)) o.equipped = false; });
+    const shieldOn = !!c.armorConfig?.shield;
+    c.armorConfig = { mode: armure.mode, baseAC: armure.baseAC, armorName: armure.armorName,
+                      shield: shieldOn, otherBonus: c.armorConfig?.otherBonus || 0 };
+  }
+  if (bouclier) {
+    c.armorConfig = c.armorConfig || defaultArmorConfig(c);
+    c.armorConfig.shield = true;
+  }
+  const note = syncAttackForItem(c, it, true);
+  return `${it.name || 'Objet'} equipe` + (note ? ` — ${note}` : '');
+}
+
+/* Configuration par defaut quand plus rien n'est porte : on rend a la classe
+   sa defense sans armure plutot que de retomber betement sur 10 + DEX. */
+function defaultArmorConfig(c) {
+  const classes = getClasses(c).map(x => x.classe);
+  const mode = classes.includes('Barbarian') ? 'unarmoredBarb'
+             : classes.includes('Monk')      ? 'unarmoredMonk'
+             : 'unarmored';
+  return { mode, baseAC: 10, armorName: '', shield: !!c.armorConfig?.shield, otherBonus: c.armorConfig?.otherBonus || 0 };
+}
+
+/* L'armure configuree correspond-elle a un objet reellement equipe ?
+   Sert a signaler l'incoherence plutot qu'a l'empecher. */
+function equippedArmorMismatch(c, inv) {
+  const cfg = c.armorConfig || {};
+  if (!['light','medium','heavy'].includes(cfg.mode)) return null;
+  const porte = (inv?.items || []).some(it => it.equipped && armorFromItem(it));
+  return porte ? null : (cfg.armorName || 'Cette armure');
+}
+
+/* ── Lien magique (attunement) ──
+   C'etaient trois champs texte ou l'on retapait le nom d'un objet deja present
+   dans l'inventaire. Le lien est desormais un drapeau sur l'objet lui-meme. */
+
+const ATTUNE_MAX = 3;
+
+/* Un objet peut-il faire l'objet d'un lien ? */
+function isAttunable(item) {
+  return !!item && (item.attune === true || item.cat === 'magique');
+}
+
+function attunedItems(inv) {
+  return (inv?.items || []).filter(it => it.attuned);
+}
+
+/* Migration unique des trois anciens emplacements vers les objets.
+   Un nom qui ne correspond a aucun objet en cree un : « je suis lie a X »
+   signifie que je possede X, et le perdre serait pire que l'ajouter. */
+function migrateAttunement(inv) {
+  if (!inv || !Array.isArray(inv.attunement)) return 0;
+  inv.items = inv.items || [];
+  let repris = 0;
+  inv.attunement.forEach(slot => {
+    const nom = (slot?.name || '').trim();
+    if (!nom) return;
+    const existant = inv.items.find(it => (it.name || '').trim().toLowerCase() === nom.toLowerCase());
+    if (existant) {
+      existant.attune = true;
+      if (slot.active) existant.attuned = true;
+    } else {
+      inv.items.push({ qty: 1, name: nom, cat: 'magique', notes: '', attune: true, attuned: !!slot.active });
+    }
+    repris++;
+  });
+  delete inv.attunement;
+  return repris;
+}
+
+/* Etablit ou rompt le lien. Renvoie un message, ou null si rien n'a change. */
+function toggleAttune(idx) {
+  const inv = INV();
+  const it = (inv.items || [])[idx];
+  if (!it || !isAttunable(it)) return null;
+  if (it.attuned) { it.attuned = false; return `Lien rompu avec ${it.name || "l'objet"}`; }
+  if (attunedItems(inv).length >= ATTUNE_MAX) {
+    return `Deja lie a ${ATTUNE_MAX} objets — romps un lien d'abord`;
+  }
+  it.attuned = true;
+  return `Lie a ${it.name || "l'objet"}`;
+}
+
+/* Consomme une unite. On ne supprime pas l'objet a zero : un flacon vide
+   reste une ligne que le joueur choisit de retirer lui-meme. */
+function useConsumable(idx) {
+  const it = (INV().items || [])[idx];
+  if (!it) return null;
+  const q = parseInt(it.qty) || 0;
+  if (q <= 0) return `${it.name || 'Objet'} : il n'en reste plus`;
+  it.qty = q - 1;
+  return `${it.name || 'Objet'} utilise — il en reste ${it.qty}`;
+}
+
+function renderAttunement() {
+  const box = document.getElementById('attunement-slots');
+  if (!box) return;
+  const inv = INV();
+  const lies = attunedItems(inv);
+  const dispo = (inv.items || []).filter(isAttunable).length;
+  const lbl = document.getElementById('attunement-count');
+  if (lbl) {
+    lbl.textContent = `${lies.length} / ${ATTUNE_MAX}`;
+    lbl.className = 'attune-count' + (lies.length >= ATTUNE_MAX ? ' full' : '');
+  }
+  box.innerHTML = lies.length
+    ? lies.map(it => `<div class="attune-item">⟡ ${esc(it.name || 'Sans nom')}</div>`).join('')
+    : `<div class="attune-empty">${dispo
+        ? 'Aucun lien actif — utilise le ⟡ sur un objet magique de ton inventaire.'
+        : 'Aucun objet magique dans ton inventaire.'}</div>`;
+}
+
 function renderWornArmor() {
   const container = document.getElementById('worn-armor-card-container');
   if (!container || !playerData) return;
@@ -8178,6 +8758,8 @@ function renderWornArmor() {
       </label>
     </div>
     <div class="wa-formula" id="wa-formula">—</div>
+    ${(() => { const m = equippedArmorMismatch(C(), INV());
+      return m ? `<div class="wa-mismatch">⚠ ${esc(m)} n'est équipée depuis aucun objet de ton inventaire.</div>` : ''; })()}
   </div>`;
 
   calcAndSetAC(); // compute and fill badge + formula
@@ -8222,6 +8804,108 @@ function renderWornArmor() {
   if (bonusEl)  bonusEl.addEventListener('input',  () => { cfg.otherBonus = parseInt(bonusEl.value)||0; _save(); });
 }
 
+/* ── Encombrement (PHB 2024) ──
+   Capacite = FOR x 15 lb, doublee pour les creatures de taille L, divisee par
+   deux pour les Tiny. Les pieces comptent : 50 pieces = 1 lb.
+   Les objets importes avant cette version n'ont pas de poids : on l'ignore
+   plutot que de compter 0, et on le signale. */
+const SIZE_CARRY_MULT = { Tiny: 0.5, Small: 1, Medium: 1, Large: 2, Huge: 4, Gargantuan: 8 };
+
+function carryCapacity(c) {
+  const str = parseInt(c.for) || 10;
+  const sizeRaw = (typeof SPECIES_DATA !== 'undefined' && SPECIES_DATA[c.species]?.size) || 'Medium';
+  // « Medium or Small » -> Medium : meme multiplicateur, aucune ambiguite
+  const size = Object.keys(SIZE_CARRY_MULT).find(k => sizeRaw.includes(k)) || 'Medium';
+  return Math.round(str * 15 * SIZE_CARRY_MULT[size]);
+}
+
+function coinWeight(currency) {
+  const n = ['pp','gp','ep','sp','cp'].reduce((t,k) => t + (parseInt(currency?.[k]) || 0), 0);
+  return Math.round(n / 50 * 100) / 100;   // 50 pieces = 1 lb
+}
+
+function inventoryWeight(inv) {
+  const items = inv?.items || [];
+  let total = 0, sansPoids = 0;
+  items.forEach(it => {
+    const w = parseFloat(it.weight);
+    const q = parseInt(it.qty);
+    if (isNaN(w)) { sansPoids++; return; }
+    total += w * (isNaN(q) ? 1 : q);
+  });
+  total += coinWeight(inv?.currency);
+  return { total: Math.round(total * 100) / 100, sansPoids, coins: coinWeight(inv?.currency) };
+}
+
+/* ── Valeur du butin ──
+   Le cout des objets importes est conserve en po depuis que le compendium ne
+   l'aplatit plus dans le texte. On separe objets et bourse : ce ne sont pas les
+   memes chiffres pour un joueur (ce qu'il peut depenser vs ce qu'il peut vendre). */
+const COIN_RATE = { pp: 10, gp: 1, ep: 0.5, sp: 0.1, cp: 0.01 };
+
+function purseValue(currency) {
+  const v = Object.entries(COIN_RATE)
+    .reduce((t, [k, r]) => t + (parseInt(currency?.[k]) || 0) * r, 0);
+  return Math.round(v * 100) / 100;
+}
+
+function itemsValue(items) {
+  let total = 0, sansPrix = 0;
+  (items || []).forEach(it => {
+    const c = parseFloat(it.cost);
+    if (isNaN(c)) { sansPrix++; return; }
+    total += c * (parseInt(it.qty) || 1);
+  });
+  return { total: Math.round(total * 100) / 100, sansPrix };
+}
+
+/* Formate un montant en po sans decimale inutile (15 po, 0.5 po). */
+function fmtGp(v) {
+  return (Math.round(v * 100) / 100).toString().replace(/\.0+$/, '');
+}
+
+function renderLootValue() {
+  const box = document.getElementById('inv-value');
+  if (!box) return;
+  const inv = INV();
+  const { total, sansPrix } = itemsValue(inv.items);
+  const purse = purseValue(inv.currency);
+  if (!total && !purse) { box.innerHTML = ''; return; }
+  box.innerHTML =
+      `<span class="inv-val-label">Valeur</span>`
+    + `<strong>${fmtGp(total + purse)} po</strong>`
+    + `<span class="inv-val-detail">${fmtGp(total)} en objets &middot; ${fmtGp(purse)} en bourse`
+    + (sansPrix ? ` &middot; <span class="inv-val-missing">${sansPrix} sans prix</span>` : '')
+    + `</span>`;
+}
+
+function renderEncumbrance() {
+  const box = document.getElementById('inv-encumbrance');
+  if (!box) return;
+  const c = C();
+  const chk = document.getElementById('inv-ignore-encumbrance');
+  if (chk) chk.checked = !!c.ignoreEncumbrance;
+  if (c.ignoreEncumbrance) {
+    box.className = 'inv-enc off';
+    box.innerHTML = '<span class="inv-enc-label">Encombrement ignore</span>';
+    return;
+  }
+  const { total, sansPoids, coins } = inventoryWeight(INV());
+  const cap = carryCapacity(c);
+  const pct = cap > 0 ? Math.min(100, Math.round(total / cap * 100)) : 0;
+  const over = total > cap;
+  box.className = 'inv-enc' + (over ? ' over' : pct >= 80 ? ' warn' : '');
+  box.innerHTML =
+      `<div class="inv-enc-head"><span class="inv-enc-label">Charge</span>`
+    + `<strong>${total} / ${cap} lb</strong>`
+    + (over ? '<span class="inv-enc-flag">&#9888; au-dela de ta capacite</span>' : '') + `</div>`
+    + `<div class="inv-enc-track"><div class="inv-enc-bar" style="width:${pct}%"></div></div>`
+    + `<div class="inv-enc-detail">FOR ${parseInt(c.for)||10} x 15`
+    + (coins ? ` &middot; ${coins} lb de pieces` : '')
+    + (sansPoids ? ` &middot; <span class="inv-enc-missing">${sansPoids} objet${sansPoids>1?'s':''} sans poids renseigne</span>` : '')
+    + `</div>`;
+}
+
 function renderInventory() {
   const search = (document.getElementById('inv-search')?.value || '').toLowerCase();
   const tbody  = document.getElementById('inv-tbody');
@@ -8242,35 +8926,34 @@ function renderInventory() {
     if (search && !item.name?.toLowerCase().includes(search) && !item.notes?.toLowerCase().includes(search)) return;
     const selOpts = CAT_OPTIONS.map(o => `<option value="${o.value}"${item.cat===o.value?' selected':''}>${o.label}</option>`).join('');
     const tr = document.createElement('tr');
+    tr.className = (item.equipped ? 'inv-row-equipped ' : '') + (item.attuned ? 'inv-row-attuned' : '');
     tr.innerHTML = `
       <td><input class="inv-inp" style="width:50px;text-align:center;" data-item="${i}" data-ik="qty"   type="number" value="${item.qty||1}" min="0"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Nom de l'objet"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="notes" value="${esc(item.notes||'')}" placeholder="Description"></td>
+      <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Poids unitaire (lb)"></td>
       <td><select class="inv-inp" style="padding:0.18rem 0.25rem;font-size:0.74rem;" data-item="${i}" data-ik="cat">${selOpts}</select></td>
-      <td><button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
+      <td style="white-space:nowrap;">${item.cat === 'consommable'
+        ? `<button class="inv-use-btn" data-use-item="${i}" title="Utiliser une unité" aria-label="Utiliser ${esc(item.name||'')}">⌁</button>`
+        : ''}${isAttunable(item)
+        ? `<button class="inv-attune-btn${item.attuned ? ' on' : ''}" data-attune-item="${i}" title="${item.attuned ? 'Rompre le lien' : 'Établir un lien magique'}" aria-label="${item.attuned ? 'Rompre le lien avec' : 'Se lier à'} ${esc(item.name||'')}">⟡</button>`
+        : ''}${isEquippable(item)
+        ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Retirer' : 'Équiper'}" aria-label="${item.equipped ? 'Retirer' : 'Équiper'} ${esc(item.name||'')}">${item.equipped ? '🛡' : '○'}</button>`
+        : ''}<button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
     `;
     tbody.appendChild(tr);
   });
   // Update cat tab badges
   const allBadge = document.getElementById('icat-badge-all');
   if (allBadge) allBadge.textContent = items.length;
-}
-function renderAttunement() {
-  const inv = INV();
-  const slots = inv.attunement || [{},{},{}];
-  for (let i = 0; i < 3; i++) {
-    const inp = document.querySelector(`.attunement-slot-inp[data-at="${i}"]`);
-    const chk = document.querySelector(`.attunement-slot-check[data-at="${i}"]`);
-    const lbl = document.getElementById(`at-label-${i}`);
-    const s = slots[i] || {};
-    if (inp) { inp.value = s.name || ''; inp.classList.toggle('attuned', !!s.active); }
-    if (chk) chk.checked = !!s.active;
-    if (lbl) lbl.textContent = s.active ? 'attunée' : 'libre';
-  }
+  renderEncumbrance();
+  renderLootValue();
+  renderAttunement();
 }
 function fillCurrency() {
   const cur = INV().currency || {};
   document.querySelectorAll('[data-currency]').forEach(inp => { inp.value = cur[inp.dataset.currency] || 0; });
+  renderLootValue();
 }
 
 /* ══ Conversion de monnaie ══
@@ -8553,7 +9236,7 @@ async function renderAdminPanel() {
       const pct    = pvMax > 0 ? Math.min(100, Math.round(pvCur / pvMax * 100)) : 0;
       const isDead = pvMax > 0 && pvCur <= 0;
       let hpColor  = '#6aba6a';
-      if (pct < 50) hpcolor = '#c9a227';
+      if (pct < 50) hpColor = '#c9a227';
       if (pct < 25) hpColor = '#c97a7a';
       if (isDead)   hpColor = '#c97a7a';
 
@@ -10953,24 +11636,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.inv-cat-tab').forEach(t => t.classList.toggle('active', t === tab));
     renderInventory();
   });
-  // Attunement
-  document.getElementById('attunement-slots')?.addEventListener('input', e => {
-    const at = e.target.dataset.at;
-    if (at === undefined) return;
-    const inv = INV();
-    if (!inv.attunement) inv.attunement = [{},{},{}];
-    const idx = parseInt(at);
-    if (e.target.type === 'checkbox') {
-      inv.attunement[idx].active = e.target.checked;
-      const inp = document.querySelector(`.attunement-slot-inp[data-at="${at}"]`);
-      const lbl = document.getElementById(`at-label-${at}`);
-      if (inp) inp.classList.toggle('attuned', e.target.checked);
-      if (lbl) lbl.textContent = e.target.checked ? 'attunée' : 'libre';
-    } else {
-      inv.attunement[idx].name = e.target.value;
-    }
-    triggerSave();
-  });
   document.getElementById('btn-add-item').addEventListener('click', () => {
     if (!playerData) return;
     INV().items.push({ qty:1, name:'', notes:'' });
@@ -10982,13 +11647,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('inv-tbody').addEventListener('input', e => {
     const el = e.target;
-    if (el.dataset.item !== undefined && el.dataset.ik) {
-      const i = parseInt(el.dataset.item);
-      INV().items[i][el.dataset.ik] = el.dataset.ik === 'qty' ? parseInt(el.value)||0 : el.value;
-      triggerSave();
+    if (el.dataset.item === undefined || !el.dataset.ik) return;
+    const i  = parseInt(el.dataset.item);
+    const ik = el.dataset.ik;
+    const it = INV().items[i];
+    if (!it) return;
+    if (ik === 'qty') { it.qty = parseInt(el.value) || 0; renderEncumbrance(); }
+    else if (ik === 'weight') {
+      // Champ vide = poids inconnu, pas zero : on retire la cle pour que
+      // l'encombrement le compte comme « non renseigne » plutot que gratuit.
+      const w = parseFloat(el.value);
+      if (el.value === '' || isNaN(w) || w < 0) delete it.weight; else it.weight = w;
+      renderEncumbrance();
     }
+    else it[ik] = el.value;
+    triggerSave();
+  });
+
+  // Ignorer l'encombrement — reglage par personnage
+  document.getElementById('inv-ignore-encumbrance')?.addEventListener('change', e => {
+    C().ignoreEncumbrance = e.target.checked;
+    renderEncumbrance(); triggerSave();
   });
   document.getElementById('inv-tbody').addEventListener('click', e => {
+    const use = e.target.closest('[data-use-item]');
+    if (use) {
+      const msg = useConsumable(parseInt(use.dataset.useItem));
+      renderInventory(); triggerSave();
+      if (msg) showToast(msg);
+      return;
+    }
+    const at = e.target.closest('[data-attune-item]');
+    if (at) {
+      const msg = toggleAttune(parseInt(at.dataset.attuneItem));
+      renderInventory(); triggerSave();
+      if (msg) showToast(msg);
+      return;
+    }
+    const eq = e.target.closest('[data-equip-item]');
+    if (eq) {
+      const msg = toggleEquip(parseInt(eq.dataset.equipItem));
+      renderInventory(); renderWornArmor(); calcAndSetAC(); renderHero(); renderAttacks(); triggerSave();
+      if (msg) showToast(msg);
+      return;
+    }
     const btn = e.target.closest('[data-del-item]');
     if (!btn) return;
     INV().items.splice(parseInt(btn.dataset.delItem), 1);
@@ -11016,6 +11718,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderNotesPages();
     triggerSave();
   });
+  {
+    let _notesSearchTimer;
+    document.getElementById('notes-search')?.addEventListener('input', () => {
+      clearTimeout(_notesSearchTimer);
+      _notesSearchTimer = setTimeout(renderNotesSearch, 140);
+    });
+  }
   document.getElementById('btn-add-note-page').addEventListener('click', () => {
     if (!playerData) return;
     saveCurrentNoteContent();
@@ -11028,13 +11737,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('btn-del-note-page').addEventListener('click', () => {
     if (!playerData) return;
+    saveCurrentNoteContent();          // ne pas supprimer une version perimee
     const pages = getNotePages();
-    if (pages.length <= 1) return;
-    pages.splice(activeNotesPageIdx, 1);
+    if (pages.length <= 1) { showToast('Il doit rester au moins une page.'); return; }
+    const idx  = activeNotesPageIdx;
+    const page = pages[idx];
+    const nom  = page?.name || `Page ${idx + 1}`;
+    const car  = (page?.content || '').length;
+    // Une page de notes representant parfois des heures de jeu, on demande
+    // confirmation en annoncant ce qu'elle contient, puis on laisse annuler.
+    if (car > 0 && !confirm(
+      `Supprimer la page « ${nom} » ?
+${car} caractere(s) de notes.
+
+`
+      + `Tu pourras annuler pendant quelques secondes.`
+    )) return;
+    pages.splice(idx, 1);
     if (activeNotesPageIdx >= pages.length) activeNotesPageIdx = pages.length - 1;
-    renderNotesPages();
-    loadCurrentNoteInEditor();
-    triggerSave();
+    renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
+    showCharUndoToast(`🗑 Page « ${nom} » supprimee`, () => {
+      const p2 = getNotePages();
+      p2.splice(Math.min(idx, p2.length), 0, page);
+      activeNotesPageIdx = Math.min(idx, p2.length - 1);
+      renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
+      showToast(`✦ Page « ${nom} » restauree`);
+    });
   });
 
   /* ── Paramètres ── */

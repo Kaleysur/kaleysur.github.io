@@ -306,6 +306,23 @@
        Open5e v2 2024 : weapon/armor sous-objets, category objet, cost "75.00"
        dnd5eapi v1    : damage/range/armor_class objets imbriqués, cost {quantity,unit}
        local Eberron  : category string, cost "X gp"/"—", desc string  ── */
+  /* Cout -> pieces d'or. Deux schemas : v2 renvoie une chaine ("75.00"), v1 un
+     objet {quantity, unit}. 1 po = 10 pa = 100 pc, 1 pp = 10 po, 1 pe = 5 po. */
+  function _costToGp(raw) {
+    const RATE = { cp: 0.01, sp: 0.1, ep: 0.5, gp: 1, pp: 10 };
+    if (raw == null) return null;
+    if (typeof raw === 'object') {
+      const q = parseFloat(raw.quantity);
+      const r = RATE[(raw.unit || 'gp').toLowerCase()];
+      return (isNaN(q) || !r) ? null : Math.round(q * r * 100) / 100;
+    }
+    const m = String(raw).trim().match(/^([0-9.,]+)\s*(cp|sp|ep|gp|pp)?/i);
+    if (!m) return null;
+    const q = parseFloat(m[1].replace(',', ''));
+    const r = RATE[(m[2] || 'gp').toLowerCase()];
+    return (isNaN(q) || !r) ? null : Math.round(q * r * 100) / 100;
+  }
+
   function _addItem(item) {
     if (!playerData) return;
 
@@ -386,7 +403,42 @@
     const descFirst = descRaw.split('\n').find(l => l.trim()) || '';
     if (descFirst) parts.push(descFirst.length > 120 ? descFirst.slice(0, 120) + '…' : descFirst);
 
-    INV().items.push({ qty: 1, name: item.name, cat, notes: parts.join(' · ') });
+    // On conserve les donnees STRUCTUREES en plus du resume texte : le poids et le
+    // cout aplatis dans `notes` ne servaient a rien (aucun encombrement possible).
+    // `notes` reste rempli pour rester lisible et retrocompatible.
+    const entry = { qty: 1, name: item.name, cat, notes: parts.join(' · ') };
+    const w = parseFloat(item.weight);
+    if (!isNaN(w) && w > 0) entry.weight = w;
+    const gp = _costToGp(rawCost);
+    if (gp != null) entry.cost = gp;
+    if (dmgDice) {
+      entry.dmg = dmgDice;
+      if (dmgType) entry.dmgType = dmgType;
+      // Proprietes utiles a la ligne d'attaque : finesse decide de la carac.,
+      // la portee force la DEX, la categorie decide de la maitrise.
+      const noms = propsArr.map(pr => typeof pr === 'string' ? pr : (pr.property?.name || pr.name || ''))
+                           .filter(Boolean).join(' ').toLowerCase();
+      if (/finesse/.test(noms)) entry.finesse = true;
+      if (/ammunition|thrown/.test(noms) || rNorm) entry.ranged = true;
+      const catTxt = (catName || '').toLowerCase();
+      if (/martial/.test(catTxt)) entry.weaponCat = 'martial';
+      else if (/simple/.test(catTxt)) entry.weaponCat = 'simple';
+      const mastery = item.weapon_mastery
+        || propsArr.find(pr => pr.property?.type === 'Mastery')?.detail;
+      if (mastery) entry.mastery = mastery;
+    }
+    if (acBase != null) {
+      entry.ac = acBase;
+      // Le type d'armure se deduit exactement du traitement de la DEX :
+      // aucune DEX = lourde, DEX plafonnee a +2 = intermediaire, sinon legere.
+      const dexAdd = arm.ac_add_dexmod ?? (typeof item.armor_class === 'object' ? item.armor_class.dex_bonus : item.armor_dex_bonus) ?? false;
+      const dexCap = arm.ac_cap_dexmod ?? (typeof item.armor_class === 'object' ? item.armor_class.max_bonus : item.armor_max_dex) ?? null;
+      entry.armorType = !dexAdd ? 'heavy' : (dexCap ? 'medium' : 'light');
+    }
+    if (/(^|[^a-z])shield([^a-z]|$)/.test((item.name || '').toLowerCase())) { entry.shield = true; delete entry.armorType; }
+    if (item.rarity) entry.rarity = item.rarity;
+    if (item.requires_attunement === true) entry.attune = true;
+    INV().items.push(entry);
     renderInventory(); triggerSave();
   }
 
