@@ -278,6 +278,11 @@
     .notes-res-count { font-family:inherit; font-size:0.62rem; color:#7a7a82; background:rgba(255,255,255,0.06); padding:0 0.3rem; border-radius:8px; }
     .notes-res-snip { font-size:0.7rem; color:#8a8a92; line-height:1.45; margin-top:0.2rem; white-space:pre-wrap; word-break:break-word; }
     .notes-res-snip mark { background:rgba(201,162,39,0.28); color:var(--gold,#c9a227); padding:0 1px; border-radius:2px; }
+    .canvas-sync { font-size:0.68rem; font-style:italic; color:#55555c; white-space:nowrap; flex-shrink:0; transition:color 0.2s; }
+    .canvas-sync.pending { color:#7a7a82; }
+    .canvas-sync.up { color:var(--gold-dark,#8a6e1a); }
+    .canvas-sync.ok { color:#6aba6a; }
+    .canvas-sync.err { color:#d9a441; font-style:normal; }
     .conflict-banner { position:fixed; left:50%; transform:translateX(-50%); bottom:1.5rem; z-index:10001; max-width:min(560px, calc(100vw - 2rem)); display:flex; flex-direction:column; gap:0.6rem; background:#2a2410; border:1px solid #6a5a20; border-left:3px solid #d9a441; border-radius:6px; padding:0.75rem 1rem; box-shadow:0 6px 28px rgba(0,0,0,0.6); font-size:0.8rem; color:#e2cfa0; line-height:1.5; }
     .conflict-banner strong { color:#d9a441; }
     .conflict-detail { color:#a89060; font-size:0.74rem; }
@@ -3751,6 +3756,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div class="canvas-main">
             <div class="canvas-page-title-row">
               <input class="notes-page-title-input" id="canvas-page-title" placeholder="Page name…" />
+              <span class="canvas-sync" id="canvas-sync" title="Sauvegarde du dessin vers le cloud"></span>
               <button class="canvas-tool-btn" id="ctool-download" title="Download as PNG">⤓ PNG</button>
               <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page">🗑</button>
             </div>
@@ -4838,7 +4844,12 @@ function flushPendingSave() {
   } catch {}
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') flushPendingSave();
+  if (document.visibilityState === 'hidden') {
+    // Les dessins en attente partent tout de suite : sans ca, fermer l'onglet
+    // pendant le delai d'envoi laissait le dessin uniquement en local.
+    if (typeof _canvasDirty !== 'undefined' && _canvasDirty.size) syncCanvasPages();
+    flushPendingSave();
+  }
 });
 window.addEventListener('pagehide', flushPendingSave);
 
@@ -6535,6 +6546,103 @@ const canvasState = {
 let canvasPages = [];        // [{id, title, data}]
 let currentCanvasPageId = 0; // index into canvasPages
 
+/* ── Synchronisation des dessins ──
+   Les pages de canvas ne vivaient QUE dans le localStorage : vider le cache du
+   navigateur ou ouvrir la fiche ailleurs et tout etait perdu, sans un mot.
+   On garde le localStorage comme copie de travail (ecrite a chaque trait, donc
+   rapide et disponible hors ligne) et on televerse les images vers Supabase
+   Storage — seule l'URL voyage dans playerData, comme pour les fonds. */
+
+let _canvasDirty = new Set();   // index des pages modifiees depuis le dernier envoi
+let _canvasSyncTimer = null;
+let _canvasSyncing = false;
+
+/* Metadonnees synchronisees : [{ id, title, url }] — jamais les pixels. */
+function canvasMeta() {
+  const slot = activeSlot();
+  if (!slot) return [];
+  if (!Array.isArray(slot.canvas)) slot.canvas = [];
+  return slot.canvas;
+}
+
+/* Envoi differe : le canvas est sauvegarde a chaque fin de trait, on ne peut
+   pas televerser aussi souvent. On attend une pause dans le dessin. */
+function scheduleCanvasSync(delay = 6000) {
+  clearTimeout(_canvasSyncTimer);
+  _canvasSyncTimer = setTimeout(() => { syncCanvasPages(); }, delay);
+}
+
+function setCanvasSyncBadge(etat) {
+  const el = document.getElementById('canvas-sync');
+  if (!el) return;
+  const TXT = { pending: '· en attente', up: '↑ envoi…', ok: '✓ sauvegardé', err: '⚠ local seulement', none: '' };
+  el.textContent = TXT[etat] ?? '';
+  el.className = 'canvas-sync ' + etat;
+}
+
+/* Televerse les pages modifiees et note leur URL dans playerData. */
+async function syncCanvasPages() {
+  if (_canvasSyncing || !currentUser || !playerData) return;
+  if (!_canvasDirty.size) return;
+  if (!navigator.onLine) { setCanvasSyncBadge('err'); return; }
+  _canvasSyncing = true;
+  setCanvasSyncBadge('up');
+  const charId = playerData.activeCharId;
+  const aEnvoyer = [..._canvasDirty];
+  let echec = 0;
+  for (const i of aEnvoyer) {
+    const pg = canvasPages[i];
+    if (!pg?.data) { _canvasDirty.delete(i); continue; }
+    try {
+      const url = await sbUploadImage(`${currentUser}/${charId}-canvas-${pg.id}.png`, pg.data);
+      const meta = canvasMeta();
+      const m = meta.find(x => x.id === pg.id);
+      if (m) { m.url = url; m.title = pg.title; }
+      else meta.push({ id: pg.id, title: pg.title, url });
+      _canvasDirty.delete(i);
+    } catch (e) { echec++; }
+  }
+  // Les pages supprimees localement disparaissent aussi des metadonnees
+  const ids = new Set(canvasPages.map(p2 => p2.id));
+  const meta = canvasMeta();
+  for (let i = meta.length - 1; i >= 0; i--) if (!ids.has(meta[i].id)) meta.splice(i, 1);
+  _canvasSyncing = false;
+  triggerSave();
+  setCanvasSyncBadge(echec ? 'err' : 'ok');
+  if (echec) scheduleCanvasSync(30000);            // nouvelle tentative plus tard
+  else setTimeout(() => setCanvasSyncBadge('none'), 2500);
+}
+
+/* Reconstruit les pages absentes localement depuis les URL distantes.
+   C'est le cas d'un nouvel appareil, ou d'un cache navigateur vide. */
+async function hydrateCanvasFromRemote() {
+  const meta = canvasMeta();
+  if (!meta.length) return false;
+  const presents = new Set(canvasPages.map(p2 => p2.id));
+  const manquants = meta.filter(m => !presents.has(m.id) && m.url);
+  if (!manquants.length) return false;
+  let ajoutees = 0;
+  for (const m of manquants) {
+    try {
+      const blob = await (await fetch(m.url)).blob();
+      const dataUrl = await new Promise((res, rej) => {
+        const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej;
+        fr.readAsDataURL(blob);
+      });
+      canvasPages.push({ id: m.id, title: m.title || 'Page', data: dataUrl });
+      ajoutees++;
+    } catch (e) { /* URL morte : on n'invente pas de page vide */ }
+  }
+  if (!ajoutees) return false;
+  // Une page vierge creee par defaut n'a plus de raison d'etre
+  if (canvasPages.length > ajoutees && canvasPages[0] && !canvasPages[0].data
+      && !meta.some(m => m.id === canvasPages[0].id)) canvasPages.shift();
+  saveCanvasPages();
+  renderCanvasPagesSidebar();
+  showToast(`✦ ${ajoutees} page(s) de dessin récupérée(s)`);
+  return true;
+}
+
 function canvasPageStorageKey() {
   return 'canvaspages-' + (currentUser||'?') + '-' + (playerData?.activeCharId||'0');
 }
@@ -6547,6 +6655,9 @@ function loadCanvasPages() {
     canvasPages = [{ id: Date.now(), title: 'Page 1', data: null }];
   }
   currentCanvasPageId = 0;
+  _canvasDirty.clear();
+  // Nouvel appareil ou cache vide : on va rechercher ce qui manque
+  hydrateCanvasFromRemote().then(ok => { if (ok) { initCanvas(); renderCanvasPagesSidebar(); } });
 }
 function saveCanvasPages() {
   try { localStorage.setItem(canvasPageStorageKey(), JSON.stringify(canvasPages)); } catch(e) {
@@ -6594,6 +6705,8 @@ function deleteCanvasPage() {
   initCanvas(false);
   renderCanvasPagesSidebar();
   saveCanvasPages();
+  _canvasDirty.add(currentCanvasPageId);
+  scheduleCanvasSync(1500);
 }
 function saveCurrentCanvasPage() {
   const cv = document.getElementById('handnote-canvas');
@@ -6601,6 +6714,9 @@ function saveCurrentCanvasPage() {
   if (canvasPages[currentCanvasPageId]) {
     canvasPages[currentCanvasPageId].data = cv.toDataURL();
     saveCanvasPages();
+    _canvasDirty.add(currentCanvasPageId);
+    setCanvasSyncBadge('pending');
+    scheduleCanvasSync();
   }
 }
 function loadCurrentCanvasPage() {
