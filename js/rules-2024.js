@@ -41,6 +41,24 @@ const PREPARED_SPELLS = {
   'Artificer': [2,3,4,5,6,6,7,7,9,9,10,10,11,11,12,12,14,14,15,15],
 };
 
+/* ── Progression des sorts mineurs ──
+   PHB 2024 : les lanceurs complets en gagnent un aux niveaux 4 et 10.
+   Paladin et Rodeur n'en ont pas. Le Psion suit le texte de sa propre classe
+   (2 au niveau 1, 3 au niveau 10, 4 au niveau 14 — UA 2025).
+   L'Artificier suit la progression Tasha's, faute de table 2024 publiee. */
+const CANTRIPS_KNOWN = {
+  'Artificer': [2,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,5,5,5],
+  'Bard':      [2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
+  'Cleric':    [3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5],
+  'Druid':     [2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
+  'Paladin':   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  'Psion':     [2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4,4,4],
+  'Ranger':    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  'Sorcerer':  [4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6],
+  'Warlock':   [2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
+  'Wizard':    [3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5],
+};
+
 /* ── Style de préparation des sorts (PHB 2024) ──
    La 2024 a supprimé les « sorts connus » : toutes les classes préparent des sorts.
    Ce qui change, c'est QUAND on peut les échanger — et le Magicien garde un grimoire.

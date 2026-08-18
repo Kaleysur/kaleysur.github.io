@@ -69,6 +69,10 @@ function ok(cond, label) {
     extract(J, 'function abilKeysFromFeat(abilStr)'),
     extract(J, 'function preparedTotal(c)'),
     extract(J, 'function multiclassPrereqCheck(c, className)'),
+    extract(R, 'const CANTRIPS_KNOWN'),
+    extract(J, 'function cantripsAt(className, level)'),
+    extract(J, 'function expertiseAt(className, level)'),
+    extract(J, 'function topSlotLevel(slots)'),
     extract(J, 'function planLevelUp(c, className)'),
     extract(J, 'function applyLevelUp(c, plan, choices)'),
     extract(J, 'function applyStartingGear(c, className, items)'),
@@ -489,6 +493,49 @@ function ok(cond, label) {
      'quantite absente = 1');
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+  /* -- Gains que le joueur doit choisir : sorts mineurs, Expertise, emplacements -- */
+  {
+    const CANTRIPS_T = new Function(extract(R, 'const CANTRIPS_KNOWN') + '; return CANTRIPS_KNOWN;')();
+    // Chaque lanceur a une table de 20 niveaux, croissante, coherente avec le niveau 1
+    Object.entries(STARTING_SPELLS).forEach(([cls, st]) => {
+      const tb = CANTRIPS_T[cls];
+      ok(!!tb, `${cls} : table de sorts mineurs manquante`);
+      eq((tb || []).length, 20, `${cls} : table sur 20 niveaux`);
+      eq((tb || [])[0], st.cantrips, `${cls} : niveau 1 coherent avec STARTING_SPELLS`);
+      (tb || []).forEach((n, i) => {
+        if (i > 0) ok(n >= tb[i - 1], `${cls} niv.${i + 1} : la table ne doit pas decroitre`);
+      });
+    });
+    eq(cantripsAt('Fighter', 5), 0, 'une classe non lanceuse n a pas de sorts mineurs');
+    eq(cantripsAt('Bard', 4) - cantripsAt('Bard', 3), 1, 'Barde : un sort mineur de plus au niveau 4');
+    eq(cantripsAt('Wizard', 10) - cantripsAt('Wizard', 9), 1, 'Magicien : un de plus au niveau 10');
+
+    // Expertise lue dans la description de la capacite, pas codee en dur
+    eq(expertiseAt('Rogue', 1), 2, 'Roublard niveau 1 : deux competences');
+    eq(expertiseAt('Rogue', 6), 2, 'Roublard niveau 6 : deux de plus');
+    eq(expertiseAt('Rogue', 5), 0, 'Roublard niveau 5 : aucune');
+    eq(expertiseAt('Bard', 2), 2, 'Barde niveau 2');
+    eq(expertiseAt('Ranger', 9), 2, 'Rodeur niveau 9');
+    eq(expertiseAt('Fighter', 6), 0, 'le Guerrier n a pas d Expertise');
+
+    eq(topSlotLevel([4,3,2,0,0,0,0,0,0]), 3, 'plus haut niveau de sort accessible');
+    eq(topSlotLevel(null), 0, 'aucun emplacement');
+    eq(topSlotLevel([]), 0, 'tableau vide');
+
+    // L'Expertise ne s'applique qu'a une competence deja maitrisee
+    const r0 = { for:14, dex:14, con:14, int:14, sag:14, cha:14, pvMax:20, nbDeVie:5,
+                 classes:[{ classe:'Rogue', sousClasse:'Assassin', niveau:5 }], discret:1, perception:0 };
+    const res0 = applyLevelUp(r0, planLevelUp(r0, 'Rogue'), { expertise:['discret','perception'] });
+    eq(r0.discret, 2, 'competence maitrisee : passe en Expertise');
+    eq(r0.perception, 0, 'competence non maitrisee : refusee');
+    ok(res0.log.some(x => /Expertise/.test(x)), 'Expertise notee dans le journal');
+    // Le journal annonce aussi les gains a choisir soi-meme
+    const b1 = { for:14, dex:14, con:14, int:14, sag:14, cha:14, pvMax:20, nbDeVie:3,
+                 classes:[{ classe:'Bard', sousClasse:'College of Lore', niveau:3 }] };
+    ok(applyLevelUp(b1, planLevelUp(b1, 'Bard'), {}).log.some(x => /sort mineur/.test(x)),
+       'sort mineur gagne : annonce');
+  }
 
   /* -- Valeur du butin -- */
   eq(purseValue({ gp:100 }), 100, 'bourse en po');
