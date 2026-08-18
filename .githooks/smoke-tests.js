@@ -91,6 +91,11 @@ function ok(cond, label) {
     extract(J, 'function isProficientWith(c, weaponCat)'),
     extract(J, 'function attackFromItem(item, c)'),
     extract(J, 'function syncAttackForItem(c, item, equipped)'),
+    extract(J, 'const COIN_RATE'),
+    extract(J, 'function purseValue(currency)'),
+    extract(J, 'function itemsValue(items)'),
+    extract(J, 'function fmtGp(v)'),
+    extract(J, 'function searchNotes(pages, query)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -481,6 +486,44 @@ function ok(cond, label) {
      'quantite absente = 1');
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+  /* -- Valeur du butin -- */
+  eq(purseValue({ gp:100 }), 100, 'bourse en po');
+  eq(purseValue({ pp:1, gp:1, ep:1, sp:1, cp:1 }), 11.61, 'toutes les denominations');
+  eq(purseValue({}), 0, 'bourse vide');
+  eq(itemsValue([{ name:'A', cost:15, qty:2 }]), { total:30, sansPrix:0 }, 'prix multiplie par la quantite');
+  eq(itemsValue([{ name:'A', cost:15 }, { name:'B' }]), { total:15, sansPrix:1 },
+     'objet sans prix signale, pas compte a zero');
+  eq(itemsValue([{ name:'A', cost:2.5 }]), { total:2.5, sansPrix:0 }, 'quantite absente = 1');
+  eq(itemsValue([]), { total:0, sansPrix:0 }, 'inventaire vide');
+  eq(fmtGp(15), '15', 'pas de decimale inutile');
+  eq(fmtGp(0.5), '0.5', 'decimale conservee');
+  eq(fmtGp(15.006), '15.01', 'arrondi au centieme');
+
+  /* -- Recherche dans les notes -- */
+  {
+    const pages = [
+      { name:'Session 1', content:'Nous avons rencontre Elara a Ouestvir. Elara nous a parle du culte.' },
+      { name:'PNJ',       content:'Elara — pretresse. Bram — forgeron.' },
+      { name:'Elara',     content:'Rien ici.' },
+      { name:'Vide',      content:'' },
+    ];
+    const r = searchNotes(pages, 'elara');
+    eq(r.length, 3, 'trois pages concernees');
+    eq(r[0].total, 2, 'occurrences comptees dans la page');
+    eq(r[0].hits[0].motif, 'Elara', 'la casse d origine est conservee dans l extrait');
+    eq(r[2].dansTitre, true, 'trouve dans le titre seul');
+    eq(r[2].hits.length, 0, 'titre seul : aucun extrait');
+    eq(searchNotes(pages, 'e'), [], 'requete d un seul caractere ignoree');
+    eq(searchNotes(pages, ''), [], 'requete vide');
+    eq(searchNotes(pages, 'dragon'), [], 'aucun resultat');
+    eq(searchNotes(pages, 'ELARA').length, 3, 'recherche insensible a la casse');
+    eq(searchNotes(null, 'test'), [], 'pages absentes');
+    eq(searchNotes(pages, '  elara  ').length, 3, 'espaces autour de la requete ignores');
+    const many = searchNotes([{ name:'X', content:'orc orc orc orc orc' }], 'orc');
+    eq(many[0].hits.length, 3, 'au plus trois extraits affiches');
+    eq(many[0].total, 5, 'mais le total reste exact');
+  }
 
   /* -- Une arme equipee devient une ligne d'attaque -- */
   {
