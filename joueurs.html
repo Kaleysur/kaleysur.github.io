@@ -278,6 +278,13 @@
     .notes-res-count { font-family:inherit; font-size:0.62rem; color:#7a7a82; background:rgba(255,255,255,0.06); padding:0 0.3rem; border-radius:8px; }
     .notes-res-snip { font-size:0.7rem; color:#8a8a92; line-height:1.45; margin-top:0.2rem; white-space:pre-wrap; word-break:break-word; }
     .notes-res-snip mark { background:rgba(201,162,39,0.28); color:var(--gold,#c9a227); padding:0 1px; border-radius:2px; }
+    .conflict-banner { position:fixed; left:50%; transform:translateX(-50%); bottom:1.5rem; z-index:10001; max-width:min(560px, calc(100vw - 2rem)); display:flex; flex-direction:column; gap:0.6rem; background:#2a2410; border:1px solid #6a5a20; border-left:3px solid #d9a441; border-radius:6px; padding:0.75rem 1rem; box-shadow:0 6px 28px rgba(0,0,0,0.6); font-size:0.8rem; color:#e2cfa0; line-height:1.5; }
+    .conflict-banner strong { color:#d9a441; }
+    .conflict-detail { color:#a89060; font-size:0.74rem; }
+    .conflict-actions { display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap; }
+    .conflict-banner button { background:none; border:1px solid #6a5a20; color:#e2cfa0; cursor:pointer; font-family:inherit; font-size:0.76rem; padding:0.3rem 0.75rem; border-radius:4px; transition:background 0.12s; }
+    .conflict-banner button:hover { background:rgba(217,164,65,0.15); }
+    .conflict-banner #conflict-restore { border-color:#d9a441; color:#d9a441; }
     .notes-res-empty { font-size:0.72rem; color:#55555c; font-style:italic; padding:0.3rem 0.45rem; }
     .notes-editor { width:100%; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:6px; color:var(--j-text,#e8e0d0); font-size:0.9rem; padding:0.75rem; box-sizing:border-box; font-family:'Lora',serif; line-height:1.6; resize:vertical; min-height:260px; flex:1; }
     .notes-editor:focus { outline:none; border-color:var(--gold-dark); }
@@ -4682,6 +4689,83 @@ function updateConnIndicator(state) {
   if (state === 'local')   { el.textContent = '⚠ Local';       el.className = 'conn-indicator local';   el.title = 'Échec cloud — données sauvées localement uniquement'; }
 }
 
+/* ── Filet de securite en cas de conflit ──
+   Quand une ecriture concurrente est refusee (autre appareil, admin MJ), on
+   rechargeait le distant PAR-DESSUS l'etat local : tout ce qui n'etait pas
+   encore parti — typiquement des notes en cours de frappe — disparaissait sans
+   un mot, et le cache local etait ecrase au login suivant.
+   On garde desormais une copie avant d'ecraser, et on le dit. */
+function conflictKey(u) { return 'kaleysur_conflict_' + u; }
+
+function saveConflictSnapshot(user, json) {
+  try { localStorage.setItem(conflictKey(user), `{"ts":${Date.now()},"data":${json}}`); return true; }
+  catch (e) { return false; }
+}
+
+function getConflictSnapshot(user) {
+  try { return JSON.parse(localStorage.getItem(conflictKey(user)) || 'null'); }
+  catch (e) { return null; }
+}
+
+function clearConflictSnapshot(user) {
+  try { localStorage.removeItem(conflictKey(user)); } catch (e) {}
+}
+
+/* Compare deux jeux de donnees et resume ce que le local avait en plus.
+   Sert a dire au joueur ce qu'il risque de perdre, pas a fusionner tout seul. */
+function diffNotes(local, distant) {
+  const out = [];
+  Object.entries(local?.characters || {}).forEach(([id, slot]) => {
+    const nom = slot?.character?.characterName || slot?.name || id;
+    const a = Array.isArray(slot?.notes) ? slot.notes : [];
+    const b = Array.isArray(distant?.characters?.[id]?.notes) ? distant.characters[id].notes : [];
+    const pagesEnPlus = Math.max(0, a.length - b.length);
+    const carA = a.reduce((t, p) => t + (p?.content || '').length, 0);
+    const carB = b.reduce((t, p) => t + (p?.content || '').length, 0);
+    if (pagesEnPlus > 0 || carA > carB) {
+      out.push({ nom, pagesEnPlus, caracteresEnPlus: Math.max(0, carA - carB) });
+    }
+  });
+  return out;
+}
+
+/* Banniere de recuperation — persistante, elle ne disparait pas toute seule. */
+function showConflictBanner(user) {
+  const snap = getConflictSnapshot(user);
+  if (!snap) return;
+  document.getElementById('conflict-banner')?.remove();
+  const perdu = diffNotes(snap.data, playerData);
+  const detail = perdu.length
+    ? perdu.map(p => `${p.nom} : ${p.pagesEnPlus ? p.pagesEnPlus + ' page(s), ' : ''}${p.caracteresEnPlus} caractere(s) de notes`).join(' — ')
+    : 'aucune difference detectee dans les notes';
+  const el = document.createElement('div');
+  el.id = 'conflict-banner';
+  el.className = 'conflict-banner';
+  el.innerHTML =
+      `<div><strong>Version d'un autre appareil chargee.</strong> Ta version locale a ete mise de cote : `
+    + `<span class="conflict-detail">${esc(detail)}</span></div>`
+    + `<div class="conflict-actions">`
+    + `<button type="button" id="conflict-restore">Restaurer ma version</button>`
+    + `<button type="button" id="conflict-dismiss">Garder celle-ci</button></div>`;
+  document.body.appendChild(el);
+  el.querySelector('#conflict-restore').addEventListener('click', () => {
+    const s2 = getConflictSnapshot(user);
+    if (!s2?.data) return;
+    // On repart du _rev distant courant pour que la restauration soit acceptee
+    const rev = playerData?._rev;
+    playerData = s2.data;
+    playerData._rev = rev;
+    clearConflictSnapshot(user);
+    el.remove();
+    renderAll(); renderCharCards(); renderCharSelector(); triggerSave();
+    showToast('✦ Ta version a ete restauree');
+  });
+  el.querySelector('#conflict-dismiss').addEventListener('click', () => {
+    clearConflictSnapshot(user);
+    el.remove();
+  });
+}
+
 function triggerSave() {
   _saveScheduledAt = Date.now(); // marquer qu'une sauvegarde est en attente
   const badge = document.getElementById('save-badge');
@@ -4702,7 +4786,9 @@ function triggerSave() {
       const res = await sbUpdateDataGuarded(currentUser, _json, prevRev);
       if (res === 'conflict') {
         // Écriture concurrente (autre appareil / admin DM) : on recharge le distant
-        // plutôt que de l'écraser silencieusement.
+        // plutôt que de l'écraser. Mais on met notre version de côté d'abord :
+        // sans ça, des notes en cours de frappe disparaissaient sans un mot.
+        saveConflictSnapshot(currentUser, _json);
         try {
           const row = await sbGetPlayer(currentUser);
           if (row?.data) {
@@ -4712,6 +4798,7 @@ function triggerSave() {
         } catch {}
         badge.textContent = '⚠ Synchronisé depuis un autre appareil'; badge.className = 'save-badge err';
         setTimeout(() => { badge.textContent = ''; badge.className = 'save-badge'; }, 4000);
+        showConflictBanner(currentUser);
         return;
       }
       _lastSaveAt = Date.now();
@@ -5459,6 +5546,9 @@ async function openDashboard() {
   showScreen('screen-dashboard');
   renderDashboard();
   startRealtime(currentUser);
+  // Une copie mise de cote lors d'un conflit precedent attend peut-etre une
+  // decision : on la represente plutot que de la laisser mourir en silence.
+  if (getConflictSnapshot(currentUser)) setTimeout(() => showConflictBanner(currentUser), 600);
   migrateImagesToStorage(); // async, non bloquant — convertit les base64 existants en URL Storage
   applyLayout();
   buildSecTabBar();
@@ -11647,13 +11737,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('btn-del-note-page').addEventListener('click', () => {
     if (!playerData) return;
+    saveCurrentNoteContent();          // ne pas supprimer une version perimee
     const pages = getNotePages();
-    if (pages.length <= 1) return;
-    pages.splice(activeNotesPageIdx, 1);
+    if (pages.length <= 1) { showToast('Il doit rester au moins une page.'); return; }
+    const idx  = activeNotesPageIdx;
+    const page = pages[idx];
+    const nom  = page?.name || `Page ${idx + 1}`;
+    const car  = (page?.content || '').length;
+    // Une page de notes representant parfois des heures de jeu, on demande
+    // confirmation en annoncant ce qu'elle contient, puis on laisse annuler.
+    if (car > 0 && !confirm(
+      `Supprimer la page « ${nom} » ?
+${car} caractere(s) de notes.
+
+`
+      + `Tu pourras annuler pendant quelques secondes.`
+    )) return;
+    pages.splice(idx, 1);
     if (activeNotesPageIdx >= pages.length) activeNotesPageIdx = pages.length - 1;
-    renderNotesPages();
-    loadCurrentNoteInEditor();
-    triggerSave();
+    renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
+    showCharUndoToast(`🗑 Page « ${nom} » supprimee`, () => {
+      const p2 = getNotePages();
+      p2.splice(Math.min(idx, p2.length), 0, page);
+      activeNotesPageIdx = Math.min(idx, p2.length - 1);
+      renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
+      showToast(`✦ Page « ${nom} » restauree`);
+    });
   });
 
   /* ── Paramètres ── */

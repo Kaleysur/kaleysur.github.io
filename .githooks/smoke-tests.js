@@ -96,6 +96,7 @@ function ok(cond, label) {
     extract(J, 'function itemsValue(items)'),
     extract(J, 'function fmtGp(v)'),
     extract(J, 'function searchNotes(pages, query)'),
+    extract(J, 'function diffNotes(local, distant)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -499,6 +500,23 @@ function ok(cond, label) {
   eq(fmtGp(15), '15', 'pas de decimale inutile');
   eq(fmtGp(0.5), '0.5', 'decimale conservee');
   eq(fmtGp(15.006), '15.01', 'arrondi au centieme');
+
+  /* -- Filet de securite sur conflit : ce que le local avait en plus -- */
+  {
+    const mk = (nom, notes) => ({ characters:{ c1:{ character:{ characterName:nom }, notes } } });
+    eq(diffNotes(mk('Thorin', [{ content:'aaa' }, { content:'bbb' }]), mk('Thorin', [{ content:'aaa' }])),
+       [{ nom:'Thorin', pagesEnPlus:1, caracteresEnPlus:3 }], 'page en plus cote local');
+    eq(diffNotes(mk('Thorin', [{ content:'aaaaa' }]), mk('Thorin', [{ content:'aaa' }])),
+       [{ nom:'Thorin', pagesEnPlus:0, caracteresEnPlus:2 }], 'texte en plus cote local');
+    eq(diffNotes(mk('Thorin', [{ content:'aaa' }]), mk('Thorin', [{ content:'aaa' }])), [],
+       'versions identiques : rien a signaler');
+    eq(diffNotes(mk('Thorin', [{ content:'a' }]), mk('Thorin', [{ content:'aaaa' }])), [],
+       'distant plus riche : on ne reclame rien');
+    eq(diffNotes(mk('Thorin', [{ content:'aaa' }]), { characters:{} }),
+       [{ nom:'Thorin', pagesEnPlus:1, caracteresEnPlus:3 }], 'personnage absent du distant');
+    eq(diffNotes({}, {}), [], 'donnees vides');
+    eq(diffNotes(mk('Thorin', null), mk('Thorin', null)), [], 'notes absentes');
+  }
 
   /* -- Recherche dans les notes -- */
   {
