@@ -327,6 +327,12 @@ input,select{font-family:inherit;color-scheme:dark;}
 .group-btn.heal:hover{background:rgba(138,186,138,0.14);}
 .group-hint{font-size:0.7rem;color:var(--text-dim,#8a8272);margin-top:0.45rem;font-style:italic;}
 .group-empty{font-size:0.76rem;color:var(--text-dim,#8a8272);font-style:italic;padding:0.4rem 0;}
+.group-cond-grid{display:flex;flex-wrap:wrap;gap:0.3rem;}
+.group-cond{background:var(--bg-input,#0f0d08);border:1px solid var(--border,#3a3020);border-radius:99px;color:var(--text-dim,#8a8272);cursor:pointer;font-family:inherit;font-size:0.72rem;padding:0.22rem 0.6rem;display:inline-flex;align-items:center;gap:0.3rem;transition:all 0.12s;}
+.group-cond:hover{border-color:var(--gold-dark,#8a6e1a);color:var(--gold,#e8c96a);}
+.group-cond.some{border-color:#8a6e1a;color:#d9a441;background:rgba(217,164,65,0.1);}
+.group-cond.all{border-color:#c04040;background:#2a0f0f;color:#f08080;}
+.gc-n{font-size:0.62rem;background:rgba(255,255,255,0.12);border-radius:8px;padding:0 0.28rem;}
 .group-results{margin:0.7rem 0;display:flex;flex-direction:column;gap:0.22rem;}
 .gres{display:grid;grid-template-columns:1fr auto 34px 72px;align-items:center;gap:0.5rem;font-size:0.76rem;padding:0.24rem 0.5rem;border-radius:4px;background:var(--bg-input,#0f0d08);border-left:2px solid var(--border,#3a3020);}
 .gres.ok{border-left-color:#6aba6a;}
@@ -1282,6 +1288,8 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <div class="group-tabs">
         <button class="group-tab active" data-gtab="hp">Dégâts / Soins</button>
         <button class="group-tab" data-gtab="save">Sauvegarde</button>
+        <button class="group-tab" data-gtab="cond">Conditions</button>
+        <button class="group-tab" data-gtab="rest">Repos</button>
       </div>
 
       <div class="group-targets" id="group-targets"></div>
@@ -1303,6 +1311,18 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         <div class="group-hint">Les PV temporaires absorbent les dégâts en premier.</div>
       </div>
 
+      <div class="group-pane" id="group-pane-cond" style="display:none;">
+        <div class="group-cond-grid" id="group-cond-grid"></div>
+        <div class="group-hint">Cliquer applique la condition a toute la selection. Un second clic la retire.</div>
+      </div>
+
+      <div class="group-pane" id="group-pane-rest" style="display:none;">
+        <div class="group-row">
+          <button class="group-btn" id="group-short-rest">☽ Repos court</button>
+          <button class="group-btn heal" id="group-long-rest">☀ Repos long</button>
+        </div>
+        <div class="group-hint">Le repos court rend les ressources a recharge courte et les emplacements de pacte. Les des de vie restent au joueur — le MJ ne les depense pas a sa place.</div>
+      </div>
       <div class="group-pane" id="group-pane-save" style="display:none;">
         <div class="group-row">
           <label>Sauvegarde</label>
@@ -2951,6 +2971,78 @@ function combatantState(key) {
            temp: parseInt(src.temp) || 0, char: null };
 }
 
+/* Ajoute ou retire une condition sur n'importe quel combattant. */
+function setCombatantCondition(key, cond, add) {
+  const [kind, a, b] = key.split('::');
+  let cible = null, apresSauvegarde = null;
+  if (kind === 'p') {
+    const data = getPlayerData(a);
+    cible = data?.characters?.[b]?.character;
+    apresSauvegarde = () => schedulePlayerSave(a, data);
+  } else {
+    cible = kind === 'm' ? localMonsters[a] : localFriendlies[a];
+    apresSauvegarde = () => { if (typeof saveLocalState === 'function') saveLocalState(); };
+  }
+  if (!cible) return false;
+  cible.conditions = Array.isArray(cible.conditions) ? cible.conditions : [];
+  const present = cible.conditions.includes(cond);
+  if (add && !present) cible.conditions.push(cond);
+  if (!add) cible.conditions = cible.conditions.filter(x => x !== cond);
+  apresSauvegarde();
+  updatePanel(key);
+  return add ? !present : present;
+}
+
+/* Repos de groupe.
+   Long : PV au maximum, PV temporaires effaces, jets de mort remis a zero,
+   emplacements et ressources longues restaurees.
+   Court : ressources a recharge courte et emplacements de pacte (Occultiste).
+   Les des de vie restent au joueur — le MJ ne peut pas les depenser a sa place. */
+function restCombatant(key, type) {
+  const [kind, a, b] = key.split('::');
+  if (kind !== 'p') {
+    // Monstres et PNJ : un repos long les remet a plein, un court ne fait rien
+    const src = kind === 'm' ? localMonsters[a] : localFriendlies[a];
+    if (!src) return null;
+    if (type === 'long') { src.hp = src.hpMax; src.conditions = []; }
+    if (typeof saveLocalState === 'function') saveLocalState();
+    updatePanel(key);
+    return type === 'long' ? 'restaure' : 'aucun effet';
+  }
+  const data = getPlayerData(a);
+  const c = data?.characters?.[b]?.character;
+  if (!c) return null;
+  const notes = [];
+  if (type === 'long') {
+    c.pvActuel = parseInt(c.pvMax) || 0;
+    c.pvTemp = 0;
+    c.mortSucces = 0; c.mortEchecs = 0;
+    c.emplacementsUtilises = {};
+    for (let i = 1; i <= 9; i++) c.emplacementsUtilises[i] = 0;
+    if (Array.isArray(c.resources)) c.resources.forEach(r => { r.used = 0; });
+    notes.push('PV au max, emplacements et ressources restaures');
+  } else {
+    let n = 0;
+    if (Array.isArray(c.resources)) {
+      c.resources.forEach(r => {
+        if ((r.reset || r.recharge) === 'short') { r.used = 0; n++; }
+      });
+    }
+    // Occultiste : les emplacements de pacte reviennent au repos court
+    const estOccultiste = (c.classes || [{ classe: c.classe }])
+      .some(cl => cl && cl.classe === 'Warlock');
+    if (estOccultiste) {
+      c.emplacementsUtilises = {};
+      for (let i = 1; i <= 9; i++) c.emplacementsUtilises[i] = 0;
+      notes.push('emplacements de pacte');
+    }
+    notes.push(n + ' ressource(s) courte(s)');
+  }
+  updatePanel(key);
+  schedulePlayerSave(a, data);
+  return notes.join(', ');
+}
+
 /* Tous les combattants dont le panneau est ouvert. */
 function groupCombatants() {
   return Object.keys(openPanels).map(combatantState).filter(Boolean);
@@ -3009,9 +3101,57 @@ document.addEventListener('DOMContentLoaded', function initGroupActions() {
   overlay.querySelectorAll('[data-gtab]').forEach(b => b.addEventListener('click', () => {
     const onglet = b.dataset.gtab;
     overlay.querySelectorAll('[data-gtab]').forEach(x => x.classList.toggle('active', x === b));
-    $('group-pane-hp').style.display   = onglet === 'hp' ? '' : 'none';
-    $('group-pane-save').style.display = onglet === 'save' ? '' : 'none';
+    ['hp','save','cond','rest'].forEach(o =>
+      $('group-pane-' + o).style.display = onglet === o ? '' : 'none');
+    if (onglet === 'cond') renderCondGrid();
   }));
+
+
+  /* Conditions : la grille montre l'etat de la selection.
+     Une condition portee par TOUTES les cibles se retire, sinon elle s'applique. */
+  function renderCondGrid() {
+    const box = $('group-cond-grid');
+    const list = cibles();
+    box.innerHTML = ALL_CONDITIONS.map(cond => {
+      const n = list.filter(t => {
+        const src = t.char || (t.kind === 'monster' ? localMonsters[t.id.split('::')[1]]
+                                                    : localFriendlies[t.id.split('::')[1]]);
+        return Array.isArray(src?.conditions) && src.conditions.includes(cond);
+      }).length;
+      const etat = !n ? '' : (n === list.length && list.length ? ' all' : ' some');
+      return `<button type="button" class="group-cond${etat}" data-gcond="${esc(cond)}">`
+           + `${esc(cond)}${n ? `<span class="gc-n">${n}</span>` : ''}</button>`;
+    }).join('');
+    box.querySelectorAll('[data-gcond]').forEach(b => b.addEventListener('click', () => {
+      const cond = b.dataset.gcond;
+      const list2 = cibles();
+      if (!list2.length) { dmToast('Sélectionne au moins une cible', true); return; }
+      const tous = list2.every(t => {
+        const src = t.char || (t.kind === 'monster' ? localMonsters[t.id.split('::')[1]]
+                                                    : localFriendlies[t.id.split('::')[1]]);
+        return Array.isArray(src?.conditions) && src.conditions.includes(cond);
+      });
+      let n = 0;
+      list2.forEach(t => { if (setCombatantCondition(t.id, cond, !tous)) n++; });
+      renderCondGrid(); renderTargets(); renderInitChips();
+      dmToast(`${cond} ${tous ? 'retirée de' : 'appliquée à'} ${n} cible(s)`);
+    }));
+  }
+
+  /* Repos de groupe */
+  function reposGroupe(type) {
+    const list = cibles();
+    if (!list.length) { dmToast('Sélectionne au moins une cible', true); return; }
+    const resume = [];
+    list.forEach(t => {
+      const r = restCombatant(t.id, type);
+      if (r) resume.push(t.label);
+    });
+    renderTargets(); renderInitChips();
+    dmToast(`${type === 'long' ? 'Repos long' : 'Repos court'} — ${resume.join(', ')}`);
+  }
+  $('group-short-rest').addEventListener('click', () => reposGroupe('short'));
+  $('group-long-rest').addEventListener('click', () => reposGroupe('long'));
 
   function appliquer(signe) {
     const n = parseInt($('group-amount').value) || 0;
