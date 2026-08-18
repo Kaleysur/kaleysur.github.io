@@ -859,6 +859,47 @@ function ok(cond, label) {
   const perc = dc.profSkills.find(x => x.sk.key === 'perception');
   eq(perc && perc.prof, 2, 'dmCalc Perception expertise');
 
+  /* -- Actions de groupe : degats avec PV temporaires, soins, sauvegardes -- */
+  eval([
+    extract(D, 'function applyDamageWithTemp(cible, degats)'),
+    extract(D, 'function applyHealing(cible, soin)'),
+    extract(D, 'function rollGroupSave(cibles, dc)'),
+  ].join('\n'));
+
+  // Les PV temporaires absorbent en premier (regle 2024)
+  eq(applyDamageWithTemp({ hp:30, temp:0 }, 12), { hp:18, temp:0, absorbe:0, applique:12 },
+     'degats sans PV temporaires');
+  eq(applyDamageWithTemp({ hp:30, temp:15 }, 12), { hp:30, temp:3, absorbe:12, applique:0 },
+     'PV temporaires absorbent tout');
+  eq(applyDamageWithTemp({ hp:30, temp:5 }, 12), { hp:23, temp:0, absorbe:5, applique:7 },
+     'absorption partielle');
+  eq(applyDamageWithTemp({ hp:5, temp:0 }, 50), { hp:0, temp:0, absorbe:0, applique:50 },
+     'les PV ne passent jamais sous zero');
+  eq(applyDamageWithTemp({ hp:30, temp:5 }, 0), { hp:30, temp:5, absorbe:0, applique:0 },
+     'degats nuls : rien ne bouge');
+  eq(applyDamageWithTemp({ hp:30, temp:0 }, -5), { hp:30, temp:0, absorbe:0, applique:0 },
+     'degats negatifs ignores');
+
+  // Soins plafonnes au maximum
+  eq(applyHealing({ hp:20, hpMax:30 }, 25), { hp:30, rendu:10 }, 'soin plafonne au maximum');
+  eq(applyHealing({ hp:10, hpMax:30 }, 8), { hp:18, rendu:8 }, 'soin normal');
+  eq(applyHealing({ hp:30, hpMax:30 }, 10), { hp:30, rendu:0 }, 'deja au maximum');
+  eq(applyHealing({ hp:0, hpMax:30 }, 5), { hp:5, rendu:5 }, 'un personnage a terre remonte');
+
+  // Sauvegardes de groupe
+  {
+    const res = rollGroupSave([{ id:'a', label:'Thorin', mod:5 }, { id:'b', label:'Elara', mod:-1 }], 15);
+    eq(res.length, 2, 'un resultat par cible');
+    ok(res.every(r => r.total === r.de + r.mod), 'total = de + modificateur');
+    ok(res.every(r => r.de >= 1 && r.de <= 20), 'le de reste dans ses bornes');
+    ok(res.every(r => r.reussi === (r.total >= 15)), 'reussite evaluee sur le DD');
+    eq(rollGroupSave([], 15), [], 'aucune cible');
+    eq(rollGroupSave(null, 15), [], 'cibles absentes');
+    // Un DD de 1 est toujours reussi, un DD de 30 avec mod 0 jamais
+    ok(rollGroupSave([{ id:'x', mod:0 }], 1)[0].reussi, 'DD 1 toujours reussi');
+    ok(!rollGroupSave([{ id:'x', mod:0 }], 30)[0].reussi, 'DD 30 sans modificateur : impossible');
+  }
+
   // Multiclasse + Jack of All Trades
   eq(dmCalc({ classes: [{ niveau: 3 }, { niveau: 2 }] }).totalLevel, 5, 'dmCalc niveau total multiclasse');
   const bard = dmCalc({ niveau: 4, dex: 10, jackOfAllTrades: true });

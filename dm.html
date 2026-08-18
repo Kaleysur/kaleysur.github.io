@@ -290,6 +290,58 @@ input,select{font-family:inherit;color-scheme:dark;}
 .combat-panel.friendly-panel:hover{border-color:rgba(50,130,200,0.55);box-shadow:0 6px 28px rgba(0,0,0,0.6),0 0 16px rgba(50,130,200,0.08);}
 .combat-panel.friendly-panel .panel-header{background:linear-gradient(135deg,rgba(15,45,80,0.8) 0%,rgba(10,30,55,0.6) 100%);}
 
+/* ── Actions de groupe ── */
+.group-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:9600;align-items:center;justify-content:center;padding:1rem;}
+.group-overlay.open{display:flex;}
+.group-modal{background:var(--bg-panel,#15120c);border:1px solid var(--border,#3a3020);border-radius:8px;width:560px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 10px 44px rgba(0,0,0,0.7);}
+.group-head{display:flex;align-items:center;justify-content:space-between;padding:0.8rem 1rem;border-bottom:1px solid var(--border,#3a3020);font-family:'Cinzel',serif;color:var(--gold,#e8c96a);font-size:0.92rem;letter-spacing:0.05em;}
+.group-x{background:none;border:none;color:var(--text-dim,#8a8272);cursor:pointer;font-size:0.95rem;padding:0.2rem 0.4rem;border-radius:4px;}
+.group-x:hover{color:#e08080;background:rgba(224,128,128,0.12);}
+.group-tabs{display:flex;gap:0.3rem;padding:0.7rem 1rem 0;}
+.group-tab{flex:1;background:none;border:1px solid var(--border,#3a3020);color:var(--text-dim,#8a8272);cursor:pointer;font-family:inherit;font-size:0.78rem;padding:0.35rem 0.6rem;border-radius:5px;transition:all 0.12s;}
+.group-tab:hover{border-color:var(--gold-dark,#8a6e1a);color:var(--gold,#e8c96a);}
+.group-tab.active{border-color:var(--gold-dark,#8a6e1a);background:rgba(232,201,106,0.12);color:var(--gold,#e8c96a);}
+.group-targets{display:flex;flex-wrap:wrap;gap:0.35rem;padding:0.8rem 1rem 0.5rem;max-height:220px;overflow-y:auto;}
+.group-target{display:flex;align-items:center;gap:0.4rem;background:var(--bg-input,#0f0d08);border:1px solid var(--border,#3a3020);border-radius:5px;color:var(--text,#ddd4c0);cursor:pointer;font-family:inherit;font-size:0.76rem;padding:0.3rem 0.55rem;transition:all 0.12s;}
+.group-target:hover{border-color:var(--gold-dark,#8a6e1a);}
+.group-target.on{border-color:var(--gold,#e8c96a);background:rgba(232,201,106,0.16);color:var(--gold,#e8c96a);}
+.group-target.bloodied .gt-hp{color:#d9a441;}
+.group-target.down{opacity:0.55;}
+.group-target.down .gt-hp{color:#e08080;}
+.gt-kind{font-size:0.8rem;}
+.gt-hp{color:var(--text-dim,#8a8272);font-size:0.72rem;}
+.group-select-row{display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap;padding:0 1rem 0.7rem;border-bottom:1px solid var(--border,#3a3020);}
+.group-mini{background:none;border:1px solid var(--border,#3a3020);color:var(--text-dim,#8a8272);cursor:pointer;font-family:inherit;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;}
+.group-mini:hover{border-color:var(--gold-dark,#8a6e1a);color:var(--gold,#e8c96a);}
+.group-count{margin-left:auto;font-size:0.72rem;color:var(--text-dim,#8a8272);}
+.group-pane{padding:0.9rem 1rem 1rem;}
+.group-row{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;}
+.group-row label{font-size:0.74rem;color:var(--text-dim,#8a8272);text-transform:uppercase;letter-spacing:0.05em;}
+.group-row input,.group-row select{background:var(--bg-input,#0f0d08);border:1px solid var(--border,#3a3020);border-radius:4px;color:var(--text,#ddd4c0);font-family:inherit;font-size:0.82rem;padding:0.28rem 0.5rem;width:82px;}
+.group-row input:focus,.group-row select:focus{outline:none;border-color:var(--gold-dark,#8a6e1a);}
+.group-btn{background:var(--bg-input,#0f0d08);border:1px solid var(--border,#3a3020);border-radius:5px;color:var(--text,#ddd4c0);cursor:pointer;font-family:inherit;font-size:0.78rem;padding:0.3rem 0.7rem;transition:all 0.12s;}
+.group-btn:hover{border-color:var(--gold-dark,#8a6e1a);color:var(--gold,#e8c96a);}
+.group-btn.dmg{border-color:#6a3030;color:#e08080;}
+.group-btn.dmg:hover{background:rgba(224,128,128,0.14);}
+.group-btn.heal{border-color:#356a35;color:#8aba8a;}
+.group-btn.heal:hover{background:rgba(138,186,138,0.14);}
+.group-hint{font-size:0.7rem;color:var(--text-dim,#8a8272);margin-top:0.45rem;font-style:italic;}
+.group-empty{font-size:0.76rem;color:var(--text-dim,#8a8272);font-style:italic;padding:0.4rem 0;}
+.group-results{margin:0.7rem 0;display:flex;flex-direction:column;gap:0.22rem;}
+.gres{display:grid;grid-template-columns:1fr auto 34px 72px;align-items:center;gap:0.5rem;font-size:0.76rem;padding:0.24rem 0.5rem;border-radius:4px;background:var(--bg-input,#0f0d08);border-left:2px solid var(--border,#3a3020);}
+.gres.ok{border-left-color:#6aba6a;}
+.gres.ko{border-left-color:#c97a7a;}
+.gres-name{color:var(--text,#ddd4c0);}
+.gres-roll{color:var(--text-dim,#8a8272);font-size:0.7rem;}
+.gres-total{font-family:'Cinzel',serif;color:var(--gold,#e8c96a);text-align:right;}
+.gres-verdict{font-size:0.72rem;text-align:right;}
+.gres.ok .gres-verdict{color:#8aba8a;}
+.gres.ko .gres-verdict{color:#e08080;}
+@media(max-width:600px){
+  .group-modal{width:100%;}
+  .gres{grid-template-columns:1fr auto 30px;}
+  .gres-verdict{grid-column:1 / -1;text-align:left;}
+}
 /* ── References sidebar section ── */
 #ref-section{border-top:1px solid var(--border-bright);padding:0.6rem 0.8rem 0.55rem;}
 #ref-section-header{
@@ -1210,6 +1262,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         <div class="dice-result" id="dice-result">—</div>
       </div>
     </div>
+    <button id="btn-group-action" class="nav-btn">⚡ Groupe</button>
     <button id="btn-open-drawer" class="nav-btn">📋 Fiches</button>
     <div class="nav-right">
       <span id="poll-indicator">—</span>
@@ -1217,6 +1270,56 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <button id="btn-logout">Déco.</button>
     </div>
   </nav>
+
+  <!-- Actions de groupe -->
+  <div id="group-overlay" class="group-overlay">
+    <div class="group-modal">
+      <div class="group-head">
+        <span>⚡ Action de groupe</span>
+        <button id="group-close" class="group-x" title="Fermer">✕</button>
+      </div>
+
+      <div class="group-tabs">
+        <button class="group-tab active" data-gtab="hp">Dégâts / Soins</button>
+        <button class="group-tab" data-gtab="save">Sauvegarde</button>
+      </div>
+
+      <div class="group-targets" id="group-targets"></div>
+      <div class="group-select-row">
+        <button class="group-mini" data-gsel="all">Tout</button>
+        <button class="group-mini" data-gsel="players">Joueurs</button>
+        <button class="group-mini" data-gsel="monsters">Monstres</button>
+        <button class="group-mini" data-gsel="none">Aucun</button>
+        <span class="group-count" id="group-count">0 sélectionné</span>
+      </div>
+
+      <div class="group-pane" id="group-pane-hp">
+        <div class="group-row">
+          <label>Montant</label>
+          <input type="number" id="group-amount" min="0" value="0">
+          <button class="group-btn dmg" id="group-damage">⚔ Dégâts</button>
+          <button class="group-btn heal" id="group-heal">✚ Soins</button>
+        </div>
+        <div class="group-hint">Les PV temporaires absorbent les dégâts en premier.</div>
+      </div>
+
+      <div class="group-pane" id="group-pane-save" style="display:none;">
+        <div class="group-row">
+          <label>Sauvegarde</label>
+          <select id="group-save-abil"></select>
+          <label>DD</label>
+          <input type="number" id="group-save-dc" min="1" value="15">
+          <button class="group-btn" id="group-roll">🎲 Lancer</button>
+        </div>
+        <div class="group-results" id="group-results"></div>
+        <div class="group-row" id="group-apply-row" style="display:none;">
+          <label>Dégâts</label>
+          <input type="number" id="group-save-dmg" min="0" value="0">
+          <button class="group-btn dmg" id="group-apply-save">Appliquer — moitié sur réussite</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="dm-layout">
     <div id="sidebar-backdrop"></div>
@@ -2807,6 +2910,226 @@ document.addEventListener('keydown', e => {
 
 /* Énumère tous les combattants éligibles (panneaux ouverts), avec roll d'initiative optionnel.
    `skip` : Set d'ids à exclure (utilisé par l'ajout incrémental). */
+/* Applique un delta de PV a n'importe quel combattant (joueur, monstre, allie). */
+function setCombatantHp(key, hp, temp) {
+  const [kind, a, b] = key.split('::');
+  if (kind === 'p') {
+    const data = getPlayerData(a);
+    const c = data?.characters?.[b]?.character;
+    if (!c) return null;
+    c.pvActuel = hp;
+    if (temp !== undefined) c.pvTemp = temp;
+    schedulePlayerSave(a, data);
+  } else if (kind === 'm') {
+    const m = localMonsters[a]; if (!m) return null;
+    m.hp = hp; if (temp !== undefined) m.temp = temp;
+    if (typeof saveLocalState === 'function') saveLocalState();
+  } else if (kind === 'f') {
+    const f = localFriendlies[a]; if (!f) return null;
+    f.hp = hp; if (temp !== undefined) f.temp = temp;
+    if (typeof saveLocalState === 'function') saveLocalState();
+  } else return null;
+  updatePanel(key);
+  return true;
+}
+
+/* Etat d'un combattant, quelle que soit sa nature. */
+function combatantState(key) {
+  const [kind, a, b] = key.split('::');
+  if (kind === 'p') {
+    const data = getPlayerData(a);
+    const slot = data?.characters?.[b];
+    const c = slot?.character; if (!c) return null;
+    return { id: key, kind: 'player', label: slot.name || a,
+             hp: parseInt(c.pvActuel) || 0, hpMax: parseInt(c.pvMax) || 0,
+             temp: parseInt(c.pvTemp) || 0, char: c };
+  }
+  const src = kind === 'm' ? localMonsters[a] : localFriendlies[a];
+  if (!src) return null;
+  return { id: key, kind: kind === 'm' ? 'monster' : 'friendly', label: src.name,
+           hp: parseInt(src.hp) || 0, hpMax: parseInt(src.hpMax) || 0,
+           temp: parseInt(src.temp) || 0, char: null };
+}
+
+/* Tous les combattants dont le panneau est ouvert. */
+function groupCombatants() {
+  return Object.keys(openPanels).map(combatantState).filter(Boolean);
+}
+
+/* DM_SAVES est declare plus bas dans le fichier : on attend le DOM pour que
+   la constante soit initialisee, sinon on lit une variable en zone morte. */
+document.addEventListener('DOMContentLoaded', function initGroupActions() {
+  const overlay = document.getElementById('group-overlay');
+  if (!overlay) return;
+  const $ = id => document.getElementById(id);
+  let selection = new Set();
+  let dernierJet = null;
+
+  $('group-save-abil').innerHTML = DM_SAVES
+    .map(sv => `<option value="${sv.key}|${sv.attr}">${sv.label}</option>`).join('');
+
+  function renderTargets() {
+    const box = $('group-targets');
+    const list = groupCombatants();
+    if (!list.length) {
+      box.innerHTML = '<div class="group-empty">Aucun panneau ouvert — ouvre des combattants dans la barre latérale.</div>';
+      $('group-count').textContent = '';
+      return;
+    }
+    box.innerHTML = list.map(t => {
+      const on = selection.has(t.id);
+      const pct = t.hpMax > 0 ? Math.round(t.hp / t.hpMax * 100) : 0;
+      const etat = t.hp <= 0 ? ' down' : pct <= 50 ? ' bloodied' : '';
+      const icone = t.kind === 'player' ? '🛡' : (t.kind === 'monster' ? '👹' : '🤝');
+      return `<button type="button" class="group-target${on ? ' on' : ''}${etat}" data-gt="${esc(t.id)}">`
+           + `<span class="gt-kind">${icone}</span>`
+           + `<span class="gt-name">${esc(t.label)}</span>`
+           + `<span class="gt-hp">${t.hp}/${t.hpMax}${t.temp ? ' +' + t.temp : ''}</span></button>`;
+    }).join('');
+    box.querySelectorAll('[data-gt]').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.gt;
+      if (selection.has(k)) selection.delete(k); else selection.add(k);
+      renderTargets();
+    }));
+    $('group-count').textContent = selection.size + ' sélectionné' + (selection.size > 1 ? 's' : '');
+  }
+
+  function cibles() { return [...selection].map(combatantState).filter(Boolean); }
+
+  overlay.querySelectorAll('[data-gsel]').forEach(b => b.addEventListener('click', () => {
+    const mode = b.dataset.gsel;
+    const list = groupCombatants();
+    if (mode === 'none') selection = new Set();
+    else if (mode === 'all') selection = new Set(list.map(t => t.id));
+    else if (mode === 'players') selection = new Set(list.filter(t => t.kind === 'player').map(t => t.id));
+    else if (mode === 'monsters') selection = new Set(list.filter(t => t.kind === 'monster').map(t => t.id));
+    renderTargets();
+  }));
+
+  overlay.querySelectorAll('[data-gtab]').forEach(b => b.addEventListener('click', () => {
+    const onglet = b.dataset.gtab;
+    overlay.querySelectorAll('[data-gtab]').forEach(x => x.classList.toggle('active', x === b));
+    $('group-pane-hp').style.display   = onglet === 'hp' ? '' : 'none';
+    $('group-pane-save').style.display = onglet === 'save' ? '' : 'none';
+  }));
+
+  function appliquer(signe) {
+    const n = parseInt($('group-amount').value) || 0;
+    const list = cibles();
+    if (!list.length) { dmToast('Sélectionne au moins une cible', true); return; }
+    if (n <= 0) { dmToast('Indique un montant', true); return; }
+    const resume = [];
+    list.forEach(t => {
+      if (signe < 0) {
+        const r = applyDamageWithTemp(t, n);
+        setCombatantHp(t.id, r.hp, r.temp);
+        resume.push(t.label + ' −' + r.applique + (r.absorbe ? ' (' + r.absorbe + ' absorbés)' : ''));
+      } else {
+        const r = applyHealing(t, n);
+        setCombatantHp(t.id, r.hp);
+        resume.push(t.label + ' +' + r.rendu);
+      }
+    });
+    renderInitChips(); renderTargets();
+    dmToast(resume.join(' · '));
+  }
+  $('group-damage').addEventListener('click', () => appliquer(-1));
+  $('group-heal').addEventListener('click', () => appliquer(1));
+
+  $('group-roll').addEventListener('click', () => {
+    const list = cibles();
+    if (!list.length) { dmToast('Sélectionne au moins une cible', true); return; }
+    const parts = $('group-save-abil').value.split('|');
+    const dc = parseInt($('group-save-dc').value) || 10;
+    // Joueurs : modificateur reel calcule par dmCalc. Monstres : leur bloc ne
+    // contient pas de caracteristiques, on lance a plat et on le signale.
+    const avecMod = list.map(t => ({
+      id: t.id, label: t.label, estJoueur: !!t.char,
+      mod: t.char ? dmCalc(t.char).save({ key: parts[0], attr: parts[1] }).val : 0
+    }));
+    dernierJet = { dc, resultats: rollGroupSave(avecMod, dc) };
+    const inconnus = avecMod.filter(x => !x.estJoueur).length;
+    $('group-results').innerHTML = dernierJet.resultats.map(r => {
+      const m = avecMod.find(x => x.id === r.id);
+      const signe = r.mod ? (r.mod > 0 ? '+' + r.mod : String(r.mod)) : '';
+      return `<div class="gres ${r.reussi ? 'ok' : 'ko'}">`
+           + `<span class="gres-name">${esc(r.label)}</span>`
+           + `<span class="gres-roll">${r.de}${signe}${m && !m.estJoueur ? ' <em>(sans mod.)</em>' : ''}</span>`
+           + `<span class="gres-total">${r.total}</span>`
+           + `<span class="gres-verdict">${r.reussi ? '✓ réussi' : '✕ échec'}</span></div>`;
+    }).join('')
+    + (inconnus ? `<div class="group-hint">${inconnus} monstre(s) lancé(s) sans modificateur — leur bloc n en contient pas.</div>` : '');
+    $('group-apply-row').style.display = '';
+  });
+
+  $('group-apply-save').addEventListener('click', () => {
+    if (!dernierJet) { dmToast('Lance les sauvegardes en premier', true); return; }
+    const n = parseInt($('group-save-dmg').value) || 0;
+    if (n <= 0) { dmToast('Indique les dégâts', true); return; }
+    const resume = [];
+    dernierJet.resultats.forEach(r => {
+      const t = combatantState(r.id); if (!t) return;
+      const degats = r.reussi ? Math.floor(n / 2) : n;
+      const res = applyDamageWithTemp(t, degats);
+      setCombatantHp(t.id, res.hp, res.temp);
+      resume.push(t.label + ' −' + res.applique);
+    });
+    renderInitChips(); renderTargets();
+    dmToast('DD ' + dernierJet.dc + ' — ' + resume.join(' · '));
+  });
+
+  function ouvrir() {
+    selection = new Set(); dernierJet = null;
+    $('group-results').innerHTML = '';
+    $('group-apply-row').style.display = 'none';
+    renderTargets();
+    overlay.classList.add('open');
+  }
+  window._openGroupActions = ouvrir;
+  document.getElementById('btn-group-action')?.addEventListener('click', ouvrir);
+  $('group-close').addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) overlay.classList.remove('open');
+  });
+});
+
+/* ── Actions de groupe ──
+   Une boule de feu touche quatre personnages : c'etait quatre series de clics,
+   panneau par panneau. Ici on selectionne les cibles une fois et on applique. */
+
+/* Degats en respectant les PV temporaires : ils absorbent en premier (regle
+   2024). Fonction pure sur un objet {hp, hpMax, temp} — testable. */
+function applyDamageWithTemp(cible, degats) {
+  const d = Math.max(0, parseInt(degats) || 0);
+  let temp = Math.max(0, parseInt(cible.temp) || 0);
+  const absorbe = Math.min(temp, d);
+  temp -= absorbe;
+  const reste = d - absorbe;
+  const hp = Math.max(0, (parseInt(cible.hp) || 0) - reste);
+  return { hp, temp, absorbe, applique: reste };
+}
+
+function applyHealing(cible, soin) {
+  const h = Math.max(0, parseInt(soin) || 0);
+  const max = parseInt(cible.hpMax) || 0;
+  const avant = parseInt(cible.hp) || 0;
+  const hp = max > 0 ? Math.min(max, avant + h) : avant + h;
+  return { hp, rendu: hp - avant };
+}
+
+/* Jet de sauvegarde d'un groupe. `mod` vient de dmCalc pour les joueurs, ou
+   d'une saisie manuelle pour les monstres (leur bloc n'a pas de caracteristiques). */
+function rollGroupSave(cibles, dc) {
+  const seuil = parseInt(dc) || 10;
+  return (cibles || []).map(t => {
+    const de = Math.floor(Math.random() * 20) + 1;
+    const mod = parseInt(t.mod) || 0;
+    const total = de + mod;
+    return { id: t.id, label: t.label, de, mod, total, reussi: total >= seuil };
+  });
+}
+
 function enumerateOpenCombatants(roll = false, skip = null) {
   const out = [];
   const rollInit = mod => roll ? Math.floor(Math.random() * 20) + 1 + mod : mod;
