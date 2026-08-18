@@ -74,6 +74,10 @@ function ok(cond, label) {
     extract(J, 'function applyStartingGear(c, className, items)'),
     extract(J, 'function startingMaxHp(c, hitDie, speciesEffects)'),
     extract(J, 'function startingSpellHint(className)'),
+    extract(J, 'const SIZE_CARRY_MULT'),
+    extract(J, 'function carryCapacity(c)'),
+    extract(J, 'function coinWeight(currency)'),
+    extract(J, 'function inventoryWeight(inv)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -444,6 +448,26 @@ function ok(cond, label) {
     eq(c.levelPlan.rows[3].hp, 7, 'journal : PV gagnés');
     eq(c.levelPlan.rows[3].asi, '+1 DEX / +1 CON', 'journal : décision ASI');
   }
+
+  /* -- Encombrement : capacite, poids des pieces, total de l'inventaire -- */
+  eq(carryCapacity({ for:10, species:'Human' }), 150, 'capacite FOR 10');
+  eq(carryCapacity({ for:18, species:'Dwarf' }), 270, 'capacite FOR 18');
+  eq(carryCapacity({}), 150, 'sans FOR : 10 par defaut');
+  eq(carryCapacity({ for:12, species:'EspeceInconnue' }), 180, 'espece inconnue : taille Medium');
+  // Toute espece jouable doit donner une capacite exploitable
+  Object.keys(SPECIES_DATA).forEach(sp =>
+    ok(carryCapacity({ for:10, species:sp }) > 0, `${sp} : capacite de charge invalide`));
+  eq(coinWeight({ gp:50 }), 1, '50 pieces = 1 lb');
+  eq(coinWeight({ pp:10, gp:20, sp:20 }), 1, 'pieces melangees');
+  eq(coinWeight({}), 0, 'aucune piece');
+  eq(inventoryWeight({ items:[{ name:'Javelin', qty:4, weight:2 }], currency:{} }).total, 8,
+     'le poids est multiplie par la quantite');
+  eq(inventoryWeight({ items:[{ name:'X', qty:1 }], currency:{} }),
+     { total:0, sansPoids:1, coins:0 }, 'objet sans poids : compte comme non renseigne, pas 0');
+  eq(inventoryWeight({ items:[{ name:'Y', weight:2.5 }], currency:{} }).total, 2.5,
+     'quantite absente = 1');
+  eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
+  eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
 
   /* ── Sorts à choisir après création (startingSpellHint) ── */
   eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');

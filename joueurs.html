@@ -513,6 +513,32 @@
     .ration-actions { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.2rem; }
     .ration-day-btn { font-size:0.75rem; padding:0.3rem 0.75rem; }
     /* ── Catégories inventaire ── */
+    /* Encombrement */
+    .inv-enc { background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-left:2px solid var(--gold-dark,#8a6e1a); border-radius:0 4px 4px 0; padding:0.45rem 0.7rem; margin-bottom:0.5rem; font-size:0.74rem; }
+    .inv-enc:empty { display:none; }
+    .inv-enc.warn { border-left-color:#d9a441; }
+    .inv-enc.over { border-left-color:var(--danger,#c97a7a); }
+    .inv-enc.off  { border-left-color:#3a3a44; color:#6a6a72; font-style:italic; }
+    .inv-enc-head { display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; }
+    .inv-enc-label { letter-spacing:0.07em; text-transform:uppercase; color:#a88a3a; font-size:0.68rem; }
+    .inv-enc.off .inv-enc-label { color:inherit; text-transform:none; letter-spacing:0; font-size:0.74rem; }
+    .inv-enc-head strong { color:var(--j-text,#e2cfa0); font-family:'Cinzel',serif; }
+    .inv-enc.over .inv-enc-head strong { color:var(--danger,#c97a7a); }
+    .inv-enc-flag { color:var(--danger,#c97a7a); font-size:0.7rem; }
+    .inv-enc-track { height:4px; background:rgba(255,255,255,0.07); border-radius:2px; margin:0.35rem 0 0.3rem; overflow:hidden; }
+    .inv-enc-bar { height:100%; background:var(--gold-dark,#8a6e1a); transition:width 0.25s; }
+    .inv-enc.warn .inv-enc-bar { background:#d9a441; }
+    .inv-enc.over .inv-enc-bar { background:var(--danger,#c97a7a); }
+    .inv-enc-detail { color:#7a7a82; font-size:0.7rem; }
+    .inv-enc-missing { color:#a88a3a; }
+    .inv-enc-toggle { display:flex; align-items:center; gap:0.4rem; font-size:0.72rem; color:#7a7a82; cursor:pointer; user-select:none; margin-bottom:0.7rem; }
+    .inv-enc-toggle input { accent-color:var(--gold-dark); width:13px; height:13px; cursor:pointer; }
+    .inv-enc-toggle-hint { color:#55555c; font-size:0.68rem; }
+    /* Sur petit ecran la colonne Lb ecrasait le nom de l'objet (37 px). Le poids
+       se saisit une fois a l'import ; le total reste lisible dans la barre. */
+    @media (max-width: 700px) {
+      .inv-table thead th:nth-child(4), .inv-table tbody td:nth-child(4) { display:none; }
+    }
     .inv-cat-tabs { display:flex; gap:0; margin-bottom:0.75rem; border-bottom:1px solid var(--j-border-col,#2a2a3a); flex-wrap:wrap; }
     .inv-cat-tab { padding:0.3rem 0.7rem; background:none; border:none; border-bottom:2px solid transparent; color:#666; font-size:0.72rem; cursor:pointer; font-family:'Cinzel',serif; letter-spacing:0.04em; transition:all var(--transition); white-space:nowrap; }
     .inv-cat-tab:hover { color:#aaa; }
@@ -3586,13 +3612,20 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <button class="btn btn-sm" id="btn-open-compendium-item" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
           <button class="btn btn-sm btn-gold" id="btn-add-item">+ Add</button>
         </div>
+        <div class="inv-enc" id="inv-encumbrance"></div>
+        <label class="inv-enc-toggle">
+          <input type="checkbox" id="inv-ignore-encumbrance">
+          Ignorer l'encombrement
+          <span class="inv-enc-toggle-hint">(beaucoup de tables ne suivent pas la regle)</span>
+        </label>
         <table class="inv-table">
           <thead><tr>
-            <th style="width:10%">Qty</th>
-            <th style="width:28%">Name</th>
-            <th style="width:32%">Description</th>
-            <th style="width:18%">Category</th>
-            <th style="width:12%"></th>
+            <th style="width:9%">Qty</th>
+            <th style="width:26%">Name</th>
+            <th style="width:28%">Description</th>
+            <th style="width:11%" title="Poids unitaire en livres">Lb</th>
+            <th style="width:16%">Category</th>
+            <th style="width:10%"></th>
           </tr></thead>
           <tbody id="inv-tbody"></tbody>
         </table>
@@ -8330,6 +8363,66 @@ function renderWornArmor() {
   if (bonusEl)  bonusEl.addEventListener('input',  () => { cfg.otherBonus = parseInt(bonusEl.value)||0; _save(); });
 }
 
+/* ── Encombrement (PHB 2024) ──
+   Capacite = FOR x 15 lb, doublee pour les creatures de taille L, divisee par
+   deux pour les Tiny. Les pieces comptent : 50 pieces = 1 lb.
+   Les objets importes avant cette version n'ont pas de poids : on l'ignore
+   plutot que de compter 0, et on le signale. */
+const SIZE_CARRY_MULT = { Tiny: 0.5, Small: 1, Medium: 1, Large: 2, Huge: 4, Gargantuan: 8 };
+
+function carryCapacity(c) {
+  const str = parseInt(c.for) || 10;
+  const sizeRaw = (typeof SPECIES_DATA !== 'undefined' && SPECIES_DATA[c.species]?.size) || 'Medium';
+  // « Medium or Small » -> Medium : meme multiplicateur, aucune ambiguite
+  const size = Object.keys(SIZE_CARRY_MULT).find(k => sizeRaw.includes(k)) || 'Medium';
+  return Math.round(str * 15 * SIZE_CARRY_MULT[size]);
+}
+
+function coinWeight(currency) {
+  const n = ['pp','gp','ep','sp','cp'].reduce((t,k) => t + (parseInt(currency?.[k]) || 0), 0);
+  return Math.round(n / 50 * 100) / 100;   // 50 pieces = 1 lb
+}
+
+function inventoryWeight(inv) {
+  const items = inv?.items || [];
+  let total = 0, sansPoids = 0;
+  items.forEach(it => {
+    const w = parseFloat(it.weight);
+    const q = parseInt(it.qty);
+    if (isNaN(w)) { sansPoids++; return; }
+    total += w * (isNaN(q) ? 1 : q);
+  });
+  total += coinWeight(inv?.currency);
+  return { total: Math.round(total * 100) / 100, sansPoids, coins: coinWeight(inv?.currency) };
+}
+
+function renderEncumbrance() {
+  const box = document.getElementById('inv-encumbrance');
+  if (!box) return;
+  const c = C();
+  const chk = document.getElementById('inv-ignore-encumbrance');
+  if (chk) chk.checked = !!c.ignoreEncumbrance;
+  if (c.ignoreEncumbrance) {
+    box.className = 'inv-enc off';
+    box.innerHTML = '<span class="inv-enc-label">Encombrement ignore</span>';
+    return;
+  }
+  const { total, sansPoids, coins } = inventoryWeight(INV());
+  const cap = carryCapacity(c);
+  const pct = cap > 0 ? Math.min(100, Math.round(total / cap * 100)) : 0;
+  const over = total > cap;
+  box.className = 'inv-enc' + (over ? ' over' : pct >= 80 ? ' warn' : '');
+  box.innerHTML =
+      `<div class="inv-enc-head"><span class="inv-enc-label">Charge</span>`
+    + `<strong>${total} / ${cap} lb</strong>`
+    + (over ? '<span class="inv-enc-flag">&#9888; au-dela de ta capacite</span>' : '') + `</div>`
+    + `<div class="inv-enc-track"><div class="inv-enc-bar" style="width:${pct}%"></div></div>`
+    + `<div class="inv-enc-detail">FOR ${parseInt(c.for)||10} x 15`
+    + (coins ? ` &middot; ${coins} lb de pieces` : '')
+    + (sansPoids ? ` &middot; <span class="inv-enc-missing">${sansPoids} objet${sansPoids>1?'s':''} sans poids renseigne</span>` : '')
+    + `</div>`;
+}
+
 function renderInventory() {
   const search = (document.getElementById('inv-search')?.value || '').toLowerCase();
   const tbody  = document.getElementById('inv-tbody');
@@ -8354,6 +8447,7 @@ function renderInventory() {
       <td><input class="inv-inp" style="width:50px;text-align:center;" data-item="${i}" data-ik="qty"   type="number" value="${item.qty||1}" min="0"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Nom de l'objet"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="notes" value="${esc(item.notes||'')}" placeholder="Description"></td>
+      <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Poids unitaire (lb)"></td>
       <td><select class="inv-inp" style="padding:0.18rem 0.25rem;font-size:0.74rem;" data-item="${i}" data-ik="cat">${selOpts}</select></td>
       <td><button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
     `;
@@ -8362,6 +8456,7 @@ function renderInventory() {
   // Update cat tab badges
   const allBadge = document.getElementById('icat-badge-all');
   if (allBadge) allBadge.textContent = items.length;
+  renderEncumbrance();
 }
 function renderAttunement() {
   const inv = INV();
@@ -11090,11 +11185,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   document.getElementById('inv-tbody').addEventListener('input', e => {
     const el = e.target;
-    if (el.dataset.item !== undefined && el.dataset.ik) {
-      const i = parseInt(el.dataset.item);
-      INV().items[i][el.dataset.ik] = el.dataset.ik === 'qty' ? parseInt(el.value)||0 : el.value;
-      triggerSave();
+    if (el.dataset.item === undefined || !el.dataset.ik) return;
+    const i  = parseInt(el.dataset.item);
+    const ik = el.dataset.ik;
+    const it = INV().items[i];
+    if (!it) return;
+    if (ik === 'qty') { it.qty = parseInt(el.value) || 0; renderEncumbrance(); }
+    else if (ik === 'weight') {
+      // Champ vide = poids inconnu, pas zero : on retire la cle pour que
+      // l'encombrement le compte comme « non renseigne » plutot que gratuit.
+      const w = parseFloat(el.value);
+      if (el.value === '' || isNaN(w) || w < 0) delete it.weight; else it.weight = w;
+      renderEncumbrance();
     }
+    else it[ik] = el.value;
+    triggerSave();
+  });
+
+  // Ignorer l'encombrement — reglage par personnage
+  document.getElementById('inv-ignore-encumbrance')?.addEventListener('change', e => {
+    C().ignoreEncumbrance = e.target.checked;
+    renderEncumbrance(); triggerSave();
   });
   document.getElementById('inv-tbody').addEventListener('click', e => {
     const btn = e.target.closest('[data-del-item]');
