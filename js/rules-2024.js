@@ -306,6 +306,89 @@ const GENERAL_FEATS = {
   'War Caster':         { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Advantage on CON saves to maintain Concentration. Perform somatic components with weapons/shield in hand. Cast a spell (1 action, targeting one creature) instead of an Opportunity Attack." },
   'Weapon Master':      { asi:true, abil:'FOR or DEX', prereq:'', desc:"You gain the Mastery property for one kind of weapon you're proficient with; you can change it on a Long Rest." },
 };
+/* ── Capacites qui demandent un CHOIX (PHB 2024) ──
+   Jusqu'ici l'assistant se contentait d'afficher « Fighting Style — Choose a
+   fighting style: ... » sans jamais laisser choisir. Le joueur devait le noter
+   a la main, ou l'oubliait.
+
+   `pick`    : combien d'options retenir
+   `options` : liste commune, OU `perClass` quand elle depend de la classe
+   `inherit` : reutilise les options d'une autre capacite (Champion niv.7) */
+const FEATURE_CHOICES = {
+  'Fighting Style': {
+    pick: 1,
+    perClass: {
+      Fighter: ['Archery','Defense','Dueling','Great Weapon Fighting','Protection','Two-Weapon Fighting'],
+      Paladin: ['Blessed Warrior','Defense','Dueling','Great Weapon Fighting','Protection'],
+      Ranger:  ['Archery','Defense','Druidic Warrior','Two-Weapon Fighting'],
+    },
+    desc: {
+      'Archery':              '+2 to ranged weapon attack rolls.',
+      'Blessed Warrior':      'You learn two Cleric cantrips; Charisma is your spellcasting ability for them.',
+      'Defense':              '+1 AC while wearing armor.',
+      'Druidic Warrior':      'You learn two Druid cantrips; Wisdom is your spellcasting ability for them.',
+      'Dueling':              '+2 damage with a one-handed weapon and no other weapon.',
+      'Great Weapon Fighting':'Reroll 1s and 2s on damage with a two-handed weapon.',
+      'Protection':           'Reaction: impose Disadvantage on an attack against an ally within 5 ft.',
+      'Two-Weapon Fighting':  'Add your ability modifier to the off-hand attack damage.',
+    },
+  },
+  'Additional Fighting Style': { pick: 1, inherit: 'Fighting Style' },
+
+  'Divine Order': {
+    pick: 1,
+    options: ['Protector','Thaumaturge'],
+    desc: {
+      'Protector':   'Proficiency with Martial weapons and Heavy armor.',
+      'Thaumaturge': 'One additional Cleric cantrip, and Expertise in Arcana or Religion.',
+    },
+  },
+
+  'Primal Order': {
+    pick: 1,
+    options: ['Magician','Warden'],
+    desc: {
+      'Magician': 'One extra cantrip from any list; a Nature spell is always prepared.',
+      'Warden':   'Proficiency with Martial weapons and Medium armor.',
+    },
+  },
+
+  'Elemental Fury': {
+    pick: 1,
+    options: ['Primal Strike','Potent Spellcasting'],
+    desc: {
+      'Primal Strike':       'Your Wild Shape melee attacks count as Magical for resistances.',
+      'Potent Spellcasting': 'Add your WIS modifier to the damage of your Druid cantrips.',
+    },
+  },
+
+  'Deft Explorer': {
+    pick: 1,
+    options: ['Expertise','Canny'],
+    desc: {
+      'Expertise': 'Double your proficiency bonus in one more skill.',
+      'Canny':     'One extra language, and one additional level-1 Ranger spell always prepared.',
+    },
+  },
+
+  'Metamagic': {
+    pick: 2,
+    options: ['Careful','Distant','Empowered','Extended','Heightened','Quickened','Seeking','Subtle','Transmuted','Twinned'],
+    desc: {
+      'Careful':    'Protect chosen allies from your own spell.',
+      'Distant':    'Double the range of a spell.',
+      'Empowered':  'Reroll damage dice.',
+      'Extended':   'Double the duration.',
+      'Heightened': 'One target has Disadvantage on its save.',
+      'Quickened':  'Cast with a Bonus Action.',
+      'Seeking':    'Reroll a missed spell attack.',
+      'Subtle':     'Cast without Verbal or Somatic components.',
+      'Transmuted': 'Change the damage type.',
+      'Twinned':    'Target a second creature.',
+    },
+  },
+};
+
 const ASI_LEVELS = [4, 8, 12, 16, 19];
 
 /* ── Prérequis de multiclassage (PHB 2024) ──
