@@ -2675,8 +2675,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .lvlup-warn:empty { display: none; }
 .lvlup-block { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--j-border-col, #3a2810); }
 .lvlup-block-title {
+  /* --gold-dark ne donne que 3.99:1 sur le fond de la modal, sous le seuil AA
+     de 4.5 pour du texte de 11 px. Ce ton monte à 5.87:1 en restant discret. */
   font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--gold-dark, #8a6e1a); margin-bottom: 0.5rem;
+  color: #a88a3a; margin-bottom: 0.5rem;
 }
 .lvlup-req { color: #7a7a8a; text-transform: none; letter-spacing: 0; font-size: 0.9em; }
 .lvlup-hp-row { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
@@ -2692,6 +2694,14 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .lvlup-tab:hover { border-color: var(--gold-dark, #8a6e1a); color: var(--gold-dark, #8a6e1a); }
 .lvlup-tab.active { border-color: var(--gold-dark, #8a6e1a); background: rgba(201,169,110,0.12); color: var(--gold, #c9a227); }
 .lvlup-asi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+/* Au doigt, les boutons d'action des modales (créateur et montée de niveau)
+   tombaient à 25 px de haut. On les remonte à 38 px : ce sont des actions qui
+   valident ou annulent, elles ne doivent pas se rater. */
+@media (hover: none), (max-width: 600px) {
+  .new-char-btn-row .btn,
+  .lvlup-hp-row .btn,
+  .lvlup-tab { min-height: 38px; padding-top: 0.4rem; padding-bottom: 0.4rem; }
+}
 
 /* ── Assistant de création de personnage ── */
 .wiz-modal { width: 460px; }
