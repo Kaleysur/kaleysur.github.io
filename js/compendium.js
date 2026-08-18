@@ -411,7 +411,22 @@
     if (!isNaN(w) && w > 0) entry.weight = w;
     const gp = _costToGp(rawCost);
     if (gp != null) entry.cost = gp;
-    if (dmgDice) { entry.dmg = dmgDice; if (dmgType) entry.dmgType = dmgType; }
+    if (dmgDice) {
+      entry.dmg = dmgDice;
+      if (dmgType) entry.dmgType = dmgType;
+      // Proprietes utiles a la ligne d'attaque : finesse decide de la carac.,
+      // la portee force la DEX, la categorie decide de la maitrise.
+      const noms = propsArr.map(pr => typeof pr === 'string' ? pr : (pr.property?.name || pr.name || ''))
+                           .filter(Boolean).join(' ').toLowerCase();
+      if (/finesse/.test(noms)) entry.finesse = true;
+      if (/ammunition|thrown/.test(noms) || rNorm) entry.ranged = true;
+      const catTxt = (catName || '').toLowerCase();
+      if (/martial/.test(catTxt)) entry.weaponCat = 'martial';
+      else if (/simple/.test(catTxt)) entry.weaponCat = 'simple';
+      const mastery = item.weapon_mastery
+        || propsArr.find(pr => pr.property?.type === 'Mastery')?.detail;
+      if (mastery) entry.mastery = mastery;
+    }
     if (acBase != null) {
       entry.ac = acBase;
       // Le type d'armure se deduit exactement du traitement de la DEX :

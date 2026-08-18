@@ -8313,6 +8313,72 @@ function armorFromItem(item) {
   return null;
 }
 
+/* ── Une arme equipee devient une ligne d'attaque ──
+   Ajouter une epee depuis le compendium obligeait a la ressaisir a la main dans
+   l'onglet Attaques. On la construit desormais a partir des donnees de l'objet. */
+
+/* Le personnage maitrise-t-il cette categorie d'arme ?
+   weaponProf est du texte libre par classe (« Simple and Martial weapons »). */
+function isProficientWith(c, weaponCat) {
+  const profs = getClasses(c)
+    .map(cl => (typeof CLASS_DATA !== 'undefined' && CLASS_DATA[cl.classe]?.weaponProf) || '')
+    .join(' ').toLowerCase();
+  if (!profs) return true;                      // classe inconnue : on n'invente pas un malus
+  if (/martial/.test(profs)) return true;       // martial couvre aussi simple
+  if (weaponCat === 'martial') return false;
+  return /simple/.test(profs) || !weaponCat;
+}
+
+/* Construit la ligne d'attaque d'un objet, ou null si ce n'est pas une arme.
+   Les donnees du compendium priment ; sinon on retombe sur STARTING_WEAPONS. */
+function attackFromItem(item, c) {
+  if (!item) return null;
+  const nom = (item.name || '').trim();
+  let dmg = item.dmg, type = item.dmgType, finesse = !!item.finesse, ranged = !!item.ranged;
+  let cat = item.weaponCat;
+
+  if (!dmg && typeof STARTING_WEAPONS !== 'undefined') {
+    const key = STARTING_WEAPONS[nom] ? nom
+              : Object.keys(STARTING_WEAPONS).find(w => nom.includes(w));
+    if (key) {
+      const w = STARTING_WEAPONS[key];
+      dmg = w.dmg; type = w.type; finesse = !!w.finesse;
+      ranged = w.abil === 'dex';
+    }
+  }
+  if (!dmg) return null;
+
+  const m = k => Math.floor(((parseInt(c[k]) || 10) - 10) / 2);
+  // Distance : toujours DEX. Finesse : la meilleure des deux. Sinon FOR.
+  const abil = ranged ? 'dex' : (finesse ? (m('dex') > m('for') ? 'dex' : 'for') : 'for');
+  const bonus = m(abil);
+  return {
+    name: nom,
+    degats: dmg + (bonus ? (bonus > 0 ? '+' : '') + bonus : ''),
+    typeDegat: type || '',
+    atkType: abil,
+    prof: isProficientWith(c, cat),
+    bonus: '',
+    fromItem: nom,                 // marque l'origine : seules ces lignes sont retirees
+  };
+}
+
+/* Ajoute / retire la ligne d'attaque liee a un objet. */
+function syncAttackForItem(c, item, equipped) {
+  const atk = attackFromItem(item, c);
+  if (!atk) return null;
+  c.attaques = c.attaques || [];
+  const i = c.attaques.findIndex(a => a.fromItem === atk.fromItem);
+  if (equipped) {
+    if (i >= 0) return null;
+    c.attaques.push(atk);
+    return `attaque ajoutee`;
+  }
+  if (i < 0) return null;
+  c.attaques.splice(i, 1);
+  return `attaque retiree`;
+}
+
 /* Un objet est-il equipable ? (sinon on n'affiche pas le bouton) */
 function isEquippable(item) {
   return !!armorFromItem(item) || isShieldItem(item)
@@ -8333,7 +8399,8 @@ function toggleEquip(idx) {
     it.equipped = false;
     if (armure)  { c.armorConfig = defaultArmorConfig(c); }
     if (bouclier) { c.armorConfig = c.armorConfig || defaultArmorConfig(c); c.armorConfig.shield = false; }
-    return `${it.name || 'Objet'} retire`;
+    const note = syncAttackForItem(c, it, false);
+    return `${it.name || 'Objet'} retire` + (note ? ` — ${note}` : '');
   }
 
   it.equipped = true;
@@ -8348,7 +8415,8 @@ function toggleEquip(idx) {
     c.armorConfig = c.armorConfig || defaultArmorConfig(c);
     c.armorConfig.shield = true;
   }
-  return `${it.name || 'Objet'} equipe`;
+  const note = syncAttackForItem(c, it, true);
+  return `${it.name || 'Objet'} equipe` + (note ? ` — ${note}` : '');
 }
 
 /* Configuration par defaut quand plus rien n'est porte : on rend a la classe
@@ -11394,7 +11462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eq = e.target.closest('[data-equip-item]');
     if (eq) {
       const msg = toggleEquip(parseInt(eq.dataset.equipItem));
-      renderInventory(); renderWornArmor(); calcAndSetAC(); renderHero(); triggerSave();
+      renderInventory(); renderWornArmor(); calcAndSetAC(); renderHero(); renderAttacks(); triggerSave();
       if (msg) showToast(msg);
       return;
     }

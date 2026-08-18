@@ -88,6 +88,9 @@ function ok(cond, label) {
     extract(J, 'function isAttunable(item)'),
     extract(J, 'function attunedItems(inv)'),
     extract(J, 'function migrateAttunement(inv)'),
+    extract(J, 'function isProficientWith(c, weaponCat)'),
+    extract(J, 'function attackFromItem(item, c)'),
+    extract(J, 'function syncAttackForItem(c, item, equipped)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -478,6 +481,45 @@ function ok(cond, label) {
      'quantite absente = 1');
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+  /* -- Une arme equipee devient une ligne d'attaque -- */
+  {
+    const guerrier = { for:16, dex:12, classes:[{ classe:'Fighter', niveau:5 }] };
+    const magicien = { for:8,  dex:14, classes:[{ classe:'Wizard',  niveau:5 }] };
+    const roublard = { for:10, dex:18, classes:[{ classe:'Rogue',   niveau:5 }] };
+    eq(attackFromItem({ name:'Longsword', dmg:'1d8', dmgType:'Slashing', weaponCat:'martial' }, guerrier),
+       { name:'Longsword', degats:'1d8+3', typeDegat:'Slashing', atkType:'for', prof:true, bonus:'', fromItem:'Longsword' },
+       'arme du compendium -> ligne d attaque');
+    eq(attackFromItem({ name:'Rapier', dmg:'1d8', finesse:true }, roublard).atkType, 'dex',
+       'finesse : la meilleure des deux caracteristiques');
+    eq(attackFromItem({ name:'Rapier', dmg:'1d8', finesse:true }, guerrier).atkType, 'for',
+       'finesse : FOR quand elle est meilleure');
+    eq(attackFromItem({ name:'Longbow', dmg:'1d8', ranged:true }, guerrier).atkType, 'dex',
+       'arme a distance : toujours DEX');
+    // Maitrise deduite de la classe : un magicien n'est pas maitre d'une arme martiale
+    eq(attackFromItem({ name:'Greataxe', dmg:'1d12', weaponCat:'martial' }, magicien).prof, false,
+       'magicien : pas maitre des armes martiales');
+    eq(attackFromItem({ name:'Dagger', dmg:'1d4', weaponCat:'simple' }, magicien).prof, true,
+       'magicien : maitre des armes simples');
+    eq(isProficientWith({ classes:[{ classe:'ClasseInconnue' }] }, 'martial'), true,
+       'classe inconnue : aucun malus invente');
+    // Repli sur STARTING_WEAPONS quand l'objet n'a pas ete importe du compendium
+    eq(attackFromItem({ name:'Greataxe' }, guerrier).degats, '1d12+3',
+       'arme saisie a la main : repli sur les armes connues');
+    eq(attackFromItem({ name:'Rope, Hempen' }, guerrier), null, 'un objet quelconque ne cree pas d attaque');
+    eq(attackFromItem({ name:'Chain Mail' }, guerrier), null, 'une armure ne cree pas d attaque');
+    // Ajout / retrait sans toucher aux lignes saisies a la main
+    const c2 = { for:16, dex:12, classes:[{ classe:'Fighter', niveau:5 }],
+                 attaques:[{ name:'Poing', degats:'1', atkType:'for' }] };
+    syncAttackForItem(c2, { name:'Longsword', dmg:'1d8' }, true);
+    eq(c2.attaques.length, 2, 'attaque ajoutee a l equipement');
+    syncAttackForItem(c2, { name:'Longsword', dmg:'1d8' }, true);
+    eq(c2.attaques.length, 2, 'pas de doublon si deja presente');
+    syncAttackForItem(c2, { name:'Longsword', dmg:'1d8' }, false);
+    eq(c2.attaques.length, 1, 'attaque retiree au deshabillage');
+    eq(c2.attaques[0].name, 'Poing', 'les attaques saisies a la main sont preservees');
+    eq(syncAttackForItem(c2, { name:'Rope' }, true), null, 'un objet non-arme ne touche a rien');
+  }
 
   /* -- Lien magique : migration des anciens emplacements, plafond de 3 -- */
   const ATTUNE_MAX_T = new Function(extract(J, 'const ATTUNE_MAX') + '; return ATTUNE_MAX;')();
