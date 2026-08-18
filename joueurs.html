@@ -5400,7 +5400,7 @@ document.getElementById('species-custom')?.addEventListener('input', () => {
 /* ════════════════════════════════════════════════════════════
    BACKGROUND — bonus de caractéristiques, origin feat, compétences (PHB 2024)
    ════════════════════════════════════════════════════════════ */
-const ABIL_LABEL = { for:'FOR', dex:'DEX', con:'CON', int:'INT', sag:'SAG', cha:'CHA' };
+const ABIL_LABEL = { for:'STR', dex:'DEX', con:'CON', int:'INT', sag:'WIS', cha:'CHA' };
 
 function renderBackground() {
   const c       = C();
@@ -8444,7 +8444,7 @@ function planLevelUp(c, className) {
    ET la nouvelle demandent chacune 13 dans leurs caractéristiques. */
 function multiclassPrereqCheck(c, className) {
   if (typeof MULTICLASS_PREREQ === 'undefined') return null;
-  const LABEL = { for:'FOR', dex:'DEX', con:'CON', int:'INT', sag:'SAG', cha:'CHA' };
+  const LABEL = { for:'STR', dex:'DEX', con:'CON', int:'INT', sag:'WIS', cha:'CHA' };
   const missing = [];
   const check = (cls) => {
     const req = MULTICLASS_PREREQ[cls];
@@ -9001,7 +9001,7 @@ function renderWornArmor() {
   if (mode==='unarmored')     hint = `10 + DEX (${dex>=0?'+':''}${dex})`;
   else if (mode==='mageArmor') hint = `13 + DEX (${dex>=0?'+':''}${dex})`;
   else if (mode==='unarmoredBarb') hint = `10 + DEX (${dex>=0?'+':''}${dex}) + CON (${con>=0?'+':''}${con})`;
-  else if (mode==='unarmoredMonk') hint = `10 + DEX (${dex>=0?'+':''}${dex}) + SAG (${wis>=0?'+':''}${wis})`;
+  else if (mode==='unarmoredMonk') hint = `10 + DEX (${dex>=0?'+':''}${dex}) + WIS (${wis>=0?'+':''}${wis})`;
 
   container.innerHTML = `
   <div class="worn-armor-card">
@@ -9166,7 +9166,7 @@ function renderEncumbrance() {
     + `<strong>${total} / ${cap} lb</strong>`
     + (over ? '<span class="inv-enc-flag">&#9888; au-dela de ta capacite</span>' : '') + `</div>`
     + `<div class="inv-enc-track"><div class="inv-enc-bar" style="width:${pct}%"></div></div>`
-    + `<div class="inv-enc-detail">FOR ${parseInt(c.for)||10} x 15`
+    + `<div class="inv-enc-detail">STR ${parseInt(c.for)||10} x 15`
     + (coins ? ` &middot; ${coins} lb de pieces` : '')
     + (sansPoids ? ` &middot; <span class="inv-enc-missing">${sansPoids} objet${sansPoids>1?'s':''} sans poids renseigne</span>` : '')
     + `</div>`;
@@ -12578,7 +12578,7 @@ ${car} characters of notes.
     if (!overlay) return;
 
     const STD_ARRAY = [15, 14, 13, 12, 10, 8];
-    const ABILS = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
+    const ABILS = [['for','STR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','WIS'],['cha','CHA']];
     const TOTAL_STEPS = 6;
     let step = 1;
     let wizBgOk = true;   // les deux bonus de background pointent-ils deux carac. différentes ?
@@ -13031,7 +13031,7 @@ ${car} characters of notes.
 document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
   const overlay = document.getElementById('lvlup-modal-overlay');
   if (!overlay) return;
-  const ABIL = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
+  const ABIL = [['for','STR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','WIS'],['cha','CHA']];
   const $ = id => document.getElementById(id);
   let plan = null, chosenHp = null, asiMode = 'abil';
   let expertisePick = new Set();
@@ -14142,7 +14142,7 @@ function renderFamiliars() {
     card.className = 'familiar-card' + (fam._collapsed ? ' collapsed' : '');
     card.dataset.fi = fi;
     const AB = ['for','dex','con','int','sag','cha'];
-    const AB_LABELS = ['FOR','DEX','CON','INT','SAG','CHA'];
+    const AB_LABELS = ['STR','DEX','CON','INT','WIS','CHA'];
     const abilitiesHtml = AB.map((ab, i) => `
       <div class="fam-ab-box">
         <div class="fam-ab-label">${AB_LABELS[i]}</div>
