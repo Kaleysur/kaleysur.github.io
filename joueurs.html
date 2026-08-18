@@ -3059,7 +3059,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <div class="char-selector" id="char-selector">
         <button class="char-selector-btn" id="char-selector-btn" title="Changer de personnage">
           <span class="char-selector-avatar" id="char-selector-avatar">⚔</span>
-          <span class="char-selector-name" id="char-selector-name">Personnage</span>
+          <span class="char-selector-name" id="char-selector-name">Character</span>
           <span class="char-selector-arrow">▾</span>
         </button>
         <div class="char-selector-dropdown" id="char-selector-dropdown"></div>
@@ -3287,7 +3287,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <div>
                 <div style="display:flex;align-items:center;gap:0.4rem;">
                   <div class="vb-section-label">Death Saves</div>
-                  <button id="death-save-roll-btn" title="Lancer un jet de mort (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">🎲</button>
+                  <button id="death-save-roll-btn" title="Roll a death save (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">🎲</button>
                 </div>
                 <!-- Pips cliquables — data-idx / data-type gérés par renderCombat -->
                 <div class="vb-death-pips" id="vb-hero-death-pips" style="cursor:pointer;" title="Click to toggle"></div>
@@ -5119,7 +5119,7 @@ function renderClassFeatures() {
       ${pending.map(cl => `<strong>${esc(cl.classe)} ${cl.niveau}</strong>`).join(', ')}
       <span class="cf-alert-hint">(onglet Identity)</span></div>` : ''}
     <div class="cf-profs">
-      <div class="cf-prof-item"><span class="cf-prof-label">Saving Throws:</span> ${data.saves.map(s=>s.toUpperCase()).join(' &amp; ')}</div>
+      <div class="cf-prof-item"><span class="cf-prof-label">Saving Throws:</span> ${data.saves.map(s=>ABIL_LABEL[s]||s.toUpperCase()).join(' &amp; ')}</div>
       ${data.armorProf  ? `<div class="cf-prof-item"><span class="cf-prof-label">Armor:</span> ${data.armorProf}</div>` : ''}
       ${data.weaponProf ? `<div class="cf-prof-item"><span class="cf-prof-label">Weapons:</span> ${data.weaponProf}</div>` : ''}
       ${skillPick}
@@ -6271,7 +6271,7 @@ function renderAbilities() {
     box.className = 'ability-box';
     box.innerHTML = `
       <div class="ability-name">${ab.label}</div>
-      <div class="ability-mod roll-trigger" id="mod-${ab.key}" data-roll-label="${ab.label} Check" data-roll-bonus="${mod(score)}" title="Lancer d20 + ${modStr(score)}">${modStr(score)}</div>
+      <div class="ability-mod roll-trigger" id="mod-${ab.key}" data-roll-label="${ab.label} Check" data-roll-bonus="${mod(score)}" title="Roll d20 + ${modStr(score)}">${modStr(score)}</div>
       <input type="number" class="ability-score-input" data-f="${ab.key}" value="${score}" min="1" max="30" title="Score brut">
     `;
     grid.appendChild(box);
@@ -6377,7 +6377,7 @@ function renderSaves() {
     const val  = mod(abilScore(sv.attr)) + (prof ? bonus : 0) + modBonus;
     const row  = document.createElement('div');
     row.className = 'sv-row';
-    row.innerHTML = `<div class="prof-dot ${prof ? 'on' : ''}" data-sv="${sv.key}" role="button" tabindex="0" title="Proficiency" aria-label="Proficiency ${sv.label}"></div><span class="sv-val roll-trigger" data-roll-label="${sv.label} Save" data-roll-bonus="${val}" title="Lancer d20 + ${val}">${val >= 0 ? '+' : ''}${val}</span><span>${sv.label}</span>`;
+    row.innerHTML = `<div class="prof-dot ${prof ? 'on' : ''}" data-sv="${sv.key}" role="button" tabindex="0" title="Proficiency" aria-label="Proficiency ${sv.label}"></div><span class="sv-val roll-trigger" data-roll-label="${sv.label} Save" data-roll-bonus="${val}" title="Roll d20 + ${val}">${val >= 0 ? '+' : ''}${val}</span><span>${sv.label}</span>`;
     frag.appendChild(row);
   });
   col.innerHTML = '';
@@ -6430,7 +6430,7 @@ function renderSkills() {
     const title = profLevel === 2 ? 'Expertise (double proficiency)' : profLevel === 1 ? 'Proficiency' : 'Not proficient';
     const row = document.createElement('div');
     row.className = 'sk-row';
-    row.innerHTML = `<div class="prof-dot ${dotClass}" data-sk="${sk.key}" role="button" tabindex="0" title="${title}" aria-label="Proficiency ${sk.label}"></div><span class="sk-val roll-trigger" data-roll-label="${sk.label}" data-roll-bonus="${val}" title="Lancer d20 + ${val}">${val >= 0 ? '+' : ''}${val}</span><span>${sk.label} <span style="color:#555;font-size:0.72rem;">(${sk.attr.toUpperCase()})</span></span>`;
+    row.innerHTML = `<div class="prof-dot ${dotClass}" data-sk="${sk.key}" role="button" tabindex="0" title="${title}" aria-label="Proficiency ${sk.label}"></div><span class="sk-val roll-trigger" data-roll-label="${sk.label}" data-roll-bonus="${val}" title="Roll d20 + ${val}">${val >= 0 ? '+' : ''}${val}</span><span>${sk.label} <span style="color:#555;font-size:0.72rem;">(${ABIL_LABEL[sk.attr] || sk.attr.toUpperCase()})</span></span>`;
     frag.appendChild(row);
   });
   col.innerHTML = '';
@@ -6602,7 +6602,7 @@ function renderAttacks() {
     const statSelOpts = [['','—'],['for','STR'],['dex','DEX'],['int','INT'],['sag','WIS'],['cha','CHA'],['sort','Spell']].map(([val, lbl]) =>
       `<option value="${val}"${(atk.atkType||'') === val ? ' selected' : ''}>${lbl}</option>`
     ).join('');
-    const dmgDiceBtn = atk.degats ? `<button class="atk-dice-btn" data-atk="${i}" title="Lancer ${atk.degats}">🎲</button>` : '';
+    const dmgDiceBtn = atk.degats ? `<button class="atk-dice-btn" data-atk="${i}" title="Roll ${atk.degats}">🎲</button>` : '';
     const tr = document.createElement('tr');
     if (isMobile) {
       tr.innerHTML = `<td colspan="7" style="padding:0;border:none;">
@@ -8183,8 +8183,8 @@ function renderSpells() {
         ? `<td style="text-align:center;"><span style="color:#555;font-size:0.7rem;" title="Cantrips are always available">✦</span></td>`
         : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared ? 'Prepared — click to unprepare' : (hasBook ? 'In your spellbook — click to prepare' : 'Not prepared — click to prepare')}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
 
-      const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Lancer le sort (consomme un emplacement niv.${esc(s.level||'1')}+)">⚡</button>` : '';
-      const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Lancer ${esc(s.degat)}">🎲</button>` : '';
+      const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Cast the spell (uses a level ${esc(s.level||'1')}+ slot)">⚡</button>` : '';
+      const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Roll ${esc(s.degat)}">🎲</button>` : '';
       tr.innerHTML = prepCell
         + `<td style="text-align:center;"><input class="atk-inp" data-spell="${i}" data-sk="level" value="${esc(s.level||'0')}" placeholder="0" style="width:38px;text-align:center;font-size:0.78rem;"></td>`
         + `<td><div class="atk-dmg-wrap"><input class="atk-inp" data-spell="${i}" data-sk="name" value="${esc(s.name||'')}" placeholder="Spell name">${castBtn}</div></td>`
@@ -12722,7 +12722,7 @@ ${car} characters of notes.
       const lin = data.lineages?.[selLineage.value];
       const fx  = Object.assign({}, data.effects, lin?.effects || {});
       const traits = [...(data.traits[1] || []), ...((lin && lin[1]) || [])];
-      box.innerHTML = `<div>Taille <strong>${data.size}</strong> · Vitesse <strong>${fx.speed || data.speed} ft</strong></div>`
+      box.innerHTML = `<div>Size <strong>${data.size}</strong> · Speed <strong>${fx.speed || data.speed} ft</strong></div>`
         + traits.map(t => `<div class="wiz-trait"><span class="wiz-trait-name">${t.name}</span> — ${t.desc}</div>`).join('');
     }
     selSpecies.addEventListener('change', () => { buildLineageOptions(); previewSpecies(); });
@@ -12763,7 +12763,7 @@ ${car} characters of notes.
       const info = DND_CLASSES[selClass.value] || {};
       box.innerHTML = `<div>Hit Die <strong>${info.de || '1d8'}</strong>`
         + `${info.sort ? ` · Incantation <strong>${info.sort}</strong>` : ''}`
-        + ` · Sauvegardes <strong>${d.saves.map(s => s.toUpperCase()).join(' & ')}</strong></div>`
+        + ` · Saving throws <strong>${d.saves.map(s => ABIL_LABEL[s] || s.toUpperCase()).join(' & ')}</strong></div>`
         + (d.armorProf ? `<div>Armures : ${d.armorProf}</div>` : '')
         + (d.weaponProf ? `<div>Armes : ${d.weaponProf}</div>` : '')
         + (d.features[1] || []).map(f => `<div class="wiz-trait"><span class="wiz-trait-name">${f.name}</span> — ${f.desc}</div>`).join('');
@@ -14211,7 +14211,7 @@ function renderFamiliars() {
             </div>
           </div>
           <div class="fam-stat-box">
-            <div class="fam-stat-label">Vitesse</div>
+            <div class="fam-stat-label">Speed</div>
             <div class="fam-stat-val">
               <input class="fam-inline-input" type="text" placeholder="30 ft."
                 data-fi="${fi}" data-fk="speed" value="${esc(fam.speed)}" style="width:100%;text-align:center;">
