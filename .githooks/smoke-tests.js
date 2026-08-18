@@ -69,6 +69,10 @@ function ok(cond, label) {
     extract(J, 'function abilKeysFromFeat(abilStr)'),
     extract(J, 'function preparedTotal(c)'),
     extract(J, 'function multiclassPrereqCheck(c, className)'),
+    extract(R, 'const CANTRIPS_KNOWN'),
+    extract(J, 'function cantripsAt(className, level)'),
+    extract(J, 'function expertiseAt(className, level)'),
+    extract(J, 'function topSlotLevel(slots)'),
     extract(J, 'function planLevelUp(c, className)'),
     extract(J, 'function applyLevelUp(c, plan, choices)'),
     extract(J, 'function applyStartingGear(c, className, items)'),
@@ -97,6 +101,8 @@ function ok(cond, label) {
     extract(J, 'function fmtGp(v)'),
     extract(J, 'function searchNotes(pages, query)'),
     extract(J, 'function diffNotes(local, distant)'),
+    extract(J, 'function buildWikiIndex(entries)'),
+    extract(J, 'function renderNoteMarkdown(texte, wikiIndex)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -488,6 +494,49 @@ function ok(cond, label) {
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
 
+  /* -- Gains que le joueur doit choisir : sorts mineurs, Expertise, emplacements -- */
+  {
+    const CANTRIPS_T = new Function(extract(R, 'const CANTRIPS_KNOWN') + '; return CANTRIPS_KNOWN;')();
+    // Chaque lanceur a une table de 20 niveaux, croissante, coherente avec le niveau 1
+    Object.entries(STARTING_SPELLS).forEach(([cls, st]) => {
+      const tb = CANTRIPS_T[cls];
+      ok(!!tb, `${cls} : table de sorts mineurs manquante`);
+      eq((tb || []).length, 20, `${cls} : table sur 20 niveaux`);
+      eq((tb || [])[0], st.cantrips, `${cls} : niveau 1 coherent avec STARTING_SPELLS`);
+      (tb || []).forEach((n, i) => {
+        if (i > 0) ok(n >= tb[i - 1], `${cls} niv.${i + 1} : la table ne doit pas decroitre`);
+      });
+    });
+    eq(cantripsAt('Fighter', 5), 0, 'une classe non lanceuse n a pas de sorts mineurs');
+    eq(cantripsAt('Bard', 4) - cantripsAt('Bard', 3), 1, 'Barde : un sort mineur de plus au niveau 4');
+    eq(cantripsAt('Wizard', 10) - cantripsAt('Wizard', 9), 1, 'Magicien : un de plus au niveau 10');
+
+    // Expertise lue dans la description de la capacite, pas codee en dur
+    eq(expertiseAt('Rogue', 1), 2, 'Roublard niveau 1 : deux competences');
+    eq(expertiseAt('Rogue', 6), 2, 'Roublard niveau 6 : deux de plus');
+    eq(expertiseAt('Rogue', 5), 0, 'Roublard niveau 5 : aucune');
+    eq(expertiseAt('Bard', 2), 2, 'Barde niveau 2');
+    eq(expertiseAt('Ranger', 9), 2, 'Rodeur niveau 9');
+    eq(expertiseAt('Fighter', 6), 0, 'le Guerrier n a pas d Expertise');
+
+    eq(topSlotLevel([4,3,2,0,0,0,0,0,0]), 3, 'plus haut niveau de sort accessible');
+    eq(topSlotLevel(null), 0, 'aucun emplacement');
+    eq(topSlotLevel([]), 0, 'tableau vide');
+
+    // L'Expertise ne s'applique qu'a une competence deja maitrisee
+    const r0 = { for:14, dex:14, con:14, int:14, sag:14, cha:14, pvMax:20, nbDeVie:5,
+                 classes:[{ classe:'Rogue', sousClasse:'Assassin', niveau:5 }], discret:1, perception:0 };
+    const res0 = applyLevelUp(r0, planLevelUp(r0, 'Rogue'), { expertise:['discret','perception'] });
+    eq(r0.discret, 2, 'competence maitrisee : passe en Expertise');
+    eq(r0.perception, 0, 'competence non maitrisee : refusee');
+    ok(res0.log.some(x => /Expertise/.test(x)), 'Expertise notee dans le journal');
+    // Le journal annonce aussi les gains a choisir soi-meme
+    const b1 = { for:14, dex:14, con:14, int:14, sag:14, cha:14, pvMax:20, nbDeVie:3,
+                 classes:[{ classe:'Bard', sousClasse:'College of Lore', niveau:3 }] };
+    ok(applyLevelUp(b1, planLevelUp(b1, 'Bard'), {}).log.some(x => /sort mineur/.test(x)),
+       'sort mineur gagne : annonce');
+  }
+
   /* -- Valeur du butin -- */
   eq(purseValue({ gp:100 }), 100, 'bourse en po');
   eq(purseValue({ pp:1, gp:1, ep:1, sp:1, cp:1 }), 11.61, 'toutes les denominations');
@@ -500,6 +549,34 @@ function ok(cond, label) {
   eq(fmtGp(15), '15', 'pas de decimale inutile');
   eq(fmtGp(0.5), '0.5', 'decimale conservee');
   eq(fmtGp(15.006), '15.01', 'arrondi au centieme');
+
+  /* -- Notes : markdown leger et liens wiki -- */
+  {
+    const idx = buildWikiIndex([{ title:'Ouestvir', url:'ayakan/ouestvir.html' }]);
+    const r = t2 => renderNoteMarkdown(t2, idx);
+    eq(r('# Session 4'), '<h3 class="note-h">Session 4</h3>', 'titre de niveau 1');
+    eq(r('### Detail'), '<h5 class="note-h">Detail</h5>', 'titre de niveau 3');
+    eq(r('du **texte** ici'), '<p>du <strong>texte</strong> ici</p>', 'gras');
+    eq(r('du *texte* ici'), '<p>du <em>texte</em> ici</p>', 'italique');
+    { const NL = String.fromCharCode(10);
+      eq(r('- un' + NL + '- deux'), '<ul>' + NL + '<li>un</li>' + NL + '<li>deux</li>' + NL + '</ul>', 'liste a puces'); }
+    eq(r('> parole'), '<blockquote>parole</blockquote>', 'citation');
+    eq(r('---'), '<hr>', 'separateur');
+    eq(r('[[Ouestvir]]'), '<p><a class="note-wiki" href="ayakan/ouestvir.html">Ouestvir</a></p>',
+       'lien vers une page du wiki');
+    eq(r('[[Ouestvir|la cite]]'), '<p><a class="note-wiki" href="ayakan/ouestvir.html">la cite</a></p>',
+       'lien avec libelle personnalise');
+    ok(/note-wiki missing/.test(r('[[Zorglub]]')), 'page inconnue : signalee, pas de lien mort');
+    ok(r('[[OUESTVIR]]').includes('ayakan/ouestvir.html'), 'recherche de page insensible a la casse');
+    // Echappement : les notes sont aussi affichees dans la vue MJ
+    eq(r('<script>alert(1)</script>'), '<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>', 'HTML echappe');
+    ok(r('[[<b>x</b>]]').includes('&lt;b&gt;'), 'HTML echappe aussi dans un lien wiki');
+    eq(r('Bram & Elara'), '<p>Bram &amp; Elara</p>', 'esperluette echappee');
+    eq(r(''), '', 'texte vide');
+    eq(r(null), '', 'texte absent');
+    eq(buildWikiIndex(null).size, 0, 'index absent');
+    eq(buildWikiIndex([{ title:'X' }]).size, 0, 'entree sans url ignoree');
+  }
 
   /* -- Filet de securite sur conflit : ce que le local avait en plus -- */
   {
@@ -781,6 +858,47 @@ function ok(cond, label) {
   eq(stealth && stealth.val, 6, 'dmCalc Stealth +6');
   const perc = dc.profSkills.find(x => x.sk.key === 'perception');
   eq(perc && perc.prof, 2, 'dmCalc Perception expertise');
+
+  /* -- Actions de groupe : degats avec PV temporaires, soins, sauvegardes -- */
+  eval([
+    extract(D, 'function applyDamageWithTemp(cible, degats)'),
+    extract(D, 'function applyHealing(cible, soin)'),
+    extract(D, 'function rollGroupSave(cibles, dc)'),
+  ].join('\n'));
+
+  // Les PV temporaires absorbent en premier (regle 2024)
+  eq(applyDamageWithTemp({ hp:30, temp:0 }, 12), { hp:18, temp:0, absorbe:0, applique:12 },
+     'degats sans PV temporaires');
+  eq(applyDamageWithTemp({ hp:30, temp:15 }, 12), { hp:30, temp:3, absorbe:12, applique:0 },
+     'PV temporaires absorbent tout');
+  eq(applyDamageWithTemp({ hp:30, temp:5 }, 12), { hp:23, temp:0, absorbe:5, applique:7 },
+     'absorption partielle');
+  eq(applyDamageWithTemp({ hp:5, temp:0 }, 50), { hp:0, temp:0, absorbe:0, applique:50 },
+     'les PV ne passent jamais sous zero');
+  eq(applyDamageWithTemp({ hp:30, temp:5 }, 0), { hp:30, temp:5, absorbe:0, applique:0 },
+     'degats nuls : rien ne bouge');
+  eq(applyDamageWithTemp({ hp:30, temp:0 }, -5), { hp:30, temp:0, absorbe:0, applique:0 },
+     'degats negatifs ignores');
+
+  // Soins plafonnes au maximum
+  eq(applyHealing({ hp:20, hpMax:30 }, 25), { hp:30, rendu:10 }, 'soin plafonne au maximum');
+  eq(applyHealing({ hp:10, hpMax:30 }, 8), { hp:18, rendu:8 }, 'soin normal');
+  eq(applyHealing({ hp:30, hpMax:30 }, 10), { hp:30, rendu:0 }, 'deja au maximum');
+  eq(applyHealing({ hp:0, hpMax:30 }, 5), { hp:5, rendu:5 }, 'un personnage a terre remonte');
+
+  // Sauvegardes de groupe
+  {
+    const res = rollGroupSave([{ id:'a', label:'Thorin', mod:5 }, { id:'b', label:'Elara', mod:-1 }], 15);
+    eq(res.length, 2, 'un resultat par cible');
+    ok(res.every(r => r.total === r.de + r.mod), 'total = de + modificateur');
+    ok(res.every(r => r.de >= 1 && r.de <= 20), 'le de reste dans ses bornes');
+    ok(res.every(r => r.reussi === (r.total >= 15)), 'reussite evaluee sur le DD');
+    eq(rollGroupSave([], 15), [], 'aucune cible');
+    eq(rollGroupSave(null, 15), [], 'cibles absentes');
+    // Un DD de 1 est toujours reussi, un DD de 30 avec mod 0 jamais
+    ok(rollGroupSave([{ id:'x', mod:0 }], 1)[0].reussi, 'DD 1 toujours reussi');
+    ok(!rollGroupSave([{ id:'x', mod:0 }], 30)[0].reussi, 'DD 30 sans modificateur : impossible');
+  }
 
   // Multiclasse + Jack of All Trades
   eq(dmCalc({ classes: [{ niveau: 3 }, { niveau: 2 }] }).totalLevel, 5, 'dmCalc niveau total multiclasse');

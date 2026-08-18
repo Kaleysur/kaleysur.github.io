@@ -268,6 +268,27 @@
     .currency-label { font-size:0.7rem; color:#888; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.2rem; }
 
     /* ── Notes multi-pages ── */
+    .notes-preview-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#888; cursor:pointer; font-family:inherit; font-size:0.72rem; padding:0.22rem 0.55rem; border-radius:4px; white-space:nowrap; flex-shrink:0; transition:all 0.12s; }
+    .notes-preview-btn:hover { border-color:var(--gold-dark,#8a6e1a); color:var(--gold-dark,#8a6e1a); }
+    .notes-preview-btn.on { border-color:var(--gold-dark,#8a6e1a); background:rgba(201,169,110,0.12); color:var(--gold,#c9a227); }
+    .notes-preview { flex:1; min-height:260px; overflow-y:auto; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:6px; padding:0.85rem 1rem; font-family:'Lora',serif; font-size:0.9rem; line-height:1.7; color:var(--j-text,#e8e0d0); }
+    .notes-preview .note-h { font-family:'Cinzel',serif; color:var(--gold,#c9a227); margin:0.9rem 0 0.35rem; line-height:1.3; }
+    .notes-preview .note-h:first-child { margin-top:0; }
+    .notes-preview h3.note-h { font-size:1.05rem; }
+    .notes-preview h4.note-h { font-size:0.95rem; }
+    .notes-preview h5.note-h { font-size:0.86rem; letter-spacing:0.04em; }
+    .notes-preview p { margin:0 0 0.5rem; }
+    .notes-preview ul { margin:0 0 0.6rem 1.1rem; }
+    .notes-preview li { margin-bottom:0.15rem; }
+    .notes-preview blockquote { margin:0 0 0.6rem; padding:0.25rem 0.7rem; border-left:2px solid var(--gold-dark,#8a6e1a); color:#a89060; font-style:italic; }
+    .notes-preview code { background:rgba(255,255,255,0.07); padding:0.05rem 0.3rem; border-radius:3px; font-size:0.85em; font-family:ui-monospace,Menlo,Consolas,monospace; }
+    .notes-preview hr { border:none; border-top:1px solid var(--j-border-col,#2a2a3a); margin:0.9rem 0; }
+    .notes-preview strong { color:#f0e2c0; }
+    .notes-preview .note-wiki { color:var(--gold,#c9a227); text-decoration:none; border-bottom:1px solid rgba(201,162,39,0.4); }
+    .notes-preview .note-wiki:hover { border-bottom-color:var(--gold,#c9a227); }
+    .notes-preview .note-wiki.missing { color:#8a8a92; border-bottom:1px dashed #55555c; cursor:help; }
+    .notes-preview-empty { color:#55555c; font-style:italic; }
+    .notes-md-hint { font-size:0.66rem; color:#4a4a52; margin-top:0.35rem; line-height:1.5; }
     .notes-search { background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:4px; color:var(--j-text,#e8e0d0); font-size:0.76rem; padding:0.3rem 0.5rem; font-family:inherit; box-sizing:border-box; }
     .notes-search:focus { outline:none; border-color:var(--gold-dark); }
     .notes-results { padding:0 0.4rem 0.4rem; overflow-y:auto; }
@@ -278,6 +299,11 @@
     .notes-res-count { font-family:inherit; font-size:0.62rem; color:#7a7a82; background:rgba(255,255,255,0.06); padding:0 0.3rem; border-radius:8px; }
     .notes-res-snip { font-size:0.7rem; color:#8a8a92; line-height:1.45; margin-top:0.2rem; white-space:pre-wrap; word-break:break-word; }
     .notes-res-snip mark { background:rgba(201,162,39,0.28); color:var(--gold,#c9a227); padding:0 1px; border-radius:2px; }
+    .canvas-sync { font-size:0.68rem; font-style:italic; color:#55555c; white-space:nowrap; flex-shrink:0; transition:color 0.2s; }
+    .canvas-sync.pending { color:#7a7a82; }
+    .canvas-sync.up { color:var(--gold-dark,#8a6e1a); }
+    .canvas-sync.ok { color:#6aba6a; }
+    .canvas-sync.err { color:#d9a441; font-style:normal; }
     .conflict-banner { position:fixed; left:50%; transform:translateX(-50%); bottom:1.5rem; z-index:10001; max-width:min(560px, calc(100vw - 2rem)); display:flex; flex-direction:column; gap:0.6rem; background:#2a2410; border:1px solid #6a5a20; border-left:3px solid #d9a441; border-radius:6px; padding:0.75rem 1rem; box-shadow:0 6px 28px rgba(0,0,0,0.6); font-size:0.8rem; color:#e2cfa0; line-height:1.5; }
     .conflict-banner strong { color:#d9a441; }
     .conflict-detail { color:#a89060; font-size:0.74rem; }
@@ -2781,6 +2807,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .lvlup-tab:hover { border-color: var(--gold-dark, #8a6e1a); color: var(--gold-dark, #8a6e1a); }
 .lvlup-tab.active { border-color: var(--gold-dark, #8a6e1a); background: rgba(201,169,110,0.12); color: var(--gold, #c9a227); }
 .lvlup-asi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.lvlup-gains { font-size: 0.76rem; line-height: 1.6; color: #a89a7a; }
+.lvlup-gains div { margin-bottom: 0.2rem; }
+.lvlup-gains strong { color: var(--gold, #c9a227); }
+.lvlup-gains .lvlup-gain-icon { color: var(--gold-dark, #8a6e1a); margin-right: 0.25rem; }
 /* Au doigt, les boutons d'action des modales (créateur et montée de niveau)
    tombaient à 25 px de haut. On les remonte à 38 px : ce sont des actions qui
    valident ou annulent, elles ne doivent pas se rater. */
@@ -3730,9 +3760,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="notes-editor-wrap">
           <div class="notes-page-title-row">
             <input class="notes-page-title-input" id="notes-page-title" placeholder="Page name…" />
+            <button class="notes-preview-btn" id="btn-notes-preview" title="Aperçu : mise en forme et liens vers le wiki">👁 Aperçu</button>
             <button class="notes-del-page-btn" id="btn-del-note-page" title="Delete this page">🗑</button>
           </div>
           <textarea class="notes-editor" id="notes-editor" placeholder="Your session notes, quests, key NPCs…"></textarea>
+          <div class="notes-preview" id="notes-preview" style="display:none;"></div>
+          <div class="notes-md-hint" id="notes-md-hint">**gras** · *italique* · # titre · - liste · &gt; citation · [[Ouestvir]] pour lier une page du wiki</div>
           <div style="font-size:0.72rem;color:#555;text-align:right;margin-top:0.3rem;font-style:italic;">Autosave</div>
         </div>
       </div>
@@ -3751,6 +3784,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div class="canvas-main">
             <div class="canvas-page-title-row">
               <input class="notes-page-title-input" id="canvas-page-title" placeholder="Page name…" />
+              <span class="canvas-sync" id="canvas-sync" title="Sauvegarde du dessin vers le cloud"></span>
               <button class="canvas-tool-btn" id="ctool-download" title="Download as PNG">⤓ PNG</button>
               <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page">🗑</button>
             </div>
@@ -4625,6 +4659,86 @@ function renderNotesSearch() {
     }));
 }
 
+/* ── Rendu des notes : markdown leger + liens wiki ──
+   L'edition reste un textarea ; ce rendu sert au mode Apercu. Tout est echappe
+   AVANT d'inserer la moindre balise. Fonction pure, donc testable hors navigateur. */
+
+let _wikiIndex = null;          // Map titre minuscule -> url, chargee a la demande
+
+function buildWikiIndex(entries) {
+  const m = new Map();
+  (entries || []).forEach(e => {
+    if (e?.title && e?.url) m.set(e.title.trim().toLowerCase(), e.url);
+  });
+  return m;
+}
+
+async function loadWikiIndex() {
+  if (_wikiIndex) return _wikiIndex;
+  try {
+    const r = await fetch('search-index.json');
+    _wikiIndex = buildWikiIndex(await r.json());
+  } catch (e) { _wikiIndex = new Map(); }
+  return _wikiIndex;
+}
+
+/* Sous-ensemble volontairement reduit : titres, gras, italique, listes,
+   citations, code, separateurs, et [[Lien wiki]] / [[Cible|texte affiche]]. */
+function renderNoteMarkdown(texte, wikiIndex) {
+  const esc = t => String(t)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const idx = wikiIndex instanceof Map ? wikiIndex : new Map();
+
+  const inline = (t) => {
+    let out = esc(t);
+    // Liens wiki d'abord : leur contenu ne doit pas etre relu comme du markdown
+    out = out.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, cible, libelle) => {
+      const nom = cible.trim();
+      const txt = (libelle || cible).trim();
+      const url = idx.get(nom.toLowerCase());
+      return url
+        ? `<a class="note-wiki" href="${url}">${txt}</a>`
+        : `<span class="note-wiki missing" title="Aucune page nommee ainsi dans le wiki">${txt}</span>`;
+    });
+    out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+    out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    out = out.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+    return out;
+  };
+
+  const lignes = String(texte || '').split('\n');
+  const html = [];
+  let listeOuverte = false;
+  const fermerListe = () => { if (listeOuverte) { html.push('</ul>'); listeOuverte = false; } };
+
+  lignes.forEach(ligne => {
+    const l = ligne.trimEnd();
+    if (/^\s*$/.test(l))            { fermerListe(); return; }
+    if (/^---+\s*$/.test(l))        { fermerListe(); html.push('<hr>'); return; }
+    let m;
+    if ((m = l.match(/^(#{1,3})\s+(.*)$/))) {
+      fermerListe();
+      const n = m[1].length;
+      html.push(`<h${n + 2} class="note-h">${inline(m[2])}</h${n + 2}>`);
+      return;
+    }
+    if ((m = l.match(/^\s*[-*]\s+(.*)$/))) {
+      if (!listeOuverte) { html.push('<ul>'); listeOuverte = true; }
+      html.push(`<li>${inline(m[1])}</li>`);
+      return;
+    }
+    if ((m = l.match(/^\s*>\s?(.*)$/))) {
+      fermerListe();
+      html.push(`<blockquote>${inline(m[1])}</blockquote>`);
+      return;
+    }
+    fermerListe();
+    html.push(`<p>${inline(l)}</p>`);
+  });
+  fermerListe();
+  return html.join('\n');
+}
+
 function renderNotesPages() {
   const pages = getNotePages();
   const list = document.getElementById('notes-pages-list');
@@ -4838,7 +4952,12 @@ function flushPendingSave() {
   } catch {}
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') flushPendingSave();
+  if (document.visibilityState === 'hidden') {
+    // Les dessins en attente partent tout de suite : sans ca, fermer l'onglet
+    // pendant le delai d'envoi laissait le dessin uniquement en local.
+    if (typeof _canvasDirty !== 'undefined' && _canvasDirty.size) syncCanvasPages();
+    flushPendingSave();
+  }
 });
 window.addEventListener('pagehide', flushPendingSave);
 
@@ -6535,6 +6654,103 @@ const canvasState = {
 let canvasPages = [];        // [{id, title, data}]
 let currentCanvasPageId = 0; // index into canvasPages
 
+/* ── Synchronisation des dessins ──
+   Les pages de canvas ne vivaient QUE dans le localStorage : vider le cache du
+   navigateur ou ouvrir la fiche ailleurs et tout etait perdu, sans un mot.
+   On garde le localStorage comme copie de travail (ecrite a chaque trait, donc
+   rapide et disponible hors ligne) et on televerse les images vers Supabase
+   Storage — seule l'URL voyage dans playerData, comme pour les fonds. */
+
+let _canvasDirty = new Set();   // index des pages modifiees depuis le dernier envoi
+let _canvasSyncTimer = null;
+let _canvasSyncing = false;
+
+/* Metadonnees synchronisees : [{ id, title, url }] — jamais les pixels. */
+function canvasMeta() {
+  const slot = activeSlot();
+  if (!slot) return [];
+  if (!Array.isArray(slot.canvas)) slot.canvas = [];
+  return slot.canvas;
+}
+
+/* Envoi differe : le canvas est sauvegarde a chaque fin de trait, on ne peut
+   pas televerser aussi souvent. On attend une pause dans le dessin. */
+function scheduleCanvasSync(delay = 6000) {
+  clearTimeout(_canvasSyncTimer);
+  _canvasSyncTimer = setTimeout(() => { syncCanvasPages(); }, delay);
+}
+
+function setCanvasSyncBadge(etat) {
+  const el = document.getElementById('canvas-sync');
+  if (!el) return;
+  const TXT = { pending: '· en attente', up: '↑ envoi…', ok: '✓ sauvegardé', err: '⚠ local seulement', none: '' };
+  el.textContent = TXT[etat] ?? '';
+  el.className = 'canvas-sync ' + etat;
+}
+
+/* Televerse les pages modifiees et note leur URL dans playerData. */
+async function syncCanvasPages() {
+  if (_canvasSyncing || !currentUser || !playerData) return;
+  if (!_canvasDirty.size) return;
+  if (!navigator.onLine) { setCanvasSyncBadge('err'); return; }
+  _canvasSyncing = true;
+  setCanvasSyncBadge('up');
+  const charId = playerData.activeCharId;
+  const aEnvoyer = [..._canvasDirty];
+  let echec = 0;
+  for (const i of aEnvoyer) {
+    const pg = canvasPages[i];
+    if (!pg?.data) { _canvasDirty.delete(i); continue; }
+    try {
+      const url = await sbUploadImage(`${currentUser}/${charId}-canvas-${pg.id}.png`, pg.data);
+      const meta = canvasMeta();
+      const m = meta.find(x => x.id === pg.id);
+      if (m) { m.url = url; m.title = pg.title; }
+      else meta.push({ id: pg.id, title: pg.title, url });
+      _canvasDirty.delete(i);
+    } catch (e) { echec++; }
+  }
+  // Les pages supprimees localement disparaissent aussi des metadonnees
+  const ids = new Set(canvasPages.map(p2 => p2.id));
+  const meta = canvasMeta();
+  for (let i = meta.length - 1; i >= 0; i--) if (!ids.has(meta[i].id)) meta.splice(i, 1);
+  _canvasSyncing = false;
+  triggerSave();
+  setCanvasSyncBadge(echec ? 'err' : 'ok');
+  if (echec) scheduleCanvasSync(30000);            // nouvelle tentative plus tard
+  else setTimeout(() => setCanvasSyncBadge('none'), 2500);
+}
+
+/* Reconstruit les pages absentes localement depuis les URL distantes.
+   C'est le cas d'un nouvel appareil, ou d'un cache navigateur vide. */
+async function hydrateCanvasFromRemote() {
+  const meta = canvasMeta();
+  if (!meta.length) return false;
+  const presents = new Set(canvasPages.map(p2 => p2.id));
+  const manquants = meta.filter(m => !presents.has(m.id) && m.url);
+  if (!manquants.length) return false;
+  let ajoutees = 0;
+  for (const m of manquants) {
+    try {
+      const blob = await (await fetch(m.url)).blob();
+      const dataUrl = await new Promise((res, rej) => {
+        const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej;
+        fr.readAsDataURL(blob);
+      });
+      canvasPages.push({ id: m.id, title: m.title || 'Page', data: dataUrl });
+      ajoutees++;
+    } catch (e) { /* URL morte : on n'invente pas de page vide */ }
+  }
+  if (!ajoutees) return false;
+  // Une page vierge creee par defaut n'a plus de raison d'etre
+  if (canvasPages.length > ajoutees && canvasPages[0] && !canvasPages[0].data
+      && !meta.some(m => m.id === canvasPages[0].id)) canvasPages.shift();
+  saveCanvasPages();
+  renderCanvasPagesSidebar();
+  showToast(`✦ ${ajoutees} page(s) de dessin récupérée(s)`);
+  return true;
+}
+
 function canvasPageStorageKey() {
   return 'canvaspages-' + (currentUser||'?') + '-' + (playerData?.activeCharId||'0');
 }
@@ -6547,6 +6763,9 @@ function loadCanvasPages() {
     canvasPages = [{ id: Date.now(), title: 'Page 1', data: null }];
   }
   currentCanvasPageId = 0;
+  _canvasDirty.clear();
+  // Nouvel appareil ou cache vide : on va rechercher ce qui manque
+  hydrateCanvasFromRemote().then(ok => { if (ok) { initCanvas(); renderCanvasPagesSidebar(); } });
 }
 function saveCanvasPages() {
   try { localStorage.setItem(canvasPageStorageKey(), JSON.stringify(canvasPages)); } catch(e) {
@@ -6594,6 +6813,8 @@ function deleteCanvasPage() {
   initCanvas(false);
   renderCanvasPagesSidebar();
   saveCanvasPages();
+  _canvasDirty.add(currentCanvasPageId);
+  scheduleCanvasSync(1500);
 }
 function saveCurrentCanvasPage() {
   const cv = document.getElementById('handnote-canvas');
@@ -6601,6 +6822,9 @@ function saveCurrentCanvasPage() {
   if (canvasPages[currentCanvasPageId]) {
     canvasPages[currentCanvasPageId].data = cv.toDataURL();
     saveCanvasPages();
+    _canvasDirty.add(currentCanvasPageId);
+    setCanvasSyncBadge('pending');
+    scheduleCanvasSync();
   }
 }
 function loadCurrentCanvasPage() {
@@ -8128,6 +8352,32 @@ function abilKeysFromFeat(abilStr) {
   return abilStr.split(/,| or /).map(s => MAP[s.trim().toUpperCase()]).filter(Boolean);
 }
 
+/* Sorts mineurs connus a un niveau de classe donne. */
+function cantripsAt(className, level) {
+  if (typeof CANTRIPS_KNOWN === 'undefined') return 0;
+  const t = CANTRIPS_KNOWN[className];
+  if (!t) return 0;
+  return t[Math.max(1, Math.min(20, parseInt(level) || 1)) - 1] || 0;
+}
+
+/* Combien de competences passent en Expertise a ce niveau de classe ?
+   Lu dans la description de la capacite plutot que code en dur. */
+function expertiseAt(className, level) {
+  const feats = (typeof CLASS_DATA !== 'undefined' && CLASS_DATA[className]?.features?.[level]) || [];
+  const f = feats.find(x => /^expertise$/i.test(x.name || ''));
+  if (!f) return 0;
+  const m = (f.desc || '').match(/(\d+)\s+(?:more\s+)?skills?/i);
+  return m ? parseInt(m[1]) : 2;
+}
+
+/* Plus haut niveau de sort accessible, d'apres les emplacements. */
+function topSlotLevel(slots) {
+  if (!Array.isArray(slots)) return 0;
+  let n = 0;
+  slots.forEach((v, i) => { if ((parseInt(v) || 0) > 0) n = i + 1; });
+  return n;
+}
+
 /* Décrit la montée d'un niveau dans `className` sans modifier le personnage. */
 function planLevelUp(c, className) {
   const classes = getClasses(c);
@@ -8179,6 +8429,11 @@ function planLevelUp(c, className) {
     newFeatures: [...clsFeatures, ...subFeatures],
     pbBefore: pb(totalBefore), pbAfter: pb(totalAfter),
     preparedBefore: preparedTotal(c),
+    // Gains que le joueur doit choisir lui-meme : sans rappel, ils passent a la trappe
+    cantripsGained: Math.max(0, cantripsAt(className, toLevel) - cantripsAt(className, fromLevel)),
+    cantripsTotal: cantripsAt(className, toLevel),
+    expertiseCount: expertiseAt(className, toLevel),
+    slotsBefore: computeMulticlassSlots(c),
     // Multiclassage : 13 requis des deux côtés (on prévient, on ne bloque pas —
     // certaines tables l'ignorent volontairement)
     prereq: idx < 0 ? multiclassPrereqCheck(c, className) : null,
@@ -8257,6 +8512,13 @@ function applyLevelUp(c, plan, choices) {
     log.push(`Sous-classe : ${ch.subclass}`);
   }
 
+  // ── Expertise ── uniquement sur des competences deja maitrisees
+  if (plan.expertiseCount && Array.isArray(ch.expertise)) {
+    ch.expertise.slice(0, plan.expertiseCount).forEach(k => {
+      if ((parseInt(c[k]) || 0) >= 1) { c[k] = 2; log.push(`Expertise : ${k}`); }
+    });
+  }
+
   // ── ASI ou don ──
   if (plan.isAsi) {
     if (ch.asiMode === 'feat' && ch.feat) {
@@ -8314,6 +8576,10 @@ function applyLevelUp(c, plan, choices) {
   if (plan.pbAfter > plan.pbBefore) log.push(`Bonus de maîtrise +${plan.pbBefore} → +${plan.pbAfter}`);
   const prepAfter = preparedTotal(c);
   if (prepAfter > plan.preparedBefore) log.push(`Sorts préparés ${plan.preparedBefore} → ${prepAfter}`);
+  if (plan.cantripsGained > 0) log.push(`+${plan.cantripsGained} sort mineur à choisir`);
+  const topApres = topSlotLevel(computeMulticlassSlots(c));
+  const topAvant = topSlotLevel(plan.slotsBefore);
+  if (topApres > topAvant) log.push(`Sorts de niveau ${topApres} débloqués`);
 
   return { ok:true, log, gain, totalLevel: getTotalLevel(c) };
 }
@@ -11725,6 +11991,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       _notesSearchTimer = setTimeout(renderNotesSearch, 140);
     });
   }
+  document.getElementById('btn-notes-preview')?.addEventListener('click', async () => {
+    const ed  = document.getElementById('notes-editor');
+    const pv  = document.getElementById('notes-preview');
+    const btn = document.getElementById('btn-notes-preview');
+    const enApercu = pv.style.display !== 'none';
+    if (enApercu) {
+      pv.style.display = 'none'; ed.style.display = '';
+      btn.textContent = '👁 Aperçu'; btn.classList.remove('on');
+      ed.focus();
+      return;
+    }
+    saveCurrentNoteContent();
+    const idx = await loadWikiIndex();
+    pv.innerHTML = renderNoteMarkdown(ed.value, idx)
+      || '<p class="notes-preview-empty">Page vide.</p>';
+    ed.style.display = 'none'; pv.style.display = '';
+    btn.textContent = '✎ Éditer'; btn.classList.add('on');
+  });
   document.getElementById('btn-add-note-page').addEventListener('click', () => {
     if (!playerData) return;
     saveCurrentNoteContent();
@@ -12750,6 +13034,42 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
   const ABIL = [['for','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['sag','SAG'],['cha','CHA']];
   const $ = id => document.getElementById(id);
   let plan = null, chosenHp = null, asiMode = 'abil';
+  let expertisePick = new Set();
+
+  /* Copie legere du personnage au niveau suivant — sert a comparer les
+     emplacements de sorts avant/apres sans rien modifier. */
+  function simulateLevel(c, p) {
+    const classes = getClasses(c).map(x => ({ ...x }));
+    if (p.isNewClass) classes.push({ classe: p.className, niveau: 1 });
+    else classes[p.classIdx].niveau = p.toLevel;
+    return { classes };
+  }
+
+  /* Expertise : uniquement parmi les competences deja maitrisees (regle 2024). */
+  function renderExpertiseChips() {
+    const box = $('lvlup-exp-chips');
+    const c = C();
+    const eligibles = SKILLS.filter(sk => (parseInt(c[sk.key]) || 0) === 1);
+    if (!eligibles.length) {
+      box.innerHTML = '';
+      $('lvlup-exp-note').innerHTML = "⚠ Aucune compétence maîtrisée à doubler — coche d'abord tes maîtrises.";
+      return;
+    }
+    const plein = expertisePick.size >= plan.expertiseCount;
+    box.innerHTML = eligibles.map(sk => {
+      const on = expertisePick.has(sk.key);
+      return `<button type="button" class="cf-skill-chip${on ? ' on' : ''}${!on && plein ? ' muted' : ''}" data-exp="${sk.key}">${esc(sk.label)}</button>`;
+    }).join('');
+    box.querySelectorAll('[data-exp]').forEach(chip =>
+      chip.addEventListener('click', () => {
+        const k = chip.dataset.exp;
+        if (expertisePick.has(k)) expertisePick.delete(k);
+        else if (expertisePick.size < plan.expertiseCount) expertisePick.add(k);
+        else { showToast(`Déjà ${plan.expertiseCount} choisies — retires-en une`); return; }
+        renderExpertiseChips();
+      }));
+    $('lvlup-exp-note').textContent = `${expertisePick.size} / ${plan.expertiseCount} choisie(s)`;
+  }
 
   const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk',
                       'Paladin','Psion','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
@@ -12825,6 +13145,28 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
       syncAsiNote();
     }
 
+    // Expertise : on fait choisir parmi les competences deja maitrisees
+    const expBlock = $('lvlup-exp-block');
+    expBlock.style.display = plan.expertiseCount ? '' : 'none';
+    if (plan.expertiseCount) {
+      $('lvlup-exp-req').textContent = `${plan.expertiseCount} compétence${plan.expertiseCount > 1 ? 's' : ''} à doubler`;
+      renderExpertiseChips();
+    } else expertisePick = new Set();
+
+    // Rappels : ce que le niveau apporte mais que l'assistant ne peut pas choisir
+    const gains = [];
+    if (plan.cantripsGained > 0) {
+      gains.push(`<div><span class="lvlup-gain-icon">✦</span><strong>${plan.cantripsGained}</strong> sort mineur de plus `
+               + `(<strong>${plan.cantripsTotal}</strong> au total) — à prendre dans le Compendium.</div>`);
+    }
+    const avant = topSlotLevel(plan.slotsBefore);
+    const apres = topSlotLevel(computeMulticlassSlots(simulateLevel(c, plan)));
+    if (apres > avant) {
+      gains.push(`<div><span class="lvlup-gain-icon">✦</span>Tu débloques les sorts de <strong>niveau ${apres}</strong>.</div>`);
+    }
+    $('lvlup-gains-block').style.display = gains.length ? '' : 'none';
+    $('lvlup-gains').innerHTML = gains.join('');
+
     // Nouveautés
     const feats = plan.newFeatures;
     $('lvlup-new-block').style.display = feats.length ? '' : 'none';
@@ -12897,8 +13239,14 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
       showToast('⚠ Choisis un don, ou bascule sur Caractéristiques.');
       return;
     }
+    if (plan.expertiseCount && expertisePick.size
+        && expertisePick.size < plan.expertiseCount) {
+      showToast(`⚠ Choisis ${plan.expertiseCount} compétences pour l'Expertise, ou aucune.`);
+      return;
+    }
     const res = applyLevelUp(C(), plan, {
       hp: chosenHp, subclass: $('lvlup-sub').value, asiMode,
+      expertise: [...expertisePick],
       asiA: $('lvlup-asi-a').value, asiB: $('lvlup-asi-b').value,
       feat: $('lvlup-feat').value, featAbil: $('lvlup-feat-abil').value,
     });
@@ -12918,6 +13266,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
             .map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`;
     chosenHp = null;
     asiMode = 'abil';
+    expertisePick = new Set();
     overlay.querySelectorAll('[data-asimode]').forEach(b => b.classList.toggle('active', b.dataset.asimode === 'abil'));
     $('lvlup-asi-abil').style.display = ''; $('lvlup-asi-feat').style.display = 'none';
     $('lvlup-feat-desc').innerHTML = ''; $('lvlup-feat-abil-wrap').style.display = 'none';
@@ -13680,6 +14029,19 @@ document.addEventListener('keydown', e => {
             </div>
             <div class="wiz-preview" id="lvlup-feat-desc"></div>
           </div>
+        </div>
+
+        <!-- Expertise -->
+        <div class="lvlup-block" id="lvlup-exp-block" style="display:none;">
+          <div class="lvlup-block-title">Expertise <span class="lvlup-req" id="lvlup-exp-req"></span></div>
+          <div class="cf-skill-chips" id="lvlup-exp-chips"></div>
+          <div class="lvlup-hp-detail" id="lvlup-exp-note"></div>
+        </div>
+
+        <!-- Rappels : sorts mineurs, emplacements -->
+        <div class="lvlup-block" id="lvlup-gains-block" style="display:none;">
+          <div class="lvlup-block-title">À choisir toi-même</div>
+          <div class="lvlup-gains" id="lvlup-gains"></div>
         </div>
 
         <!-- Nouveautés -->
