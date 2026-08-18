@@ -2760,6 +2760,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   background: rgba(255,255,255,0.06); color: #999; font-family: 'Cinzel', serif;
 }
 .cf-skill-count.done { background: rgba(106,186,106,0.15); color: var(--success, #6aba6a); }
+.cf-fc { margin-top: 0.45rem; padding-top: 0.4rem; border-top: 1px dashed var(--j-border-col, #3a2810); }
+.cf-fc-head { font-size: 0.7rem; margin-bottom: 0.15rem; }
+.cf-fc-todo { color: #d9a441; }
+.cf-fc-done { color: #8aba8a; }
 .cf-skill-chips { display: flex; flex-wrap: wrap; gap: 0.25rem; width: 100%; margin-top: 0.3rem; }
 .cf-skill-chip {
   font-size: 0.7rem; padding: 0.12rem 0.5rem; border-radius: 10px; cursor: pointer;
@@ -2839,6 +2843,9 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 }
 .wiz-preview:empty { display: none; }
 .wiz-preview strong { color: var(--gold, #c9a227); }
+.wiz-fc { margin-top: 0.5rem; }
+.wiz-fc-note { font-size: 0.72rem; color: #8a8a92; margin-top: 0.3rem; line-height: 1.45; }
+.wiz-fc-note strong { color: var(--gold, #c9a227); }
 .wiz-lang-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .wiz-lang-note { font-size: 0.72rem; color: #7a7a8a; margin-top: 0.35rem; }
 .wiz-lang-note strong { color: var(--gold, #c9a227); }
@@ -5019,6 +5026,48 @@ function autoFillClass(classe) {
 /* ════════════════════════════════════════════════════════════
    CLASS FEATURES — Render automatique par niveau
    ════════════════════════════════════════════════════════════ */
+/* Bloc de pastilles pour une capacite a choix, dans la fiche.
+   Rend le choix modifiable partout, pas seulement au moment de monter de
+   niveau : un personnage cree avant cette fonctionnalite peut le renseigner. */
+function featureChoiceChips(featureName, className) {
+  const opt = featureOptions(featureName, className);
+  if (!opt) return '';
+  const pris = getFeatureChoice(C(), featureName);
+  const plein = pris.length >= opt.pick;
+  const manque = opt.pick - pris.length;
+  return `<div class="cf-fc">`
+    + `<div class="cf-fc-head">`
+    + (manque > 0
+        ? `<span class="cf-fc-todo">Choose ${manque > 1 ? manque : 'one'}</span>`
+        : `<span class="cf-fc-done">✓ ${pris.join(', ')}</span>`)
+    + `</div>`
+    + `<div class="cf-skill-chips">`
+    + opt.options.map(o => {
+        const on = pris.includes(o);
+        return `<button type="button" class="cf-skill-chip${on ? ' on' : ''}${!on && plein ? ' muted' : ''}"`
+             + ` data-cffeat="${esc(featureName)}" data-cfcls="${esc(className)}" data-cfopt="${esc(o)}"`
+             + ` title="${esc(opt.desc[o] || '')}">${esc(o)}</button>`;
+      }).join('')
+    + `</div></div>`;
+}
+
+/* Clic sur une pastille : ajoute, retire, ou refuse si le quota est atteint. */
+function bindFeatureChoiceChips(root) {
+  root.querySelectorAll('[data-cffeat]').forEach(chip => chip.addEventListener('click', () => {
+    const nom = chip.dataset.cffeat, cls = chip.dataset.cfcls, o = chip.dataset.cfopt;
+    const opt = featureOptions(nom, cls);
+    if (!opt) return;
+    const pris = getFeatureChoice(C(), nom).slice();
+    const i = pris.indexOf(o);
+    if (i >= 0) pris.splice(i, 1);
+    else if (pris.length < opt.pick) pris.push(o);
+    else { showToast(`Already ${opt.pick} chosen for ${nom} — remove one first`); return; }
+    setFeatureChoice(C(), nom, cls, pris);
+    renderClassFeatures();
+    triggerSave();
+  }));
+}
+
 function renderClassFeatures() {
   renderSpeciesTraits(); // les traits d'species dépendent du total level — même cycle de rendu
   renderBackground();
@@ -5206,7 +5255,7 @@ function renderClassFeatures() {
       div.innerHTML = `
         <div class="cf-feature-row"><span class="cf-feature-name">${feat.name}</span>${badges}</div>
         <div class="cf-feature-desc">${feat.desc}</div>
-      `;
+      ` + featureChoiceChips(feat.name, clName);
       levelBody.appendChild(div);
     });
 
@@ -5226,7 +5275,7 @@ function renderClassFeatures() {
         div.innerHTML = `
           <div class="cf-feature-row"><span class="cf-feature-name">${feat.name}</span>${badges}</div>
           <div class="cf-feature-desc">${feat.desc}</div>
-        `;
+      ` + featureChoiceChips(feat.name, clName);
         levelBody.appendChild(div);
       });
     }
@@ -5241,6 +5290,7 @@ function renderClassFeatures() {
     body.appendChild(group);
   } // end for lvl
   }); // end validClasses.forEach
+  bindFeatureChoiceChips(body);
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -12806,6 +12856,7 @@ ${car} characters of notes.
 
     /* ── Compétences de classe : chips à quota, comme dans la fiche ── */
     let wizSkills = new Set();
+    let wizFc = {};                 // choix de capacites de niveau 1
     function renderWizSkills() {
       const box = document.getElementById('wiz-class-skills');
       const d = CLASS_DATA[selClass.value];
@@ -12830,18 +12881,59 @@ ${car} characters of notes.
       });
     }
 
+
+    /* Choix de capacites disponibles des le niveau 1 (style de combat du
+       Guerrier, ordre divin du Clerc, ordre primordial du Druide). Les autres
+       arrivent plus tard et seront proposes par le monteur de niveau. */
+    function renderWizFeatureChoices() {
+      const box = document.getElementById('wiz-class-fc');
+      if (!box) return;
+      const cls = selClass.value;
+      const liste = cls ? featureChoicesAt(cls, '', 1) : [];
+      if (!liste.length) { box.innerHTML = ''; return; }
+      box.innerHTML = liste.map(f => {
+        const pris = wizFc[f.name] || [];
+        const plein = pris.length >= f.pick;
+        return `<div class="wiz-fc">`
+          + `<div class="field-label">${esc(f.name)} — ${f.pick > 1 ? `choose ${f.pick}` : 'choose one'}</div>`
+          + `<div class="cf-skill-chips">`
+          + f.options.map(o => {
+              const on = pris.includes(o);
+              return `<button type="button" class="cf-skill-chip${on ? ' on' : ''}${!on && plein ? ' muted' : ''}"`
+                   + ` data-wfc="${esc(f.name)}" data-wfcopt="${esc(o)}"`
+                   + ` title="${esc(f.desc[o] || '')}">${esc(o)}</button>`;
+            }).join('')
+          + `</div>`
+          + (pris.length ? `<div class="wiz-fc-note">${pris.map(o =>
+               `<strong>${esc(o)}</strong> — ${esc(f.desc[o] || '')}`).join('<br>')}</div>` : '')
+          + `</div>`;
+      }).join('');
+      box.querySelectorAll('[data-wfc]').forEach(chip => chip.addEventListener('click', () => {
+        const nom = chip.dataset.wfc, o = chip.dataset.wfcopt;
+        const def = liste.find(f => f.name === nom);
+        const pris = wizFc[nom] || (wizFc[nom] = []);
+        const i = pris.indexOf(o);
+        if (i >= 0) pris.splice(i, 1);
+        else if (pris.length < def.pick) pris.push(o);
+        else { showToast(`Already ${def.pick} chosen for ${nom} — remove one first`); return; }
+        renderWizFeatureChoices();
+      }));
+    }
+
     function previewClass() {
       wizSkills = new Set();   // la classe change → on repart de zéro
       renderWizSkills();
+      wizFc = {};
+      renderWizFeatureChoices();
       const box = document.getElementById('wiz-class-preview');
       const d = CLASS_DATA[selClass.value];
       if (!d) { box.innerHTML = ''; return; }
       const info = DND_CLASSES[selClass.value] || {};
       box.innerHTML = `<div>Hit Die <strong>${info.de || '1d8'}</strong>`
-        + `${info.sort ? ` · Incantation <strong>${info.sort}</strong>` : ''}`
+        + `${info.sort ? ` · Spellcasting <strong>${info.sort}</strong>` : ''}`
         + ` · Saving throws <strong>${d.saves.map(s => ABIL_LABEL[s] || s.toUpperCase()).join(' & ')}</strong></div>`
-        + (d.armorProf ? `<div>Armures : ${d.armorProf}</div>` : '')
-        + (d.weaponProf ? `<div>Armes : ${d.weaponProf}</div>` : '')
+        + (d.armorProf ? `<div>Armor: ${d.armorProf}</div>` : '')
+        + (d.weaponProf ? `<div>Weapons: ${d.weaponProf}</div>` : '')
         + (d.features[1] || []).map(f => `<div class="wiz-trait"><span class="wiz-trait-name">${f.name}</span> — ${f.desc}</div>`).join('');
     }
     selClass.addEventListener('change', previewClass);
@@ -12960,6 +13052,7 @@ ${car} characters of notes.
       refreshTool();
       abilBox.querySelectorAll('.wiz-abil-sel').forEach(s => s.value = '');
       wizSkills = new Set();
+      wizFc = {};
       wizBgOk = true;
       ['wiz-species-preview','wiz-class-preview','wiz-bg-preview','wiz-class-skills','wiz-bg-bonus','wiz-summary'].forEach(id =>
         document.getElementById(id).innerHTML = '');
@@ -13013,6 +13106,8 @@ ${car} characters of notes.
         const saveMap = { for:'saveFor', dex:'saveDex', con:'saveCon', int:'saveInt', sag:'saveSag', cha:'saveCha' };
         Object.entries(saveMap).forEach(([a, k]) => { c[k] = cd.saves.includes(a); });
         wizSkills.forEach(k => { c[k] = 1; });   // compétences de classe choisies à l'étape 3
+        Object.entries(wizFc).forEach(([nom, sel]) =>
+          setFeatureChoice(c, nom, selClass.value, sel));
         const info = DND_CLASSES[selClass.value] || {};
         c.deVie = info.de || '1d8';
         c.nbDeVie = 1;
@@ -14052,6 +14147,7 @@ document.addEventListener('keydown', e => {
             <select class="auth-input" id="wiz-class"></select>
           </div>
           <div class="wiz-skills" id="wiz-class-skills"></div>
+          <div class="wiz-skills" id="wiz-class-fc"></div>
           <div class="wiz-preview" id="wiz-class-preview"></div>
         </div>
 
