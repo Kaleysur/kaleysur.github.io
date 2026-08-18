@@ -544,7 +544,11 @@
     /* Sur petit ecran la colonne Lb ecrasait le nom de l'objet (37 px). Le poids
        se saisit une fois a l'import ; le total reste lisible dans la barre. */
     @media (max-width: 700px) {
-      .inv-table thead th:nth-child(4), .inv-table tbody td:nth-child(4) { display:none; }
+      /* Lb : le poids se saisit une fois, le total reste dans la barre.
+         Category : deja filtrable par les onglets juste au-dessus.
+         Sans ca, le nom de l'objet tombait a 67 px. */
+      .inv-table thead th:nth-child(4), .inv-table tbody td:nth-child(4),
+      .inv-table thead th:nth-child(5), .inv-table tbody td:nth-child(5) { display:none; }
     }
     .inv-cat-tabs { display:flex; gap:0; margin-bottom:0.75rem; border-bottom:1px solid var(--j-border-col,#2a2a3a); flex-wrap:wrap; }
     .inv-cat-tab { padding:0.3rem 0.7rem; background:none; border:none; border-bottom:2px solid transparent; color:#666; font-size:0.72rem; cursor:pointer; font-family:'Cinzel',serif; letter-spacing:0.04em; transition:all var(--transition); white-space:nowrap; }
@@ -555,7 +559,32 @@
     /* ── Attunement ── */
     .attunement-section { margin-top:0.85rem; padding-top:0.75rem; border-top:1px solid #2a1e0a; }
     .attunement-label { font-family:'Cinzel',serif; font-size:0.62rem; color:var(--gold-dark); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.5rem; }
-    .attunement-slots { display:flex; flex-direction:column; gap:0.35rem; }
+    .attunement-slots { display:flex; flex-direction:column; gap:0.3rem; }
+    .attune-count { font-family:'Cinzel',serif; color:#c090e8; letter-spacing:0; text-transform:none; margin-left:0.3rem; }
+    .attune-count.full { color:#e8a0a0; }
+    .attune-item { font-size:0.78rem; color:#c090e8; padding:0.18rem 0.45rem; background:rgba(122,74,170,0.1); border-left:2px solid #7a4aaa; border-radius:0 3px 3px 0; }
+    .attune-empty { font-size:0.72rem; color:#55555c; font-style:italic; }
+    .inv-attune-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#55555c; cursor:pointer; font-size:0.72rem; line-height:1; padding:0.18rem 0.32rem; border-radius:3px; margin-right:0.25rem; transition:all 0.12s; }
+    .inv-attune-btn:hover { border-color:#7a4aaa; color:#c090e8; }
+    .inv-attune-btn.on { border-color:#7a4aaa; background:rgba(122,74,170,0.16); color:#c090e8; }
+    .inv-use-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#55555c; cursor:pointer; font-size:0.72rem; line-height:1; padding:0.18rem 0.32rem; border-radius:3px; margin-right:0.25rem; transition:all 0.12s; }
+    .inv-use-btn:hover { border-color:#6aba6a; color:#8aba8a; }
+    .inv-row-attuned [data-ik="name"] { color:#c090e8; }
+    /* Mobile : la derniere colonne peut porter jusqu'a 4 boutons. On leur donne
+       une vraie cible tactile et on repartit le reste au profit du nom. */
+    @media (max-width: 700px) {
+      .inv-attune-btn, .inv-use-btn, .inv-equip-btn {
+        padding:0.42rem 0.4rem; font-size:0.88rem; margin-right:0.1rem;
+      }
+      .inv-table td:last-child, .inv-table th:last-child { white-space:nowrap; width:1%; }
+      /* Sans table-layout:fixed les pourcentages sont ignores et le contenu
+         de la description mange la place du nom. */
+      .inv-table { table-layout:fixed; width:100%; }
+      .inv-table thead th:nth-child(1) { width:44px; }
+      .inv-table thead th:nth-child(2) { width:46%; }
+      .inv-table thead th:nth-child(3) { width:auto; }
+      .inv-table .inv-inp { font-size:0.76rem; padding:0.2rem 0.25rem; }
+    }
     .attunement-slot { display:flex; align-items:center; gap:0.5rem; }
     .attunement-slot input[type=text] { flex:1; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); border-radius:4px; color:var(--j-text,#e8e0d0); font-size:0.8rem; padding:0.25rem 0.45rem; transition:border-color var(--transition); }
     .attunement-slot input[type=text]:focus { outline:none; border-color:var(--gold-dark); }
@@ -3638,24 +3667,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         </table>
         <!-- Attunement -->
         <div class="attunement-section">
-          <div class="attunement-label">⟡ Attunement (max 3)</div>
-          <div class="attunement-slots" id="attunement-slots">
-            <div class="attunement-slot">
-              <input type="checkbox" class="attunement-slot-check" data-at="0">
-              <input type="text" class="attunement-slot-inp" data-at="0" placeholder="Magic item 1…">
-              <span class="attunement-slot-label" id="at-label-0">free</span>
-            </div>
-            <div class="attunement-slot">
-              <input type="checkbox" class="attunement-slot-check" data-at="1">
-              <input type="text" class="attunement-slot-inp" data-at="1" placeholder="Magic item 2…">
-              <span class="attunement-slot-label" id="at-label-1">free</span>
-            </div>
-            <div class="attunement-slot">
-              <input type="checkbox" class="attunement-slot-check" data-at="2">
-              <input type="text" class="attunement-slot-inp" data-at="2" placeholder="Magic item 3…">
-              <span class="attunement-slot-label" id="at-label-2">free</span>
-            </div>
-          </div>
+          <div class="attunement-label">⟡ Lien magique <span class="attune-count" id="attunement-count">0 / 3</span></div>
+          <div class="attunement-slots" id="attunement-slots"></div>
         </div>
       </div>
       <div class="sheet-section">
@@ -5768,6 +5781,7 @@ function _renderTab(tabId) {
 
 function renderAll() {
   migrateToMulticlass(C());
+  migrateAttunement(INV());
   fillFields();
   populateSpeciesUI();
   populateBackgroundUI();
@@ -8356,6 +8370,86 @@ function equippedArmorMismatch(c, inv) {
   return porte ? null : (cfg.armorName || 'Cette armure');
 }
 
+/* ── Lien magique (attunement) ──
+   C'etaient trois champs texte ou l'on retapait le nom d'un objet deja present
+   dans l'inventaire. Le lien est desormais un drapeau sur l'objet lui-meme. */
+
+const ATTUNE_MAX = 3;
+
+/* Un objet peut-il faire l'objet d'un lien ? */
+function isAttunable(item) {
+  return !!item && (item.attune === true || item.cat === 'magique');
+}
+
+function attunedItems(inv) {
+  return (inv?.items || []).filter(it => it.attuned);
+}
+
+/* Migration unique des trois anciens emplacements vers les objets.
+   Un nom qui ne correspond a aucun objet en cree un : « je suis lie a X »
+   signifie que je possede X, et le perdre serait pire que l'ajouter. */
+function migrateAttunement(inv) {
+  if (!inv || !Array.isArray(inv.attunement)) return 0;
+  inv.items = inv.items || [];
+  let repris = 0;
+  inv.attunement.forEach(slot => {
+    const nom = (slot?.name || '').trim();
+    if (!nom) return;
+    const existant = inv.items.find(it => (it.name || '').trim().toLowerCase() === nom.toLowerCase());
+    if (existant) {
+      existant.attune = true;
+      if (slot.active) existant.attuned = true;
+    } else {
+      inv.items.push({ qty: 1, name: nom, cat: 'magique', notes: '', attune: true, attuned: !!slot.active });
+    }
+    repris++;
+  });
+  delete inv.attunement;
+  return repris;
+}
+
+/* Etablit ou rompt le lien. Renvoie un message, ou null si rien n'a change. */
+function toggleAttune(idx) {
+  const inv = INV();
+  const it = (inv.items || [])[idx];
+  if (!it || !isAttunable(it)) return null;
+  if (it.attuned) { it.attuned = false; return `Lien rompu avec ${it.name || "l'objet"}`; }
+  if (attunedItems(inv).length >= ATTUNE_MAX) {
+    return `Deja lie a ${ATTUNE_MAX} objets — romps un lien d'abord`;
+  }
+  it.attuned = true;
+  return `Lie a ${it.name || "l'objet"}`;
+}
+
+/* Consomme une unite. On ne supprime pas l'objet a zero : un flacon vide
+   reste une ligne que le joueur choisit de retirer lui-meme. */
+function useConsumable(idx) {
+  const it = (INV().items || [])[idx];
+  if (!it) return null;
+  const q = parseInt(it.qty) || 0;
+  if (q <= 0) return `${it.name || 'Objet'} : il n'en reste plus`;
+  it.qty = q - 1;
+  return `${it.name || 'Objet'} utilise — il en reste ${it.qty}`;
+}
+
+function renderAttunement() {
+  const box = document.getElementById('attunement-slots');
+  if (!box) return;
+  const inv = INV();
+  const lies = attunedItems(inv);
+  const dispo = (inv.items || []).filter(isAttunable).length;
+  const lbl = document.getElementById('attunement-count');
+  if (lbl) {
+    lbl.textContent = `${lies.length} / ${ATTUNE_MAX}`;
+    lbl.className = 'attune-count' + (lies.length >= ATTUNE_MAX ? ' full' : '');
+  }
+  box.innerHTML = lies.length
+    ? lies.map(it => `<div class="attune-item">⟡ ${esc(it.name || 'Sans nom')}</div>`).join('')
+    : `<div class="attune-empty">${dispo
+        ? 'Aucun lien actif — utilise le ⟡ sur un objet magique de ton inventaire.'
+        : 'Aucun objet magique dans ton inventaire.'}</div>`;
+}
+
 function renderWornArmor() {
   const container = document.getElementById('worn-armor-card-container');
   if (!container || !playerData) return;
@@ -8541,14 +8635,18 @@ function renderInventory() {
     if (search && !item.name?.toLowerCase().includes(search) && !item.notes?.toLowerCase().includes(search)) return;
     const selOpts = CAT_OPTIONS.map(o => `<option value="${o.value}"${item.cat===o.value?' selected':''}>${o.label}</option>`).join('');
     const tr = document.createElement('tr');
-    if (item.equipped) tr.className = 'inv-row-equipped';
+    tr.className = (item.equipped ? 'inv-row-equipped ' : '') + (item.attuned ? 'inv-row-attuned' : '');
     tr.innerHTML = `
       <td><input class="inv-inp" style="width:50px;text-align:center;" data-item="${i}" data-ik="qty"   type="number" value="${item.qty||1}" min="0"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Nom de l'objet"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="notes" value="${esc(item.notes||'')}" placeholder="Description"></td>
       <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Poids unitaire (lb)"></td>
       <td><select class="inv-inp" style="padding:0.18rem 0.25rem;font-size:0.74rem;" data-item="${i}" data-ik="cat">${selOpts}</select></td>
-      <td style="white-space:nowrap;">${isEquippable(item)
+      <td style="white-space:nowrap;">${item.cat === 'consommable'
+        ? `<button class="inv-use-btn" data-use-item="${i}" title="Utiliser une unité" aria-label="Utiliser ${esc(item.name||'')}">⌁</button>`
+        : ''}${isAttunable(item)
+        ? `<button class="inv-attune-btn${item.attuned ? ' on' : ''}" data-attune-item="${i}" title="${item.attuned ? 'Rompre le lien' : 'Établir un lien magique'}" aria-label="${item.attuned ? 'Rompre le lien avec' : 'Se lier à'} ${esc(item.name||'')}">⟡</button>`
+        : ''}${isEquippable(item)
         ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Retirer' : 'Équiper'}" aria-label="${item.equipped ? 'Retirer' : 'Équiper'} ${esc(item.name||'')}">${item.equipped ? '🛡' : '○'}</button>`
         : ''}<button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
     `;
@@ -8558,19 +8656,7 @@ function renderInventory() {
   const allBadge = document.getElementById('icat-badge-all');
   if (allBadge) allBadge.textContent = items.length;
   renderEncumbrance();
-}
-function renderAttunement() {
-  const inv = INV();
-  const slots = inv.attunement || [{},{},{}];
-  for (let i = 0; i < 3; i++) {
-    const inp = document.querySelector(`.attunement-slot-inp[data-at="${i}"]`);
-    const chk = document.querySelector(`.attunement-slot-check[data-at="${i}"]`);
-    const lbl = document.getElementById(`at-label-${i}`);
-    const s = slots[i] || {};
-    if (inp) { inp.value = s.name || ''; inp.classList.toggle('attuned', !!s.active); }
-    if (chk) chk.checked = !!s.active;
-    if (lbl) lbl.textContent = s.active ? 'attunée' : 'libre';
-  }
+  renderAttunement();
 }
 function fillCurrency() {
   const cur = INV().currency || {};
@@ -11257,24 +11343,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.inv-cat-tab').forEach(t => t.classList.toggle('active', t === tab));
     renderInventory();
   });
-  // Attunement
-  document.getElementById('attunement-slots')?.addEventListener('input', e => {
-    const at = e.target.dataset.at;
-    if (at === undefined) return;
-    const inv = INV();
-    if (!inv.attunement) inv.attunement = [{},{},{}];
-    const idx = parseInt(at);
-    if (e.target.type === 'checkbox') {
-      inv.attunement[idx].active = e.target.checked;
-      const inp = document.querySelector(`.attunement-slot-inp[data-at="${at}"]`);
-      const lbl = document.getElementById(`at-label-${at}`);
-      if (inp) inp.classList.toggle('attuned', e.target.checked);
-      if (lbl) lbl.textContent = e.target.checked ? 'attunée' : 'libre';
-    } else {
-      inv.attunement[idx].name = e.target.value;
-    }
-    triggerSave();
-  });
   document.getElementById('btn-add-item').addEventListener('click', () => {
     if (!playerData) return;
     INV().items.push({ qty:1, name:'', notes:'' });
@@ -11309,6 +11377,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderEncumbrance(); triggerSave();
   });
   document.getElementById('inv-tbody').addEventListener('click', e => {
+    const use = e.target.closest('[data-use-item]');
+    if (use) {
+      const msg = useConsumable(parseInt(use.dataset.useItem));
+      renderInventory(); triggerSave();
+      if (msg) showToast(msg);
+      return;
+    }
+    const at = e.target.closest('[data-attune-item]');
+    if (at) {
+      const msg = toggleAttune(parseInt(at.dataset.attuneItem));
+      renderInventory(); triggerSave();
+      if (msg) showToast(msg);
+      return;
+    }
     const eq = e.target.closest('[data-equip-item]');
     if (eq) {
       const msg = toggleEquip(parseInt(eq.dataset.equipItem));

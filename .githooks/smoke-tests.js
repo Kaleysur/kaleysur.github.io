@@ -84,6 +84,10 @@ function ok(cond, label) {
     extract(J, 'function isEquippable(item)'),
     extract(J, 'function defaultArmorConfig(c)'),
     extract(J, 'function equippedArmorMismatch(c, inv)'),
+    extract(J, 'const ATTUNE_MAX'),
+    extract(J, 'function isAttunable(item)'),
+    extract(J, 'function attunedItems(inv)'),
+    extract(J, 'function migrateAttunement(inv)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -474,6 +478,29 @@ function ok(cond, label) {
      'quantite absente = 1');
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+  /* -- Lien magique : migration des anciens emplacements, plafond de 3 -- */
+  const ATTUNE_MAX_T = new Function(extract(J, 'const ATTUNE_MAX') + '; return ATTUNE_MAX;')();
+  eq(ATTUNE_MAX_T, 3, 'trois liens au maximum');
+  eq(isAttunable({ name:'X', attune:true }), true, 'objet du compendium liable');
+  eq(isAttunable({ name:'X', cat:'magique' }), true, 'objet magique liable');
+  eq(isAttunable({ name:'Rope', cat:'equipement' }), false, 'objet ordinaire non liable');
+  {
+    // L'ancien format (3 champs texte) doit se transferer sans rien perdre
+    const inv = { items:[{ name:'Cloak of Protection', cat:'magique' }],
+                  attunement:[{ name:'Cloak of Protection', active:true },
+                              { name:'Ring of Jumping', active:false },
+                              { name:'', active:false }] };
+    eq(migrateAttunement(inv), 2, 'deux emplacements nommes repris');
+    eq(inv.items[0].attuned, true, 'objet existant : lien conserve');
+    eq(inv.items.length, 2, 'objet absent de l inventaire : cree');
+    eq(inv.items[1].name, 'Ring of Jumping', 'nom repris tel quel');
+    eq('attunement' in inv, false, 'ancienne cle supprimee');
+    eq(migrateAttunement(inv), 0, 'migration idempotente');
+  }
+  eq(migrateAttunement({ items:[] }), 0, 'inventaire sans ancien format');
+  eq(migrateAttunement(null), 0, 'inventaire absent');
+  eq(attunedItems({ items:[{ attuned:true }, {}, { attuned:true }] }).length, 2, 'comptage des liens');
 
   /* -- Objets equipes : l'inventaire pilote la CA -- */
   const ARMOR_PRESETS_T = new Function(extract(J, 'const ARMOR_PRESETS') + '; return ARMOR_PRESETS;')();
