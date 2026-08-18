@@ -70,6 +70,12 @@ function ok(cond, label) {
     extract(J, 'function preparedTotal(c)'),
     extract(J, 'function multiclassPrereqCheck(c, className)'),
     extract(R, 'const CANTRIPS_KNOWN'),
+    extract(R, 'const FEATURE_CHOICES'),
+    extract(J, 'function featureOptions(featureName, className)'),
+    extract(J, 'function featureChoicesAt(className, subclassName, level)'),
+    extract(J, 'function getFeatureChoice(c, featureName)'),
+    extract(J, 'function setFeatureChoice(c, featureName, className, selection)'),
+    extract(J, 'function pendingFeatureChoices(c)'),
     extract(J, 'function cantripsAt(className, level)'),
     extract(J, 'function expertiseAt(className, level)'),
     extract(J, 'function topSlotLevel(slots)'),
@@ -149,10 +155,12 @@ function ok(cond, label) {
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
-          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR } =
+          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,
+          FEATURE_CHOICES } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
       + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
+      + ' FEATURE_CHOICES,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -493,6 +501,90 @@ function ok(cond, label) {
      'quantite absente = 1');
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+
+  /* -- Choix de capacites : style de combat, ordre divin, metamagie... -- */
+  {
+    // Les options du style de combat dependent de la classe
+    eq(featureOptions('Fighting Style', 'Fighter').options.length, 6, 'Guerrier : six styles de combat');
+    eq(featureOptions('Fighting Style', 'Paladin').options.length, 5, 'Paladin : cinq styles');
+    eq(featureOptions('Fighting Style', 'Ranger').options.length, 4, 'Rodeur : quatre styles');
+    ok(!featureOptions('Fighting Style', 'Paladin').options.includes('Archery'),
+       'Archery n est pas propose au Paladin');
+    ok(featureOptions('Fighting Style', 'Ranger').options.includes('Druidic Warrior'),
+       'Druidic Warrior propre au Rodeur');
+    ok(featureOptions('Fighting Style', 'Paladin').options.includes('Blessed Warrior'),
+       'Blessed Warrior propre au Paladin');
+    eq(featureOptions('Metamagic', 'Sorcerer').pick, 2, 'Metamagie : deux options a retenir');
+    eq(featureOptions('Second Wind', 'Fighter'), null, 'une capacite sans choix ne propose rien');
+    eq(featureOptions('Additional Fighting Style', 'Fighter').options.length, 6,
+       'Champion : herite de la liste du Guerrier');
+
+    // Chaque option a une description : sans elle l'infobulle serait vide
+    Object.entries(FEATURE_CHOICES).forEach(([nom, def]) => {
+      const src = def.inherit ? FEATURE_CHOICES[def.inherit] : def;
+      const toutes = src.perClass ? [].concat(...Object.values(src.perClass)) : src.options;
+      [...new Set(toutes)].forEach(o =>
+        ok(!!(src.desc || {})[o], `${nom} / ${o} : description manquante`));
+      ok((def.pick || 1) >= 1, `${nom} : nombre a retenir invalide`);
+    });
+
+    // Niveaux ou le choix se presente
+    eq(featureChoicesAt('Fighter', null, 1).map(f => f.name), ['Fighting Style'], 'Guerrier niveau 1');
+    eq(featureChoicesAt('Paladin', null, 2).map(f => f.name), ['Fighting Style'], 'Paladin niveau 2');
+    eq(featureChoicesAt('Cleric', null, 1).map(f => f.name), ['Divine Order'], 'Clerc niveau 1');
+    eq(featureChoicesAt('Druid', null, 1).map(f => f.name), ['Primal Order'], 'Druide niveau 1');
+    eq(featureChoicesAt('Sorcerer', null, 2).map(f => f.name), ['Metamagic'], 'Ensorceleur niveau 2');
+    eq(featureChoicesAt('Ranger', null, 2).map(f => f.name).sort(), ['Deft Explorer', 'Fighting Style'],
+       'Rodeur niveau 2 : deux capacites a choix');
+    eq(featureChoicesAt('Fighter', 'Champion', 7).map(f => f.name), ['Additional Fighting Style'],
+       'Champion niveau 7 : un second style');
+    eq(featureChoicesAt('Fighter', 'Champion', 3), [], 'aucun choix a ce niveau');
+
+    // Enregistrement : on refuse ce qui n'est pas propose
+    {
+      const c3 = { classes: [{ classe: 'Fighter', sousClasse: 'Champion', niveau: 7 }] };
+      eq(setFeatureChoice(c3, 'Fighting Style', 'Fighter', ['Defense']), ['Defense'], 'choix valide retenu');
+      eq(getFeatureChoice(c3, 'Fighting Style'), ['Defense'], 'choix relu correctement');
+      eq(setFeatureChoice(c3, 'Fighting Style', 'Fighter', ['OptionBidon']), [],
+         'option inexistante refusee');
+      eq(setFeatureChoice(c3, 'Fighting Style', 'Paladin', ['Archery']), [],
+         'option d une autre classe refusee');
+      eq(setFeatureChoice(c3, 'Metamagic', 'Sorcerer', ['Careful', 'Subtle', 'Twinned']),
+         ['Careful', 'Subtle'], 'surplus tronque au nombre autorise');
+      eq(getFeatureChoice({}, 'Fighting Style'), [], 'personnage sans choix enregistre');
+    }
+
+    // Ce qui reste a decider
+    {
+      const g = { classes: [{ classe: 'Fighter', sousClasse: 'Champion', niveau: 7 }] };
+      eq(pendingFeatureChoices(g).map(x => x.name), ['Fighting Style', 'Additional Fighting Style'],
+         'Guerrier 7 neuf : deux choix en attente');
+      setFeatureChoice(g, 'Fighting Style', 'Fighter', ['Defense']);
+      eq(pendingFeatureChoices(g).map(x => x.name), ['Additional Fighting Style'],
+         'un choix fait, un restant');
+      const s3 = { classes: [{ classe: 'Sorcerer', sousClasse: '', niveau: 3 }] };
+      setFeatureChoice(s3, 'Metamagic', 'Sorcerer', ['Careful']);
+      eq(pendingFeatureChoices(s3)[0], { name: 'Metamagic', classe: 'Sorcerer', niveau: 2, pick: 2, fait: 1 },
+         'Metamagie a moitie choisie : signalee');
+    }
+
+    // Le monteur de niveau expose bien les choix du niveau vise
+    {
+      const f2 = { for: 14, dex: 14, con: 14, int: 14, sag: 14, cha: 14, pvMax: 20, nbDeVie: 1,
+                   classes: [{ classe: 'Fighter', sousClasse: '', niveau: 1 }] };
+      eq(planLevelUp(f2, 'Fighter').featureChoices, [], 'niveau 2 du Guerrier : aucun choix');
+      const p2 = { for: 14, dex: 14, con: 14, int: 14, sag: 14, cha: 14, pvMax: 20, nbDeVie: 1,
+                   classes: [{ classe: 'Paladin', sousClasse: '', niveau: 1 }] };
+      eq(planLevelUp(p2, 'Paladin').featureChoices.map(f => f.name), ['Fighting Style'],
+         'niveau 2 du Paladin : style de combat propose');
+      // Et applyLevelUp l'enregistre
+      const r2 = applyLevelUp(p2, planLevelUp(p2, 'Paladin'),
+                              { featureChoices: { 'Fighting Style': ['Dueling'] } });
+      eq(getFeatureChoice(p2, 'Fighting Style'), ['Dueling'], 'choix enregistre a la montee');
+      ok(r2.log.some(x => /Fighting Style/.test(x)), 'choix note dans le journal');
+    }
+  }
 
   /* -- Gains que le joueur doit choisir : sorts mineurs, Expertise, emplacements -- */
   {
