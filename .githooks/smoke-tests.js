@@ -78,6 +78,12 @@ function ok(cond, label) {
     extract(J, 'function carryCapacity(c)'),
     extract(J, 'function coinWeight(currency)'),
     extract(J, 'function inventoryWeight(inv)'),
+    extract(J, 'const ARMOR_PRESETS'),
+    extract(J, 'function isShieldItem(item)'),
+    extract(J, 'function armorFromItem(item)'),
+    extract(J, 'function isEquippable(item)'),
+    extract(J, 'function defaultArmorConfig(c)'),
+    extract(J, 'function equippedArmorMismatch(c, inv)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -124,10 +130,10 @@ function ok(cond, label) {
   // que d'extraire bloc par bloc (les accolades dans les descriptions piègent le scan).
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
-          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ } =
+          STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
-      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ,'
+      + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -468,6 +474,47 @@ function ok(cond, label) {
      'quantite absente = 1');
   eq(inventoryWeight({ items:[], currency:{ gp:100 } }).total, 2, 'les pieces comptent dans la charge');
   eq(inventoryWeight({ items:[], currency:{} }), { total:0, sansPoids:0, coins:0 }, 'inventaire vide');
+
+  /* -- Objets equipes : l'inventaire pilote la CA -- */
+  const ARMOR_PRESETS_T = new Function(extract(J, 'const ARMOR_PRESETS') + '; return ARMOR_PRESETS;')();
+  eq(isShieldItem({ name:'Shield' }), true, 'bouclier reconnu');
+  eq(isShieldItem({ name:'Shield, +1' }), true, 'bouclier magique reconnu');
+  eq(isShieldItem({ name:'Bouclier' }), true, 'bouclier en francais');
+  eq(isShieldItem({ name:'Shielded Boots' }), false, 'pas de faux positif sur un mot compose');
+  eq(isShieldItem({ name:'Longsword' }), false, 'une arme n est pas un bouclier');
+  eq(isShieldItem({ name:'Pavois', shield:true }), true, 'donnee du compendium prioritaire');
+  // Resolution d'une armure : compendium, puis tables connues, puis rien
+  eq(armorFromItem({ name:'Elven Chain', armorType:'medium', ac:13 }),
+     { mode:'medium', baseAC:13, armorName:'Elven Chain' }, 'armure du compendium');
+  eq(armorFromItem({ name:'Chain Mail' }),
+     { mode:'heavy', baseAC:16, armorName:'Chain Mail' }, 'armure connue par son nom');
+  eq(armorFromItem({ name:'Studded Leather Armor' }),
+     { mode:'light', baseAC:12, armorName:'Studded Leather' }, 'armure reconnue par contenu');
+  eq(armorFromItem({ name:'Shield' }), null, 'un bouclier n est pas une armure');
+  eq(armorFromItem({ name:'Rope' }), null, 'un objet quelconque n est pas une armure');
+  // Toute armure de depart doit se resoudre, sinon l'equipement ne ferait rien
+  Object.keys(STARTING_ARMOR).forEach(n =>
+    ok(!!armorFromItem({ name:n }), `${n} : armure de depart non resolue`));
+  // Tous les presets de la fiche aussi
+  ['light','medium','heavy'].forEach(m => ARMOR_PRESETS_T[m].forEach(p2 =>
+    eq(armorFromItem({ name:p2.name })?.mode, m, `${p2.name} : type d armure attendu ${m}`)));
+  // Retrait : on rend a la classe sa defense sans armure
+  eq(defaultArmorConfig({ classes:[{ classe:'Barbarian', niveau:3 }] }).mode, 'unarmoredBarb',
+     'barbare : defense sans armure');
+  eq(defaultArmorConfig({ classes:[{ classe:'Monk', niveau:3 }] }).mode, 'unarmoredMonk',
+     'moine : defense sans armure');
+  eq(defaultArmorConfig({ classes:[{ classe:'Fighter', niveau:3 }] }).mode, 'unarmored',
+     'guerrier : simplement sans armure');
+  // Incoherence entre l'armure configuree et ce qui est reellement porte
+  eq(equippedArmorMismatch({ armorConfig:{ mode:'heavy', armorName:'Plate' } }, { items:[] }), 'Plate',
+     'armure portee sans objet correspondant : signalee');
+  eq(equippedArmorMismatch({ armorConfig:{ mode:'heavy', armorName:'Chain Mail' } },
+     { items:[{ name:'Chain Mail', equipped:true }] }), null, 'armure equipee : rien a signaler');
+  eq(equippedArmorMismatch({ armorConfig:{ mode:'unarmored' } }, { items:[] }), null,
+     'sans armure : rien a signaler');
+  eq(isEquippable({ name:'Rope', cat:'equipement' }), false, 'une corde ne s equipe pas');
+  ok(isEquippable({ name:'Longsword', cat:'arme' }), 'une arme s equipe');
+  ok(isEquippable({ name:'Chain Mail' }), 'une armure s equipe');
 
   /* ── Sorts à choisir après création (startingSpellHint) ── */
   eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');

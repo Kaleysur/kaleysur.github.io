@@ -412,7 +412,15 @@
     const gp = _costToGp(rawCost);
     if (gp != null) entry.cost = gp;
     if (dmgDice) { entry.dmg = dmgDice; if (dmgType) entry.dmgType = dmgType; }
-    if (acBase != null) entry.ac = acBase;
+    if (acBase != null) {
+      entry.ac = acBase;
+      // Le type d'armure se deduit exactement du traitement de la DEX :
+      // aucune DEX = lourde, DEX plafonnee a +2 = intermediaire, sinon legere.
+      const dexAdd = arm.ac_add_dexmod ?? (typeof item.armor_class === 'object' ? item.armor_class.dex_bonus : item.armor_dex_bonus) ?? false;
+      const dexCap = arm.ac_cap_dexmod ?? (typeof item.armor_class === 'object' ? item.armor_class.max_bonus : item.armor_max_dex) ?? null;
+      entry.armorType = !dexAdd ? 'heavy' : (dexCap ? 'medium' : 'light');
+    }
+    if (/(^|[^a-z])shield([^a-z]|$)/.test((item.name || '').toLowerCase())) { entry.shield = true; delete entry.armorType; }
     if (item.rarity) entry.rarity = item.rarity;
     if (item.requires_attunement === true) entry.attune = true;
     INV().items.push(entry);

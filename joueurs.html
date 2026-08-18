@@ -534,6 +534,13 @@
     .inv-enc-toggle { display:flex; align-items:center; gap:0.4rem; font-size:0.72rem; color:#7a7a82; cursor:pointer; user-select:none; margin-bottom:0.7rem; }
     .inv-enc-toggle input { accent-color:var(--gold-dark); width:13px; height:13px; cursor:pointer; }
     .inv-enc-toggle-hint { color:#55555c; font-size:0.68rem; }
+    /* Objets equipes */
+    .inv-equip-btn { background:none; border:1px solid var(--j-border-col,#2a2a3a); color:#55555c; cursor:pointer; font-size:0.72rem; line-height:1; padding:0.18rem 0.32rem; border-radius:3px; margin-right:0.25rem; transition:all 0.12s; }
+    .inv-equip-btn:hover { border-color:var(--gold-dark,#8a6e1a); color:var(--gold,#c9a227); }
+    .inv-equip-btn.on { border-color:var(--gold-dark,#8a6e1a); background:rgba(201,169,110,0.14); color:var(--gold,#c9a227); }
+    .inv-row-equipped td { background:rgba(201,169,110,0.05); }
+    .inv-row-equipped [data-ik="name"] { color:var(--gold,#c9a227); }
+    .wa-mismatch { font-size:0.7rem; color:#d9a441; line-height:1.4; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid var(--j-border-col,#2a2a3a); }
     /* Sur petit ecran la colonne Lb ecrasait le nom de l'objet (37 px). Le poids
        se saisit une fois a l'import ; le total reste lisible dans la barre. */
     @media (max-width: 700px) {
@@ -8260,6 +8267,95 @@ function calcAndSetAC() {
   if (heroCA) heroCA.textContent = (base + (typeof getMod === 'function' ? (getMod('ac')||0) : 0));
 }
 
+/* ── Objets equipes : l'inventaire pilote la CA ──
+   Jusqu'ici « Worn Armor » etait un systeme parallele : on pouvait porter une
+   cotte de mailles sans la posseder. Equiper une armure depuis l'inventaire
+   ecrit desormais c.armorConfig, et la CA se recalcule seule. */
+
+/* Un objet est-il un bouclier ? (donnee du compendium, ou le nom) */
+function isShieldItem(item) {
+  return !!item && (item.shield === true || /(^|[^a-z])(shield|bouclier)([^a-z]|$)/.test((item.name || '').toLowerCase()));
+}
+
+/* Resout un objet d'inventaire en configuration d'armure, ou null si ce n'en
+   est pas une. Trois sources, de la plus fiable a la plus approximative :
+   les donnees du compendium, les tables d'armures connues, puis rien. */
+function armorFromItem(item) {
+  if (!item || isShieldItem(item)) return null;
+  const nom = (item.name || '').trim();
+  if (item.armorType && item.ac) {
+    return { mode: item.armorType, baseAC: parseInt(item.ac), armorName: nom };
+  }
+  // Armures de depart (« Leather Armor », « Chain Mail »…)
+  if (typeof STARTING_ARMOR !== 'undefined' && STARTING_ARMOR[nom]) {
+    const a = STARTING_ARMOR[nom];
+    return { mode: a.mode, baseAC: a.baseAC, armorName: a.armorName || nom };
+  }
+  // Presets de la fiche, par nom exact ou contenu (« Leather » dans « Leather Armor »)
+  for (const mode of ['light', 'medium', 'heavy']) {
+    const p = ARMOR_PRESETS[mode].find(x => x.name === nom || nom.includes(x.name));
+    if (p) return { mode, baseAC: p.baseAC, armorName: p.name };
+  }
+  return null;
+}
+
+/* Un objet est-il equipable ? (sinon on n'affiche pas le bouton) */
+function isEquippable(item) {
+  return !!armorFromItem(item) || isShieldItem(item)
+      || item?.cat === 'arme' || item?.cat === 'armure' || !!item?.dmg;
+}
+
+/* Equipe / retire un objet. Une seule armure a la fois ; le bouclier est
+   independant. Renvoie un message pour le toast, ou null si rien n'a change. */
+function toggleEquip(idx) {
+  const items = INV().items || [];
+  const it = items[idx];
+  if (!it) return null;
+  const c = C();
+  const armure  = armorFromItem(it);
+  const bouclier = isShieldItem(it);
+
+  if (it.equipped) {
+    it.equipped = false;
+    if (armure)  { c.armorConfig = defaultArmorConfig(c); }
+    if (bouclier) { c.armorConfig = c.armorConfig || defaultArmorConfig(c); c.armorConfig.shield = false; }
+    return `${it.name || 'Objet'} retire`;
+  }
+
+  it.equipped = true;
+  if (armure) {
+    // Une seule armure portee : on retire l'autre sans rien dire d'autre
+    items.forEach((o, i) => { if (i !== idx && o.equipped && armorFromItem(o)) o.equipped = false; });
+    const shieldOn = !!c.armorConfig?.shield;
+    c.armorConfig = { mode: armure.mode, baseAC: armure.baseAC, armorName: armure.armorName,
+                      shield: shieldOn, otherBonus: c.armorConfig?.otherBonus || 0 };
+  }
+  if (bouclier) {
+    c.armorConfig = c.armorConfig || defaultArmorConfig(c);
+    c.armorConfig.shield = true;
+  }
+  return `${it.name || 'Objet'} equipe`;
+}
+
+/* Configuration par defaut quand plus rien n'est porte : on rend a la classe
+   sa defense sans armure plutot que de retomber betement sur 10 + DEX. */
+function defaultArmorConfig(c) {
+  const classes = getClasses(c).map(x => x.classe);
+  const mode = classes.includes('Barbarian') ? 'unarmoredBarb'
+             : classes.includes('Monk')      ? 'unarmoredMonk'
+             : 'unarmored';
+  return { mode, baseAC: 10, armorName: '', shield: !!c.armorConfig?.shield, otherBonus: c.armorConfig?.otherBonus || 0 };
+}
+
+/* L'armure configuree correspond-elle a un objet reellement equipe ?
+   Sert a signaler l'incoherence plutot qu'a l'empecher. */
+function equippedArmorMismatch(c, inv) {
+  const cfg = c.armorConfig || {};
+  if (!['light','medium','heavy'].includes(cfg.mode)) return null;
+  const porte = (inv?.items || []).some(it => it.equipped && armorFromItem(it));
+  return porte ? null : (cfg.armorName || 'Cette armure');
+}
+
 function renderWornArmor() {
   const container = document.getElementById('worn-armor-card-container');
   if (!container || !playerData) return;
@@ -8319,6 +8415,8 @@ function renderWornArmor() {
       </label>
     </div>
     <div class="wa-formula" id="wa-formula">—</div>
+    ${(() => { const m = equippedArmorMismatch(C(), INV());
+      return m ? `<div class="wa-mismatch">⚠ ${esc(m)} n'est équipée depuis aucun objet de ton inventaire.</div>` : ''; })()}
   </div>`;
 
   calcAndSetAC(); // compute and fill badge + formula
@@ -8443,13 +8541,16 @@ function renderInventory() {
     if (search && !item.name?.toLowerCase().includes(search) && !item.notes?.toLowerCase().includes(search)) return;
     const selOpts = CAT_OPTIONS.map(o => `<option value="${o.value}"${item.cat===o.value?' selected':''}>${o.label}</option>`).join('');
     const tr = document.createElement('tr');
+    if (item.equipped) tr.className = 'inv-row-equipped';
     tr.innerHTML = `
       <td><input class="inv-inp" style="width:50px;text-align:center;" data-item="${i}" data-ik="qty"   type="number" value="${item.qty||1}" min="0"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Nom de l'objet"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="notes" value="${esc(item.notes||'')}" placeholder="Description"></td>
       <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Poids unitaire (lb)"></td>
       <td><select class="inv-inp" style="padding:0.18rem 0.25rem;font-size:0.74rem;" data-item="${i}" data-ik="cat">${selOpts}</select></td>
-      <td><button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
+      <td style="white-space:nowrap;">${isEquippable(item)
+        ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Retirer' : 'Équiper'}" aria-label="${item.equipped ? 'Retirer' : 'Équiper'} ${esc(item.name||'')}">${item.equipped ? '🛡' : '○'}</button>`
+        : ''}<button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -11208,6 +11309,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderEncumbrance(); triggerSave();
   });
   document.getElementById('inv-tbody').addEventListener('click', e => {
+    const eq = e.target.closest('[data-equip-item]');
+    if (eq) {
+      const msg = toggleEquip(parseInt(eq.dataset.equipItem));
+      renderInventory(); renderWornArmor(); calcAndSetAC(); renderHero(); triggerSave();
+      if (msg) showToast(msg);
+      return;
+    }
     const btn = e.target.closest('[data-del-item]');
     if (!btn) return;
     INV().items.splice(parseInt(btn.dataset.delItem), 1);
