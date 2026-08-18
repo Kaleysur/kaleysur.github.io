@@ -3064,7 +3064,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       </div>
       <!-- Sélecteur de personnage -->
       <div class="char-selector" id="char-selector">
-        <button class="char-selector-btn" id="char-selector-btn" title="Changer de personnage">
+        <button class="char-selector-btn" id="char-selector-btn" title="Switch character">
           <span class="char-selector-avatar" id="char-selector-avatar">⚔</span>
           <span class="char-selector-name" id="char-selector-name">Character</span>
           <span class="char-selector-arrow">▾</span>
@@ -3476,10 +3476,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div class="exhaustion-row">
             <span class="exhaustion-label">Exhaustion</span>
             <div class="exhaustion-pips" id="exhaustion-pips">
-              <div class="exhaust-pip" data-ex="1" role="button" tabindex="0" title="Level 1 — −1 to all d20 Tests" aria-label="Exhaustion 1"></div>
-              <div class="exhaust-pip" data-ex="2" role="button" tabindex="0" title="Level 2 — −2 to all d20 Tests" aria-label="Exhaustion 2"></div>
-              <div class="exhaust-pip" data-ex="3" role="button" tabindex="0" title="Level 3 — −3 to all d20 Tests" aria-label="Exhaustion 3"></div>
-              <div class="exhaust-pip" data-ex="4" role="button" tabindex="0" title="Level 4 — −4 to all d20 Tests" aria-label="Exhaustion 4"></div>
+              <div class="exhaust-pip" data-ex="1" role="button" tabindex="0" title="Level 1 — −2 to all d20 Tests · Speed −5 ft" aria-label="Exhaustion 1"></div>
+              <div class="exhaust-pip" data-ex="2" role="button" tabindex="0" title="Level 2 — −4 to all d20 Tests · Speed −10 ft" aria-label="Exhaustion 2"></div>
+              <div class="exhaust-pip" data-ex="3" role="button" tabindex="0" title="Level 3 — −6 to all d20 Tests · Speed −15 ft" aria-label="Exhaustion 3"></div>
+              <div class="exhaust-pip" data-ex="4" role="button" tabindex="0" title="Level 4 — −8 to all d20 Tests · Speed −20 ft" aria-label="Exhaustion 4"></div>
               <div class="exhaust-pip" data-ex="5" role="button" tabindex="0" title="Level 5 — −5 + Speed halved" aria-label="Exhaustion 5"></div>
               <div class="exhaust-pip" data-ex="6" role="button" tabindex="0" title="Level 6 — Death" aria-label="Exhaustion 6"></div>
             </div>
@@ -5608,6 +5608,8 @@ function applyHpChange(delta) {
   } else {
     c.pvActuel = Math.max(0, Math.min(max, before + delta));
   }
+  // Regagner le moindre PV a 0 met fin aux jets de mort (PHB)
+  if (before <= 0 && c.pvActuel > 0) { c.mortSucces = 0; c.mortEchecs = 0; }
   pushHpLog(delta, c.pvActuel, max);
   updateHpBar();
   renderHpLog();
@@ -5785,7 +5787,7 @@ function renderCharSelector() {
         <div class="char-sel-item-sub">${classStr}</div>
       </div>
       ${isActive ? '<span style="color:var(--gold);font-size:0.7rem;">✦</span>' : ''}
-      <button class="char-sel-del" data-del-char="${id}" title="Delete this character" aria-label="Delete ${esc(c.characterName || 'ce personnage')}">✕</button>
+      <button class="char-sel-del" data-del-char="${id}" title="Delete this character" aria-label="Delete ${esc(c.characterName || 'this character')}">✕</button>
     `;
     item.querySelector('[data-del-char]').addEventListener('click', e => {
       e.stopPropagation();
@@ -7178,9 +7180,12 @@ function renderConditions() {
     const isConc = active.includes('Concentrating');
     concBadge.classList.toggle('visible', isConc);
     if (isConc) {
-      const concSpell = (C().spells || []).find(s => s.conc);
+      // c.concentration = le sort REELLEMENT maintenu. s.conc n'est que la
+      // propriete « ce sort demande de la concentration » : la premiere trouvee
+      // n'a aucune raison d'etre celle en cours.
+      const actif = C().concentration;
       const span = concBadge.querySelector('span');
-      if (span) span.textContent = concSpell ? `Concentration — ${concSpell.name}` : 'Concentrating — breaking concentration ends this spell';
+      if (span) span.textContent = actif ? `Concentration — ${actif}` : 'Concentrating — breaking concentration ends this spell';
     }
   }
 }
@@ -7194,8 +7199,9 @@ function renderExhaustion() {
   if (!desc) return;
   if (level === 0) { desc.textContent = ''; return; }
   if (level >= 6)  { desc.textContent = 'Death'; return; }
-  const penalty = '−' + level + ' to all d20 Tests' + (level >= 5 ? ' · Speed halved' : '');
-  desc.textContent = 'Level ' + level + ' — ' + penalty;
+  // PHB 2024 : chaque niveau retire 2 aux tests de d20 et 5 ft de vitesse.
+  // L'ancienne echelle 2014 (−1 par niveau puis vitesse divisee) ne s'applique plus.
+  desc.textContent = 'Level ' + level + ' — −' + (level * 2) + ' to all d20 Tests · Speed −' + (level * 5) + ' ft';
 }
 
 /* ── Repos ── */
@@ -8277,48 +8283,50 @@ function renderRationTracker() {
   const el = document.getElementById('ration-tracker');
   if (!el) return;
   const r = getRations();
-  const conMod = Math.floor(((C().scores?.CON ?? 10) - 10) / 2);
+  // c.con, pas c.scores.CON : ce chemin n'existe pas dans le modele, le
+  // modificateur valait donc toujours 0 et le seuil restait fige a 3 jours.
+  const conMod = Math.floor(((parseInt(C().con) || 10) - 10) / 2);
   // D&D 5e: exhaustion after (3 + CON mod) days without food (min 1), 1 day without water
   const foodThresh = Math.max(1, 3 + conMod);
 
   function warnFood() {
     if (r.food > 0)           return { cls:'ok',  txt:`${r.food} ration${r.food > 1 ? 's' : ''}` };
     if (r.joursPriveFood < foodThresh) return { cls:'low', txt:`Deprived D${r.joursPriveFood}/${foodThresh}` };
-    return { cls:'out', txt:`Exhaustion ! J${r.joursPriveFood}` };
+    return { cls:'out', txt:`Exhaustion! D${r.joursPriveFood}` };
   }
   function warnWater() {
-    if (r.water > 0)          return { cls:'ok',  txt:`${r.water} jour${r.water > 1 ? 's' : ''}` };
+    if (r.water > 0)          return { cls:'ok',  txt:`${r.water} day${r.water > 1 ? 's' : ''}` };
     if (r.joursPriveWater < 1) return { cls:'low', txt:'Deprived D0/1' };
-    return { cls:'out', txt:`Exhaustion ! J${r.joursPriveWater}` };
+    return { cls:'out', txt:`Exhaustion! D${r.joursPriveWater}` };
   }
   const wf = warnFood(); const ww = warnWater();
 
   el.innerHTML = `
     <div class="ration-row">
       <span class="ration-icon">🍖</span>
-      <span class="ration-label">Rations alimentaires</span>
+      <span class="ration-label">Food rations</span>
       <div class="ration-counter">
         <button class="ration-btn" data-ration-adj="food" data-d="-1" title="Remove a ration">−</button>
         <input type="number" class="ration-val" id="ration-food-val" value="${r.food}" min="0" max="99">
         <button class="ration-btn" data-ration-adj="food" data-d="1" title="Add a ration">+</button>
       </div>
       <span class="ration-warn ${wf.cls}">${wf.txt}</span>
-      ${r.joursPriveFood > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveFood}j sans nourriture</span>` : ''}
+      ${r.joursPriveFood > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveFood}d without food</span>` : ''}
     </div>
     <div class="ration-row">
       <span class="ration-icon">💧</span>
-      <span class="ration-label">Eau (jours)</span>
+      <span class="ration-label">Water (days)</span>
       <div class="ration-counter">
-        <button class="ration-btn" data-ration-adj="water" data-d="-1" title="Remove un jour d'eau">−</button>
+        <button class="ration-btn" data-ration-adj="water" data-d="-1" title="Remove a day of water">−</button>
         <input type="number" class="ration-val" id="ration-water-val" value="${r.water}" min="0" max="99">
         <button class="ration-btn" data-ration-adj="water" data-d="1" title="Add a day of water">+</button>
       </div>
       <span class="ration-warn ${ww.cls}">${ww.txt}</span>
-      ${r.joursPriveWater > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveWater}j sans eau</span>` : ''}
+      ${r.joursPriveWater > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveWater}d without water</span>` : ''}
     </div>
     <div class="ration-actions">
       <button class="btn btn-sm ration-day-btn" id="btn-ration-day" title="Consume 1 ration and 1 day of water. Updates deprivation if lacking.">🌙 End of day</button>
-      <button class="btn btn-sm" id="btn-ration-rest" title="Reset deprivation to zero (long rest with food and water)">☀ Repos complet</button>
+      <button class="btn btn-sm" id="btn-ration-rest" title="Reset deprivation to zero (long rest with food and water)">☀ Full Rest</button>
     </div>`;
 
   // +/- buttons
@@ -9085,7 +9093,7 @@ function renderAttunement() {
     lbl.className = 'attune-count' + (lies.length >= ATTUNE_MAX ? ' full' : '');
   }
   box.innerHTML = lies.length
-    ? lies.map(it => `<div class="attune-item">⟡ ${esc(it.name || 'Sans nom')}</div>`).join('')
+    ? lies.map(it => `<div class="attune-item">⟡ ${esc(it.name || 'Unnamed')}</div>`).join('')
     : `<div class="attune-empty">${dispo
         ? 'No active attunement — use ⟡ on a magic item in your inventory.'
         : 'No magic items in your inventory.'}</div>`;
@@ -9294,7 +9302,7 @@ function renderEncumbrance() {
     + `<div class="inv-enc-track"><div class="inv-enc-bar" style="width:${pct}%"></div></div>`
     + `<div class="inv-enc-detail">STR ${parseInt(c.for)||10} x 15`
     + (coins ? ` &middot; ${coins} lb de pieces` : '')
-    + (sansPoids ? ` &middot; <span class="inv-enc-missing">${sansPoids} objet${sansPoids>1?'s':''} sans poids renseigne</span>` : '')
+    + (sansPoids ? ` &middot; <span class="inv-enc-missing">${sansPoids} objet${sansPoids>1?'s':''} with no weight set</span>` : '')
     + `</div>`;
 }
 
@@ -12222,7 +12230,7 @@ ${car} characters of notes.
   document.getElementById('btn-reset-char').addEventListener('click', async () => {
     const slot = activeSlot();
     if (!slot) return;
-    if (!confirm('Reset "' + (slot.name || 'ce personnage') + '"? This cannot be undone.')) return;
+    if (!confirm('Reset "' + (slot.name || 'this character') + '"? This cannot be undone.')) return;
     slot.character = emptyCharacter();
     slot.inventory = { items:[], currency:{pp:0,gp:0,ep:0,sp:0,cp:0} };
     slot.notes = emptyNotesPages();
@@ -14114,13 +14122,13 @@ document.addEventListener('keydown', e => {
     <!-- ── Modal Nouveau Personnage ── -->
     <div class="new-char-modal-overlay" id="new-char-modal-overlay">
       <div class="new-char-modal wiz-modal">
-        <h3>✦ Nouveau personnage</h3>
+        <h3>✦ New character</h3>
         <div class="wiz-steps" id="wiz-steps"></div>
 
         <!-- 1 · Identité -->
         <div class="wiz-step" data-step="1">
           <div class="auth-field">
-            <label class="auth-label" for="new-char-name">Nom du personnage</label>
+            <label class="auth-label" for="new-char-name">Character name</label>
             <input type="text" class="auth-input" id="new-char-name" placeholder="Hero name…" maxlength="40" autocomplete="off">
           </div>
           <div class="field-label" style="margin:0.5rem 0 0.4rem;">Avatar</div>
@@ -14453,7 +14461,7 @@ function renderFamiliars() {
         <hr class="fam-divider">
         <div class="fam-props">
           <div style="display:flex;gap:0.4rem;align-items:center;margin-bottom:0.25rem;">
-            <span style="flex-shrink:0;">Jets de sauvegarde :</span>
+            <span style="flex-shrink:0;">Saving throws:</span>
             <input class="fam-props-input" type="text" placeholder="ex: Dex +4, Con +2"
               data-fi="${fi}" data-fk="savesNote" value="${esc(fam.savesNote)}">
           </div>
