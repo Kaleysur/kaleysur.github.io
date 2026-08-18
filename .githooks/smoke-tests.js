@@ -533,7 +533,7 @@ function ok(cond, label) {
     // Le journal annonce aussi les gains a choisir soi-meme
     const b1 = { for:14, dex:14, con:14, int:14, sag:14, cha:14, pvMax:20, nbDeVie:3,
                  classes:[{ classe:'Bard', sousClasse:'College of Lore', niveau:3 }] };
-    ok(applyLevelUp(b1, planLevelUp(b1, 'Bard'), {}).log.some(x => /sort mineur/.test(x)),
+    ok(applyLevelUp(b1, planLevelUp(b1, 'Bard'), {}).log.some(x => /cantrip/.test(x)),
        'sort mineur gagne : annonce');
   }
 
@@ -726,15 +726,15 @@ function ok(cond, label) {
   /* ── Sorts à choisir après création (startingSpellHint) ── */
   eq(startingSpellHint('Fighter'), null, 'Guerrier : aucun sort à choisir');
   eq(startingSpellHint('Rogue'),   null, 'Roublard : aucun sort à choisir');
-  ok(/3<\/strong> sorts mineurs/.test(startingSpellHint('Wizard')), 'Magicien : 3 sorts mineurs');
-  ok(/6<\/strong> sorts de niveau 1 pour ton grimoire/.test(startingSpellHint('Wizard')), 'Magicien : grimoire de 6');
-  ok(/4<\/strong> préparés/.test(startingSpellHint('Wizard')), 'Magicien : 4 préparés');
-  ok(/3<\/strong> sorts mineurs/.test(startingSpellHint('Cleric')), 'Clerc : 3 sorts mineurs');
-  ok(!/grimoire/.test(startingSpellHint('Cleric')), 'Clerc : pas de grimoire');
+  ok(/3<\/strong> cantrips/.test(startingSpellHint('Wizard')), 'Magicien : 3 sorts mineurs');
+  ok(/6<\/strong> level-1 spells for your spellbook/.test(startingSpellHint('Wizard')), 'Magicien : grimoire de 6');
+  ok(/4<\/strong> prepared/.test(startingSpellHint('Wizard')), 'Magicien : 4 préparés');
+  ok(/3<\/strong> cantrips/.test(startingSpellHint('Cleric')), 'Clerc : 3 sorts mineurs');
+  ok(!/spellbook/.test(startingSpellHint('Cleric')), 'Clerc : pas de grimoire');
   // Demi-lanceurs 2024 : pas de sorts mineurs, mais des sorts préparés dès le niveau 1
-  ok(!/mineur/.test(startingSpellHint('Paladin')), 'Paladin : aucun sort mineur');
-  ok(/2<\/strong> sorts de niveau 1 à préparer/.test(startingSpellHint('Paladin')), 'Paladin : 2 sorts préparés');
-  ok(/2<\/strong> sorts de niveau 1 à préparer/.test(startingSpellHint('Ranger')), 'Rôdeur : lanceur dès le niveau 1 (2024)');
+  ok(!/cantrip/.test(startingSpellHint('Paladin')), 'Paladin : aucun sort mineur');
+  ok(/2<\/strong> level-1 spells to prepare/.test(startingSpellHint('Paladin')), 'Paladin : 2 sorts préparés');
+  ok(/2<\/strong> level-1 spells to prepare/.test(startingSpellHint('Ranger')), 'Rôdeur : lanceur dès le niveau 1 (2024)');
   // Tout lanceur doit déclarer ses sorts mineurs, sinon la fiche sort sans indication
   Object.keys(PREPARED_SPELLS).forEach(cls => {
     ok(!!STARTING_SPELLS[cls], `${cls} : sorts de départ non déclarés`);

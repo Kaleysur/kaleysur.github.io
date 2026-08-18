@@ -3049,7 +3049,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <!-- ══ VB: Sticky top bar (brand + tabs + actions) ══ -->
     <div class="dash-header vb-topbar">
       <!-- Sidebar toggle -->
-      <button id="btn-sidebar-toggle" class="btn btn-sm" title="Afficher / masquer la barre latérale" style="font-size:1rem;padding:0 0.5rem;flex-shrink:0;">☰</button>
+      <button id="btn-sidebar-toggle" class="btn btn-sm" title="Show / hide the sidebar" style="font-size:1rem;padding:0 0.5rem;flex-shrink:0;">☰</button>
       <!-- Brand -->
       <div class="vb-brand">
         <span class="vb-brand-sigil">✦</span>
@@ -3081,7 +3081,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="dash-avatar" id="dash-avatar">⚔</div>
         <div>
           <div class="dash-name" id="dash-name">—</div>
-          <div class="dash-char-info" id="dash-info">Aucun personnage</div>
+          <div class="dash-char-info" id="dash-info">No character</div>
         </div>
       </div>
       <!-- Actions -->
@@ -3091,8 +3091,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="inspiration-btn" id="btn-inspiration" title="Inspiration (avantage sur un jet)">✦</button>
         <button class="btn btn-sm btn-gold" id="btn-new-char" title="New character" onclick="openNewCharModal()" style="font-size:1rem;padding:0 0.55rem;line-height:1;">+</button>
         <button class="btn btn-sm" id="btn-layout-edit" title="Rearrange sections">⠿</button>
-        <button class="btn btn-sm" id="btn-undo" title="Annuler (Ctrl+Z)" disabled style="opacity:0.4;">↩</button>
-        <button class="btn btn-sm" id="btn-field-lock" title="Verrouiller les champs (mode affichage)">✏</button>
+        <button class="btn btn-sm" id="btn-undo" title="Cancel (Ctrl+Z)" disabled style="opacity:0.4;">↩</button>
+        <button class="btn btn-sm" id="btn-field-lock" title="Lock fields (view mode)">✏</button>
         <button class="btn btn-sm" id="dice-tray-btn" title="Dice Roller">⚄</button>
         <button class="btn btn-sm" id="btn-install-app" title="Installer l'application" style="display:none;">📲</button>
         <button class="btn btn-sm btn-danger" id="btn-logout">Log out</button>
@@ -3115,12 +3115,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         Bonus : <input type="number" id="dice-tray-mod" value="0" placeholder="0">
       </div>
       <div class="dice-roll-mode">
-        <button class="drm-btn adv"  id="drm-adv"  title="Avantage — 2d20 garder le plus haut">ADV</button>
+        <button class="drm-btn adv"  id="drm-adv"  title="Advantage — 2d20 keep highest">ADV</button>
         <button class="drm-btn norm active" id="drm-norm" title="Normal">NORM</button>
         <button class="drm-btn dis"  id="drm-dis"  title="Disadvantage — 2d20 keep lowest">DIS</button>
       </div>
       <div class="dice-tray-title" style="margin-top:0.4rem;">Historique</div>
-      <div id="roll-history"><div class="rh-empty">Aucun jet pour l'instant.</div></div>
+      <div id="roll-history"><div class="rh-empty">No rolls yet.</div></div>
     </div>
 
     <!-- char-cards gardé caché (rendu mais non affiché, sert au JS existant) -->
@@ -3268,7 +3268,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <div id="conc-banner" style="display:none;margin-top:8px;padding:5px 8px;background:rgba(160,112,224,0.12);border:1px solid rgba(160,112,224,0.35);border-radius:4px;display:none;align-items:center;gap:6px;">
               <span style="color:#c090f8;font-size:0.78rem;flex-shrink:0;">◉ Conc.</span>
               <span id="conc-spell-name" style="color:#e8e0d0;font-size:0.78rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</span>
-              <button id="conc-break-btn" title="Briser la concentration" style="background:none;border:1px solid rgba(160,112,224,0.4);border-radius:3px;color:#a070e0;cursor:pointer;font-size:0.68rem;padding:1px 5px;flex-shrink:0;line-height:1.4;">✕ Briser</button>
+              <button id="conc-break-btn" title="Break concentration" style="background:none;border:1px solid rgba(160,112,224,0.4);border-radius:3px;color:#a070e0;cursor:pointer;font-size:0.68rem;padding:1px 5px;flex-shrink:0;line-height:1.4;">✕ Briser</button>
             </div>
             <div class="vb-vitals-sep"></div>
 
@@ -3290,7 +3290,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
                   <button id="death-save-roll-btn" title="Lancer un jet de mort (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">🎲</button>
                 </div>
                 <!-- Pips cliquables — data-idx / data-type gérés par renderCombat -->
-                <div class="vb-death-pips" id="vb-hero-death-pips" style="cursor:pointer;" title="Cliquer pour basculer"></div>
+                <div class="vb-death-pips" id="vb-hero-death-pips" style="cursor:pointer;" title="Click to toggle"></div>
                 <!-- Dots fonctionnels cachés (maintenus pour compat JS existant) -->
                 <div style="display:none;">
                   <div class="death-dots" id="death-success">
@@ -3350,7 +3350,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
         <!-- Class Features (auto-populated) -->
 
-        <!-- Sauvegardes & Compétences -->
+        <!-- Sauvegardes & Skills -->
 
         <div class="sheet-section" data-sec="saves">
           <div class="sheet-section-title">Saving Throws &amp; Skills</div>
@@ -3469,12 +3469,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div class="exhaustion-row">
             <span class="exhaustion-label">Exhaustion</span>
             <div class="exhaustion-pips" id="exhaustion-pips">
-              <div class="exhaust-pip" data-ex="1" role="button" tabindex="0" title="Level 1 — −1 to all d20 Tests" aria-label="Épuisement 1"></div>
-              <div class="exhaust-pip" data-ex="2" role="button" tabindex="0" title="Level 2 — −2 to all d20 Tests" aria-label="Épuisement 2"></div>
-              <div class="exhaust-pip" data-ex="3" role="button" tabindex="0" title="Level 3 — −3 to all d20 Tests" aria-label="Épuisement 3"></div>
-              <div class="exhaust-pip" data-ex="4" role="button" tabindex="0" title="Level 4 — −4 to all d20 Tests" aria-label="Épuisement 4"></div>
-              <div class="exhaust-pip" data-ex="5" role="button" tabindex="0" title="Level 5 — −5 + Speed halved" aria-label="Épuisement 5"></div>
-              <div class="exhaust-pip" data-ex="6" role="button" tabindex="0" title="Level 6 — Death" aria-label="Épuisement 6"></div>
+              <div class="exhaust-pip" data-ex="1" role="button" tabindex="0" title="Level 1 — −1 to all d20 Tests" aria-label="Exhaustion 1"></div>
+              <div class="exhaust-pip" data-ex="2" role="button" tabindex="0" title="Level 2 — −2 to all d20 Tests" aria-label="Exhaustion 2"></div>
+              <div class="exhaust-pip" data-ex="3" role="button" tabindex="0" title="Level 3 — −3 to all d20 Tests" aria-label="Exhaustion 3"></div>
+              <div class="exhaust-pip" data-ex="4" role="button" tabindex="0" title="Level 4 — −4 to all d20 Tests" aria-label="Exhaustion 4"></div>
+              <div class="exhaust-pip" data-ex="5" role="button" tabindex="0" title="Level 5 — −5 + Speed halved" aria-label="Exhaustion 5"></div>
+              <div class="exhaust-pip" data-ex="6" role="button" tabindex="0" title="Level 6 — Death" aria-label="Exhaustion 6"></div>
             </div>
             <span class="exhaustion-desc" id="exhaustion-desc"></span>
           </div>
@@ -3592,7 +3592,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <div class="field-group">
               <label class="field-label">Species</label>
               <select class="field-input" id="species-select"></select>
-              <input type="text" class="field-input" data-f="species" id="species-custom" placeholder="Espèce personnalisée…" style="display:none;margin-top:0.3rem;">
+              <input type="text" class="field-input" data-f="species" id="species-custom" placeholder="Custom species…" style="display:none;margin-top:0.3rem;">
             </div>
             <div class="field-group" id="lineage-group" style="display:none;">
               <label class="field-label" id="lineage-label">Lineage</label>
@@ -3602,7 +3602,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
                 <label class="field-label">Classes &amp; Levels</label>
                 <div style="display:flex;gap:0.35rem;">
-                  <button class="btn btn-sm btn-gold" id="btn-level-up" type="button" title="Assistant : PV, sous-classe, ASI/don, ressources">⬆ Monter de niveau</button>
+                  <button class="btn btn-sm btn-gold" id="btn-level-up" type="button" title="Assistant : PV, sous-classe, ASI/don, ressources">⬆ Level Up</button>
                   <button class="btn btn-sm" id="btn-add-mc-class" type="button">+ Add Class</button>
                 </div>
               </div>
@@ -3614,7 +3614,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <div class="field-group">
               <label class="field-label">Background</label>
               <select class="field-input" id="background-select"></select>
-              <input type="text" class="field-input" data-f="background" id="background-custom" placeholder="Background personnalisé…" style="display:none;margin-top:0.3rem;">
+              <input type="text" class="field-input" data-f="background" id="background-custom" placeholder="Custom background…" style="display:none;margin-top:0.3rem;">
             </div>
             <div class="field-group">
               <label class="field-label">Alignment</label>
@@ -3685,7 +3685,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <!-- ── Inventory Tab ── -->
     <div class="tab-panel" id="tab-inventaire">
       <div class="sheet-section" id="section-worn-armor">
-        <div class="sheet-section-title">🛡 Armure portée</div>
+        <div class="sheet-section-title">🛡 Worn Armor</div>
         <div id="worn-armor-card-container"></div>
       </div>
       <div class="sheet-section">
@@ -3706,15 +3706,15 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="inv-enc" id="inv-encumbrance"></div>
         <label class="inv-enc-toggle">
           <input type="checkbox" id="inv-ignore-encumbrance">
-          Ignorer l'encombrement
-          <span class="inv-enc-toggle-hint">(beaucoup de tables ne suivent pas la regle)</span>
+          Ignore encumbrance
+          <span class="inv-enc-toggle-hint">(many tables skip this rule)</span>
         </label>
         <table class="inv-table">
           <thead><tr>
             <th style="width:9%">Qty</th>
             <th style="width:26%">Name</th>
             <th style="width:28%">Description</th>
-            <th style="width:11%" title="Poids unitaire en livres">Lb</th>
+            <th style="width:11%" title="Unit weight in pounds">Lb</th>
             <th style="width:16%">Category</th>
             <th style="width:10%"></th>
           </tr></thead>
@@ -3723,7 +3723,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="inv-val" id="inv-value"></div>
         <!-- Attunement -->
         <div class="attunement-section">
-          <div class="attunement-label">⟡ Lien magique <span class="attune-count" id="attunement-count">0 / 3</span></div>
+          <div class="attunement-label">⟡ Attunement <span class="attune-count" id="attunement-count">0 / 3</span></div>
           <div class="attunement-slots" id="attunement-slots"></div>
         </div>
       </div>
@@ -3732,7 +3732,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="ration-tracker" id="ration-tracker"></div>
       </div>
       <div class="sheet-section">
-        <div class="sheet-section-title">Currency <button class="btn btn-sm" id="btn-convert-currency" title="Convertir vers la plus grande dénomination possible" style="font-size:0.68rem;padding:0.1rem 0.5rem;margin-left:0.5rem;vertical-align:middle;">⇄ Convertir</button></div>
+        <div class="sheet-section-title">Currency <button class="btn btn-sm" id="btn-convert-currency" title="Convert to the largest possible denomination" style="font-size:0.68rem;padding:0.1rem 0.5rem;margin-left:0.5rem;vertical-align:middle;">⇄ Convert</button></div>
         <div class="currency-grid">
           <div class="currency-item"><div class="currency-label">PP</div><input type="number" class="field-input" data-currency="pp" min="0" value="0"></div>
           <div class="currency-item"><div class="currency-label">GP</div><input type="number" class="field-input" data-currency="gp" min="0" value="0"></div>
@@ -3750,9 +3750,9 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="notes-pages-sidebar">
           <div class="notes-pages-header">
             <span>Pages</span>
-            <button class="notes-add-page-btn" id="btn-add-note-page" title="Nouvelle page">+</button>
+            <button class="notes-add-page-btn" id="btn-add-note-page" title="New page">+</button>
           </div>
-          <input type="search" class="notes-search" id="notes-search" placeholder="Chercher dans toutes les pages…" autocomplete="off">
+          <input type="search" class="notes-search" id="notes-search" placeholder="Search all pages…" autocomplete="off">
           <div class="notes-pages-list" id="notes-pages-list"></div>
           <div class="notes-results" id="notes-results"></div>
         </div>
@@ -3760,12 +3760,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="notes-editor-wrap">
           <div class="notes-page-title-row">
             <input class="notes-page-title-input" id="notes-page-title" placeholder="Page name…" />
-            <button class="notes-preview-btn" id="btn-notes-preview" title="Aperçu : mise en forme et liens vers le wiki">👁 Aperçu</button>
+            <button class="notes-preview-btn" id="btn-notes-preview" title="Preview: formatting and wiki links">👁 Preview</button>
             <button class="notes-del-page-btn" id="btn-del-note-page" title="Delete this page">🗑</button>
           </div>
           <textarea class="notes-editor" id="notes-editor" placeholder="Your session notes, quests, key NPCs…"></textarea>
           <div class="notes-preview" id="notes-preview" style="display:none;"></div>
-          <div class="notes-md-hint" id="notes-md-hint">**gras** · *italique* · # titre · - liste · &gt; citation · [[Ouestvir]] pour lier une page du wiki</div>
+          <div class="notes-md-hint" id="notes-md-hint">**gras** · *italique* · # titre · - liste · &gt; quote · [[Ouestvir]] to link a wiki page</div>
           <div style="font-size:0.72rem;color:#555;text-align:right;margin-top:0.3rem;font-style:italic;">Autosave</div>
         </div>
       </div>
@@ -3776,7 +3776,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div class="canvas-pages-sidebar">
             <div class="canvas-pages-header">
               <span>Pages</span>
-              <button class="notes-add-page-btn" id="btn-add-canvas-page" title="Nouvelle page">+</button>
+              <button class="notes-add-page-btn" id="btn-add-canvas-page" title="New page">+</button>
             </div>
             <div class="canvas-pages-list" id="canvas-pages-list"></div>
           </div>
@@ -3784,7 +3784,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div class="canvas-main">
             <div class="canvas-page-title-row">
               <input class="notes-page-title-input" id="canvas-page-title" placeholder="Page name…" />
-              <span class="canvas-sync" id="canvas-sync" title="Sauvegarde du dessin vers le cloud"></span>
+              <span class="canvas-sync" id="canvas-sync" title="Drawing sync to the cloud"></span>
               <button class="canvas-tool-btn" id="ctool-download" title="Download as PNG">⤓ PNG</button>
               <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page">🗑</button>
             </div>
@@ -3862,7 +3862,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="settings-row" style="margin-top:0.5rem;">
           <div class="settings-label">Portrait colors<div class="settings-desc">Extract from your portrait image</div></div>
           <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-            <button class="btn btn-sm" id="btn-extract-portrait-color" title="Générer un thème depuis les couleurs du portrait">🎨 Extract from portrait</button>
+            <button class="btn btn-sm" id="btn-extract-portrait-color" title="Generate a theme from the portrait colors">🎨 Extract from portrait</button>
             <div id="portrait-palette" style="display:flex;gap:5px;align-items:center;"></div>
           </div>
         </div>
@@ -4003,7 +4003,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <div class="settings-section">
         <h3>⚔ Importer depuis D&amp;D Beyond</h3>
         <div style="font-size:0.78rem;color:#999;margin-bottom:0.85rem;">
-          ⓘ Le personnage doit être en <strong style="color:var(--gold);">Public</strong>
+          ⓘ The character must be set to <strong style="color:var(--gold);">Public</strong>
           (Settings → Character Privacy) sur dndbeyond.com.
         </div>
 
@@ -4208,7 +4208,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div class="tab-panel" id="tab-familiers">
       <div class="fam-toolbar">
         <span class="fam-toolbar-title">⟡ Familiers &amp; Compagnons</span>
-        <button class="btn btn-sm" id="btn-fam-lock" title="Basculer édition / affichage">👁 Afficher</button>
+        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view">👁 Afficher</button>
         <button class="btn btn-sm fam-toolbar-edit-only" id="btn-open-compendium-monster" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
         <button class="btn btn-sm btn-gold fam-toolbar-edit-only" id="btn-add-familiar">+ Add</button>
       </div>
@@ -4367,8 +4367,8 @@ const THEMES = [
   { id:'or',        name:'Or',        gold:'#c9a227', dark:'#8a6e1a' },
   { id:'rubis',     name:'Rubis',     gold:'#d96060', dark:'#a83030' },
   { id:'saphir',    name:'Saphir',    gold:'#6090e0', dark:'#3060b0' },
-  { id:'emeraude',  name:'Émeraude',  gold:'#50b870', dark:'#308040' },
-  { id:'amethyste', name:'Améthyste', gold:'#9870e0', dark:'#6040b0' },
+  { id:'emeraude',  name:'Emerald',  gold:'#50b870', dark:'#308040' },
+  { id:'amethyste', name:'Amethyst', gold:'#9870e0', dark:'#6040b0' },
   { id:'argent',    name:'Argent',    gold:'#a0b0c0', dark:'#708090' },
   { id:'cuivre',    name:'Cuivre',    gold:'#c87840', dark:'#904820' },
   { id:'turquoise', name:'Turquoise', gold:'#40b8a8', dark:'#208878' },
@@ -4378,7 +4378,7 @@ function applyTheme(id) {
   // Accepte un objet custom {custom:true, gold, dark} ou un string ID
   if (typeof id === 'object' && id?.gold) {
     gold = id.gold; dark = id.dark || id.gold;
-    activeId = '__custom__'; label = 'Personnalisé';
+    activeId = '__custom__'; label = 'Custom';
   } else {
     const t = THEMES.find(x => x.id === id) || THEMES[0];
     gold = t.gold; dark = t.dark; activeId = t.id; label = t.name;
@@ -4455,13 +4455,13 @@ async function sbFetch(path, options = {}) {
 }
 async function sbGetPlayer(username) {
   const r = await sbFetch(`/rest/v1/players?username=eq.${encodeURIComponent(username)}&select=*`);
-  if (!r.ok) throw new Error('Erreur réseau : ' + r.status);
+  if (!r.ok) throw new Error('Network error: ' + r.status);
   const rows = await r.json();
   return rows[0] || null;
 }
 async function sbCreatePlayer(username, passwordHash, data) {
   const r = await sbFetch('/rest/v1/players', { method:'POST', headers:{'Prefer':'return=minimal'}, body: JSON.stringify({ username, password_hash: passwordHash, data }) });
-  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || 'Erreur création : ' + r.status); }
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.message || 'Creation error: ' + r.status); }
 }
 async function sbUpdateData(username, data, _json) {
   // _json : JSON pré-stringifié du data (évite un 2e stringify de plusieurs MB sur le hot path)
@@ -4496,7 +4496,7 @@ async function sbUploadImage(path, dataUrl) {
     headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': blob.type },
     body: blob
   });
-  if (!r.ok) throw new Error('Upload échoué : ' + r.status);
+  if (!r.ok) throw new Error('Upload failed: ' + r.status);
   return `${SB_URL}/storage/v1/object/public/backgrounds/${safePath}`;
 }
 
@@ -4636,7 +4636,7 @@ function renderNotesSearch() {
   if (list) list.style.display = actif ? 'none' : '';
   if (!actif) { box.innerHTML = ''; return; }
   if (!res.length) {
-    box.innerHTML = `<div class="notes-res-empty">Aucun résultat pour « ${esc(q.trim())} »</div>`;
+    box.innerHTML = `<div class="notes-res-empty">No results for « ${esc(q.trim())} »</div>`;
     return;
   }
   box.innerHTML = res.map(r =>
@@ -4698,7 +4698,7 @@ function renderNoteMarkdown(texte, wikiIndex) {
       const url = idx.get(nom.toLowerCase());
       return url
         ? `<a class="note-wiki" href="${url}">${txt}</a>`
-        : `<span class="note-wiki missing" title="Aucune page nommee ainsi dans le wiki">${txt}</span>`;
+        : `<span class="note-wiki missing" title="No wiki page with that name">${txt}</span>`;
     });
     out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
     out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -4798,9 +4798,9 @@ function saveLocal(u, data, _json) {
 function updateConnIndicator(state) {
   const el = document.getElementById('conn-indicator');
   if (!el) return;
-  if (state === 'online')  { el.textContent = '🟢 Cloud';      el.className = 'conn-indicator online';  el.title = 'Données synchronisées avec le cloud'; }
+  if (state === 'online')  { el.textContent = '🟢 Cloud';      el.className = 'conn-indicator online';  el.title = 'Data synced with the cloud'; }
   if (state === 'offline') { el.textContent = '🟠 Hors ligne'; el.className = 'conn-indicator offline'; el.title = 'Hors ligne — sauvegarde locale active'; }
-  if (state === 'local')   { el.textContent = '⚠ Local';       el.className = 'conn-indicator local';   el.title = 'Échec cloud — données sauvées localement uniquement'; }
+  if (state === 'local')   { el.textContent = '⚠ Local';       el.className = 'conn-indicator local';   el.title = 'Cloud failed — data saved locally only'; }
 }
 
 /* ── Filet de securite en cas de conflit ──
@@ -4850,8 +4850,8 @@ function showConflictBanner(user) {
   document.getElementById('conflict-banner')?.remove();
   const perdu = diffNotes(snap.data, playerData);
   const detail = perdu.length
-    ? perdu.map(p => `${p.nom} : ${p.pagesEnPlus ? p.pagesEnPlus + ' page(s), ' : ''}${p.caracteresEnPlus} caractere(s) de notes`).join(' — ')
-    : 'aucune difference detectee dans les notes';
+    ? perdu.map(p => `${p.nom} : ${p.pagesEnPlus ? p.pagesEnPlus + ' page(s), ' : ''}${p.caracteresEnPlus} characters of notes`).join(' — ')
+    : 'no difference found in the notes';
   const el = document.createElement('div');
   el.id = 'conflict-banner';
   el.className = 'conflict-banner';
@@ -4859,8 +4859,8 @@ function showConflictBanner(user) {
       `<div><strong>Version d'un autre appareil chargee.</strong> Ta version locale a ete mise de cote : `
     + `<span class="conflict-detail">${esc(detail)}</span></div>`
     + `<div class="conflict-actions">`
-    + `<button type="button" id="conflict-restore">Restaurer ma version</button>`
-    + `<button type="button" id="conflict-dismiss">Garder celle-ci</button></div>`;
+    + `<button type="button" id="conflict-restore">Restore my version</button>`
+    + `<button type="button" id="conflict-dismiss">Keep this one</button></div>`;
   document.body.appendChild(el);
   el.querySelector('#conflict-restore').addEventListener('click', () => {
     const s2 = getConflictSnapshot(user);
@@ -4872,7 +4872,7 @@ function showConflictBanner(user) {
     clearConflictSnapshot(user);
     el.remove();
     renderAll(); renderCharCards(); renderCharSelector(); triggerSave();
-    showToast('✦ Ta version a ete restauree');
+    showToast('✦ Your version has been restored');
   });
   el.querySelector('#conflict-dismiss').addEventListener('click', () => {
     clearConflictSnapshot(user);
@@ -4910,7 +4910,7 @@ function triggerSave() {
             renderAll(); updateHpBar(); renderHero();
           }
         } catch {}
-        badge.textContent = '⚠ Synchronisé depuis un autre appareil'; badge.className = 'save-badge err';
+        badge.textContent = '⚠ Synced from another device'; badge.className = 'save-badge err';
         setTimeout(() => { badge.textContent = ''; badge.className = 'save-badge'; }, 4000);
         showConflictBanner(currentUser);
         return;
@@ -5020,7 +5020,7 @@ function autoFillClass(classe) {
    CLASS FEATURES — Render automatique par niveau
    ════════════════════════════════════════════════════════════ */
 function renderClassFeatures() {
-  renderSpeciesTraits(); // les traits d'espèce dépendent du niveau total — même cycle de rendu
+  renderSpeciesTraits(); // les traits d'species dépendent du total level — même cycle de rendu
   renderBackground();
   const c       = C();
   const classes = getClasses(c);
@@ -5105,7 +5105,7 @@ function renderClassFeatures() {
       const sk = SKILLS.find(s => s.key === k);
       const on = (parseInt(c[k]) || 0) >= 1;
       return `<button class="cf-skill-chip${on ? ' on' : ''}${!on && full ? ' muted' : ''}"
-        data-cf-skill="${k}" title="${on ? 'Retirer la maîtrise' : 'Cocher la maîtrise'}">${sk ? sk.label : k}</button>`;
+        data-cf-skill="${k}" title="${on ? 'Remove proficiency' : 'Mark proficiency'}">${sk ? sk.label : k}</button>`;
     }).join('');
     return `<div class="cf-prof-item cf-skills-row">
       <span class="cf-prof-label">Skills:</span>
@@ -5115,7 +5115,7 @@ function renderClassFeatures() {
   })();
 
   body.innerHTML = `
-    ${pending.length ? `<div class="cf-subclass-alert">⚠ Sous-classe à choisir —
+    ${pending.length ? `<div class="cf-subclass-alert">⚠ Subclass à choisir —
       ${pending.map(cl => `<strong>${esc(cl.classe)} ${cl.niveau}</strong>`).join(', ')}
       <span class="cf-alert-hint">(onglet Identity)</span></div>` : ''}
     <div class="cf-profs">
@@ -5138,7 +5138,7 @@ function renderClassFeatures() {
       } else {
         const chosen = data.skillList.filter(x => (parseInt(c[x]) || 0) >= 1).length;
         if (chosen >= data.skillChoices) {
-          showToast(`Déjà ${data.skillChoices} compétence${data.skillChoices > 1 ? 's' : ''} — retires-en une d'abord`);
+          showToast(`Already ${data.skillChoices} skill${data.skillChoices > 1 ? 's' : ''} — remove one first`);
           return;
         }
         c[k] = 1;
@@ -5269,24 +5269,24 @@ function renderSpeciesTraits() {
   body.innerHTML = `
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Type:</span> ${data.type || 'Humanoid'}
-        ${data.type && data.type !== 'Humanoid' ? `<span style="color:#888;font-size:0.9em;"> — les sorts qui ciblent les Humanoïdes (Charme-personne, Immobilisation de personne…) ne t'affectent pas</span>` : ''}</div>
+        ${data.type && data.type !== 'Humanoid' ? `<span style="color:#888;font-size:0.9em;"> — spells that target Humanoids (Charm Person, Hold Person…) don't affect you</span>` : ''}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Size:</span> ${data.size}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Speed:</span> ${speedTarget} ft.
-        ${speedOk ? `<span class="apply-done">✓ appliquée</span>`
+        ${speedOk ? `<span class="apply-done">✓ applied</span>`
                   : `<button class="apply-btn" id="sp-apply-speed">✓ Appliquer (${speedTarget} ft)</button>`}</div>
-      ${fx.telepathyPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Télépathie:</span>
-        ${fx.telepathyPerLevel} ft/niveau — soit <strong>${fx.telepathyPerLevel * totalLvl} ft</strong> au niveau ${totalLvl}</div>` : ''}
-      ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">PV bonus:</span>
-        +${fx.hpPerLevel}/niveau — soit <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max au niveau ${totalLvl}
-        <span style="color:#888;font-size:0.9em;">(appliqué à la création — à ajouter toi-même à chaque montée de niveau)</span></div>` : ''}
-      ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choisis une lignée (onglet Identity)</div>` : ''}
+      ${fx.telepathyPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Telepathy:</span>
+        ${fx.telepathyPerLevel} ft/niveau — soit <strong>${fx.telepathyPerLevel * totalLvl} ft</strong> at level ${totalLvl}</div>` : ''}
+      ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Bonus HP:</span>
+        +${fx.hpPerLevel}/level — that is <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max at level ${totalLvl}
+        <span style="color:#888;font-size:0.9em;">(applied at creation — add it yourself on each level up)</span></div>` : ''}
+      ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choose a lineage (Identity tab)</div>` : ''}
     </div>
   `;
 
   document.getElementById('sp-apply-speed')?.addEventListener('click', () => {
     c.vitesse = speedTarget;
     fillFields(); renderHero(); renderSpeciesTraits(); triggerSave();
-    showToast(`✓ Vitesse réglée à ${speedTarget} ft.`);
+    showToast(`✓ Speed set to ${speedTarget} ft.`);
   });
 
   const lineageTraits = (data.lineages && data.lineages[lineage]) || {};
@@ -5355,7 +5355,7 @@ function populateSpeciesUI() {
     linGrp.style.display = '';
     document.getElementById('lineage-label').textContent =
       c.species === 'Tiefling' ? 'Fiendish Legacy' : 'Lineage';
-    linSel.innerHTML = '<option value="">— Choisir —</option>'
+    linSel.innerHTML = '<option value="">— Choose —</option>'
       + lins.map(l => `<option value="${l}"${c.lineage === l ? ' selected' : ''}>${l}</option>`).join('');
   } else {
     linGrp.style.display = 'none';
@@ -5420,11 +5420,11 @@ function renderBackground() {
   body.innerHTML = `
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Ability Scores:</span> ${abils}
-        <span style="color:#888;font-size:0.9em;"> — répartis +2/+1 ou +1/+1/+1</span></div>
+        <span style="color:#888;font-size:0.9em;"> — assign +2/+1 or +1/+1/+1</span></div>
       <div class="cf-prof-item"><span class="cf-prof-label">Skills:</span> ${data.skills}
         ${data.skillKeys ? (skillsDone
-          ? `<span class="apply-done">✓ maîtrises cochées</span>`
-          : `<button class="apply-btn" id="bg-apply-skills">✓ Cocher les maîtrises</button>`) : ''}</div>
+          ? `<span class="apply-done">✓ proficiencies marked</span>`
+          : `<button class="apply-btn" id="bg-apply-skills">✓ Mark proficiencies</button>`) : ''}</div>
       <div class="cf-prof-item"><span class="cf-prof-label">Tool:</span> ${data.tool}</div>
     </div>
     <div class="cf-level-group">
@@ -5451,7 +5451,7 @@ function renderBackground() {
   document.getElementById('bg-apply-skills')?.addEventListener('click', () => {
     (data.skillKeys || []).forEach(k => { if ((parseInt(c[k]) || 0) < 1) c[k] = 1; });
     renderSkills(); renderPassiveSkills(); renderBackground(); triggerSave();
-    showToast(`✓ Maîtrises appliquées : ${data.skills}`);
+    showToast(`✓ Proficiencies applied: ${data.skills}`);
   });
 }
 
@@ -5579,7 +5579,7 @@ function showScreen(id)     { document.querySelectorAll('.j-screen').forEach(s =
 async function doLogin() {
   const username = document.getElementById('login-user').value.trim().toLowerCase();
   const password = document.getElementById('login-pass').value;
-  if (!username || !password) { showAuthError('Remplis tous les champs.'); return; }
+  if (!username || !password) { showAuthError('Fill in all fields.'); return; }
   clearAuthError();
   const btn = document.getElementById('btn-login');
   btn.disabled = true; btn.innerHTML = '<span class="auth-spinner"></span> Connexion…';
@@ -5605,16 +5605,16 @@ async function doRegister() {
   const password = document.getElementById('reg-pass').value;
   const password2 = document.getElementById('reg-pass2').value;
   clearAuthError();
-  if (!username) { showAuthError('Entre un pseudo.'); return; }
+  if (!username) { showAuthError('Enter a username.'); return; }
   if (username.length < 2) { showAuthError('Username must be at least 2 characters.'); return; }
   if (!/^[a-z0-9_-]+$/.test(username)) { showAuthError('Username: letters, digits, _ and - only.'); return; }
   if (password.length < 6) { showAuthError('Password: at least 6 characters.'); return; }
   if (password !== password2) { showAuthError('Passwords do not match.'); return; }
   const btn = document.getElementById('btn-register');
-  btn.disabled = true; btn.innerHTML = '<span class="auth-spinner"></span> Création…';
+  btn.disabled = true; btn.innerHTML = '<span class="auth-spinner"></span> Creating…';
   try {
     const existing = await sbGetPlayer(username);
-    if (existing) { showAuthError('Ce pseudo est déjà pris.'); return; }
+    if (existing) { showAuthError('That username is already taken.'); return; }
     const hash = await hashPwd(password);
     const data = emptyPlayerData(username);
     await sbCreatePlayer(username, hash, data);
@@ -5699,7 +5699,7 @@ function renderInspiration() {
   if (!btn || !playerData) return;
   const active = !!playerData.inspiration;
   btn.classList.toggle('active', active);
-  btn.title = active ? 'Inspiration active — cliquer pour utiliser' : 'Inspiration (avantage sur un jet)';
+  btn.title = active ? 'Inspiration active — click to use' : 'Inspiration (avantage sur un jet)';
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -5735,7 +5735,7 @@ function renderCharSelector() {
         <div class="char-sel-item-sub">${classStr}</div>
       </div>
       ${isActive ? '<span style="color:var(--gold);font-size:0.7rem;">✦</span>' : ''}
-      <button class="char-sel-del" data-del-char="${id}" title="Supprimer ce personnage" aria-label="Supprimer ${esc(c.characterName || 'ce personnage')}">✕</button>
+      <button class="char-sel-del" data-del-char="${id}" title="Delete this character" aria-label="Delete ${esc(c.characterName || 'ce personnage')}">✕</button>
     `;
     item.querySelector('[data-del-char]').addEventListener('click', e => {
       e.stopPropagation();
@@ -5771,7 +5771,7 @@ function deleteCharacter(id) {
   const slot  = chars[id];
   if (!slot) return;
   if (Object.keys(chars).length <= 1) {
-    showToast('⚠ Impossible : il doit rester au moins un personnage.');
+    showToast('⚠ Not possible: at least one character must remain.');
     return;
   }
   const c    = slot.character || {};
@@ -5782,9 +5782,9 @@ function deleteCharacter(id) {
   ].filter(Boolean).join(' · ');
 
   if (!confirm(
-    `Supprimer « ${nom} » ?\n${desc ? desc + '\n' : ''}\n`
-    + `Sa fiche, son inventaire et ses notes seront effacés.\n`
-    + `Tu pourras annuler pendant quelques secondes.`
+    `Delete "${nom}"?\n${desc ? desc + '\n' : ''}\n`
+    + `Its sheet, inventory and notes will be erased.\n`
+    + `You can undo this for a few seconds.`
   )) return;
 
   // Position d'origine conservée pour restaurer l'ordre à l'identique
@@ -5799,7 +5799,7 @@ function deleteCharacter(id) {
   if (etaitActif) { applyCharTheme(); applyCharBg(C()); }
   triggerSave();
 
-  showCharUndoToast(`🗑 « ${nom} » supprimé`, () => {
+  showCharUndoToast(`🗑 "${nom}" deleted`, () => {
     // Réinsertion à sa place d'origine
     const rest = Object.entries(playerData.characters);
     rest.splice(position, 0, [id, slot]);
@@ -5808,7 +5808,7 @@ function deleteCharacter(id) {
     renderCharCards(); renderCharSelector(); renderAll();
     applyCharTheme(); applyCharBg(C());
     triggerSave();
-    showToast(`✦ « ${nom} » restauré`);
+    showToast(`✦ "${nom}" restored`);
   });
 }
 
@@ -5822,7 +5822,7 @@ function showCharUndoToast(msg, onUndo) {
   t.className = 'char-undo-toast';
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.textContent = '↶ Annuler';
+  btn.textContent = '↶ Undo';
   const label = document.createElement('span');
   label.textContent = msg;
   t.append(label, btn);
@@ -5921,7 +5921,7 @@ function updateCharSummary() {
     if (classStr) parts.push(classStr);
   }
   if (c.species) parts.push(c.species);
-  document.getElementById('dash-info').textContent = parts.join(' · ') || 'Aucun personnage';
+  document.getElementById('dash-info').textContent = parts.join(' · ') || 'No character';
 }
 
 
@@ -6534,7 +6534,7 @@ function updateSpellCalcs() {
     if (maxPrep > 0) {
       prepEl.style.display = '';
       prepEl.textContent = `${prepared.length} / ${maxPrep}`;
-      prepEl.title = `Sorts préparés — maximum ${maxPrep} à ce niveau (PHB 2024)`;
+      prepEl.title = `Prepared spells — maximum ${maxPrep} at this level (PHB 2024)`;
       prepEl.className = 'spell-prep-counter' + (prepared.length > maxPrep ? ' over' : prepared.length > 0 ? ' ok' : '');
     } else {
       // Classe sans préparation de sorts (guerrier, roublard…) : compteur masqué
@@ -6554,10 +6554,10 @@ function renderPrepStyle() {
   if (!styles.length) { noteEl.innerHTML = ''; return; }
   noteEl.innerHTML = styles.map(({ cls, st }) => {
     const swap = st.swap === 'long'
-      ? 'sorts <strong>préparés</strong> — tu changes ta sélection à chaque <strong>repos long</strong>'
-      : 'liste <strong>fixe</strong> — tu n\'échanges un sort qu\'en <strong>montant de niveau</strong>';
+      ? '<strong>prepared</strong> spells — you swap your selection on each <strong>Long Rest</strong>'
+      : "<strong>fixed</strong> list — you only swap a spell when you <strong>gain a level</strong>";
     const book = st.book
-      ? ' · 📖 = dans ton <em>grimoire</em> mais pas préparé aujourd\'hui'
+      ? " · 📖 = in your <em>spellbook</em> but not prepared today"
       : '';
     return `<div>✦ <strong>${esc(cls)}</strong> — ${swap}${book}</div>`;
   }).join('');
@@ -6683,7 +6683,7 @@ function scheduleCanvasSync(delay = 6000) {
 function setCanvasSyncBadge(etat) {
   const el = document.getElementById('canvas-sync');
   if (!el) return;
-  const TXT = { pending: '· en attente', up: '↑ envoi…', ok: '✓ sauvegardé', err: '⚠ local seulement', none: '' };
+  const TXT = { pending: '· pending', up: '↑ uploading…', ok: '✓ saved', err: '⚠ local only', none: '' };
   el.textContent = TXT[etat] ?? '';
   el.className = 'canvas-sync ' + etat;
 }
@@ -6747,7 +6747,7 @@ async function hydrateCanvasFromRemote() {
       && !meta.some(m => m.id === canvasPages[0].id)) canvasPages.shift();
   saveCanvasPages();
   renderCanvasPagesSidebar();
-  showToast(`✦ ${ajoutees} page(s) de dessin récupérée(s)`);
+  showToast(`✦ ${ajoutees} drawing page(s) recovered`);
   return true;
 }
 
@@ -6769,7 +6769,7 @@ function loadCanvasPages() {
 }
 function saveCanvasPages() {
   try { localStorage.setItem(canvasPageStorageKey(), JSON.stringify(canvasPages)); } catch(e) {
-    showToast('⚠ Espace de stockage plein — dessin non sauvegardé. Supprime des pages ou efface le cache.');
+    showToast('⚠ Storage full — drawing not saved. Delete pages or clear the cache.');
   }
 }
 function renderCanvasPagesSidebar() {
@@ -7044,7 +7044,7 @@ function renderPassiveSkills() {
   const passives = [
     { label:'Perception passive',      key:'perception',   attr:'sag' },
     { label:'Investigation passive',   key:'investigation',attr:'int' },
-    { label:'Perspicacité passive',    key:'perspicacite', attr:'sag' },
+    { label:'Passive Insight',    key:'perspicacite', attr:'sag' },
   ];
   const html = passives.map(p => {
     const prof = !!c[p.key];
@@ -7153,7 +7153,7 @@ function renderExhaustion() {
 /* ── Import D&D Beyond ── */
 function parseDnDBeyondJSON(raw) {
   const d = raw.data || raw;
-  if (!d.name && !d.classes) throw new Error("Format JSON non reconnu — assure-toi d'utiliser l'URL /character/ID/json");
+  if (!d.name && !d.classes) throw new Error("JSON format not recognized — make sure you use the /character/ID/json URL");
 
   const STAT_MAP  = {1:'for',2:'dex',3:'con',4:'int',5:'sag',6:'cha'};
   const SKILL_MAP = {
@@ -7563,7 +7563,7 @@ function showUndoToast(name) {
     document.body.appendChild(toast);
     document.getElementById('undo-toast-btn')?.addEventListener('click', undoDdbImport);
   }
-  document.getElementById('undo-toast-msg').textContent = `✓ ${name} importé.`;
+  document.getElementById('undo-toast-msg').textContent = `✓ ${name} imported.`;
   toast.classList.add('visible');
   let remaining = 15;
   const countdownEl = document.getElementById('undo-countdown');
@@ -7588,7 +7588,7 @@ function undoDdbImport() {
     playerData.characters[slotId] = snapshot;
     if (playerData.activeCharId !== slotId) playerData.activeCharId = slotId;
     renderAll(); triggerSave();
-    showToast(`↺ Import annulé — ${snapshot.name} restauré.`);
+    showToast(`↺ Import undone — ${snapshot.name} restored.`);
   }
   _ddbBackup = null;
   clearTimeout(_ddbUndoTimer);
@@ -7634,7 +7634,7 @@ function openShortRestModal() {
     isWarlock ? 'Emplacements de Pacte' : ''
   ].filter(Boolean);
   document.getElementById('sr-total').textContent = restoreBits.length
-    ? '↺ Restauré : ' + restoreBits.join(', ')
+    ? '↺ Restored: ' + restoreBits.join(', ')
     : '';
 
   function updateDisplay() {
@@ -7707,7 +7707,7 @@ function doLongRest() {
   if (c.exhaustion > 0) c.exhaustion = c.exhaustion - 1;
   renderAll(); triggerSave();
   const hdLeft = totalHd - c.nbDeVieUtilises;
-  showToast(`Repos long — PV pleins, sorts et ressources restaurés · dés de vie ${hdLeft}/${totalHd} (+${Math.min(regained, spentHd)})`);
+  showToast(`Long Rest — full HP, spells and resources restored · hit dice ${hdLeft}/${totalHd} (+${Math.min(regained, spentHd)})`);
 }
 function showToast(msg) {
   let t = document.getElementById('rest-toast');
@@ -7922,7 +7922,7 @@ function renderLvlupTab() {
         <div class="lvlrow-sec-title">⬆ ASI / Feat Decision</div>
         <div class="lvlrow-feat-pick">
           <select class="lvlrow-feat-select" data-featpick="${i}">
-            <option value="">— Choisir un feat (PHB 2024) —</option>${featOpts}
+            <option value="">— Choose a feat (PHB 2024) —</option>${featOpts}
           </select>
         </div>
         <div class="lvlrow-feat-desc" id="featdesc-${i}"></div>
@@ -8060,7 +8060,7 @@ function renderLvlupTab() {
       if (!f) { desc.innerHTML = ''; return; }
       const tags = [
         f.asi ? `<span class="feat-tag">+1 ${f.abil}</span>` : '',
-        f.prereq ? `<span class="feat-tag prereq">Prérequis : ${esc(f.prereq)}</span>` : ''
+        f.prereq ? `<span class="feat-tag prereq">Prerequisite: ${esc(f.prereq)}</span>` : ''
       ].filter(Boolean).join('');
       desc.innerHTML = `${tags ? `<div class="feat-tags">${tags}</div>` : ''}<div>${f.desc}</div>`;
     };
@@ -8167,7 +8167,7 @@ function renderSpells() {
       : (_spellPrepFilter
           ? `${entries.length}`
           : (hasBook
-              ? `${preparedCount} préparé${preparedCount > 1 ? 's' : ''} · ${entries.length - preparedCount} au grimoire`
+              ? `${preparedCount} prepared${preparedCount > 1 ? 's' : ''} · ${entries.length - preparedCount} in spellbook`
               : `${preparedCount}/${entries.length} prepared`));
     hdr.innerHTML = `<td colspan="10">${lvlLabel}<span class="spell-lvl-count">${countLabel}</span></td>`;
     frag.appendChild(hdr);
@@ -8181,7 +8181,7 @@ function renderSpells() {
       // Prepared toggle cell
       const prepCell = isCantrip
         ? `<td style="text-align:center;"><span style="color:#555;font-size:0.7rem;" title="Cantrips are always available">✦</span></td>`
-        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared ? 'Préparé — cliquer pour retirer' : (hasBook ? 'Dans le grimoire — cliquer pour préparer' : 'Non préparé — cliquer pour préparer')}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
+        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared ? 'Prepared — click to unprepare' : (hasBook ? 'In your spellbook — click to prepare' : 'Not prepared — click to prepare')}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
 
       const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Lancer le sort (consomme un emplacement niv.${esc(s.level||'1')}+)">⚡</button>` : '';
       const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Lancer ${esc(s.degat)}">🎲</button>` : '';
@@ -8192,7 +8192,7 @@ function renderSpells() {
         + `<td><input class="atk-inp" data-spell="${i}" data-sk="typeDegat" value="${esc(s.typeDegat||'')}" placeholder="fire…" style="font-size:0.75rem;"></td>`
         + `<td><input class="atk-inp" data-spell="${i}" data-sk="portee" value="${esc(s.portee||'')}" placeholder="30ft" style="font-size:0.75rem;"></td>`
         + `<td><input class="atk-inp" data-spell="${i}" data-sk="action" value="${esc(s.action||'')}" placeholder="Action" style="font-size:0.75rem;"></td>`
-        + `<td style="text-align:center;"><button class="spell-conc-btn${isConc?' active':''}" data-conc-spell="${i}" title="Sort de concentration (propriété)">◉</button></td>`
+        + `<td style="text-align:center;"><button class="spell-conc-btn${isConc?' active':''}" data-conc-spell="${i}" title="Concentration spell (property)">◉</button></td>`
         + `<td style="text-align:center;"><button class="exp-toggle${s._open?' open':''}" data-spell-toggle="${i}" title="Description">▾</button></td>`
         + `<td><button class="atk-del" data-del-spell="${i}" title="Delete">✕</button></td>`;
       frag.appendChild(tr);
@@ -8202,7 +8202,7 @@ function renderSpells() {
         const metaBits = [
           s.action ? `<span class="spell-meta-badge">⏱ ${esc(s.action)}</span>` : '',
           s.portee ? `<span class="spell-meta-badge">⦾ ${esc(s.portee)}</span>` : '',
-          s.degat  ? `<button class="spell-meta-badge" data-spell-dice="${i}" title="Lancer les dégâts">⚔ ${esc(s.degat)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''} 🎲</button>` : '',
+          s.degat  ? `<button class="spell-meta-badge" data-spell-dice="${i}" title="Roll damage">⚔ ${esc(s.degat)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''} 🎲</button>` : '',
           s.conc   ? `<span class="spell-meta-badge" style="color:#c090f8;border-color:rgba(160,112,224,0.4);">◉ Concentration</span>` : ''
         ].filter(Boolean).join('');
         const dr = document.createElement('tr');
@@ -8233,13 +8233,13 @@ function renderRationTracker() {
 
   function warnFood() {
     if (r.food > 0)           return { cls:'ok',  txt:`${r.food} ration${r.food > 1 ? 's' : ''}` };
-    if (r.joursPriveFood < foodThresh) return { cls:'low', txt:`Privé J${r.joursPriveFood}/${foodThresh}` };
-    return { cls:'out', txt:`Épuisement ! J${r.joursPriveFood}` };
+    if (r.joursPriveFood < foodThresh) return { cls:'low', txt:`Deprived D${r.joursPriveFood}/${foodThresh}` };
+    return { cls:'out', txt:`Exhaustion ! J${r.joursPriveFood}` };
   }
   function warnWater() {
     if (r.water > 0)          return { cls:'ok',  txt:`${r.water} jour${r.water > 1 ? 's' : ''}` };
-    if (r.joursPriveWater < 1) return { cls:'low', txt:'Privé J0/1' };
-    return { cls:'out', txt:`Épuisement ! J${r.joursPriveWater}` };
+    if (r.joursPriveWater < 1) return { cls:'low', txt:'Deprived D0/1' };
+    return { cls:'out', txt:`Exhaustion ! J${r.joursPriveWater}` };
   }
   const wf = warnFood(); const ww = warnWater();
 
@@ -8248,7 +8248,7 @@ function renderRationTracker() {
       <span class="ration-icon">🍖</span>
       <span class="ration-label">Rations alimentaires</span>
       <div class="ration-counter">
-        <button class="ration-btn" data-ration-adj="food" data-d="-1" title="Retirer une ration">−</button>
+        <button class="ration-btn" data-ration-adj="food" data-d="-1" title="Remove a ration">−</button>
         <input type="number" class="ration-val" id="ration-food-val" value="${r.food}" min="0" max="99">
         <button class="ration-btn" data-ration-adj="food" data-d="1" title="Add a ration">+</button>
       </div>
@@ -8259,7 +8259,7 @@ function renderRationTracker() {
       <span class="ration-icon">💧</span>
       <span class="ration-label">Eau (jours)</span>
       <div class="ration-counter">
-        <button class="ration-btn" data-ration-adj="water" data-d="-1" title="Retirer un jour d'eau">−</button>
+        <button class="ration-btn" data-ration-adj="water" data-d="-1" title="Remove un jour d'eau">−</button>
         <input type="number" class="ration-val" id="ration-water-val" value="${r.water}" min="0" max="99">
         <button class="ration-btn" data-ration-adj="water" data-d="1" title="Add a day of water">+</button>
       </div>
@@ -8267,7 +8267,7 @@ function renderRationTracker() {
       ${r.joursPriveWater > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveWater}j sans eau</span>` : ''}
     </div>
     <div class="ration-actions">
-      <button class="btn btn-sm ration-day-btn" id="btn-ration-day" title="Consume 1 ration and 1 day of water. Updates deprivation if lacking.">🌙 Fin de journée</button>
+      <button class="btn btn-sm ration-day-btn" id="btn-ration-day" title="Consume 1 ration and 1 day of water. Updates deprivation if lacking.">🌙 End of day</button>
       <button class="btn btn-sm" id="btn-ration-rest" title="Reset deprivation to zero (long rest with food and water)">☀ Repos complet</button>
     </div>`;
 
@@ -8383,15 +8383,15 @@ function planLevelUp(c, className) {
   const classes = getClasses(c);
   const idx     = classes.findIndex(cl => cl.classe === className);
   const known   = typeof CLASS_DATA !== 'undefined' && CLASS_DATA[className];
-  if (!known) return { ok:false, error:`Classe inconnue : ${className}` };
+  if (!known) return { ok:false, error:`Unknown class: ${className}` };
 
   const fromLevel = idx >= 0 ? (parseInt(classes[idx].niveau) || 1) : 0;
   const toLevel   = fromLevel + 1;
-  if (toLevel > 20) return { ok:false, error:`${className} est déjà au niveau 20.` };
+  if (toLevel > 20) return { ok:false, error:`${className} is already level 20.` };
   const totalBefore = getTotalLevel(c);
   // Un multiclassage part du niveau 1 : le total ne bouge que d'un cran dans tous les cas
   const totalAfter  = totalBefore + 1;
-  if (totalAfter > 20) return { ok:false, error:'Niveau total 20 atteint.' };
+  if (totalAfter > 20) return { ok:false, error:'Total level 20 reached.' };
 
   const info      = (typeof DND_CLASSES !== 'undefined' && DND_CLASSES[className]) || {};
   const hitDie    = info.de || '1d8';
@@ -8452,7 +8452,7 @@ function multiclassPrereqCheck(c, className) {
     const met = req.any
       ? req.abils.some(a => (parseInt(c[a]) || 10) >= 13)
       : req.abils.every(a => (parseInt(c[a]) || 10) >= 13);
-    if (!met) missing.push(`${cls} : ${req.abils.map(a => LABEL[a]).join(req.any ? ' ou ' : ' et ')} 13+`);
+    if (!met) missing.push(`${cls} : ${req.abils.map(a => LABEL[a]).join(req.any ? ' or ' : ' and ')} 13+`);
   };
   getClasses(c).forEach(cl => check(cl.classe));
   check(className);
@@ -8479,21 +8479,21 @@ function applyLevelUp(c, plan, choices) {
   // ── Validations AVANT toute écriture : un échec en cours de route laisserait
   //    le personnage à moitié monté (niveau incrémenté, PV pas encore ajoutés). ──
   if (plan.needsSubclass && ch.subclass && !plan.subOptions.includes(ch.subclass)) {
-    return { ok:false, error:`Sous-classe inconnue pour ${plan.className} : ${ch.subclass}` };
+    return { ok:false, error:`Unknown subclass for ${plan.className} : ${ch.subclass}` };
   }
   if (plan.isAsi && ch.asiMode === 'feat' && ch.feat
       && typeof GENERAL_FEATS !== 'undefined' && !GENERAL_FEATS[ch.feat]) {
-    return { ok:false, error:`Don inconnu : ${ch.feat}` };
+    return { ok:false, error:`Unknown feat: ${ch.feat}` };
   }
 
   // ── Niveau ──
   c.classes = getClasses(c).map(cl => ({ ...cl }));
   if (plan.isNewClass) {
     c.classes.push({ classe: plan.className, sousClasse:'', niveau:1, customSousClasse:'' });
-    log.push(`${plan.className} ajouté au niveau 1 (multiclassage)`);
+    log.push(`${plan.className} added at level 1 (multiclassing)`);
   } else {
     c.classes[plan.classIdx].niveau = plan.toLevel;
-    log.push(`${plan.className} niveau ${plan.fromLevel} → ${plan.toLevel}`);
+    log.push(`${plan.className} level ${plan.fromLevel} → ${plan.toLevel}`);
   }
   const idx = plan.isNewClass ? c.classes.length - 1 : plan.classIdx;
 
@@ -8509,7 +8509,7 @@ function applyLevelUp(c, plan, choices) {
   // ── Sous-classe (déjà validée plus haut) ──
   if (plan.needsSubclass && ch.subclass) {
     c.classes[idx].sousClasse = ch.subclass;
-    log.push(`Sous-classe : ${ch.subclass}`);
+    log.push(`Subclass : ${ch.subclass}`);
   }
 
   // ── Expertise ── uniquement sur des competences deja maitrisees
@@ -8573,13 +8573,13 @@ function applyLevelUp(c, plan, choices) {
           : `+2 ${(ch.asiA || '').toUpperCase()}`);
   }
 
-  if (plan.pbAfter > plan.pbBefore) log.push(`Bonus de maîtrise +${plan.pbBefore} → +${plan.pbAfter}`);
+  if (plan.pbAfter > plan.pbBefore) log.push(`Proficiency bonus +${plan.pbBefore} → +${plan.pbAfter}`);
   const prepAfter = preparedTotal(c);
-  if (prepAfter > plan.preparedBefore) log.push(`Sorts préparés ${plan.preparedBefore} → ${prepAfter}`);
-  if (plan.cantripsGained > 0) log.push(`+${plan.cantripsGained} sort mineur à choisir`);
+  if (prepAfter > plan.preparedBefore) log.push(`Prepared spells ${plan.preparedBefore} → ${prepAfter}`);
+  if (plan.cantripsGained > 0) log.push(`+${plan.cantripsGained} cantrip to choose`);
   const topApres = topSlotLevel(computeMulticlassSlots(c));
   const topAvant = topSlotLevel(plan.slotsBefore);
-  if (topApres > topAvant) log.push(`Sorts de niveau ${topApres} débloqués`);
+  if (topApres > topAvant) log.push(`Level ${topApres} spells unlocked`);
 
   return { ok:true, log, gain, totalLevel: getTotalLevel(c) };
 }
@@ -8594,11 +8594,11 @@ function startingSpellHint(className) {
   if (!st) return null;
   const prepared = (PREPARED_SPELLS[className] || [])[0] || 0;
   const bits = [];
-  if (st.cantrips)  bits.push(`<strong>${st.cantrips}</strong> sort${st.cantrips > 1 ? 's' : ''} mineur${st.cantrips > 1 ? 's' : ''}`);
-  if (st.spellbook) bits.push(`<strong>${st.spellbook}</strong> sorts de niveau 1 pour ton grimoire (dont <strong>${prepared}</strong> préparés)`);
-  else if (prepared) bits.push(`<strong>${prepared}</strong> sorts de niveau 1 à préparer`);
+  if (st.cantrips)  bits.push(`<strong>${st.cantrips}</strong> cantrip${st.cantrips > 1 ? 's' : ''}`);
+  if (st.spellbook) bits.push(`<strong>${st.spellbook}</strong> level-1 spells for your spellbook (with <strong>${prepared}</strong> prepared)`);
+  else if (prepared) bits.push(`<strong>${prepared}</strong> level-1 spells to prepare`);
   if (!bits.length) return null;
-  return `Il te reste à choisir ${bits.join(' et ')} — via le Compendium, une fois la fiche créée.`;
+  return `You still need to choose ${bits.join(' and ')} — through the Compendium, once the sheet exists.`;
 }
 
 /* ── PV maximum au niveau 1 ──
@@ -8668,14 +8668,14 @@ function calcAndSetAC() {
     case 'light': {
       const b = cfg.baseAC || 11;
       base = b + dex;
-      formula = `${b} (${cfg.armorName||'Légère'}) + ${dex>=0?'+':''}${dex} DEX`;
+      formula = `${b} (${cfg.armorName||'Light'}) + ${dex>=0?'+':''}${dex} DEX`;
       break;
     }
     case 'medium': {
       const b = cfg.baseAC || 12;
       const d = Math.min(dex, 2);
       base = b + d;
-      formula = `${b} (${cfg.armorName||'Intermédiaire'}) + ${d>=0?'+':''}${d} DEX (max +2)`;
+      formula = `${b} (${cfg.armorName||'Medium'}) + ${d>=0?'+':''}${d} DEX (max +2)`;
       break;
     }
     case 'heavy':
@@ -8700,7 +8700,7 @@ function calcAndSetAC() {
       break;
     case 'custom':
       base = cfg.baseAC || 10;
-      formula = `${base} (Personnalisé)`;
+      formula = `${base} (Custom)`;
       break;
     default: // unarmored
       base = 10 + dex;
@@ -8928,12 +8928,12 @@ function toggleAttune(idx) {
   const inv = INV();
   const it = (inv.items || [])[idx];
   if (!it || !isAttunable(it)) return null;
-  if (it.attuned) { it.attuned = false; return `Lien rompu avec ${it.name || "l'objet"}`; }
+  if (it.attuned) { it.attuned = false; return `Attunement broken with ${it.name || 'the item'}`; }
   if (attunedItems(inv).length >= ATTUNE_MAX) {
-    return `Deja lie a ${ATTUNE_MAX} objets — romps un lien d'abord`;
+    return `Already attuned to ${ATTUNE_MAX} items — break one first`;
   }
   it.attuned = true;
-  return `Lie a ${it.name || "l'objet"}`;
+  return `Attuned to ${it.name || 'the item'}`;
 }
 
 /* Consomme une unite. On ne supprime pas l'objet a zero : un flacon vide
@@ -8942,9 +8942,9 @@ function useConsumable(idx) {
   const it = (INV().items || [])[idx];
   if (!it) return null;
   const q = parseInt(it.qty) || 0;
-  if (q <= 0) return `${it.name || 'Objet'} : il n'en reste plus`;
+  if (q <= 0) return `${it.name || 'Item'}: none left`;
   it.qty = q - 1;
-  return `${it.name || 'Objet'} utilise — il en reste ${it.qty}`;
+  return `${it.name || 'Item'} used — ${it.qty} left`;
 }
 
 function renderAttunement() {
@@ -8961,8 +8961,8 @@ function renderAttunement() {
   box.innerHTML = lies.length
     ? lies.map(it => `<div class="attune-item">⟡ ${esc(it.name || 'Sans nom')}</div>`).join('')
     : `<div class="attune-empty">${dispo
-        ? 'Aucun lien actif — utilise le ⟡ sur un objet magique de ton inventaire.'
-        : 'Aucun objet magique dans ton inventaire.'}</div>`;
+        ? 'No active attunement — use ⟡ on a magic item in your inventory.'
+        : 'No magic items in your inventory.'}</div>`;
 }
 
 function renderWornArmor() {
@@ -8978,19 +8978,19 @@ function renderWornArmor() {
     presetOptions = ARMOR_PRESETS[mode].map(p =>
       `<option value="${p.baseAC}|${p.name}"${cfg.armorName===p.name?' selected':''}>${p.name} (CA ${p.baseAC})</option>`
     ).join('');
-    presetOptions = `<option value="">— Choisir —</option>` + presetOptions;
+    presetOptions = `<option value="">— Choose —</option>` + presetOptions;
   }
 
   const MODES = [
     { v:'unarmored',     l:'Sans armure' },
-    { v:'light',         l:'Armure légère' },
-    { v:'medium',        l:'Armure intermédiaire' },
+    { v:'light',         l:'Light armor' },
+    { v:'medium',        l:'Medium armor' },
     { v:'heavy',         l:'Armure lourde' },
     { v:'mageArmor',     l:'Mage Armor' },
-    { v:'unarmoredBarb', l:'Défense sans armure — Barbare' },
-    { v:'unarmoredMonk', l:'Défense sans armure — Moine' },
+    { v:'unarmoredBarb', l:'Unarmored Defense — Barbarian' },
+    { v:'unarmoredMonk', l:'Unarmored Defense — Monk' },
     { v:'natural',       l:'Armure naturelle' },
-    { v:'custom',        l:'Personnalisé' },
+    { v:'custom',        l:'Custom' },
   ];
   const modeOpts = MODES.map(m => `<option value="${m.v}"${mode===m.v?' selected':''}>${m.l}</option>`).join('');
 
@@ -9025,7 +9025,7 @@ function renderWornArmor() {
     </div>
     <div class="wa-formula" id="wa-formula">—</div>
     ${(() => { const m = equippedArmorMismatch(C(), INV());
-      return m ? `<div class="wa-mismatch">⚠ ${esc(m)} n'est équipée depuis aucun objet de ton inventaire.</div>` : ''; })()}
+      return m ? `<div class="wa-mismatch">⚠ ${esc(m)} isn't equipped from any item in your inventory.</div>` : ''; })()}
   </div>`;
 
   calcAndSetAC(); // compute and fill badge + formula
@@ -9138,10 +9138,10 @@ function renderLootValue() {
   const purse = purseValue(inv.currency);
   if (!total && !purse) { box.innerHTML = ''; return; }
   box.innerHTML =
-      `<span class="inv-val-label">Valeur</span>`
+      `<span class="inv-val-label">Value</span>`
     + `<strong>${fmtGp(total + purse)} po</strong>`
-    + `<span class="inv-val-detail">${fmtGp(total)} en objets &middot; ${fmtGp(purse)} en bourse`
-    + (sansPrix ? ` &middot; <span class="inv-val-missing">${sansPrix} sans prix</span>` : '')
+    + `<span class="inv-val-detail">${fmtGp(total)} in items &middot; ${fmtGp(purse)} in coin`
+    + (sansPrix ? ` &middot; <span class="inv-val-missing">${sansPrix} without a price</span>` : '')
     + `</span>`;
 }
 
@@ -9153,7 +9153,7 @@ function renderEncumbrance() {
   if (chk) chk.checked = !!c.ignoreEncumbrance;
   if (c.ignoreEncumbrance) {
     box.className = 'inv-enc off';
-    box.innerHTML = '<span class="inv-enc-label">Encombrement ignore</span>';
+    box.innerHTML = '<span class="inv-enc-label">Encumbrance ignored</span>';
     return;
   }
   const { total, sansPoids, coins } = inventoryWeight(INV());
@@ -9162,7 +9162,7 @@ function renderEncumbrance() {
   const over = total > cap;
   box.className = 'inv-enc' + (over ? ' over' : pct >= 80 ? ' warn' : '');
   box.innerHTML =
-      `<div class="inv-enc-head"><span class="inv-enc-label">Charge</span>`
+      `<div class="inv-enc-head"><span class="inv-enc-label">Load</span>`
     + `<strong>${total} / ${cap} lb</strong>`
     + (over ? '<span class="inv-enc-flag">&#9888; au-dela de ta capacite</span>' : '') + `</div>`
     + `<div class="inv-enc-track"><div class="inv-enc-bar" style="width:${pct}%"></div></div>`
@@ -9184,7 +9184,7 @@ function renderInventory() {
     { value:'armure', label:'🛡 Armure' },
     { value:'consommable', label:'⚗ Consommable' },
     { value:'magique', label:'✦ Magique' },
-    { value:'equipement', label:'🎒 Équipement' },
+    { value:'equipement', label:'🎒 Equipment' },
   ];
   const catOpts = CAT_OPTIONS.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
   items.forEach((item, i) => {
@@ -9197,14 +9197,14 @@ function renderInventory() {
       <td><input class="inv-inp" style="width:50px;text-align:center;" data-item="${i}" data-ik="qty"   type="number" value="${item.qty||1}" min="0"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Nom de l'objet"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="notes" value="${esc(item.notes||'')}" placeholder="Description"></td>
-      <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Poids unitaire (lb)"></td>
+      <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Unit weight (lb)"></td>
       <td><select class="inv-inp" style="padding:0.18rem 0.25rem;font-size:0.74rem;" data-item="${i}" data-ik="cat">${selOpts}</select></td>
       <td style="white-space:nowrap;">${item.cat === 'consommable'
-        ? `<button class="inv-use-btn" data-use-item="${i}" title="Utiliser une unité" aria-label="Utiliser ${esc(item.name||'')}">⌁</button>`
+        ? `<button class="inv-use-btn" data-use-item="${i}" title="Use one" aria-label="Utiliser ${esc(item.name||'')}">⌁</button>`
         : ''}${isAttunable(item)
-        ? `<button class="inv-attune-btn${item.attuned ? ' on' : ''}" data-attune-item="${i}" title="${item.attuned ? 'Rompre le lien' : 'Établir un lien magique'}" aria-label="${item.attuned ? 'Rompre le lien avec' : 'Se lier à'} ${esc(item.name||'')}">⟡</button>`
+        ? `<button class="inv-attune-btn${item.attuned ? ' on' : ''}" data-attune-item="${i}" title="${item.attuned ? 'Break attunement' : 'Attune to this item'}" aria-label="${item.attuned ? 'Break attunement with' : 'Attune to'} ${esc(item.name||'')}">⟡</button>`
         : ''}${isEquippable(item)
-        ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Retirer' : 'Équiper'}" aria-label="${item.equipped ? 'Retirer' : 'Équiper'} ${esc(item.name||'')}">${item.equipped ? '🛡' : '○'}</button>`
+        ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Remove' : 'Equip'}" aria-label="${item.equipped ? 'Remove' : 'Equip'} ${esc(item.name||'')}">${item.equipped ? '🛡' : '○'}</button>`
         : ''}<button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
     `;
     tbody.appendChild(tr);
@@ -9284,8 +9284,8 @@ function castSpell(i) {
     const used = parseInt(c.emplacementsUtilises[L]) || 0;
     if (max - used > 0) { castLvl = L; break; }
   }
-  if (!castLvl) { showToast(`✗ Aucun emplacement disponible (niv.${lvl}+)`); return; }
-  if (castLvl > lvl && !confirm(`Aucun emplacement niv.${lvl} disponible.\nUtiliser un emplacement de niveau ${castLvl} ?`)) return;
+  if (!castLvl) { showToast(`✗ No slot available (lvl ${lvl}+)`); return; }
+  if (castLvl > lvl && !confirm(`No level ${lvl} slot available.\nUtiliser un emplacement de niveau ${castLvl} ?`)) return;
   // Concentration : proposer de remplacer si un autre sort est actif
   if (s.conc) {
     if (c.concentration && c.concentration !== s.name &&
@@ -9344,7 +9344,7 @@ function popUndo() {
     triggerSave();
     // Toast bref
     const badge = document.getElementById('save-badge');
-    if (badge) { const old = badge.textContent; badge.textContent = '↩ Annulé'; setTimeout(() => { badge.textContent = old || ''; }, 1800); }
+    if (badge) { const old = badge.textContent; badge.textContent = '↩ Undone'; setTimeout(() => { badge.textContent = old || ''; }, 1800); }
   } catch(e) { console.warn('Undo error', e); }
 }
 
@@ -9354,7 +9354,7 @@ function _updateUndoBtn() {
   const has = _undoStack.length > 0;
   btn.disabled = !has;
   btn.style.opacity = has ? '1' : '0.4';
-  btn.title = has ? `Annuler (${_undoStack.length} étape${_undoStack.length>1?'s':''}) — Ctrl+Z` : 'Rien à annuler';
+  btn.title = has ? `Cancel (${_undoStack.length} étape${_undoStack.length>1?'s':''}) — Ctrl+Z` : 'Nothing to undo';
 }
 
 /* ── Avatar picker (per-character) ── */
@@ -9465,7 +9465,7 @@ async function renderAdminPanel() {
   const grid    = document.getElementById('admin-grid');
   const loading = document.getElementById('admin-loading');
   grid.innerHTML = ''; loading.style.display = '';
-  loading.textContent = 'Chargement…';
+  loading.textContent = 'Loadment…';
 
   // Barre refresh + timestamp
   const refreshBar = document.createElement('div');
@@ -9485,7 +9485,7 @@ async function renderAdminPanel() {
     const rows = await sbGetAllPlayers();
     loading.style.display = 'none';
     const players = rows.filter(r => r.username !== ADMIN_USER);
-    if (!players.length) { loading.textContent = 'Aucun joueur.'; loading.style.display = ''; return; }
+    if (!players.length) { loading.textContent = 'No players.'; loading.style.display = ''; return; }
 
     const mjGrid = document.createElement('div');
     mjGrid.className = 'admin-grid';
@@ -9672,7 +9672,7 @@ function renderAdminModalTab() {
         </div>
       </div>
 
-      <!-- Caractéristiques -->
+      <!-- Abilities -->
       <div class="sheet-section">
         <div class="sheet-section-title">Ability Scores</div>
         <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.6rem;">
@@ -9814,7 +9814,7 @@ function renderAdminModalTab() {
           `).join('')}
         </div>
       </div>
-      <!-- Compétences -->
+      <!-- Skills -->
       <div class="sheet-section">
         <div class="sheet-section-title">Skills</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.4rem;">
@@ -10311,7 +10311,7 @@ function renderSectionVisibility() {
     const btn = document.createElement('button');
     btn.className = 'btn btn-sm sec-vis-btn' + (isVisible ? ' visible' : '');
     btn.textContent = label;
-    btn.title = isVisible ? 'Cliquer pour masquer' : 'Cliquer pour afficher';
+    btn.title = isVisible ? 'Click to hide' : 'Click to show';
     btn.onclick = () => {
       if (!playerData) return;
       if (!playerData.layout) playerData.layout = captureCurrentLayout();
@@ -10388,7 +10388,7 @@ function extractPortraitPalette(src) {
       const tooClose = picks.some(p => Math.abs(p.h - col.h) < 30 || Math.abs(p.h - col.h) > 330);
       if (!tooClose || picks.length === 0) picks.push(col);
     }
-    if (picks.length === 0) { alert('Aucune couleur exploitable dans ce portrait.'); return; }
+    if (picks.length === 0) { alert('No usable color in this portrait.'); return; }
 
     // Convertir en hex et afficher les swatches cliquables
     function toHex(r,g,b) {
@@ -10848,7 +10848,7 @@ function renderRoomList() {
   list.innerHTML = sorted.map(room => {
     const active = _currentRoom?.id === room.id ? ' active' : '';
     const badge = room.unread > 0 ? `<span class="chat-room-badge visible">${room.unread > 9 ? '9+' : room.unread}</span>` : '';
-    const preview = room.lastMsg ? escHtml(room.lastMsg).substring(0, 35) : '<em style="color:#333">Aucun message</em>';
+    const preview = room.lastMsg ? escHtml(room.lastMsg).substring(0, 35) : '<em style="color:#333">No messages</em>';
     return `<div class="chat-room-item${active}" data-room-id="${room.id}">
       <div class="chat-room-icon">${_roomIcon(room)}</div>
       <div class="chat-room-info">
@@ -10949,7 +10949,7 @@ function _renderOneBubble(m, box, prevUser, prevDay) {
   if (isMe) {
     const del = document.createElement('button');
     del.className = 'chat-del-btn';
-    del.title = 'Supprimer';
+    del.title = 'Delete';
     del.textContent = '✕';
     del.addEventListener('click', async () => {
       wrap.style.opacity = '0.4';
@@ -11076,7 +11076,7 @@ function openNewChatModal() {
         <input type="${idx===0?'radio':'checkbox'}" name="${listId}" id="${listId}-${u}" value="${u}">
         <label for="${listId}-${u}">${u}</label>
       </div>`
-    ).join('') || '<div style="color:#555;font-size:0.75rem;padding:0.3rem;">Aucun joueur disponible</div>';
+    ).join('') || '<div style="color:#555;font-size:0.75rem;padding:0.3rem;">No player available</div>';
   });
   modal.classList.add('open');
 }
@@ -11704,10 +11704,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const id = m[1];
     const url = `https://character-service.dndbeyond.com/character/v5/character/${id}`;
     const orig = btn.textContent;
-    btn.disabled = true; btn.innerHTML = '<span class="auth-spinner ddb-fetch-loading"></span> Chargement…';
+    btn.disabled = true; btn.innerHTML = '<span class="auth-spinner ddb-fetch-loading"></span> Loadment…';
     try {
       const r = await fetch(url, { mode: 'cors' });
-      if (!r.ok) throw new Error('HTTP ' + r.status + ' — vérifie que le personnage est en Public');
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' — check that the character is set to Public');
       const txt = await r.text();
       handleDdbJsonText(txt);
     } catch(err) {
@@ -11723,7 +11723,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Bouton "Importer le JSON collé"
   document.getElementById('ddb-paste-btn')?.addEventListener('click', () => {
     const txt = document.getElementById('ddb-paste-area')?.value?.trim();
-    if (!txt) { showToast('⚠ Le champ est vide'); return; }
+    if (!txt) { showToast('⚠ The field is empty'); return; }
     handleDdbJsonText(txt);
     document.getElementById('ddb-paste-area').value = '';
   });
@@ -11998,16 +11998,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const enApercu = pv.style.display !== 'none';
     if (enApercu) {
       pv.style.display = 'none'; ed.style.display = '';
-      btn.textContent = '👁 Aperçu'; btn.classList.remove('on');
+      btn.textContent = '👁 Preview'; btn.classList.remove('on');
       ed.focus();
       return;
     }
     saveCurrentNoteContent();
     const idx = await loadWikiIndex();
     pv.innerHTML = renderNoteMarkdown(ed.value, idx)
-      || '<p class="notes-preview-empty">Page vide.</p>';
+      || '<p class="notes-preview-empty">Empty page.</p>';
     ed.style.display = 'none'; pv.style.display = '';
-    btn.textContent = '✎ Éditer'; btn.classList.add('on');
+    btn.textContent = '✎ Edit'; btn.classList.add('on');
   });
   document.getElementById('btn-add-note-page').addEventListener('click', () => {
     if (!playerData) return;
@@ -12023,7 +12023,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!playerData) return;
     saveCurrentNoteContent();          // ne pas supprimer une version perimee
     const pages = getNotePages();
-    if (pages.length <= 1) { showToast('Il doit rester au moins une page.'); return; }
+    if (pages.length <= 1) { showToast('At least one page must remain.'); return; }
     const idx  = activeNotesPageIdx;
     const page = pages[idx];
     const nom  = page?.name || `Page ${idx + 1}`;
@@ -12031,21 +12031,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Une page de notes representant parfois des heures de jeu, on demande
     // confirmation en annoncant ce qu'elle contient, puis on laisse annuler.
     if (car > 0 && !confirm(
-      `Supprimer la page « ${nom} » ?
-${car} caractere(s) de notes.
+      `Delete the page "${nom}"?
+${car} characters of notes.
 
 `
-      + `Tu pourras annuler pendant quelques secondes.`
+      + `You can undo this for a few seconds.`
     )) return;
     pages.splice(idx, 1);
     if (activeNotesPageIdx >= pages.length) activeNotesPageIdx = pages.length - 1;
     renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
-    showCharUndoToast(`🗑 Page « ${nom} » supprimee`, () => {
+    showCharUndoToast(`🗑 Page "${nom}" deleted`, () => {
       const p2 = getNotePages();
       p2.splice(Math.min(idx, p2.length), 0, page);
       activeNotesPageIdx = Math.min(idx, p2.length - 1);
       renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
-      showToast(`✦ Page « ${nom} » restauree`);
+      showToast(`✦ Page "${nom}" restored`);
     });
   });
 
@@ -12086,7 +12086,7 @@ ${car} caractere(s) de notes.
         playerData = imported;
         await sbUpdateData(currentUser, playerData);
         renderDashboard();
-        alert('Fiche importée avec succès !');
+        alert('Sheet imported successfully!');
       } catch(err) { alert('Erreur : ' + err.message); }
     };
     reader.readAsText(file);
@@ -12096,7 +12096,7 @@ ${car} caractere(s) de notes.
   document.getElementById('btn-reset-char').addEventListener('click', async () => {
     const slot = activeSlot();
     if (!slot) return;
-    if (!confirm('Réinitialiser "' + (slot.name || 'ce personnage') + '" ? Irréversible.')) return;
+    if (!confirm('Reset "' + (slot.name || 'ce personnage') + '"? This cannot be undone.')) return;
     slot.character = emptyCharacter();
     slot.inventory = { items:[], currency:{pp:0,gp:0,ep:0,sp:0,cp:0} };
     slot.notes = emptyNotesPages();
@@ -12278,7 +12278,7 @@ ${car} caractere(s) de notes.
     renderMulticlasses(); triggerSave();
   });
   document.getElementById('btn-reset-layout')?.addEventListener('click', () => {
-    if (!confirm('Réinitialiser la mise en page par défaut ?')) return;
+    if (!confirm('Reset to the default layout?')) return;
     if (playerData) { playerData.layout = null; triggerSave(); }
     // Quitter le mode édition si actif
     if (layoutEditMode) {
@@ -12441,7 +12441,7 @@ ${car} caractere(s) de notes.
     playerData.inspiration = !playerData.inspiration;
     renderInspiration();
     triggerSave();
-    showToast(playerData.inspiration ? '✦ Inspiration gagnée !' : '✦ Inspiration utilisée.');
+    showToast(playerData.inspiration ? '✦ Inspiration gained!' : '✦ Inspiration used.');
   });
 
   /* ── Épuisement (pips) ── */
@@ -12604,11 +12604,11 @@ ${car} caractere(s) de notes.
     const selTool    = document.getElementById('wiz-tool');
     const selLang1   = document.getElementById('wiz-lang1');
     const selLang2   = document.getElementById('wiz-lang2');
-    selSpecies.innerHTML = '<option value="">— Choisir —</option>'
+    selSpecies.innerHTML = '<option value="">— Choose —</option>'
       + Object.keys(SPECIES_DATA).map(n => `<option>${n}</option>`).join('');
-    selClass.innerHTML   = '<option value="">— Choisir —</option>'
+    selClass.innerHTML   = '<option value="">— Choose —</option>'
       + Object.keys(CLASS_DATA).map(n => `<option>${n}</option>`).join('');
-    selBg.innerHTML      = '<option value="">— Choisir —</option>'
+    selBg.innerHTML      = '<option value="">— Choose —</option>'
       + Object.keys(BACKGROUND_DATA).map(n => `<option>${n}</option>`).join('');
 
     /* ── Grille de caractéristiques (tableau standard) ── */
@@ -12639,8 +12639,8 @@ ${car} caractere(s) de notes.
       });
       const remaining = STD_ARRAY.length - used.length;
       document.getElementById('wiz-abil-note').innerHTML = remaining
-        ? `Il reste <strong>${remaining}</strong> valeur${remaining > 1 ? 's' : ''} à placer — tu pourras aussi tout ajuster plus tard dans la fiche.`
-        : `<strong>✓ Tableau complet.</strong> Tu peux ajuster les scores à tout moment dans la fiche.`;
+        ? `<strong>${remaining}</strong> value${remaining > 1 ? 's' : ''} left to place — you can also adjust everything later on the sheet.`
+        : `<strong>✓ Array complete.</strong> You can adjust the scores at any time on the sheet.`;
       renderBgBonus();
     }
     abilBox.addEventListener('change', refreshAbils);
@@ -12665,7 +12665,7 @@ ${car} caractere(s) de notes.
         const same = s2.value === s1.value;
         wizBgOk = !same;   // bloque « Suivant » : sinon les +2/+1 sont perdus en silence
         document.getElementById('wiz-bgb-warn').textContent =
-          same ? '⚠ Choisis deux caractéristiques différentes (ou +1/+1/+1 à la main dans la fiche).' : '';
+          same ? '⚠ Pick two different abilities (or set +1/+1/+1 by hand on the sheet).' : '';
         // Aperçu du total dans les cellules
         abilBox.querySelectorAll('.wiz-abil-cell').forEach(cell => {
           const k = cell.querySelector('.wiz-abil-sel').dataset.abil;
@@ -12691,13 +12691,13 @@ ${car} caractere(s) de notes.
     };
     document.getElementById('wiz-suggest-abils')?.addEventListener('click', () => {
       const order = SUGGESTED[selClass.value];
-      if (!order) { showToast('Choisis d\'abord une classe (étape 3)'); return; }
+      if (!order) { showToast('Choisis d\'a class first (step 3)'); return; }
       order.forEach((k, i) => {
         const sel = abilBox.querySelector(`[data-abil="${k}"]`);
         if (sel) sel.value = String(STD_ARRAY[i]);
       });
       refreshAbils();
-      showToast(`⚡ Répartition suggérée pour ${selClass.value}`);
+      showToast(`⚡ Suggested spread for ${selClass.value}`);
     });
 
     /* ── Aperçus ── */
@@ -12709,8 +12709,8 @@ ${car} caractere(s) de notes.
       if (data?.lineages) {
         wrap.style.display = '';
         document.getElementById('wiz-lineage-label').textContent =
-          selSpecies.value === 'Tiefling' ? 'Héritage fiélon' : 'Lignée';
-        selLineage.innerHTML = '<option value="">— Choisir —</option>'
+          selSpecies.value === 'Tiefling' ? 'Fiendish Legacy' : 'Lineage';
+        selLineage.innerHTML = '<option value="">— Choose —</option>'
           + Object.keys(data.lineages).map(l => `<option>${l}</option>`).join('');
       } else { wrap.style.display = 'none'; selLineage.innerHTML = ''; }
     }
@@ -12736,7 +12736,7 @@ ${car} caractere(s) de notes.
       if (!d?.skillList) { box.innerHTML = ''; return; }
       const full = wizSkills.size >= d.skillChoices;
       box.innerHTML = `<div class="wiz-skills-head">
-          <span class="field-label">Compétences — choisis-en ${d.skillChoices}</span>
+          <span class="field-label">Skills — choose ${d.skillChoices}</span>
           <span class="cf-skill-count${full ? ' done' : ''}">${wizSkills.size}/${d.skillChoices}</span>
         </div>
         <div class="cf-skill-chips">${d.skillList.map(k => {
@@ -12761,7 +12761,7 @@ ${car} caractere(s) de notes.
       const d = CLASS_DATA[selClass.value];
       if (!d) { box.innerHTML = ''; return; }
       const info = DND_CLASSES[selClass.value] || {};
-      box.innerHTML = `<div>Dé de vie <strong>${info.de || '1d8'}</strong>`
+      box.innerHTML = `<div>Hit Die <strong>${info.de || '1d8'}</strong>`
         + `${info.sort ? ` · Incantation <strong>${info.sort}</strong>` : ''}`
         + ` · Sauvegardes <strong>${d.saves.map(s => s.toUpperCase()).join(' & ')}</strong></div>`
         + (d.armorProf ? `<div>Armures : ${d.armorProf}</div>` : '')
@@ -12776,8 +12776,8 @@ ${car} caractere(s) de notes.
       const opts = STARTING_EQUIP[selClass.value];
       const box  = document.getElementById('wiz-equip-preview');
       if (!opts) {
-        selEquip.innerHTML = '<option value="">— aucune donnée pour cette classe —</option>';
-        box.innerHTML = 'Choisis une classe à l\'étape 3 pour voir son équipement de départ.';
+        selEquip.innerHTML = '<option value="">— no data for this class —</option>';
+        box.innerHTML = 'Choisis une classe à l\'step 3 to see its starting equipment.';
         return;
       }
       selEquip.innerHTML = '<option value="">— Passer (inventaire vide) —</option>'
@@ -12788,10 +12788,10 @@ ${car} caractere(s) de notes.
       const box  = document.getElementById('wiz-equip-preview');
       const opts = STARTING_EQUIP[selClass.value];
       const o    = opts && selEquip.value !== '' ? opts[+selEquip.value] : null;
-      if (!o) { box.innerHTML = opts ? 'Aucun équipement — tu pourras tout ajouter à la main.' : box.innerHTML; return; }
+      if (!o) { box.innerHTML = opts ? 'No equipment — you can add everything by hand.' : box.innerHTML; return; }
       box.innerHTML = (o.items.length
           ? o.items.map(it => `<div>• ${it.qty} × ${it.name}</div>`).join('')
-          : '<div>Aucun objet</div>')
+          : '<div>No items</div>')
         + `<div style="margin-top:0.35rem;">Bourse : <strong>${o.gold} po</strong></div>`;
     }
     selEquip.addEventListener('change', previewEquip);
@@ -12801,8 +12801,8 @@ ${car} caractere(s) de notes.
       const d = BACKGROUND_DATA[selBg.value];
       refreshTool();
       if (!d) { box.innerHTML = ''; return; }
-      box.innerHTML = `<div>Caractéristiques <strong>${d.abilities.map(a => ABIL_LABEL[a]).join(' · ')}</strong></div>`
-        + `<div>Compétences <strong>${d.skills}</strong> <span style="color:#888;">(cochées automatiquement)</span></div>`
+      box.innerHTML = `<div>Abilities <strong>${d.abilities.map(a => ABIL_LABEL[a]).join(' · ')}</strong></div>`
+        + `<div>Skills <strong>${d.skills}</strong> <span style="color:#888;">(checked automatically)</span></div>`
         // Si l'outil est au choix, le select ci-dessus fait foi — pas de « (choice) » en double
         + (TOOL_CHOICES[d.tool] ? '' : `<div>Outil : ${d.tool}</div>`)
         + `<div class="wiz-trait"><span class="wiz-trait-name">${d.feat}</span> — ${ORIGIN_FEATS[d.feat] || ''}</div>`;
@@ -12819,7 +12819,7 @@ ${car} caractere(s) de notes.
     }
 
     /* Langues : Commun d'office + 2 au choix (PHB 2024) */
-    const langOpts = sel => '<option value="">— Choisir —</option>'
+    const langOpts = sel => '<option value="">— Choose —</option>'
       + `<optgroup label="Courantes">${LANGUAGES.standard.map(l => `<option${l === sel ? ' selected' : ''}>${l}</option>`).join('')}</optgroup>`
       + `<optgroup label="Rares">${LANGUAGES.rare.map(l => `<option${l === sel ? ' selected' : ''}>${l}</option>`).join('')}</optgroup>`;
     selLang1.innerHTML = langOpts();
@@ -12829,7 +12829,7 @@ ${car} caractere(s) de notes.
       const dup = selLang1.value && selLang1.value === selLang2.value;
       document.getElementById('wiz-lang-warn')?.remove();
       if (dup) selLang2.insertAdjacentHTML('afterend',
-        `<div class="wiz-lang-warn" id="wiz-lang-warn">⚠ Deux fois la même langue — tu en perds une.</div>`);
+        `<div class="wiz-lang-warn" id="wiz-lang-warn">⚠ Same language twice — you lose one.</div>`);
     };
     selLang1.addEventListener('change', syncLangs);
     selLang2.addEventListener('change', syncLangs);
@@ -12855,21 +12855,21 @@ ${car} caractere(s) de notes.
       const el = document.getElementById('wiz-summary');
       if (!el) return;
       const missing = [
-        !selSpecies.value && 'espèce',
+        !selSpecies.value && 'species',
         !selClass.value   && 'classe',
         !selBg.value      && 'background',
       ].filter(Boolean);
       const spellHint = startingSpellHint(selClass.value);
       el.innerHTML = (missing.length
-        ? `<span class="wiz-sum-warn">⚠ Non renseigné : ${missing.join(', ')}</span> — la fiche sera créée telle quelle, à compléter à la main.`
-        : `<span class="wiz-sum-ok">✓</span> ${esc(selSpecies.value)} · ${esc(selClass.value)} 1 · ${esc(selBg.value)} — CA, attaques et maîtrises seront remplies automatiquement.`)
+        ? `<span class="wiz-sum-warn">⚠ Not set: ${missing.join(', ')}</span> — the sheet will be created as is, to complete by hand.`
+        : `<span class="wiz-sum-ok">✓</span> ${esc(selSpecies.value)} · ${esc(selClass.value)} 1 · ${esc(selBg.value)} — AC, attacks and proficiencies will be filled in automatically.`)
         + (spellHint ? `<div class="wiz-sum-todo">✦ ${spellHint}</div>` : '');
     }
 
     btnNext.addEventListener('click', () => {
       // Étape 5 : deux bonus sur la même caractéristique = +2/+1 perdus sans avertir
       if (step === 5 && selBg.value && !wizBgOk) {
-        showToast('⚠ Choisis deux caractéristiques différentes pour les bonus du background.');
+        showToast('⚠ Pick two different abilities for the background bonuses.');
         return;
       }
       showStep(step + 1);
@@ -12988,7 +12988,7 @@ ${car} caractere(s) de notes.
       c.langues = ['Common', selLang1.value, selLang2.value]
         .filter((l, i, arr) => l && arr.indexOf(l) === i).join(', ');
 
-      finishCreate(id, `✦ ${name} créé — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'fiche vierge'}`);
+      finishCreate(id, `✦ ${name} created — ${[c.species, c.classe && c.classe + ' 1', c.background].filter(Boolean).join(' · ') || 'blank sheet'}`);
     });
 
     /* ── Fiche vierge : certains préfèrent tout remplir eux-mêmes ── */
@@ -12998,7 +12998,7 @@ ${car} caractere(s) de notes.
       playerData.characters[id] = emptyCharSlot(name);
       playerData.characters[id].character.characterName = name;
       playerData.characters[id].character.avatar = newCharSelectedAvatar;
-      finishCreate(id, `⊘ ${name} créé — fiche vierge`);
+      finishCreate(id, `⊘ ${name} created — blank sheet`);
     });
 
     function finishCreate(id, toast) {
@@ -13052,7 +13052,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const eligibles = SKILLS.filter(sk => (parseInt(c[sk.key]) || 0) === 1);
     if (!eligibles.length) {
       box.innerHTML = '';
-      $('lvlup-exp-note').innerHTML = "⚠ Aucune compétence maîtrisée à doubler — coche d'abord tes maîtrises.";
+      $('lvlup-exp-note').innerHTML = "⚠ No proficient skill to double — check your proficiencies first.";
       return;
     }
     const plein = expertisePick.size >= plan.expertiseCount;
@@ -13065,10 +13065,10 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
         const k = chip.dataset.exp;
         if (expertisePick.has(k)) expertisePick.delete(k);
         else if (expertisePick.size < plan.expertiseCount) expertisePick.add(k);
-        else { showToast(`Déjà ${plan.expertiseCount} choisies — retires-en une`); return; }
+        else { showToast(`Already ${plan.expertiseCount} chosen — remove one first`); return; }
         renderExpertiseChips();
       }));
-    $('lvlup-exp-note').textContent = `${expertisePick.size} / ${plan.expertiseCount} choisie(s)`;
+    $('lvlup-exp-note').textContent = `${expertisePick.size} / ${plan.expertiseCount} chosen`;
   }
 
   const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk',
@@ -13090,32 +13090,32 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
 
     // Titre
     $('lvlup-headline').innerHTML = plan.isNewClass
-      ? `${esc(plan.className)} niveau 1 <span class="lvlup-sub">multiclassage — niveau total ${plan.totalBefore} → ${plan.totalAfter}</span>`
+      ? `${esc(plan.className)} level 1 <span class="lvlup-sub">multiclassing — total level ${plan.totalBefore} → ${plan.totalAfter}</span>`
       : `${esc(plan.className)} ${plan.fromLevel} → ${plan.toLevel}`
-        + `<span class="lvlup-sub">niveau total ${plan.totalBefore} → ${plan.totalAfter}`
-        + (plan.pbAfter > plan.pbBefore ? ` · maîtrise +${plan.pbBefore} → +${plan.pbAfter}` : '') + `</span>`;
+        + `<span class="lvlup-sub">total level ${plan.totalBefore} → ${plan.totalAfter}`
+        + (plan.pbAfter > plan.pbBefore ? ` · proficiency +${plan.pbBefore} → +${plan.pbAfter}` : '') + `</span>`;
 
     // Prérequis de multiclassage
     $('lvlup-prereq').innerHTML = (plan.prereq && !plan.prereq.ok)
-      ? `⚠ Prérequis de multiclassage non remplis — ${plan.prereq.missing.join(' ; ')}.
-         Tu peux continuer, mais ce n'est pas conforme aux règles 2024.`
+      ? `⚠ Prerequisite de multiclassage non remplis — ${plan.prereq.missing.join(' ; ')}.
+         You can continue, but this doesn't follow the 2024 rules.`
       : '';
 
     // PV
     if (chosenHp === null) chosenHp = plan.avgHp;
     $('lvlup-hp-row').innerHTML =
-      `<button class="btn btn-sm btn-gold" id="lvlup-hp-avg">⊘ Moyenne (+${plan.avgHp})</button>
-       <button class="btn btn-sm" id="lvlup-hp-roll">🎲 Lancer ${plan.hitDie}</button>
+      `<button class="btn btn-sm btn-gold" id="lvlup-hp-avg">⊘ Average (+${plan.avgHp})</button>
+       <button class="btn btn-sm" id="lvlup-hp-roll">🎲 Roll ${plan.hitDie}</button>
        <span class="lvlup-hp-pick" id="lvlup-hp-pick">+${chosenHp} PV</span>`;
     $('lvlup-hp-detail').innerHTML =
       `${plan.hitDie} ${plan.conMod < 0 ? '−' : '+'} <strong>${Math.abs(plan.conMod)}</strong> CON`
-      + (plan.speciesHp ? ` + <strong>${plan.speciesHp}</strong> espèce` : '')
-      + ` — entre ${plan.minHp} et ${plan.maxHp} PV.`;
+      + (plan.speciesHp ? ` + <strong>${plan.speciesHp}</strong> species` : '')
+      + ` — between ${plan.minHp} and ${plan.maxHp} HP.`;
     $('lvlup-hp-avg').addEventListener('click', () => { chosenHp = plan.avgHp; $('lvlup-hp-pick').textContent = `+${chosenHp} PV`; });
     $('lvlup-hp-roll').addEventListener('click', () => {
       const r = rollDiceExpr(plan.hitDie);
       chosenHp = Math.max(1, r.total + plan.conMod + plan.speciesHp);
-      showDamageRoll(`PV niveau ${plan.totalAfter} · ${plan.hitDie}`, r);
+      showDamageRoll(`HP level ${plan.totalAfter} · ${plan.hitDie}`, r);
       $('lvlup-hp-pick').textContent = `+${chosenHp} PV`;
     });
 
@@ -13123,7 +13123,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const subBlock = $('lvlup-sub-block');
     subBlock.style.display = plan.needsSubclass ? '' : 'none';
     if (plan.needsSubclass) {
-      $('lvlup-sub').innerHTML = '<option value="">— Choisir —</option>'
+      $('lvlup-sub').innerHTML = '<option value="">— Choose —</option>'
         + plan.subOptions.map(s => `<option>${esc(s)}</option>`).join('');
       $('lvlup-sub-preview').innerHTML = '';
     }
@@ -13138,8 +13138,8 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
         return `<option value="${k}"${sel === k ? ' selected' : ''}${v >= 20 ? ' disabled' : ''}>${l} ${v}${v >= 20 ? ' (max)' : ''}</option>`;
       }).join('');
       $('lvlup-asi-a').innerHTML = '<option value="">— +2 ici, ou +1/+1 —</option>' + opt();
-      $('lvlup-asi-b').innerHTML = '<option value="">— aucune (donc +2) —</option>' + opt();
-      $('lvlup-feat').innerHTML = '<option value="">— Choisir un don —</option>'
+      $('lvlup-asi-b').innerHTML = '<option value="">— none (so +2) —</option>' + opt();
+      $('lvlup-feat').innerHTML = '<option value="">— Choose a feat —</option>'
         + Object.keys(GENERAL_FEATS).filter(f => f !== 'Ability Score Improvement')
             .map(f => `<option>${esc(f)}</option>`).join('');
       syncAsiNote();
@@ -13149,20 +13149,20 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const expBlock = $('lvlup-exp-block');
     expBlock.style.display = plan.expertiseCount ? '' : 'none';
     if (plan.expertiseCount) {
-      $('lvlup-exp-req').textContent = `${plan.expertiseCount} compétence${plan.expertiseCount > 1 ? 's' : ''} à doubler`;
+      $('lvlup-exp-req').textContent = `${plan.expertiseCount} skill${plan.expertiseCount > 1 ? 's' : ''} to double`;
       renderExpertiseChips();
     } else expertisePick = new Set();
 
     // Rappels : ce que le niveau apporte mais que l'assistant ne peut pas choisir
     const gains = [];
     if (plan.cantripsGained > 0) {
-      gains.push(`<div><span class="lvlup-gain-icon">✦</span><strong>${plan.cantripsGained}</strong> sort mineur de plus `
-               + `(<strong>${plan.cantripsTotal}</strong> au total) — à prendre dans le Compendium.</div>`);
+      gains.push(`<div><span class="lvlup-gain-icon">✦</span><strong>${plan.cantripsGained}</strong> more cantrip `
+               + `(<strong>${plan.cantripsTotal}</strong> total) — pick them in the Compendium.</div>`);
     }
     const avant = topSlotLevel(plan.slotsBefore);
     const apres = topSlotLevel(computeMulticlassSlots(simulateLevel(c, plan)));
     if (apres > avant) {
-      gains.push(`<div><span class="lvlup-gain-icon">✦</span>Tu débloques les sorts de <strong>niveau ${apres}</strong>.</div>`);
+      gains.push(`<div><span class="lvlup-gain-icon">✦</span>You unlock <strong>level ${apres}</strong>.</div>`);
     }
     $('lvlup-gains-block').style.display = gains.length ? '' : 'none';
     $('lvlup-gains').innerHTML = gains.join('');
@@ -13177,9 +13177,9 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
 
   function syncAsiNote() {
     const a = $('lvlup-asi-a').value, b = $('lvlup-asi-b').value;
-    $('lvlup-asi-note').innerHTML = !a ? 'Choisis au moins une caractéristique.'
+    $('lvlup-asi-note').innerHTML = !a ? 'Pick at least one ability.'
       : (b && b !== a) ? `<strong>+1</strong> ${a.toUpperCase()} et <strong>+1</strong> ${b.toUpperCase()}`
-      : (b && b === a) ? '⚠ Deux fois la même — ce sera un simple +2.'
+      : (b && b === a) ? '⚠ Same one twice — it will just be a +2.'
       : `<strong>+2</strong> ${a.toUpperCase()}`;
   }
   $('lvlup-asi-a').addEventListener('change', syncAsiNote);
@@ -13200,7 +13200,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const wrap = $('lvlup-feat-abil-wrap');
     if (!f) { $('lvlup-feat-desc').innerHTML = ''; wrap.style.display = 'none'; return; }
     $('lvlup-feat-desc').innerHTML =
-      (f.prereq ? `<div style="color:#d9a441;">Prérequis : ${esc(f.prereq)}</div>` : '') + esc(f.desc);
+      (f.prereq ? `<div style="color:#d9a441;">Prerequisite: ${esc(f.prereq)}</div>` : '') + esc(f.desc);
     // Les dons généraux 2024 accordent +1 : on fait choisir dans quelle carac.
     if (f.asi) {
       const keys = abilKeysFromFeat(f.abil);
@@ -13228,20 +13228,20 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
   $('lvlup-confirm').addEventListener('click', () => {
     if (!plan?.ok) return;
     if (plan.needsSubclass && !$('lvlup-sub').value) {
-      showToast('⚠ Choisis ta sous-classe — elle est requise au niveau 3.');
+      showToast('⚠ Choose your subclass — it is required at level 3.');
       return;
     }
     if (plan.isAsi && asiMode === 'abil' && !$('lvlup-asi-a').value) {
-      showToast('⚠ Choisis au moins une caractéristique à améliorer.');
+      showToast('⚠ Pick at least one ability to improve.');
       return;
     }
     if (plan.isAsi && asiMode === 'feat' && !$('lvlup-feat').value) {
-      showToast('⚠ Choisis un don, ou bascule sur Caractéristiques.');
+      showToast('⚠ Pick a feat, or switch to Abilities.');
       return;
     }
     if (plan.expertiseCount && expertisePick.size
         && expertisePick.size < plan.expertiseCount) {
-      showToast(`⚠ Choisis ${plan.expertiseCount} compétences pour l'Expertise, ou aucune.`);
+      showToast(`⚠ Choose ${plan.expertiseCount} skills for Expertise, or none.`);
       return;
     }
     const res = applyLevelUp(C(), plan, {
@@ -13253,7 +13253,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     overlay.classList.remove('open');
     if (!res.ok) { showToast('⚠ ' + res.error); return; }
     renderAll(); renderCharCards(); renderCharSelector(); triggerSave();
-    showToast(`⬆ Niveau ${res.totalLevel} — ${res.log.join(' · ')}`);
+    showToast(`⬆ Level ${res.totalLevel} — ${res.log.join(' · ')}`);
   });
 
   window.openLevelUpModal = function () {
@@ -13261,7 +13261,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const c = C();
     const cur = getClasses(c).map(cl => cl.classe).filter(Boolean);
     $('lvlup-class').innerHTML =
-        `<optgroup label="Tes classes">${cur.map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`
+        `<optgroup label="Your classes">${cur.map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`
       + `<optgroup label="Multiclasser">${CLASS_LIST.filter(n => !cur.includes(n))
             .map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`;
     chosenHp = null;
@@ -13310,7 +13310,7 @@ function debouncedStats(fn, delay = 180) {
 (function () {
   const el = document.createElement('div');
   el.id = 'save-flash';
-  el.textContent = '✓ Sauvegardé';
+  el.textContent = '✓ Saved';
   document.body.appendChild(el);
 })();
 function showSaveFlash() {
@@ -13518,8 +13518,8 @@ document.addEventListener('keydown', e => {
     btn.textContent = locked ? '🔒' : '✏';
     btn.classList.toggle('active', locked);
     btn.title = locked
-      ? 'Mode Affichage — cliquer pour éditer'
-      : 'Verrouiller les champs (mode affichage)';
+      ? 'View mode — click to edit'
+      : 'Lock fields (view mode)';
 
     if (locked) {
       requestAnimationFrame(expandTextareas);
@@ -13639,7 +13639,7 @@ function renderRollHistory() {
       <span class="rh-time">${r.at.toTimeString().slice(0,5)}</span>
       <span class="rh-label" title="${esc(r.label)}">${esc(r.label)}</span>
       <span class="rh-total${r.cls ? ' ' + r.cls : ''}">${esc(String(r.total))}</span>
-    </div>`).join('') : '<div class="rh-empty">Aucun jet pour l\'instant.</div>';
+    </div>`).join('') : '<div class="rh-empty">No rolls yet.</div>';
 }
 
 /* ── 11c. Accessibilité — enhancer générique ──
@@ -13813,9 +13813,9 @@ document.getElementById('death-save-roll-btn')?.addEventListener('click', e => {
     });
   });
   renderHero(); triggerSave();
-  const msg = roll === 20 ? '✦ Critique! +2 succès'
-            : roll === 1  ? '✕ Catastrophe! +2 échecs'
-            : roll >= 10  ? '✓ Succès' : '✗ Échec';
+  const msg = roll === 20 ? '✦ Critical! +2 successes'
+            : roll === 1  ? '✕ Disaster! +2 failures'
+            : roll >= 10  ? '✓ Success' : '✗ Failure';
   showDiceRoll('Jet de Mort', 0, 'normal');
   document.getElementById('dice-total').textContent = msg;
 });
@@ -13836,7 +13836,7 @@ document.addEventListener('keydown', e => {
     }
     case 's': {
       // S → forcer sauvegarde manuelle
-      if (playerData) { e.preventDefault(); triggerSave(); showToast('💾 Sauvegarde forcée…'); }
+      if (playerData) { e.preventDefault(); triggerSave(); showToast('💾 Force-saving…'); }
       break;
     }
     case 'r': {
@@ -13879,7 +13879,7 @@ document.addEventListener('keydown', e => {
         const roll = parseInt(document.getElementById('dice-d20')?.textContent) || 0;
         const succeeded = (roll + saveBonus) >= dc;
         document.getElementById('dice-total').textContent =
-          succeeded ? `✓ Concentration maintenue (DD ${dc})` : `✗ Concentration brisée (DD ${dc})`;
+          succeeded ? `✓ Concentration maintenue (DD ${dc})` : `✗ Concentration broken (DC ${dc})`;
       }
     }
   };
@@ -13897,20 +13897,20 @@ document.addEventListener('keydown', e => {
         <div class="wiz-step" data-step="1">
           <div class="auth-field">
             <label class="auth-label" for="new-char-name">Nom du personnage</label>
-            <input type="text" class="auth-input" id="new-char-name" placeholder="Nom du héros…" maxlength="40" autocomplete="off">
+            <input type="text" class="auth-input" id="new-char-name" placeholder="Hero name…" maxlength="40" autocomplete="off">
           </div>
           <div class="field-label" style="margin:0.5rem 0 0.4rem;">Avatar</div>
           <div class="new-char-avatar-grid" id="new-char-avatar-grid"></div>
         </div>
 
-        <!-- 2 · Espèce -->
+        <!-- 2 · Species -->
         <div class="wiz-step" data-step="2">
           <div class="auth-field">
-            <label class="auth-label" for="wiz-species">Espèce</label>
+            <label class="auth-label" for="wiz-species">Species</label>
             <select class="auth-input" id="wiz-species"></select>
           </div>
           <div class="auth-field" id="wiz-lineage-wrap" style="display:none;">
-            <label class="auth-label" for="wiz-lineage" id="wiz-lineage-label">Lignée</label>
+            <label class="auth-label" for="wiz-lineage" id="wiz-lineage-label">Lineage</label>
             <select class="auth-input" id="wiz-lineage"></select>
           </div>
           <div class="wiz-preview" id="wiz-species-preview"></div>
@@ -13919,7 +13919,7 @@ document.addEventListener('keydown', e => {
         <!-- 3 · Classe -->
         <div class="wiz-step" data-step="3">
           <div class="auth-field">
-            <label class="auth-label" for="wiz-class">Classe (niveau 1)</label>
+            <label class="auth-label" for="wiz-class">Class (level 1)</label>
             <select class="auth-input" id="wiz-class"></select>
           </div>
           <div class="wiz-skills" id="wiz-class-skills"></div>
@@ -13933,7 +13933,7 @@ document.addEventListener('keydown', e => {
             <select class="auth-input" id="wiz-bg"></select>
           </div>
           <div class="auth-field" id="wiz-tool-wrap" style="display:none;">
-            <label class="auth-label" for="wiz-tool">Outil au choix</label>
+            <label class="auth-label" for="wiz-tool">Tool of your choice</label>
             <select class="auth-input" id="wiz-tool"></select>
           </div>
           <div class="wiz-lang-row">
@@ -13946,25 +13946,25 @@ document.addEventListener('keydown', e => {
               <select class="auth-input" id="wiz-lang2"></select>
             </div>
           </div>
-          <div class="wiz-lang-note">Tu parles le <strong>Commun</strong> d'office, plus deux langues de ton origine.</div>
+          <div class="wiz-lang-note">You speak <strong>Commun</strong> by default, plus two languages from your origin.</div>
           <div class="wiz-preview" id="wiz-bg-preview"></div>
         </div>
 
-        <!-- 5 · Caractéristiques -->
+        <!-- 5 · Abilities -->
         <div class="wiz-step" data-step="5">
           <div class="wiz-abil-head">
             <span class="field-label">Tableau standard <strong style="color:var(--gold);">15·14·13·12·10·8</strong></span>
-            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Placer le tableau selon la classe choisie">⚡ Répartition suggérée</button>
+            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Assign the array based on the chosen class">⚡ Suggested spread</button>
           </div>
           <div class="wiz-abils" id="wiz-abils"></div>
           <div class="wiz-bg-bonus" id="wiz-bg-bonus"></div>
           <div class="wiz-preview" id="wiz-abil-note"></div>
         </div>
 
-        <!-- 6 · Équipement de départ -->
+        <!-- 6 · Starting equipment -->
         <div class="wiz-step" data-step="6">
           <div class="auth-field">
-            <label class="auth-label" for="wiz-equip">Équipement de départ</label>
+            <label class="auth-label" for="wiz-equip">Starting equipment</label>
             <select class="auth-input" id="wiz-equip"></select>
           </div>
           <div class="wiz-preview" id="wiz-equip-preview"></div>
@@ -13972,11 +13972,11 @@ document.addEventListener('keydown', e => {
         </div>
 
         <div class="new-char-btn-row wiz-nav">
-          <button class="btn btn-sm" id="new-char-cancel">Annuler</button>
-          <button class="btn btn-sm" id="wiz-blank" title="Créer une fiche entièrement vide, à remplir soi-même">⊘ Fiche vierge</button>
+          <button class="btn btn-sm" id="new-char-cancel">Cancel</button>
+          <button class="btn btn-sm" id="wiz-blank" title="Create a completely blank sheet to fill in yourself">⊘ Blank sheet</button>
           <button class="btn btn-sm" id="wiz-prev" style="display:none;">‹ Retour</button>
           <button class="btn btn-sm btn-gold" id="wiz-next">Suivant ›</button>
-          <button class="btn btn-sm btn-gold" id="new-char-confirm" style="display:none;">✦ Créer</button>
+          <button class="btn btn-sm btn-gold" id="new-char-confirm" style="display:none;">✦ Create</button>
         </div>
       </div>
     </div>
@@ -13984,10 +13984,10 @@ document.addEventListener('keydown', e => {
     <!-- ── Modal Montée de niveau ── -->
     <div class="new-char-modal-overlay" id="lvlup-modal-overlay">
       <div class="new-char-modal lvlup-modal">
-        <h3>⬆ Montée de niveau</h3>
+        <h3>⬆ Level Up</h3>
 
         <div class="auth-field">
-          <label class="auth-label" for="lvlup-class">Classe à monter</label>
+          <label class="auth-label" for="lvlup-class">Class to level up</label>
           <select class="auth-input" id="lvlup-class"></select>
         </div>
         <div class="lvlup-headline" id="lvlup-headline"></div>
@@ -13995,23 +13995,23 @@ document.addEventListener('keydown', e => {
 
         <!-- PV -->
         <div class="lvlup-block">
-          <div class="lvlup-block-title">Points de vie</div>
+          <div class="lvlup-block-title">Hit Points</div>
           <div class="lvlup-hp-row" id="lvlup-hp-row"></div>
           <div class="lvlup-hp-detail" id="lvlup-hp-detail"></div>
         </div>
 
-        <!-- Sous-classe (niveau 3) -->
+        <!-- Subclass (niveau 3) -->
         <div class="lvlup-block" id="lvlup-sub-block" style="display:none;">
-          <div class="lvlup-block-title">Sous-classe <span class="lvlup-req">requise au niveau 3</span></div>
+          <div class="lvlup-block-title">Subclass <span class="lvlup-req">required at level 3</span></div>
           <select class="auth-input" id="lvlup-sub"></select>
           <div class="wiz-preview" id="lvlup-sub-preview"></div>
         </div>
 
         <!-- ASI / don -->
         <div class="lvlup-block" id="lvlup-asi-block" style="display:none;">
-          <div class="lvlup-block-title">Amélioration de caractéristiques <span class="lvlup-req">ou don</span></div>
+          <div class="lvlup-block-title">Ability Score Improvement <span class="lvlup-req">or feat</span></div>
           <div class="lvlup-asi-tabs">
-            <button type="button" class="lvlup-tab active" data-asimode="abil">Caractéristiques</button>
+            <button type="button" class="lvlup-tab active" data-asimode="abil">Abilities</button>
             <button type="button" class="lvlup-tab" data-asimode="feat">Don</button>
           </div>
           <div id="lvlup-asi-abil">
@@ -14024,7 +14024,7 @@ document.addEventListener('keydown', e => {
           <div id="lvlup-asi-feat" style="display:none;">
             <select class="auth-input" id="lvlup-feat"></select>
             <div class="auth-field" id="lvlup-feat-abil-wrap" style="display:none;margin-top:0.5rem;">
-              <label class="auth-label" for="lvlup-feat-abil">+1 dans</label>
+              <label class="auth-label" for="lvlup-feat-abil">+1 in</label>
               <select class="auth-input" id="lvlup-feat-abil"></select>
             </div>
             <div class="wiz-preview" id="lvlup-feat-desc"></div>
@@ -14038,21 +14038,21 @@ document.addEventListener('keydown', e => {
           <div class="lvlup-hp-detail" id="lvlup-exp-note"></div>
         </div>
 
-        <!-- Rappels : sorts mineurs, emplacements -->
+        <!-- Rappels : cantrips, emplacements -->
         <div class="lvlup-block" id="lvlup-gains-block" style="display:none;">
-          <div class="lvlup-block-title">À choisir toi-même</div>
+          <div class="lvlup-block-title">For you to choose</div>
           <div class="lvlup-gains" id="lvlup-gains"></div>
         </div>
 
         <!-- Nouveautés -->
         <div class="lvlup-block" id="lvlup-new-block" style="display:none;">
-          <div class="lvlup-block-title">Ce que tu débloques</div>
+          <div class="lvlup-block-title">What you unlock</div>
           <div class="wiz-preview" id="lvlup-new"></div>
         </div>
 
         <div class="new-char-btn-row">
-          <button class="btn btn-sm" id="lvlup-cancel">Annuler</button>
-          <button class="btn btn-sm btn-gold" id="lvlup-confirm">⬆ Monter de niveau</button>
+          <button class="btn btn-sm" id="lvlup-cancel">Cancel</button>
+          <button class="btn btn-sm btn-gold" id="lvlup-confirm">⬆ Level Up</button>
         </div>
       </div>
     </div>
@@ -14095,7 +14095,7 @@ document.addEventListener('keydown', e => {
 
 <!-- ── Bannière mise à jour PWA ── -->
 <div id="sw-update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:var(--j-panel,#1a1408);border-top:1px solid var(--gold-dark);padding:0.55rem 1rem;align-items:center;justify-content:center;gap:0.8rem;font-size:0.82rem;color:var(--gold,#c9a96e);">
-  🔄 Une mise à jour est disponible.
+  🔄 Une mise à jour est slot available.
   <button onclick="document.getElementById('sw-update-banner').style.display='none';window._swReg&&window._swReg.waiting&&window._swReg.waiting.postMessage('skipWaiting');" style="background:var(--gold-dark);color:#fff;border:none;border-radius:4px;padding:0.25rem 0.7rem;font-size:0.78rem;cursor:pointer;font-family:'Cinzel',serif;">Actualiser</button>
   <button onclick="document.getElementById('sw-update-banner').style.display='none';" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.9rem;">✕</button>
 </div>
@@ -14113,7 +14113,7 @@ function getSbClient() {
 /* ── Familiers ── */
 function _famDefault() {
   return {
-    name: 'Nouveau familier', type: 'Bête', size: 'Petite', alignment: 'Non aligné',
+    name: 'Nouveau familier', type: 'Beast', size: 'Petite', alignment: 'Unaligned',
     ac: 10, acNote: '', pvMax: 4, pvActuel: 4, speed: '30 ft.',
     for: 10, dex: 10, con: 10, int: 10, sag: 10, cha: 10,
     savesNote: '', skillsNote: '', vulnerabilities: '', resistances: '', immunities: '',
@@ -14133,7 +14133,7 @@ function renderFamiliars() {
   const wrap = document.getElementById('fam-cards-wrap');
   if (!wrap) return;
   if (!c.familiars.length) {
-    wrap.innerHTML = '<div class="fam-empty">Aucun familier. Cliquez sur <em>+ Ajouter</em> ou importez depuis le compendium.</div>';
+    wrap.innerHTML = '<div class="fam-empty">No companions. Click <em>+ Add</em> or import from the compendium.</div>';
     return;
   }
   wrap.innerHTML = '';
@@ -14170,7 +14170,7 @@ function renderFamiliars() {
         <div class="fam-head-name">${esc(fam.name)||'—'}</div>
         <div class="fam-head-type">${esc(fam.size)} ${esc(fam.type)}</div>
         <div class="fam-head-hp">♥ ${fam.pvActuel}/${fam.pvMax}</div>
-        <button class="btn-fam-del" data-fi="${fi}" title="Supprimer ce familier">🗑</button>
+        <button class="btn-fam-del" data-fi="${fi}" title="Delete ce familier">🗑</button>
       </div>
       <div class="fam-body">
         <div class="fam-sb-header">
@@ -14178,7 +14178,7 @@ function renderFamiliars() {
             data-fi="${fi}" data-fk="name" value="${esc(fam.name)}">
           <div class="fam-type-line">
             <select class="fam-inline-input" data-fi="${fi}" data-fk="size">
-              ${['Très petite','Petite','Moyenne','Grande','Très grande','Gigantesque'].map(s =>
+              ${['Very small','Petite','Moyenne','Grande','Very large','Gigantesque'].map(s =>
                 `<option${fam.size===s?' selected':''}>${s}</option>`).join('')}
             </select>
             <input class="fam-inline-input" type="text" placeholder="Type (Beast, Fey…)"
@@ -14199,7 +14199,7 @@ function renderFamiliars() {
             </div>
           </div>
           <div class="fam-stat-box">
-            <div class="fam-stat-label">Points de vie</div>
+            <div class="fam-stat-label">Hit Points</div>
             <div class="fam-stat-val">
               <button class="fam-hp-step" data-fi="${fi}" data-hp="-1">−</button>
               <input class="fam-hp-input" type="number" min="0"
@@ -14311,7 +14311,7 @@ function renderFamiliars() {
     const delBtn = e.target.closest('.btn-fam-del');
     if (delBtn && delBtn.dataset.fi !== undefined) {
       const fi = parseInt(delBtn.dataset.fi);
-      if (!confirm('Supprimer ce familier ?')) return;
+      if (!confirm('Delete ce familier ?')) return;
       C().familiars.splice(fi, 1);
       renderFamiliars(); triggerSave();
       return;
@@ -14367,7 +14367,7 @@ function renderFamiliars() {
       const isLocked = wrap?.classList.toggle('fam-locked');
       tab?.classList.toggle('fam-tab-locked', isLocked);
       btn?.classList.toggle('fam-locked-active', isLocked);
-      if (btn) btn.innerHTML = isLocked ? '✏ Éditer' : '👁 Afficher';
+      if (btn) btn.innerHTML = isLocked ? '✏ Edit' : '👁 Afficher';
     }
   });
 
@@ -14489,18 +14489,18 @@ function startRealtime(username, _retry = 0) {
     </div>
     <div class="comp-filters">
       <input type="search" class="comp-search" id="comp-search" placeholder="Rechercher…" autocomplete="off">
-      <select class="comp-filter-select" id="comp-filter-level" title="Filtrer par niveau">
-        <option value="">Tout niveau</option>
+      <select class="comp-filter-select" id="comp-filter-level" title="Filter by level">
+        <option value="">Any level</option>
         <option value="0">Cantrip</option>
-        <option value="1">Niveau 1</option>
-        <option value="2">Niveau 2</option>
-        <option value="3">Niveau 3</option>
-        <option value="4">Niveau 4</option>
-        <option value="5">Niveau 5</option>
-        <option value="6">Niveau 6</option>
-        <option value="7">Niveau 7</option>
-        <option value="8">Niveau 8</option>
-        <option value="9">Niveau 9</option>
+        <option value="1">Level 1</option>
+        <option value="2">Level 2</option>
+        <option value="3">Level 3</option>
+        <option value="4">Level 4</option>
+        <option value="5">Level 5</option>
+        <option value="6">Level 6</option>
+        <option value="7">Level 7</option>
+        <option value="8">Level 8</option>
+        <option value="9">Level 9</option>
       </select>
       <select class="comp-filter-select" id="comp-filter-class" title="Filtrer par classe">
         <option value="">Toute classe</option>
@@ -14509,7 +14509,7 @@ function startRealtime(username, _retry = 0) {
         <option value="Cleric">Clerc</option>
         <option value="Druid">Druide</option>
         <option value="Paladin">Paladin</option>
-        <option value="Ranger">Rôdeur</option>
+        <option value="Ranger">Ranger</option>
         <option value="Sorcerer">Ensorceleur</option>
         <option value="Warlock">Occultiste</option>
         <option value="Wizard">Magicien</option>
@@ -14522,11 +14522,11 @@ function startRealtime(username, _retry = 0) {
         <option value="3">FC 3</option><option value="4">FC 4</option>
         <option value="5">FC 5</option><option value="6">FC 6+</option>
       </select>
-      <select class="comp-filter-select" id="comp-filter-cat" title="Filtrer par catégorie" style="display:none;">
-        <option value="">Toute catégorie</option>
+      <select class="comp-filter-select" id="comp-filter-cat" title="Filter by category" style="display:none;">
+        <option value="">Any category</option>
       </select>
-      <select class="comp-filter-select" id="comp-filter-startequip" title="Équipement de départ par classe" style="display:none;">
-        <option value="">Toutes les classes</option>
+      <select class="comp-filter-select" id="comp-filter-startequip" title="Starting equipment by class" style="display:none;">
+        <option value="">All classes</option>
         <option value="Barbarian">⚔️ Barbare</option>
         <option value="Bard">🎵 Barde</option>
         <option value="Cleric">✝️ Clerc</option>
@@ -14534,18 +14534,18 @@ function startRealtime(username, _retry = 0) {
         <option value="Fighter">🛡 Guerrier</option>
         <option value="Monk">🥋 Moine</option>
         <option value="Paladin">⚜️ Paladin</option>
-        <option value="Ranger">🏹 Rôdeur</option>
+        <option value="Ranger">🏹 Ranger</option>
         <option value="Rogue">🗡 Roublard</option>
         <option value="Sorcerer">🔮 Ensorceleur</option>
         <option value="Warlock">👁 Occultiste</option>
         <option value="Wizard">📚 Magicien</option>
       </select>
-      <button class="comp-startequip-btn" id="btn-startequip">⚔️ Équipement de départ</button>
+      <button class="comp-startequip-btn" id="btn-startequip">⚔️ Starting equipment</button>
       <button class="comp-summons-toggle" id="btn-comp-summons">📜 Invocations</button>
     </div>
     <div id="comp-startequip-panel"></div>
     <div id="comp-summons-list" style="display:none;"></div>
-    <div id="compendium-list"><div class="comp-loading">Chargement…</div></div>
+    <div id="compendium-list"><div class="comp-loading">Loadment…</div></div>
   </div>
 </div>
 
