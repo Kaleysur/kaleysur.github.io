@@ -97,6 +97,8 @@ function ok(cond, label) {
     extract(J, 'function fmtGp(v)'),
     extract(J, 'function searchNotes(pages, query)'),
     extract(J, 'function diffNotes(local, distant)'),
+    extract(J, 'function buildWikiIndex(entries)'),
+    extract(J, 'function renderNoteMarkdown(texte, wikiIndex)'),
     extract(J, 'window.rollDiceExpr = function'),
   ].join('\n'));
   const rollDiceExpr = window.rollDiceExpr;
@@ -500,6 +502,34 @@ function ok(cond, label) {
   eq(fmtGp(15), '15', 'pas de decimale inutile');
   eq(fmtGp(0.5), '0.5', 'decimale conservee');
   eq(fmtGp(15.006), '15.01', 'arrondi au centieme');
+
+  /* -- Notes : markdown leger et liens wiki -- */
+  {
+    const idx = buildWikiIndex([{ title:'Ouestvir', url:'ayakan/ouestvir.html' }]);
+    const r = t2 => renderNoteMarkdown(t2, idx);
+    eq(r('# Session 4'), '<h3 class="note-h">Session 4</h3>', 'titre de niveau 1');
+    eq(r('### Detail'), '<h5 class="note-h">Detail</h5>', 'titre de niveau 3');
+    eq(r('du **texte** ici'), '<p>du <strong>texte</strong> ici</p>', 'gras');
+    eq(r('du *texte* ici'), '<p>du <em>texte</em> ici</p>', 'italique');
+    { const NL = String.fromCharCode(10);
+      eq(r('- un' + NL + '- deux'), '<ul>' + NL + '<li>un</li>' + NL + '<li>deux</li>' + NL + '</ul>', 'liste a puces'); }
+    eq(r('> parole'), '<blockquote>parole</blockquote>', 'citation');
+    eq(r('---'), '<hr>', 'separateur');
+    eq(r('[[Ouestvir]]'), '<p><a class="note-wiki" href="ayakan/ouestvir.html">Ouestvir</a></p>',
+       'lien vers une page du wiki');
+    eq(r('[[Ouestvir|la cite]]'), '<p><a class="note-wiki" href="ayakan/ouestvir.html">la cite</a></p>',
+       'lien avec libelle personnalise');
+    ok(/note-wiki missing/.test(r('[[Zorglub]]')), 'page inconnue : signalee, pas de lien mort');
+    ok(r('[[OUESTVIR]]').includes('ayakan/ouestvir.html'), 'recherche de page insensible a la casse');
+    // Echappement : les notes sont aussi affichees dans la vue MJ
+    eq(r('<script>alert(1)</script>'), '<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>', 'HTML echappe');
+    ok(r('[[<b>x</b>]]').includes('&lt;b&gt;'), 'HTML echappe aussi dans un lien wiki');
+    eq(r('Bram & Elara'), '<p>Bram &amp; Elara</p>', 'esperluette echappee');
+    eq(r(''), '', 'texte vide');
+    eq(r(null), '', 'texte absent');
+    eq(buildWikiIndex(null).size, 0, 'index absent');
+    eq(buildWikiIndex([{ title:'X' }]).size, 0, 'entree sans url ignoree');
+  }
 
   /* -- Filet de securite sur conflit : ce que le local avait en plus -- */
   {
