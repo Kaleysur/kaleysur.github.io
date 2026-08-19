@@ -489,7 +489,7 @@
       resistances:     m.resistances.join(', '),
       immunities:      [...m.immunites, ...m.immunitesEtat].join(', '),
       senses: m.sens.texte, languages: m.langues || '—',
-      cr: String(m.cr ?? '0'),
+      cr: Bestiaire.crLabel(m.cr),   // « 1/4 », pas « 0.25 »
       traits: m.traits, actions: m.actions,
       bonusActions: m.bonusActions, reactions: m.reactions,
       legendaryActions: m.legendaires,
@@ -621,8 +621,8 @@
       creatures:[
         {n:'Bat',k:'bat'},{n:'Cat',k:'cat'},{n:'Crab',k:'crab'},{n:'Frog',k:'frog'},
         {n:'Hawk',k:'hawk'},{n:'Lizard',k:'lizard'},{n:'Octopus',k:'octopus'},{n:'Owl',k:'owl'},
-        {n:'Poisonous Snake',k:'poisonous-snake'},{n:'Quipper',k:'quipper'},{n:'Rat',k:'rat'},
-        {n:'Raven',k:'raven'},{n:'Sea Horse',k:'sea-horse'},{n:'Spider',k:'spider'},{n:'Weasel',k:'weasel'},
+        {n:'Venomous Snake',k:'poisonous-snake'},{n:'Quipper',k:'quipper'},{n:'Rat',k:'rat'},
+        {n:'Raven',k:'raven'},{n:'Seahorse',k:'sea-horse'},{n:'Spider',k:'spider'},{n:'Weasel',k:'weasel'},
       ]
     },
     { spell:'Find Steed', level:2, icon:'horse', note:'Otherworldly Steed — scales with slot level',
@@ -674,7 +674,7 @@
     { spell:'Find Greater Steed', level:4, icon:'dove', note:'Spirit — CR ≤5, Large or smaller',
       creatures:[
         {n:'Griffon',k:'griffon'},{n:'Hippogriff',k:'hippogriff'},{n:'Pegasus',k:'pegasus'},
-        {n:'Peryton',k:'peryton'},{n:'Saber-Toothed Tiger',k:'saber-toothed-tiger'},
+        {n:'Peryton',k:'peryton-a5e'},{n:'Saber-Toothed Tiger',k:'saber-toothed-tiger'},
       ]
     },
     // ── Conjure (PHB 2024 — spirit in creature form) ──
@@ -696,7 +696,7 @@
     { spell:'Conjure Fey', level:6, icon:'sparkle', note:'Spirit in fey form — CR ≤5',
       creatures:[
         {n:'Dryad',k:'dryad'},{n:'Green Hag',k:'green-hag'},{n:'Night Hag',k:'night-hag'},
-        {n:'Pixie',k:'pixie'},{n:'Satyr',k:'satyr'},{n:'Sprite',k:'sprite'},
+        {n:'Pixie',k:'pixie-a5e'},{n:'Satyr',k:'satyr'},{n:'Sprite',k:'sprite'},
       ]
     },
     // ── Undead ──
@@ -1160,6 +1160,46 @@
     document.querySelector('.tab-btn[data-tab="familiers"]')?.click();
   }
 
+  /* Cherche la créature dans le SRD 2024, puis dans l'API par clé.
+     Renvoie une fiche déjà normalisée par js/monsters.js. */
+  async function _resoudreCreature(creature) {
+    if (typeof Bestiaire === 'undefined') return null;
+    try {
+      const catalogue = await Bestiaire.charger();
+      const voulu = creature.n.toLowerCase();
+      const trouve = catalogue.find(m => m.name.toLowerCase() === voulu);
+      if (trouve) return trouve;
+    } catch (e) { /* hors ligne : on tente l'API */ }
+    /* Absente du catalogue 2024 (Quipper, Peryton, Pixie…) : on prend ce que
+       l'API a, en signalant que la fiche ne vient pas du SRD 2024. */
+    const essais = [
+      `${O5E}/v2/creatures/srd-2024_${creature.k}/`,
+      `${O5E}/v2/creatures/${creature.k}/`,
+      `${O5E}/v1/monsters/${creature.k}/`
+    ];
+    for (const url of essais) {
+      const r = await fetch(url).catch(() => null);
+      if (!r?.ok) continue;
+      const data = await r.json();
+      const m = Bestiaire.normaliser(data, url.includes('srd-2024') ? 'SRD 2024' : 'Open5e');
+      if (m) return m;
+    }
+    return null;
+  }
+
+  /* Une fiche normalisée devient un compagnon. */
+  function _ajouterFamiliar(m) {
+    if (!playerData) return;
+    const c = C();
+    if (!c.familiars) c.familiars = [];
+    c.familiars.push(_famDepuisMonstre(m));
+    if (typeof _tabDirty !== 'undefined') _tabDirty.familiers = true;
+    renderFamiliars(); triggerSave();
+    if (document.getElementById('screen-dashboard')?.classList.contains('active')) {
+      document.querySelector('.tab-btn[data-tab="familiers"]')?.click();
+    }
+  }
+
   // Listener : clic sur un chip d'invocation
   document.addEventListener('click', async e => {
     const chip = e.target.closest('.summon-chip');
@@ -1183,21 +1223,9 @@
         chip.textContent = '✓ ' + creature.n;
         setTimeout(() => { chip.classList.remove('done'); chip.innerHTML = `${creature.n}<span class="summon-spirit-badge">spirit</span>`; }, 2500);
       } else {
-        // Fetch depuis Open5e — v1 (slug simple, endpoint stable)
-        let data = null;
-        const rv1 = await fetch(`${O5E}/v1/monsters/${creature.k}/`).catch(() => null);
-        if (rv1?.ok) {
-          data = await rv1.json();
-        } else {
-          // Fallback : recherche par nom en v2
-          const rname = await fetch(`${O5E}/v2/creatures/?name=${encodeURIComponent(creature.n)}&limit=1`).catch(() => null);
-          if (rname?.ok) {
-            const js = await rname.json();
-            data = (js.results || [])[0] || null;
-          }
-        }
-        if (!data) throw new Error(`Not found: ${creature.k}`);
-        _addMonsterAsFamiliar(data);
+        const m = await _resoudreCreature(creature);
+        if (!m) throw new Error(`Not found: ${creature.k}`);
+        _ajouterFamiliar(m);
         chip.classList.remove('importing');
         chip.classList.add('done');
         chip.textContent = '✓ ' + creature.n;

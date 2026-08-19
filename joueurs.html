@@ -4232,7 +4232,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div class="tab-panel" id="tab-familiers">
       <div class="fam-toolbar">
         <span class="fam-toolbar-title">⟡ Familiars &amp; Companions</span>
-        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Show</button>
+        <button class="btn btn-sm" id="btn-fam-lock" title="Read-only view, for play" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> View</button>
         <button class="btn btn-sm fam-toolbar-edit-only" id="btn-open-compendium-monster" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
         <button class="btn btn-sm btn-gold fam-toolbar-edit-only" id="btn-add-familiar">+ Add</button>
       </div>
@@ -14435,6 +14435,30 @@ function _famTaille(v) {
   return FAM_SIZES_LEGACY[v] || 'Medium';
 }
 
+const FAM_VIEW_KEY = 'kaleysur_fam_view';
+
+/* Mode affichage : lecture seule, sans les boutons d'édition. Retenu par
+   appareil, comme le verrou des champs de la fiche. */
+function famModeAffichage() {
+  try { return localStorage.getItem(FAM_VIEW_KEY) === '1'; } catch (e) { return false; }
+}
+
+function appliquerModeFamiliers(affichage) {
+  try { localStorage.setItem(FAM_VIEW_KEY, affichage ? '1' : '0'); } catch (e) {}
+  const wrap = document.getElementById('fam-cards-wrap');
+  const tab  = document.getElementById('tab-familiers');
+  const btn  = document.getElementById('btn-fam-lock');
+  wrap?.classList.toggle('fam-locked', affichage);
+  tab?.classList.toggle('fam-tab-locked', affichage);
+  btn?.classList.toggle('fam-locked-active', affichage);
+  if (btn) {
+    /* Le bouton annonce ce qu'il fera, pas l'état courant. */
+    btn.innerHTML = affichage ? ic('pencil') + ' Edit' : ic('eye') + ' View';
+    btn.title = affichage ? 'Switch back to editing' : 'Read-only view, for play';
+    btn.setAttribute('aria-pressed', affichage ? 'true' : 'false');
+  }
+}
+
 function _famMod(score) { return Math.floor((parseInt(score)||10) / 2) - 5; }
 function _famModStr(score) { const m = _famMod(score); return (m >= 0 ? '+' : '') + m; }
 
@@ -14446,8 +14470,10 @@ function renderFamiliars() {
   if (!wrap) return;
   if (!c.familiars.length) {
     wrap.innerHTML = '<div class="fam-empty">No companions. Click <em>+ Add</em> or import from the compendium.</div>';
+    appliquerModeFamiliers(famModeAffichage());
     return;
   }
+  appliquerModeFamiliers(famModeAffichage());
   wrap.innerHTML = '';
   /* Migration douce des tailles : l'affichage seul ne suffit pas, le reste du
      code lit fam.size et y trouverait encore du français. */
@@ -14683,24 +14709,18 @@ function renderFamiliars() {
       return;
     }
     /* add familiar */
-    if (e.target.id === 'btn-add-familiar') {
+    if (e.target.closest('#btn-add-familiar')) {
       if (!C().familiars) C().familiars = [];
       C().familiars.push(_famDefault());
       renderFamiliars(); triggerSave();
     }
     /* open compendium monsters */
-    if (e.target.id === 'btn-open-compendium-monster') {
+    if (e.target.closest('#btn-open-compendium-monster')) {
       openCompendium('monsters');
     }
     /* toggle édition / affichage */
-    if (e.target.id === 'btn-fam-lock') {
-      const wrap = document.getElementById('fam-cards-wrap');
-      const tab  = document.getElementById('tab-familiers');
-      const btn  = document.getElementById('btn-fam-lock');
-      const isLocked = wrap?.classList.toggle('fam-locked');
-      tab?.classList.toggle('fam-tab-locked', isLocked);
-      btn?.classList.toggle('fam-locked-active', isLocked);
-      if (btn) btn.innerHTML = isLocked ? ic('pencil') + ' Edit' : ic('eye') + ' Show';
+    if (e.target.closest('#btn-fam-lock')) {
+      appliquerModeFamiliers(!famModeAffichage());
     }
   });
 
