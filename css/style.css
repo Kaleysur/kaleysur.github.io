@@ -1443,6 +1443,14 @@ footer span { color: var(--gold-dark); }
   display: inline-block;
 }
 .klc-dot-on { background: #4caf7d; box-shadow: 0 0 4px rgba(76,175,125,0.6); }
+/* Un salon de groupe n'a pas de presence a montrer : une etiquette a la place
+   de la pastille, et le nombre de membres en tete de conversation. */
+.klc-groupe {
+  flex-shrink: 0; font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--gold-dark); border: 1px solid var(--border); border-radius: 99px;
+  padding: 0.05rem 0.3rem; line-height: 1.4;
+}
+.klc-membres { font-size: 0.62rem; color: var(--text-muted); }
 
 /* ── Conversation DM ── */
 #klc-conv {
