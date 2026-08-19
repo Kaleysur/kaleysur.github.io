@@ -1113,7 +1113,8 @@ function ok(cond, label) {
   eq(Object.keys(n2.saves).length, 4, 'quatre sauvegardes maîtrisées');
   eq(n2.immunites, ['psychic'], 'immunités lues depuis le champ d affichage');
   eq(n2.sens.pp, 20, 'Perception passive de l API');
-  ok(n2.sens.texte.includes('120'), 'portée de vision dans le noir présente');
+  ok(n2.sens.texte.includes('darkvision 120'), 'portée de vision dans le noir présente');
+  ok(n2.sens.texte.includes('passive Perception 20'), 'Perception passive dans le texte des sens');
   eq(n2.initiative, 7, 'initiative fournie par l API');
   eq(n2.actions.length, 1, 'seules les ACTION dans actions');
   eq(n2.legendaires.length, 1, 'actions légendaires triées à part');

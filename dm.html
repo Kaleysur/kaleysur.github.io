@@ -3853,17 +3853,39 @@ document.getElementById('chat-section-header').addEventListener('click', () => {
   }
 });
 
+/* Identifiant de salon privé — trié, donc identique des deux côtés. */
+function roomPrivee(joueur) {
+  return 'private:' + [ADMIN_USER, joueur].sort().join(':');
+}
+
+/* Le salon doit exister dans chat_rooms pour que le joueur le voie : c'est de
+   là que sa liste est construite. Insertion idempotente. */
+async function assureRoomPrivee(joueur) {
+  const id = roomPrivee(joueur);
+  try {
+    const r = await sbFetch(`/rest/v1/chat_rooms?id=eq.${encodeURIComponent(id)}&select=id`);
+    if (r.ok && (await r.json()).length) return id;
+    await sbFetch('/rest/v1/chat_rooms', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ id, type: 'private', members: [ADMIN_USER, joueur], created_by: ADMIN_USER })
+    });
+  } catch (e) { /* le message partira quand même, la room se créera plus tard */ }
+  return id;
+}
+
 /* ── Tabs de rooms ── */
 function renderChatRoomTabs() {
   const container = document.getElementById('chat-room-tabs');
   if (!container) return;
   // General + une room privée par joueur (dm_{username})
   const players = allPlayers.filter(p => p.username !== ADMIN_USER);
-  _chatRooms = ['general', ...players.map(p => 'dm_' + p.username)];
+  _chatRooms = ['general', ...players.map(p => roomPrivee(p.username))];
   container.innerHTML = _chatRooms.map(r => {
-    const label = r === 'general' ? 'Général'
-      : (allPlayers.find(p => 'dm_' + p.username === r)?.data?.characters?.[allPlayers.find(p2=>'dm_'+p2.username===r)?.data?.activeCharId]?.name
-         || r.replace('dm_', ''));
+    const label = r === 'general' ? 'Général' : (() => {
+      const p = allPlayers.find(x => roomPrivee(x.username) === r);
+      return p?.data?.characters?.[p.data.activeCharId]?.name || p?.username || r;
+    })();
     return `<button class="chat-room-tab${r === _chatRoom ? ' active' : ''}" data-room="${esc(r)}">${esc(label)}</button>`;
   }).join('');
   container.querySelectorAll('.chat-room-tab').forEach(btn => {
@@ -3895,9 +3917,9 @@ function renderDmChat(msgs) {
     return;
   }
   list.innerHTML = msgs.map(m => `
-    <div class="dm-chat-msg${m.username === 'MJ' ? ' dm-own' : ''}">
+    <div class="dm-chat-msg${m.username === ADMIN_USER ? ' dm-own' : ''}">
       <span class="chat-author">${esc(m.username || '?')}</span>
-      <span class="chat-text">${esc(m.content || '')}</span>
+      <span class="chat-text">${esc(m.message || '')}</span>
     </div>`).join('');
   list.scrollTop = list.scrollHeight;
 }
@@ -3909,8 +3931,8 @@ function _appendChatMsg(m) {
   if (placeholder && placeholder.textContent.includes('Aucun')) placeholder.remove();
 
   const div = document.createElement('div');
-  div.className = 'dm-chat-msg' + (m.username === 'MJ' ? ' dm-own' : '');
-  div.innerHTML = `<span class="chat-author">${esc(m.username || '?')}</span><span class="chat-text">${esc(m.content || '')}</span>`;
+  div.className = 'dm-chat-msg' + (m.username === ADMIN_USER ? ' dm-own' : '');
+  div.innerHTML = `<span class="chat-author">${esc(m.username || '?')}</span><span class="chat-text">${esc(m.message || '')}</span>`;
   list.appendChild(div);
   list.scrollTop = list.scrollHeight;
 
@@ -3931,9 +3953,13 @@ async function sendDmMessage() {
   inp.value = '';
   btn.disabled = true;
   try {
+    if (_chatRoom.startsWith('private:')) {
+      const joueur = _chatRoom.slice('private:'.length).split(':').find(u => u !== ADMIN_USER);
+      if (joueur) await assureRoomPrivee(joueur);
+    }
     const r = await sbFetch(DM_CHAT_TABLE, {
       method: 'POST',
-      body: JSON.stringify({ username: 'MJ', content: msg, room: _chatRoom, type: 'chat' }),
+      body: JSON.stringify({ username: ADMIN_USER, message: msg, room: _chatRoom, type: 'text' }),
       headers: { 'Prefer': 'return=minimal' }
     });
     if (!r.ok) { inp.value = msg; } // restaurer si erreur

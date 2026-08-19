@@ -2996,6 +2996,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 <!-- Jeu d'icônes partagé par toutes les pages : sprite SVG + helper ic().
      En tête de <body> pour que les <use href="#i-…"> aient leur cible. -->
 <script src="js/icons.js"></script>
+<script src="js/monsters.js"></script>
 
 
 <nav class="top-nav" id="main-nav"></nav>
@@ -4230,8 +4231,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <!-- ── Onglet Familiers ── -->
     <div class="tab-panel" id="tab-familiers">
       <div class="fam-toolbar">
-        <span class="fam-toolbar-title">⟡ Familiers &amp; Compagnons</span>
-        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Show</button>
+        <span class="fam-toolbar-title">⟡ Familiars &amp; Companions</span>
+        <button class="btn btn-sm" id="btn-fam-lock" title="Read-only view, for play" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> View</button>
         <button class="btn btn-sm fam-toolbar-edit-only" id="btn-open-compendium-monster" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
         <button class="btn btn-sm btn-gold fam-toolbar-edit-only" id="btn-add-familiar">+ Add</button>
       </div>
@@ -4244,7 +4245,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <div class="sheet-section">
         <div class="sheet-section-title" style="display:flex;justify-content:space-between;align-items:center;">
           <span>All players</span>
-          <button class="btn btn-sm" id="btn-admin-refresh">↺ Actualiser</button>
+          <button class="btn btn-sm" id="btn-admin-refresh">↺ Refresh</button>
         </div>
         <div id="admin-loading" style="color:#666;font-style:italic;padding:0.75rem 0;">Loading…</div>
         <div class="admin-grid" id="admin-grid"></div>
@@ -4882,13 +4883,13 @@ function showConflictBanner(user) {
   document.getElementById('conflict-banner')?.remove();
   const perdu = diffNotes(snap.data, playerData);
   const detail = perdu.length
-    ? perdu.map(p => `${p.nom} : ${p.pagesEnPlus ? p.pagesEnPlus + ' page(s), ' : ''}${p.caracteresEnPlus} characters of notes`).join(' — ')
+    ? perdu.map(p => `${p.nom}: ${p.pagesEnPlus ? p.pagesEnPlus + ' page(s), ' : ''}${p.caracteresEnPlus} characters of notes`).join(' — ')
     : 'no difference found in the notes';
   const el = document.createElement('div');
   el.id = 'conflict-banner';
   el.className = 'conflict-banner';
   el.innerHTML =
-      `<div><strong>Version d'un autre appareil chargee.</strong> Ta version locale a ete mise de cote : `
+      `<div><strong>A version from another device was loaded.</strong> Your local version was set aside: `
     + `<span class="conflict-detail">${esc(detail)}</span></div>`
     + `<div class="conflict-actions">`
     + `<button type="button" id="conflict-restore">Restore my version</button>`
@@ -10779,7 +10780,7 @@ async function initViewMode() {
       }, 60000);
     }
   } catch(e) {
-    el.innerHTML = `<p style="text-align:center;color:#c97a7a;padding:3rem;">Erreur de chargement.</p>`;
+    el.innerHTML = `<p style="text-align:center;color:#c97a7a;padding:3rem;">Loading failed.</p>`;
   }
   return true;
 }
@@ -12252,7 +12253,7 @@ ${car} characters of notes.
       document.getElementById('new-pwd').value = '';
       setTimeout(() => { msg.style.display='none'; }, 3000);
     } catch(e) {
-      msg.textContent = 'Erreur : ' + e.message; msg.style.color='var(--danger)'; msg.style.display='block';
+      msg.textContent = 'Error: ' + e.message; msg.style.color='var(--danger)'; msg.style.display='block';
     }
   });
 
@@ -12359,7 +12360,7 @@ ${car} characters of notes.
   // Undo / Clear
   document.getElementById('ctool-undo').addEventListener('click', undoCanvas);
   document.getElementById('ctool-clear').addEventListener('click', () => {
-    if (!confirm('Effacer tout le dessin ?')) return;
+    if (!confirm('Erase the whole drawing?')) return;
     pushHistory(); initCanvas(false);
   });
   // Taille de trait
@@ -13010,7 +13011,7 @@ ${car} characters of notes.
       const box  = document.getElementById('wiz-equip-preview');
       if (!opts) {
         selEquip.innerHTML = '<option value="">— no data for this class —</option>';
-        box.innerHTML = 'Choisis une classe à l\'step 3 to see its starting equipment.';
+        box.innerHTML = 'Pick a class at step 3 to see its starting equipment.';
         return;
       }
       selEquip.innerHTML = '<option value="">— Passer (inventaire vide) —</option>'
@@ -13213,8 +13214,8 @@ ${car} characters of notes.
         // « Gaming Set (choice) » → l'outil réellement choisi à l'étape 4
         const tool = bd && (TOOL_CHOICES[bd.tool] ? selTool.value : bd.tool);
         const list = [
-          cd?.armorProf  && `Armures : ${cd.armorProf}`,
-          cd?.weaponProf && `Armes : ${cd.weaponProf}`,
+          cd?.armorProf  && `Armor: ${cd.armorProf}`,
+          cd?.weaponProf && `Weapons: ${cd.weaponProf}`,
           tool           && `Outil : ${tool}`,
         ].filter(Boolean);
         if (list.length) c.maitrises = list.join('\n');
@@ -14139,7 +14140,7 @@ document.addEventListener('keydown', e => {
     }
     case 'l': {
       // L → repos long (avec confirmation)
-      if (playerData) { e.preventDefault(); if (confirm('Effectuer un repos long ?')) doLongRest(); }
+      if (playerData) { e.preventDefault(); if (confirm('Take a long rest?')) doLongRest(); }
       break;
     }
     case '?':
@@ -14410,14 +14411,52 @@ function getSbClient() {
 /* ── Familiers ── */
 function _famDefault() {
   return {
-    name: 'Nouveau familier', type: 'Beast', size: 'Petite', alignment: 'Unaligned',
+    name: 'New companion', type: 'Beast', size: 'Small', alignment: 'Unaligned',
     ac: 10, acNote: '', pvMax: 4, pvActuel: 4, speed: '30 ft.',
     for: 10, dex: 10, con: 10, int: 10, sag: 10, cha: 10,
     savesNote: '', skillsNote: '', vulnerabilities: '', resistances: '', immunities: '',
     senses: 'Passive Perception 10', languages: '—', cr: '0',
-    traits: [], actions: [], bonusActions: [], reactions: [],
+    traits: [], actions: [], bonusActions: [], reactions: [], legendaryActions: [],
     notes: '', _collapsed: false
   };
+}
+
+const FAM_SIZES = ['Tiny','Small','Medium','Large','Huge','Gargantuan'];
+/* Les fiches enregistrées avant ce correctif portent des tailles françaises ou
+   des libellés qui n'ont jamais existé dans la liste. */
+const FAM_SIZES_LEGACY = {
+  'Très petite':'Tiny', 'Very small':'Tiny', 'Minuscule':'Tiny',
+  'Petite':'Small', 'Moyenne':'Medium', 'Grande':'Large',
+  'Très grande':'Huge', 'Very large':'Huge', 'Gigantesque':'Gargantuan'
+};
+function _famTaille(v) {
+  if (!v) return 'Medium';
+  if (FAM_SIZES.includes(v)) return v;
+  return FAM_SIZES_LEGACY[v] || 'Medium';
+}
+
+const FAM_VIEW_KEY = 'kaleysur_fam_view';
+
+/* Mode affichage : lecture seule, sans les boutons d'édition. Retenu par
+   appareil, comme le verrou des champs de la fiche. */
+function famModeAffichage() {
+  try { return localStorage.getItem(FAM_VIEW_KEY) === '1'; } catch (e) { return false; }
+}
+
+function appliquerModeFamiliers(affichage) {
+  try { localStorage.setItem(FAM_VIEW_KEY, affichage ? '1' : '0'); } catch (e) {}
+  const wrap = document.getElementById('fam-cards-wrap');
+  const tab  = document.getElementById('tab-familiers');
+  const btn  = document.getElementById('btn-fam-lock');
+  wrap?.classList.toggle('fam-locked', affichage);
+  tab?.classList.toggle('fam-tab-locked', affichage);
+  btn?.classList.toggle('fam-locked-active', affichage);
+  if (btn) {
+    /* Le bouton annonce ce qu'il fera, pas l'état courant. */
+    btn.innerHTML = affichage ? ic('pencil') + ' Edit' : ic('eye') + ' View';
+    btn.title = affichage ? 'Switch back to editing' : 'Read-only view, for play';
+    btn.setAttribute('aria-pressed', affichage ? 'true' : 'false');
+  }
 }
 
 function _famMod(score) { return Math.floor((parseInt(score)||10) / 2) - 5; }
@@ -14431,9 +14470,20 @@ function renderFamiliars() {
   if (!wrap) return;
   if (!c.familiars.length) {
     wrap.innerHTML = '<div class="fam-empty">No companions. Click <em>+ Add</em> or import from the compendium.</div>';
+    appliquerModeFamiliers(famModeAffichage());
     return;
   }
+  appliquerModeFamiliers(famModeAffichage());
   wrap.innerHTML = '';
+  /* Migration douce des tailles : l'affichage seul ne suffit pas, le reste du
+     code lit fam.size et y trouverait encore du français. */
+  let migre = false;
+  c.familiars.forEach(f => {
+    const t = _famTaille(f.size);
+    if (f.size !== t) { f.size = t; migre = true; }
+  });
+  if (migre) triggerSave();
+
   c.familiars.forEach((fam, fi) => {
     const card = document.createElement('div');
     card.className = 'familiar-card' + (fam._collapsed ? ' collapsed' : '');
@@ -14450,7 +14500,7 @@ function renderFamiliars() {
 
     const entryHtml = (fk, placeholder) => (fam[fk]||[]).map((t,ti) => `
       <div class="fam-entry">
-        <input class="fam-entry-name" type="text" placeholder="Nom…"
+        <input class="fam-entry-name" type="text" placeholder="Name…"
           data-fi="${fi}" data-fk="${fk}" data-ei="${ti}" data-ek="name" value="${esc(t.name)}">
         <textarea class="fam-entry-desc" rows="2" placeholder="${placeholder}"
           data-fi="${fi}" data-fk="${fk}" data-ei="${ti}" data-ek="desc">${esc(t.desc)}</textarea>
@@ -14460,6 +14510,7 @@ function renderFamiliars() {
     const actionsHtml   = entryHtml('actions', 'Description + damage…');
     const bonusHtml     = entryHtml('bonusActions', 'Description…');
     const reactionsHtml = entryHtml('reactions', 'Description…');
+    const legendaryHtml  = entryHtml('legendaryActions', 'Description…');
 
     card.innerHTML = `
       <div class="familiar-card-head" data-fi="${fi}">
@@ -14471,27 +14522,27 @@ function renderFamiliars() {
       </div>
       <div class="fam-body">
         <div class="fam-sb-header">
-          <input class="fam-name-input field-input" type="text" placeholder="Nom du familier"
+          <input class="fam-name-input field-input" type="text" placeholder="Companion name"
             data-fi="${fi}" data-fk="name" value="${esc(fam.name)}">
           <div class="fam-type-line">
             <select class="fam-inline-input" data-fi="${fi}" data-fk="size">
-              ${['Very small','Petite','Moyenne','Grande','Very large','Gigantesque'].map(s =>
-                `<option${fam.size===s?' selected':''}>${s}</option>`).join('')}
+              ${FAM_SIZES.map(s =>
+                `<option${_famTaille(fam.size)===s?' selected':''}>${s}</option>`).join('')}
             </select>
             <input class="fam-inline-input" type="text" placeholder="Type (Beast, Fey…)"
               data-fi="${fi}" data-fk="type" value="${esc(fam.type)}" style="flex:1;min-width:80px;">
-            <input class="fam-inline-input" type="text" placeholder="Alignement"
+            <input class="fam-inline-input" type="text" placeholder="Alignment"
               data-fi="${fi}" data-fk="alignment" value="${esc(fam.alignment)}" style="flex:1;min-width:80px;">
           </div>
         </div>
         <hr class="fam-divider">
         <div class="fam-topstats">
           <div class="fam-stat-box">
-            <div class="fam-stat-label">CA</div>
+            <div class="fam-stat-label">AC</div>
             <div class="fam-stat-val">
               <input class="fam-inline-input" type="number" min="0" max="40"
                 data-fi="${fi}" data-fk="ac" value="${fam.ac||10}" style="width:40px;text-align:center;">
-              <input class="fam-inline-input" type="text" placeholder="(armure nat.)"
+              <input class="fam-inline-input" type="text" placeholder="(natural armor)"
                 data-fi="${fi}" data-fk="acNote" value="${esc(fam.acNote)}" style="flex:1;min-width:60px;">
             </div>
           </div>
@@ -14580,9 +14631,14 @@ function renderFamiliars() {
           <span>Reactions</span>
           <button class="btn-fam-add-entry" data-fi="${fi}" data-fk="reactions">+ Add</button>
         </div>`}
+        ${(fam.legendaryActions?.length || 0) > 0 ? `
+        <div class="fam-section-title">Legendary Actions
+          <button class="btn-fam-add-entry" data-fi="${fi}" data-fk="legendaryActions">+ Add</button>
+        </div>
+        <div id="fam-legendaryActions-${fi}">${legendaryHtml}</div>` : ''}
         <hr class="fam-divider">
         <div class="fam-section-title" style="margin-bottom:0.2rem;">Notes</div>
-        <textarea class="fam-notes-input" placeholder="Notes libres…"
+        <textarea class="fam-notes-input" placeholder="Free notes…"
           data-fi="${fi}" data-fk="notes">${esc(fam.notes)}</textarea>
       </div>`;
     wrap.appendChild(card);
@@ -14608,9 +14664,15 @@ function renderFamiliars() {
     const delBtn = e.target.closest('.btn-fam-del');
     if (delBtn && delBtn.dataset.fi !== undefined) {
       const fi = parseInt(delBtn.dataset.fi);
-      if (!confirm('Delete ce familier ?')) return;
-      C().familiars.splice(fi, 1);
+      const c = C();
+      const [retire] = c.familiars.splice(fi, 1);
       renderFamiliars(); triggerSave();
+      /* Annulable comme les autres suppressions de la fiche, plutôt qu'un
+         confirm() qui coupe le geste en deux. */
+      showCharUndoToast(`"${retire?.name || 'Companion'}" deleted`, () => {
+        c.familiars.splice(fi, 0, retire);
+        renderFamiliars(); triggerSave();
+      });
       return;
     }
     /* add entry (trait/action/etc.) */
@@ -14647,24 +14709,18 @@ function renderFamiliars() {
       return;
     }
     /* add familiar */
-    if (e.target.id === 'btn-add-familiar') {
+    if (e.target.closest('#btn-add-familiar')) {
       if (!C().familiars) C().familiars = [];
       C().familiars.push(_famDefault());
       renderFamiliars(); triggerSave();
     }
     /* open compendium monsters */
-    if (e.target.id === 'btn-open-compendium-monster') {
+    if (e.target.closest('#btn-open-compendium-monster')) {
       openCompendium('monsters');
     }
     /* toggle édition / affichage */
-    if (e.target.id === 'btn-fam-lock') {
-      const wrap = document.getElementById('fam-cards-wrap');
-      const tab  = document.getElementById('tab-familiers');
-      const btn  = document.getElementById('btn-fam-lock');
-      const isLocked = wrap?.classList.toggle('fam-locked');
-      tab?.classList.toggle('fam-tab-locked', isLocked);
-      btn?.classList.toggle('fam-locked-active', isLocked);
-      if (btn) btn.innerHTML = isLocked ? ic('pencil') + ' Edit' : ic('eye') + ' Show';
+    if (e.target.closest('#btn-fam-lock')) {
+      appliquerModeFamiliers(!famModeAffichage());
     }
   });
 

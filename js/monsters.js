@@ -198,14 +198,17 @@
       const pp = (txt.match(/passive Perception\s+(\d+)/i) || [])[1];
       return { texte: txt, pp: pp ? +pp : null };
     }
+    /* Les sens restent en anglais : c'est de la donnée de règles, au même titre
+       que le nom du monstre et le texte de ses actions. La fiche sert les deux
+       pages, dont celle des joueurs qui est entièrement en anglais. */
     const bouts = [];
-    const ajoute = (label, portee) => { if (portee) bouts.push(label + ' ' + portee + ' ft'); };
-    ajoute('vision aveugle', brut.blindsight_range);
-    ajoute('vision dans le noir', brut.darkvision_range);
-    ajoute('perception des vibrations', brut.tremorsense_range);
-    ajoute('vision véritable', brut.truesight_range);
+    const ajoute = (label, portee) => { if (portee) bouts.push(label + ' ' + portee + ' ft.'); };
+    ajoute('blindsight', brut.blindsight_range);
+    ajoute('darkvision', brut.darkvision_range);
+    ajoute('tremorsense', brut.tremorsense_range);
+    ajoute('truesight', brut.truesight_range);
     const pp = brut.passive_perception != null ? brut.passive_perception : 10 + (mods.sag || 0);
-    bouts.push('Perception passive ' + pp);
+    bouts.push('passive Perception ' + pp);
     return { texte: bouts.join(', '), pp };
   }
 

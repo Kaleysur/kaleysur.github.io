@@ -9,11 +9,17 @@
   const SB_KEY  = 'sb_publishable_TDTCogCSFP-Lvus2x3rAAg_60l036tq';
   const ME      = localStorage.getItem('kaleysur_user');
   if (!ME) return;
+  const SB_HDR  = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+  const TABLE   = SB_URL + '/rest/v1/chat_messages';
+  const ROOMS   = SB_URL + '/rest/v1/chat_rooms';
+  const GENERAL = 'general';
+
+  /* Identifiant de salon privé — trié, donc identique quel que soit l'auteur. */
+  const roomPrivee = (a, b) => 'private:' + [a, b].sort().join(':');
 
   /* ── État ──────────────────────────────────────────────── */
   let sb            = null;
   let globalChan    = null;
-  let dmChan        = null;
   let onlineUsers   = new Set();
   let groupMsgs     = [];
   let dmConvs       = {};   // { peer: [{from,to,text,ts}] }
@@ -165,8 +171,18 @@
       }
     });
     globalChan
-      .on('broadcast', { event: 'gmsg' }, ({ payload }) => {
-        pushGroupMsg(payload, false);
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, ({ new: m }) => {
+        if (!m || m.username === ME) return;     // le mien est déjà affiché
+        if ((m.room || GENERAL) === GENERAL) { pushGroupMsg(enMsg(m), false); return; }
+        if (!m.room.startsWith('private:')) return;
+        const pair = m.room.slice('private:'.length).split(':');
+        if (!pair.includes(ME)) return;          // conversation d'autrui
+        const peer = pair.find(u => u !== ME) || m.username;
+        if (!dmConvs[peer]) dmConvs[peer] = [];
+        dmConvs[peer].push({ from: m.username, to: ME, text: m.message, ts: Date.parse(m.created_at) || Date.now() });
+        if (activePeer === peer && panelOpen && activeTab === 'dm') renderDmMsgs(peer);
+        else { unreadDm[peer] = (unreadDm[peer] || 0) + 1; updateBadge(); }
+        renderRecent();
       })
       .on('presence', { event: 'sync' }, () => {
         onlineUsers = new Set();
@@ -179,29 +195,70 @@
       .subscribe(async status => {
         if (status === 'SUBSCRIBED') {
           await globalChan.track({ u: ME });
-          sysMsg('klc-gmsgs', '✦ Connecté au chat de groupe ✦');
+          chargerHistorique();
         }
       });
 
-    /* Canal DM — tous les messages privés */
-    dmChan = sb.channel('kaleysur-dms', {
-      config: { broadcast: { self: false } }
+  }
+
+  /* ── Persistance ────────────────────────────────────────── */
+  const enMsg = m => ({ user: m.username, text: m.message, ts: Date.parse(m.created_at) || Date.now() });
+
+  async function api(url, opts) {
+    return fetch(url, { ...opts, headers: { ...SB_HDR, ...(opts && opts.headers) } });
+  }
+
+  /* Au démarrage : le salon général et les conversations privées déjà ouvertes.
+     Sans cela le widget repartait vide à chaque page du wiki. */
+  async function chargerHistorique() {
+    try {
+      const r = await api(TABLE + '?room=eq.' + GENERAL + '&order=id.desc&limit=60');
+      if (r.ok) {
+        const msgs = (await r.json()).reverse();
+        $('klc-gmsgs').innerHTML = '';
+        groupMsgs = [];
+        msgs.forEach(m => pushGroupMsg(enMsg(m), m.username === ME, true));
+      }
+    } catch (e) { /* hors ligne : le widget reste utilisable en lecture seule */ }
+    try {
+      const r = await api(TABLE + '?room=like.private:*&order=id.desc&limit=200');
+      if (!r.ok) return;
+      for (const m of (await r.json()).reverse()) {
+        const pair = (m.room || '').slice('private:'.length).split(':');
+        if (!pair.includes(ME)) continue;
+        const peer = pair.find(u => u !== ME);
+        if (!peer) continue;
+        (dmConvs[peer] = dmConvs[peer] || []).push({
+          from: m.username, to: m.username === ME ? peer : ME,
+          text: m.message, ts: Date.parse(m.created_at) || Date.now()
+        });
+      }
+      renderRecent();
+    } catch (e) {}
+  }
+
+  async function envoyer(texte, room) {
+    return api(TABLE, {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ username: ME, message: texte, type: 'text', room })
     });
-    dmChan
-      .on('broadcast', { event: 'dm' }, ({ payload }) => {
-        const { from, to, text, ts } = payload;
-        if (to !== ME) return;
-        if (!dmConvs[from]) dmConvs[from] = [];
-        dmConvs[from].push({ from, to, text, ts });
-        if (activePeer === from && panelOpen && activeTab === 'dm') {
-          renderDmMsgs(from);
-        } else {
-          unreadDm[from] = (unreadDm[from] || 0) + 1;
-          updateBadge();
-        }
-        renderRecent();
-      })
-      .subscribe();
+  }
+
+  /* Le salon doit figurer dans chat_rooms pour apparaître dans la liste du
+     destinataire, qui construit la sienne à partir de cette table. */
+  async function assureRoom(peer) {
+    const id = roomPrivee(ME, peer);
+    try {
+      const r = await api(ROOMS + '?id=eq.' + encodeURIComponent(id) + '&select=id');
+      if (r.ok && (await r.json()).length) return id;
+      await api(ROOMS, {
+        method: 'POST',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ id, type: 'private', members: [ME, peer], created_by: ME })
+      });
+    } catch (e) {}
+    return id;
   }
 
   /* ── Groupe ─────────────────────────────────────────────── */
@@ -212,16 +269,17 @@
     inp.value = '';
     const msg = { user: ME, text, ts: Date.now() };
     pushGroupMsg(msg, true);
-    globalChan.send({ type: 'broadcast', event: 'gmsg', payload: msg });
+    envoyer(text, GENERAL).then(r => { if (!r.ok) sysMsg('klc-gmsgs', 'Message non envoyé — vérifie ta connexion.'); });
   }
 
-  function pushGroupMsg(msg, mine) {
+  function pushGroupMsg(msg, mine, historique) {
     groupMsgs.push(msg);
     if (groupMsgs.length > 150) groupMsgs.shift();
     const c = $('klc-gmsgs');
     c.appendChild(msgEl(msg.user, msg.text, msg.ts, mine));
     c.scrollTop = c.scrollHeight;
-    if (!panelOpen || activeTab !== 'group') { unreadGroup++; updateBadge(); }
+    /* L'historique rechargé ne doit pas sonner comme du nouveau. */
+    if (!historique && (!panelOpen || activeTab !== 'group')) { unreadGroup++; updateBadge(); }
   }
 
   /* ── DM ─────────────────────────────────────────────────── */
@@ -240,7 +298,7 @@
   }
 
   function sendDM() {
-    if (!activePeer || !dmChan) return;
+    if (!activePeer) return;
     const inp = $('klc-dminput');
     const text = inp.value.trim();
     if (!text) return;
@@ -250,7 +308,8 @@
     dmConvs[activePeer].push(msg);
     renderDmMsgs(activePeer);
     renderRecent();
-    dmChan.send({ type: 'broadcast', event: 'dm', payload: msg });
+    const peer = activePeer;
+    assureRoom(peer).then(room => envoyer(text, room));
   }
 
   function renderDmMsgs(peer) {
