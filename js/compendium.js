@@ -178,15 +178,11 @@
       items = items.filter(i => names.has((i.name || '').toLowerCase()));
     }
     if (_activeTab === 'monsters' && crFilter !== '' && crFilter !== undefined) {
+      const voulu = _crEnNombre(crFilter);
       items = items.filter(i => {
-        const cr = parseFloat(i.challenge_rating ?? i.cr ?? 99);
-        if (crFilter === '0')  return cr === 0;
-        if (crFilter === '1')  return cr >= 0.125 && cr <= 1;
-        if (crFilter === '5')  return cr >= 2 && cr <= 5;
-        if (crFilter === '10') return cr >= 6 && cr <= 10;
-        if (crFilter === '20') return cr >= 11 && cr <= 20;
-        if (crFilter === '21') return cr > 20;
-        return true;
+        const cr = _crEnNombre(i.challenge_rating ?? i.cr ?? 99);
+        // La dernière option est un « 6+ » : au-delà, tout passe.
+        return voulu >= 6 ? cr >= 6 : cr === voulu;
       });
     }
 
@@ -237,7 +233,7 @@
           <button class="btn-comp-add" data-comp-type="item" data-comp-idx="${_allItems.indexOf(item)}">+ Add</button>`;
 
       } else {
-        const crDisplay = item.challenge_rating ?? item.cr ?? '?';
+        const crDisplay = _crLisible(item.challenge_rating ?? item.cr ?? '?');
         // type : Open5e v2 → objet {name,key} | local/dnd5eapi → string
         const typeRaw   = item.creature_type?.name || (typeof item.type === 'string' ? item.type : item.type?.name) || '';
         const typeStr   = [typeRaw, item.subtype].filter(Boolean).join(', ');
@@ -308,6 +304,29 @@
        local Eberron  : category string, cost "X gp"/"—", desc string  ── */
   /* Cout -> pieces d'or. Deux schemas : v2 renvoie une chaine ("75.00"), v1 un
      objet {quantity, unit}. 1 po = 10 pa = 100 pc, 1 pp = 10 po, 1 pe = 5 po. */
+  /* 0.125 → '1/8'. L'API donne les FP fractionnaires en décimal, illisible
+     sur une fiche de monstre. */
+  function _crLisible(v) {
+    const n = _crEnNombre(v);
+    if (n === 0.125) return '1/8';
+    if (n === 0.25)  return '1/4';
+    if (n === 0.5)   return '1/2';
+    return isNaN(n) ? String(v ?? '?') : String(n);
+  }
+
+  /* '1/2' → 0.5 ; 3 → 3. Les deux sources écrivent le FP différemment. */
+  function _crEnNombre(v) {
+    if (typeof v === 'number') return v;
+    if (v == null || v === '') return NaN;
+    const s = String(v).trim();
+    if (s.includes('/')) {
+      const [a, b] = s.split('/').map(Number);
+      return b ? a / b : NaN;
+    }
+    const n = parseFloat(s);
+    return isNaN(n) ? NaN : n;
+  }
+
   function _costToGp(raw) {
     const RATE = { cp: 0.01, sp: 0.1, ep: 0.5, gp: 1, pp: 10 };
     if (raw == null) return null;
@@ -606,7 +625,7 @@
         _addMonsterAsFamiliar(data);
         btn.textContent = '✓ Imported';
         const metaEl = btn.closest('.comp-item')?.querySelector('.comp-item-meta');
-        if (metaEl) metaEl.textContent = `CR ${data.challenge_rating??data.cr??'?'} · AC ${data.armor_class?.[0]?.value??data.armor_class??'?'} · ${data.hit_points??'?'} HP`;
+        if (metaEl) metaEl.textContent = `CR ${_crLisible(data.challenge_rating??data.cr??'?')} · AC ${data.armor_class?.[0]?.value??data.armor_class??'?'} · ${data.hit_points??'?'} HP`;
         setTimeout(() => { btn.textContent = '⊕ Import'; btn.disabled = false; }, 2000);
       } catch {
         btn.textContent = 'Error';

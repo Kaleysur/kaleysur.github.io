@@ -1002,6 +1002,170 @@ function ok(cond, label) {
   eq(dmMod(14), 2, 'dmMod');
 }
 
+/* ══════════ js/monsters.js — bestiaire ══════════ */
+{
+  /* Le module est une IIFE sur window : on l'exécute avec un faux global pour
+     récupérer l'API publique, plutôt que d'extraire fonction par fonction. */
+  const src = staged('js/monsters.js');
+  const faux = {};
+  new Function('window', src)(faux);
+  const B = faux.Bestiaire;
+
+  ok(!!B, 'Bestiaire exposé');
+
+  // Facteur de puissance : fractions, valeurs, libellés
+  eq(B.crValue('1/2'), 0.5, 'FP 1/2 en valeur');
+  eq(B.crValue('1/8'), 0.125, 'FP 1/8 en valeur');
+  eq(B.crValue(7), 7, 'FP numérique inchangé');
+  eq(B.crValue(null), 0, 'FP absent = 0');
+  eq(B.crLabel(0.25), '1/4', 'FP 0,25 affiché en fraction');
+  eq(B.crLabel(12), '12', 'FP entier affiché tel quel');
+
+  // Bonus de maîtrise : +2 jusqu'à FP 4, puis +1 tous les 4 FP
+  eq(B.pbFromCr(0), 2, 'PB au FP 0');
+  eq(B.pbFromCr(4), 2, 'PB au FP 4');
+  eq(B.pbFromCr(5), 3, 'PB au FP 5');
+  eq(B.pbFromCr(8), 3, 'PB au FP 8');
+  eq(B.pbFromCr(9), 4, 'PB au FP 9');
+  eq(B.pbFromCr(17), 6, 'PB au FP 17');
+  eq(B.pbFromCr(21), 7, 'PB au FP 21');
+  eq(B.pbFromCr('1/2'), 2, 'PB au FP fractionnaire');
+
+  // Expérience
+  eq(B.xpFromCr('1/4'), 50, 'PX au FP 1/4');
+  eq(B.xpFromCr(10), 5900, 'PX au FP 10');
+  eq(B.xpFromCr(30), 155000, 'PX au FP 30');
+  eq(B.xpFromCr(99), 0, 'FP hors table : pas de PX inventés');
+
+  // Moyenne des dés de vie
+  eq(B.avgHitDice('20d10 + 40'), 150, 'PV moyens 20d10+40');
+  eq(B.avgHitDice('6d6+6'), 27, 'PV moyens 6d6+6');
+  eq(B.avgHitDice('2d6'), 7, 'PV moyens 2d6');
+  eq(B.avgHitDice('4d8 - 4'), 14, 'PV moyens avec bonus négatif');
+  eq(B.avgHitDice(''), 0, 'dés de vie absents');
+  eq(B.avgHitDice('nawak'), 0, 'dés de vie illisibles');
+
+  eq(B.mod(21), 5, 'modificateur de 21');
+  eq(B.mod(9), -1, 'modificateur de 9');
+
+  /* Normalisation — schéma local (champs à plat, valeurs en texte) */
+  const local = {
+    name: 'Sbire', size: 'Small', type: 'Humanoid', subtype: 'Halfling',
+    alignment: 'Neutral Evil', armor_class: 13, armor_desc: 'studded leather',
+    hit_points: 27, hit_dice: '6d6+6', speed: { walk: '40 ft.' },
+    strength: 10, dexterity: 15, constitution: 12,
+    intelligence: 12, wisdom: 10, charisma: 14,
+    saving_throws: { dexterity: '+4' }, skills: { stealth: '+5' },
+    damage_resistances: ['poison'], damage_immunities: [], condition_immunities: [],
+    senses: 'passive Perception 12', languages: 'Common', challenge_rating: '1/2', cr: 0.5,
+    special_abilities: [{ name: 'Hustle', desc: 'Bonus Action.' }],
+    actions: [{ name: 'Shortsword', desc: '+4, 5 (1d6+2).' }],
+    bonus_actions: [{ name: 'Hustle', desc: 'Move.' }]
+  };
+  const n1 = B.normaliser(local, 'Eberron');
+  eq(n1.name, 'Sbire', 'nom conservé');
+  eq(n1.source, 'Eberron', 'source du supplément');
+  eq(n1.ac, 13, 'CA locale');
+  eq(n1.hp, 27, 'PV locaux');
+  eq(n1.speed.walk, 40, 'vitesse « 40 ft. » convertie en nombre');
+  eq(n1.scores.dex, 15, 'score de DEX à plat');
+  eq(n1.mods.dex, 2, 'modificateur calculé faute de source');
+  eq(n1.saves.dex, 4, 'sauvegarde « +4 » convertie');
+  eq(n1.skills.stealth, 5, 'compétence convertie');
+  eq(n1.sens.pp, 12, 'Perception passive extraite du texte');
+  eq(n1.resistances, ['poison'], 'résistances locales');
+  eq(n1.pb, 2, 'PB déduit du FP');
+  eq(n1.xp, 100, 'PX déduits du FP');
+  eq(n1.traits.length, 1, 'special_abilities lus comme traits');
+  eq(n1.actions.length, 1, 'actions locales');
+  eq(n1.bonusActions.length, 1, 'actions bonus locales');
+  eq(n1.reactions, [], 'réactions absentes');
+
+  /* Normalisation — schéma API v2 (objets imbriqués, valeurs numériques) */
+  const api = {
+    key: 'srd-2024_truc', name: 'Truc',
+    size: { name: 'Large' }, type: { name: 'Aberration' }, alignment: 'lawful evil',
+    challenge_rating: 10, armor_class: 17, armor_detail: 'natural armor',
+    hit_points: 150, hit_dice: '20d10 + 40', speed: { walk: 10, swim: 40, unit: 'feet' },
+    ability_scores: { strength: 21, dexterity: 9, constitution: 15, intelligence: 18, wisdom: 15, charisma: 18 },
+    modifiers: { strength: 5, dexterity: -1, constitution: 2, intelligence: 4, wisdom: 2, charisma: 4 },
+    saving_throws: { strength: 5, dexterity: 3, constitution: 6, intelligence: 8, wisdom: 6, charisma: 4 },
+    skill_bonuses: { history: 12, perception: 10 },
+    resistances_and_immunities: { damage_immunities_display: 'psychic', damage_resistances: [], condition_immunities: [], damage_vulnerabilities: [] },
+    darkvision_range: 120, passive_perception: 20,
+    languages: { as_string: 'Deep Speech' }, initiative_bonus: 7,
+    traits: [{ name: 'Amphibious', desc: 'Respire.' }],
+    actions: [
+      { name: 'Multiattack', desc: 'Trois attaques.', action_type: 'ACTION', order_in_statblock: 1 },
+      { name: 'Lash', desc: 'Réaction légendaire.', action_type: 'LEGENDARY_ACTION', order_in_statblock: 2 },
+      { name: 'Esquive', desc: 'Réaction.', action_type: 'REACTION', order_in_statblock: 3 }
+    ]
+  };
+  const n2 = B.normaliser(api, 'SRD 2024');
+  eq(n2.size, 'Large', 'taille désimbriquée');
+  eq(n2.type, 'Aberration', 'type désimbriqué');
+  eq(n2.speed.swim, 40, 'vitesse de nage');
+  eq(n2.mods.for, 5, 'modificateur fourni par l API');
+  /* L'API donne les six sauvegardes ; seules celles qui dépassent le
+     modificateur sont des maîtrises. */
+  eq(n2.saves.for, undefined, 'FOR non maîtrisée : écartée');
+  eq(n2.saves.int, 8, 'INT maîtrisée : conservée');
+  eq(Object.keys(n2.saves).length, 4, 'quatre sauvegardes maîtrisées');
+  eq(n2.immunites, ['psychic'], 'immunités lues depuis le champ d affichage');
+  eq(n2.sens.pp, 20, 'Perception passive de l API');
+  ok(n2.sens.texte.includes('120'), 'portée de vision dans le noir présente');
+  eq(n2.initiative, 7, 'initiative fournie par l API');
+  eq(n2.actions.length, 1, 'seules les ACTION dans actions');
+  eq(n2.legendaires.length, 1, 'actions légendaires triées à part');
+  eq(n2.reactions.length, 1, 'réactions triées à part');
+  eq(n2.traits.length, 1, 'traits v2');
+  eq(B.normaliser(null), null, 'entrée nulle refusée');
+  eq(B.normaliser({}), null, 'entrée sans nom refusée');
+
+  /* Tranches de FP du filtre */
+  ok(B.dansTrancheCr(0, '0'), 'FP 0 dans la tranche 0');
+  ok(!B.dansTrancheCr(1, '0'), 'FP 1 hors de la tranche « moins de 1 »');
+  ok(B.dansTrancheCr('1/2', '0'), 'FP 1/2 dans la tranche « moins de 1 »');
+  ok(!B.dansTrancheCr('1/2', '5'), 'FP 1/2 hors de la tranche 1-5');
+  ok(B.dansTrancheCr(5, '5'), 'FP 5 borne haute incluse');
+  ok(!B.dansTrancheCr(6, '5'), 'FP 6 hors tranche 1-5');
+  ok(B.dansTrancheCr(10, '10'), 'FP 10 dans 6-10');
+  ok(B.dansTrancheCr(25, '21'), 'FP 25 dans 21+');
+  ok(B.dansTrancheCr(3, ''), 'filtre vide : tout passe');
+
+  /* Recherche */
+  const catalogue = [n1, n2];
+  eq(B.filtrer(catalogue, { q: 'sbi' }).length, 1, 'recherche par nom');
+  eq(B.filtrer(catalogue, { q: 'aberration' }).length, 1, 'recherche par type');
+  eq(B.filtrer(catalogue, { q: 'zzz' }).length, 0, 'recherche sans résultat');
+  eq(B.filtrer(catalogue, { type: 'Humanoid' }).length, 1, 'filtre de type');
+  eq(B.filtrer(catalogue, { cr: '10' }).length, 1, 'filtre de FP');
+  eq(B.filtrer(catalogue, {}).length, 2, 'aucun filtre');
+  eq(B.filtrer(null, {}), [], 'liste absente');
+
+  /* Tri : FP croissant puis nom */
+  const tri = B.trier([{ name: 'B', cr: 5 }, { name: 'A', cr: 5 }, { name: 'C', cr: 1 }]);
+  eq(tri.map(m => m.name), ['C', 'A', 'B'], 'tri par FP puis par nom');
+
+  eq(B.typesConnus(catalogue), ['Aberration', 'Humanoid'], 'types du catalogue');
+
+  /* Rendu : la fiche doit contenir les repères que le MJ cherche */
+  const html = B.ficheHtml(n2);
+  ok(html.includes('CA</b> 17'), 'fiche : CA');
+  ok(html.includes('150'), 'fiche : PV');
+  ok(html.includes('FP</b> 10'), 'fiche : FP');
+  ok(html.includes('Actions légendaires'), 'fiche : section légendaire');
+  ok(html.includes('Amphibious'), 'fiche : trait');
+  eq(B.ficheHtml(null), '', 'fiche vide sans monstre');
+
+  /* Échappement : un nom hostile ne doit pas produire de balise */
+  const mechant = B.normaliser({ name: '<img src=x onerror=alert(1)>', armor_class: 1, hit_points: 1 }, 'x');
+  ok(!B.ficheHtml(mechant).includes('<img'), 'fiche : nom échappé');
+
+  eq(B.vitesseTexte({ walk: 30, fly: 60 }), '30 ft, vol 60 ft', 'vitesses en texte');
+  eq(B.vitesseTexte({}), '—', 'aucune vitesse');
+}
+
 /* ══════════ Verdict ══════════ */
 if (failures.length) {
   console.error(`✗ Smoke-tests : ${failures.length} échec(s) sur ${assertions} assertions`);
