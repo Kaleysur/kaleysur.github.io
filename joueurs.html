@@ -169,6 +169,10 @@
     .btn-prep-filter:hover { border-color:var(--gold-dark); color:var(--gold-dark); }
     .btn-prep-filter.active { border-color:var(--gold-dark); background:rgba(201,169,110,0.12); color:var(--gold); }
     /* ── Spell prep counter ── */
+    .spell-always-btn { background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; line-height:1; color:#4a4a52; transition:color 0.12s, transform 0.12s; }
+    .spell-always-btn:hover { color:#c9a227; transform:scale(1.12); }
+    .spell-always-btn.on { color:#c9a227; }
+    .spell-prep-btn.locked { cursor:default; opacity:0.85; }
     .spell-prep-counter { font-size:0.75rem; padding:0.15rem 0.55rem; border-radius:5px; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); color:#888; font-family:'Cinzel',serif; }
     .spell-prep-counter.ok  { border-color:#3a6a3a; color:#8aba8a; }
     .spell-prep-counter.over { border-color:#6a3a3a; color:#e07070; }
@@ -1700,19 +1704,23 @@
   #spell-tbody .spell-lvl-header td { display:block; padding:4px 0 2px; }
   #spell-tbody .exp-row { display:flex !important; align-items:center; gap:6px; padding:7px 10px; border:1px solid var(--j-border-col,#2a1f0d); border-radius:4px; background:var(--j-panel,#1a1308); }
   #spell-tbody .exp-row td { padding:0; display:flex; align-items:center; }
-  /* Colonnes réelles : 1=★préparé 2=niveau 3=nom 4=dégâts 5=type 6=portée 7=action 8=conc 9=▾ 10=✕ */
-  #spell-tbody .exp-row td:nth-child(1) { flex:0 0 32px; }
+  /* Colonnes réelles : 1=★préparé 2=🔒toujours 3=niveau 4=nom 5=dégâts 6=type
+     7=portée 8=action 9=conc 10=▾ 11=✕
+     ⚠ Ces règles désignent les colonnes par leur POSITION : ajouter une colonne
+     au tableau décale tout. Mettre à jour ce bloc en même temps. */
+  #spell-tbody .exp-row td:nth-child(1) { flex:0 0 28px; }
+  #spell-tbody .exp-row td:nth-child(2) { flex:0 0 26px; }
   /* Niveau : redondant sur mobile (les sorts sont groupés par en-têtes de niveau) */
-  #spell-tbody .exp-row td:nth-child(2) { display:none !important; }
+  #spell-tbody .exp-row td:nth-child(3) { display:none !important; }
   /* Nom : prend toute la largeur disponible */
-  #spell-tbody .exp-row td:nth-child(3) { flex:1; min-width:0; }
-  #spell-tbody .exp-row td:nth-child(3) .atk-inp { width:100%; }
-  #spell-tbody .exp-row td:nth-child(3) .atk-dmg-wrap { width:100%; }
+  #spell-tbody .exp-row td:nth-child(4) { flex:1; min-width:0; }
+  #spell-tbody .exp-row td:nth-child(4) .atk-inp { width:100%; }
+  #spell-tbody .exp-row td:nth-child(4) .atk-dmg-wrap { width:100%; }
   /* Badges méta (action · portée · dégâts · conc) visibles dans le déplié ▾ */
   .spell-meta-mobile { display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:0.4rem; }
   /* Masquer dégâts, type, portée, action — visibles dans la description via ▾ */
-  #spell-tbody .exp-row td:nth-child(4),#spell-tbody .exp-row td:nth-child(5),
-  #spell-tbody .exp-row td:nth-child(6),#spell-tbody .exp-row td:nth-child(7) { display:none !important; }
+  #spell-tbody .exp-row td:nth-child(5),#spell-tbody .exp-row td:nth-child(6),
+  #spell-tbody .exp-row td:nth-child(7),#spell-tbody .exp-row td:nth-child(8) { display:none !important; }
   #spell-tbody .exp-desc-row td { display:block; }
 }
 
@@ -3566,6 +3574,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <table class="exp-table spell-table">
               <thead><tr>
                 <th style="width:22px;" title="Prepared">★</th>
+                <th style="width:22px;" title="Always prepared — does not count against your maximum">🔒</th>
                 <th style="width:44px;">Lvl.</th>
                 <th>Spell Name</th>
                 <th style="width:70px;">Damage</th>
@@ -6577,7 +6586,10 @@ function updateSpellCalcs() {
   if (prepEl) {
     const spells = c.spells || [];
     const leveled  = spells.filter(s => s.level && s.level !== '0' && s.level !== 0);
-    const prepared = leveled.filter(s => s.prepared !== false);
+    // Les sorts « toujours prepares » (domaine, cercle, serment, don…) sont
+    // prepares en permanence SANS compter dans le maximum : on les ecarte.
+    const prepared = leveled.filter(s => !s.always && s.prepared !== false);
+    const gratuits = leveled.filter(s => s.always).length;
     const maxPrep = getClasses(c).reduce((sum, cl) => {
       const table = PREPARED_SPELLS[cl.classe];
       if (!table) return sum;
@@ -6585,8 +6597,10 @@ function updateSpellCalcs() {
     }, 0);
     if (maxPrep > 0) {
       prepEl.style.display = '';
-      prepEl.textContent = `${prepared.length} / ${maxPrep}`;
-      prepEl.title = `Prepared spells — maximum ${maxPrep} at this level (PHB 2024)`;
+      prepEl.textContent = `${prepared.length} / ${maxPrep}` + (gratuits ? ` (+${gratuits})` : '');
+      prepEl.title = `Prepared spells — maximum ${maxPrep} at this level (PHB 2024)`
+        + (gratuits ? `
+${gratuits} always-prepared spell(s), free of the maximum` : '');
       prepEl.className = 'spell-prep-counter' + (prepared.length > maxPrep ? ' over' : prepared.length > 0 ? ' ok' : '');
     } else {
       // Classe sans préparation de sorts (guerrier, roublard…) : compteur masqué
@@ -8207,12 +8221,14 @@ function renderSpells() {
 
     // Apply prepared filter (cantrips always show; leveled: hide unprepared)
     if (_spellPrepFilter && !isCantrip) {
-      entries = entries.filter(({ s }) => s.prepared !== false);
+      entries = entries.filter(({ s }) => s.always || s.prepared !== false);
     }
 
     if (!entries.length) return;
 
-    const preparedCount = isCantrip ? null : entries.filter(({ s }) => s.prepared !== false).length;
+    const preparedCount = isCantrip ? null
+      : entries.filter(({ s }) => s.always || s.prepared !== false).length;
+    const alwaysCount = isCantrip ? 0 : entries.filter(({ s }) => s.always).length;
 
     // Level header
     const hdr = document.createElement('tr');
@@ -8224,24 +8240,33 @@ function renderSpells() {
           ? `${entries.length}`
           : (hasBook
               ? `${preparedCount} prepared${preparedCount > 1 ? 's' : ''} · ${entries.length - preparedCount} in spellbook`
-              : `${preparedCount}/${entries.length} prepared`));
-    hdr.innerHTML = `<td colspan="10">${lvlLabel}<span class="spell-lvl-count">${countLabel}</span></td>`;
+              : `${preparedCount}/${entries.length} prepared`))
+      + (alwaysCount ? ` · ${alwaysCount} always` : '');
+    hdr.innerHTML = `<td colspan="11">${lvlLabel}<span class="spell-lvl-count">${countLabel}</span></td>`;
     frag.appendChild(hdr);
 
     entries.forEach(({ s, i }) => {
       const isConc    = !!s.conc;
-      const isPrepared = isCantrip || s.prepared !== false;
+      // Un sort « toujours prepare » (domaine, cercle, serment, don…) est
+      // prepare quoi qu'il arrive et ne consomme pas le quota.
+      const isAlways   = !isCantrip && !!s.always;
+      const isPrepared = isCantrip || isAlways || s.prepared !== false;
       const tr = document.createElement('tr');
       tr.className = 'exp-row' + (!isPrepared && !isCantrip ? ' spell-unprepared' : '');
 
       // Prepared toggle cell
       const prepCell = isCantrip
         ? `<td style="text-align:center;"><span style="color:#555;font-size:0.7rem;" title="Cantrips are always available">✦</span></td>`
-        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared ? 'Prepared — click to unprepare' : (hasBook ? 'In your spellbook — click to prepare' : 'Not prepared — click to prepare')}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
+        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}${isAlways?' locked':''}" data-prep-spell="${i}"${isAlways?' disabled':''} title="${isAlways ? 'Always prepared — use the 🔒 button to change' : (isPrepared ? 'Prepared — click to unprepare' : (hasBook ? 'In your spellbook — click to prepare' : 'Not prepared — click to prepare'))}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
+
+      // Bouton « toujours prepare » : le sort reste actif sans compter dans le quota
+      const alwaysCell = isCantrip
+        ? `<td></td>`
+        : `<td style="text-align:center;"><button class="spell-always-btn${isAlways?' on':''}" data-always-spell="${i}" title="${isAlways ? 'Always prepared — click to make it an ordinary prepared spell' : 'Mark as always prepared (domain, circle, oath, feat…) — free of the maximum'}">${isAlways ? '🔒' : '🔓'}</button></td>`;
 
       const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Cast the spell (uses a level ${esc(s.level||'1')}+ slot)">⚡</button>` : '';
       const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Roll ${esc(s.degat)}">🎲</button>` : '';
-      tr.innerHTML = prepCell
+      tr.innerHTML = prepCell + alwaysCell
         + `<td style="text-align:center;"><input class="atk-inp" data-spell="${i}" data-sk="level" value="${esc(s.level||'0')}" placeholder="0" style="width:38px;text-align:center;font-size:0.78rem;"></td>`
         + `<td><div class="atk-dmg-wrap"><input class="atk-inp" data-spell="${i}" data-sk="name" value="${esc(s.name||'')}" placeholder="Spell name">${castBtn}</div></td>`
         + `<td><div class="atk-dmg-wrap"><input class="atk-inp" data-spell="${i}" data-sk="degat" value="${esc(s.degat||'')}" placeholder="2d6" style="font-size:0.75rem;">${spellDice}</div></td>`
@@ -11987,6 +12012,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       const si = parseInt(togBtn.dataset.spellToggle);
       C().spells[si]._open = !C().spells[si]._open;
       renderSpells(); return;
+    }
+    // Toujours prepare : le sort reste actif sans consommer le quota
+    const alwaysBtn = e.target.closest('[data-always-spell]');
+    if (alwaysBtn) {
+      const idx = parseInt(alwaysBtn.dataset.alwaysSpell);
+      const sp = C().spells[idx];
+      if (sp) {
+        sp.always = !sp.always;
+        // Devenir « toujours prepare » implique d'etre prepare : sinon le sort
+        // afficherait l'etoile pleine tout en etant marque non prepare.
+        if (sp.always) sp.prepared = true;
+      }
+      renderSpells(); updateSpellCalcs(); triggerSave(); return;
     }
     // Prepared toggle
     const prepBtn = e.target.closest('[data-prep-spell]');
