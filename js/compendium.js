@@ -51,13 +51,13 @@
 
   function _closeCompendium() { overlay().classList.remove('open'); }
 
-  /* ── Traductions catégories équipement ── */
+  /* ── Libelles courts de categories ── */
   const CAT_FR = {
-    'Adventuring Gear':'Équipement aventure', 'Armor':'Armures', 'Weapon':'Armes',
-    'Tools':'Outils', 'Mounts and Vehicles':'Montures', 'Trade Goods':'Marchandises',
-    'Wondrous Items':'Objets merveilleux', 'Magic Items':'Objets magiques',
-    'Tack, Harness, and Drawn Vehicles':'Harnachement',
-    'Mounts and Other Animals':'Animaux & Montures',
+    'Adventuring Gear':'Adventuring Gear', 'Armor':'Armor', 'Weapon':'Weapons',
+    'Tools':'Tools', 'Mounts and Vehicles':'Mounts', 'Trade Goods':'Trade Goods',
+    'Wondrous Items':'Wondrous Items', 'Magic Items':'Magic Items',
+    'Tack, Harness, and Drawn Vehicles':'Tack & Harness',
+    'Mounts and Other Animals':'Mounts & Animals',
   };
 
   // Extrait la catégorie d'un item
@@ -74,7 +74,7 @@
     const sel = document.getElementById('comp-filter-cat');
     if (!sel) return;
     const prev = sel.value;
-    sel.innerHTML = '<option value="">Toute catégorie</option>' +
+    sel.innerHTML = '<option value="">Any category</option>' +
       cats.map(c => `<option value="${c}">${CAT_FR[c] || c}</option>`).join('');
     if (cats.includes(prev)) sel.value = prev;
   }
@@ -116,7 +116,7 @@
         _render(); return;
       }
     }
-    list().innerHTML = '<div class="comp-loading">Chargement 2024…</div>';
+    list().innerHTML = '<div class="comp-loading">Loading 2024…</div>';
     try {
       if (tab === 'spells') {
         // Sorts 2024 — fichier local extrait depuis dnd2024.wikidot.com
@@ -148,7 +148,7 @@
       if (tab !== 'spells') _persistPut(tab, _allItems); // fire-and-forget
       _render();
     } catch(e) {
-      list().innerHTML = '<div class="comp-empty">Impossible de charger le compendium. Vérifiez votre connexion.</div>';
+      list().innerHTML = '<div class="comp-empty">Could not load the compendium. Check your connection.</div>';
     }
   }
 
@@ -190,7 +190,7 @@
       });
     }
 
-    if (!items.length) { list().innerHTML = '<div class="comp-empty">Aucun résultat.</div>'; return; }
+    if (!items.length) { list().innerHTML = '<div class="comp-empty">No results.</div>'; return; }
 
     const frag = document.createDocumentFragment();
     items.slice(0, 100).forEach(item => {
@@ -256,7 +256,7 @@
     if (items.length > 100) {
       const more = document.createElement('div');
       more.className = 'comp-empty';
-      more.textContent = `… ${items.length - 100} résultats supplémentaires — affinez la recherche.`;
+      more.textContent = `… ${items.length - 100} more results — refine your search.`;
       list().appendChild(more);
     }
   }
@@ -277,10 +277,10 @@
 
     // Construire une description complète avec le stat-block du sort
     const statBlock = [
-      item.school ? `École : ${item.school}` : '',
-      item.components ? `Composantes : ${item.components}${item.material ? ` (${item.material})` : ''}` : '',
-      item.duration ? `Durée : ${item.duration}` : '',
-      item.classes?.length ? `Classes : ${item.classes.join(', ')}` : '',
+      item.school ? `School: ${item.school}` : '',
+      item.components ? `Components: ${item.components}${item.material ? ` (${item.material})` : ''}` : '',
+      item.duration ? `Duration: ${item.duration}` : '',
+      item.classes?.length ? `Classes: ${item.classes.join(', ')}` : '',
     ].filter(Boolean).join('\n');
 
     const fullDesc = statBlock ? `${statBlock}\n\n${desc}` : desc;
@@ -358,17 +358,17 @@
     }
     // Weapon Mastery 2024 : champ direct ou dans weapon.properties (type Mastery)
     if (item.weapon_mastery) {
-      parts.push(`Maîtrise : ${item.weapon_mastery}`);
+      parts.push(`Mastery: ${item.weapon_mastery}`);
     } else {
       const mp = propsArr.find(p => p.property?.type === 'Mastery' || p.property?.name === 'Mastery');
-      if (mp) parts.push(`Maîtrise : ${mp.detail || mp.property?.name || 'Mastery'}`);
+      if (mp) parts.push(`Mastery: ${mp.detail || mp.property?.name || 'Mastery'}`);
     }
 
     // ── Portée ──
     // v2 : item.weapon.range_normal | v1 : item.range.normal | local : item.range_normal
     const rNorm = wep.range_normal ?? item.range_normal ?? item.range?.normal ?? null;
     const rLong = wep.range_long   ?? item.range_long   ?? item.range?.long   ?? null;
-    if (rNorm) parts.push(`Portée ${rNorm}/${rLong || rNorm} ft`);
+    if (rNorm) parts.push(`Range ${rNorm}/${rLong || rNorm} ft`);
 
     // ── CA armure ──
     // v2 : item.armor.ac_base + ac_add_dexmod + ac_cap_dexmod
@@ -378,13 +378,13 @@
     if (acBase != null) {
       const dexBonus = arm.ac_add_dexmod  ?? (typeof item.armor_class === 'object' ? item.armor_class.dex_bonus : item.armor_dex_bonus) ?? false;
       const maxDex   = arm.ac_cap_dexmod  ?? (typeof item.armor_class === 'object' ? item.armor_class.max_bonus : item.armor_max_dex)   ?? null;
-      let acStr = `CA ${acBase}`;
+      let acStr = `AC ${acBase}`;
       if (dexBonus) acStr += maxDex ? ` + DEX (max +${maxDex})` : ' + DEX';
       parts.push(acStr);
     }
     const strMin = arm.strength_score_required ?? item.str_minimum ?? item.strength_requirement;
-    if (strMin) parts.push(`Force min. ${strMin}`);
-    if (arm.grants_stealth_disadvantage || item.stealth_disadvantage) parts.push('Discrétion désavantage');
+    if (strMin) parts.push(`Str min. ${strMin}`);
+    if (arm.grants_stealth_disadvantage || item.stealth_disadvantage) parts.push('Stealth disadvantage');
 
     // ── Poids + coût ──
     if (item.weight) parts.push(`${item.weight} lb`);
@@ -396,7 +396,7 @@
 
     // ── Rareté / attunement (items magiques locaux) ──
     if (item.rarity) parts.push(item.rarity);
-    if (item.requires_attunement === true) parts.push('Nécessite un lien');
+    if (item.requires_attunement === true) parts.push('Requires attunement');
 
     // ── Description (première ligne) ──
     const descRaw = Array.isArray(item.desc) ? item.desc[0] : (item.desc || '');
@@ -1168,14 +1168,14 @@
       div.className = 'summon-group';
       const noteHtml = grp.note ? `<span class="summon-group-note">${grp.note}</span>` : '';
       const chipsHtml = grp.creatures.map((c, ci) => {
-        const spiritBadge = c.spirit ? '<span class="summon-spirit-badge">esprit</span>' : '';
+        const spiritBadge = c.spirit ? '<span class="summon-spirit-badge">spirit</span>' : '';
         return `<button class="summon-chip" data-sg="${gi}" data-sc="${ci}" title="${c.n}">
-          <span class="summon-chip-icon">${grp.icon}</span>${c.n}${spiritBadge}
+          ${c.n}${spiritBadge}
         </button>`;
       }).join('');
       div.innerHTML = `
         <div class="summon-group-hd">
-          <span class="summon-group-lvl">Niv.${grp.level}</span>
+          <span class="summon-group-lvl">Lv.${grp.level}</span>
           <span class="summon-group-name">${grp.spell}</span>
           ${noteHtml}
         </div>
@@ -1218,7 +1218,7 @@
       senses: s.senses||'', languages: s.languages||'—', cr: s.cr||'?',
       traits: toList(s.traits), actions: toList(s.actions),
       bonusActions: toList(s.bonus_actions), reactions: toList(s.reactions),
-      notes: `⚠️ ${s.acNote||''} · ${s.hpNote||''}`, _collapsed: false,
+      notes: [s.acNote, s.hpNote].filter(Boolean).join(' · '), _collapsed: false,
     });
     if (typeof _tabDirty !== 'undefined') _tabDirty.familiers = true;
     renderFamiliars(); triggerSave();
@@ -1294,8 +1294,8 @@
     const options = cls ? STARTING_EQUIP[cls] : null;
 
     if (!options) {
-      panel.innerHTML = `<div class="comp-se-title">Équipement de départ 2024</div>
-        <p class="comp-se-note">Classe non reconnue — renseignez votre classe dans l'onglet Personnage pour voir les options.</p>`;
+      panel.innerHTML = `<div class="comp-se-title">2024 Starting Equipment</div>
+        <p class="comp-se-note">Class not recognised — set your class on the Character tab to see the options.</p>`;
       return;
     }
 
@@ -1303,20 +1303,20 @@
 
     const optHtml = options.map((opt, i) => {
       const itemLines = opt.items.map(it => `<span>${it.qty > 1 ? it.qty + '× ' : ''}${it.name}</span>`).join('<br>');
-      const goldLine = opt.gold ? `<span>${opt.gold} PO</span>` : '';
+      const goldLine = opt.gold ? `<span>${opt.gold} GP</span>` : '';
       const content = [itemLines, goldLine].filter(Boolean).join('<br>');
       return `<div class="comp-se-option${i === _seSelectedIdx ? ' selected' : ''}" data-se-opt="${i}">
         <div class="comp-se-opt-label">${opt.label}</div>
-        <div class="comp-se-opt-items">${content || '<em>Or uniquement</em>'}</div>
+        <div class="comp-se-opt-items">${content || '<em>Gold only</em>'}</div>
       </div>`;
     }).join('');
 
     panel.innerHTML = `
-      <div class="comp-se-title">⚔️ Équipement de départ — ${cls}</div>
+      <div class="comp-se-title">Starting equipment — ${cls}</div>
       <div class="comp-se-options">${optHtml}</div>
       <div class="comp-se-footer">
-        <button class="comp-se-apply" id="btn-se-apply">Appliquer l'option ${options[_seSelectedIdx]?.label?.split(' ')[1] || ''}</button>
-        <span class="comp-se-note">Ajoute les items à l'inventaire et l'or au personnage.</span>
+        <button class="comp-se-apply" id="btn-se-apply">Apply option ${options[_seSelectedIdx]?.label?.split(' ')[1] || ''}</button>
+        <span class="comp-se-note">Adds the items to your inventory and the gold to your character.</span>
       </div>`;
   }
 
@@ -1329,7 +1329,7 @@
 
     // Ajouter les items
     if (!INV().items) INV().items = [];
-    opt.items.forEach(it => { INV().items.push({ qty: it.qty, name: it.name, notes: 'Équip. départ' }); });
+    opt.items.forEach(it => { INV().items.push({ qty: it.qty, name: it.name, notes: 'Starting gear' }); });
 
     // Ajouter l'or
     if (opt.gold) {
@@ -1343,7 +1343,7 @@
     triggerSave();
 
     const btn = document.getElementById('btn-se-apply');
-    if (btn) { btn.textContent = '✓ Appliqué !'; btn.disabled = true; setTimeout(() => { btn.textContent = `Appliquer l'option ${STARTING_EQUIP[cls][_seSelectedIdx]?.label?.split(' ')[1] || ''}`; btn.disabled = false; }, 2500); }
+    if (btn) { btn.textContent = '✓ Applied!'; btn.disabled = true; setTimeout(() => { btn.textContent = `Apply option ${STARTING_EQUIP[cls][_seSelectedIdx]?.label?.split(' ')[1] || ''}`; btn.disabled = false; }, 2500); }
   }
 
   // Toggle du panneau
