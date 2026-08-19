@@ -169,6 +169,9 @@
     .btn-prep-filter:hover { border-color:var(--gold-dark); color:var(--gold-dark); }
     .btn-prep-filter.active { border-color:var(--gold-dark); background:rgba(201,169,110,0.12); color:var(--gold); }
     /* ── Spell prep counter ── */
+    /* Icônes : héritent de la couleur et de la taille du texte environnant */
+    .ic { width:1em; height:1em; vertical-align:-0.14em; flex-shrink:0; }
+    .ic-lg { width:1.25em; height:1.25em; }
     .spell-always-btn { background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; line-height:1; color:#4a4a52; transition:color 0.12s, transform 0.12s; }
     .spell-always-btn:hover { color:#c9a227; transform:scale(1.12); }
     .spell-always-btn.on { color:#c9a227; }
@@ -2990,6 +2993,92 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+<!-- ── Jeu d'icônes ──
+     Trait monochrome héritant de currentColor : les icônes prennent la couleur
+     du texte, donc le thème du personnage, sans variante à maintenir.
+     Inline plutôt qu'une police externe : la PWA doit fonctionner hors ligne
+     et la CSP interdit les ressources tierces. -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <g id="sk" fill="none" stroke="currentColor" stroke-width="1.6"
+       stroke-linecap="round" stroke-linejoin="round"></g>
+  </defs>
+
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4 2.5 20.5h19L12 4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.6v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+
+  <symbol id="i-swords" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h3.2l9 9-3.2 3.2-9-9V3Z"/><path d="M21 3h-3.2l-9 9 3.2 3.2 9-9V3Z"/><path d="M5.5 18.5 8 21M18.5 18.5 16 21"/></g></symbol>
+
+  <symbol id="i-die" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5 21 7.6v8.8L12 21.5 3 16.4V7.6L12 2.5Z"/><path d="M12 2.5v19M3 7.6l9 5.1 9-5.1"/></g></symbol>
+
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.6 4.5 5.6v6.1c0 4.4 3.1 8.3 7.5 9.7 4.4-1.4 7.5-5.3 7.5-9.7V5.6L12 2.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+
+  <symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.8 12S5.5 5.5 12 5.5 22.2 12 22.2 12 18.5 18.5 12 18.5 1.8 12 1.8 12Z"/><circle cx="12" cy="12" r="3.1"/></g></symbol>
+
+  <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="1.6"/><path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/></g></symbol>
+
+  <symbol id="i-unlock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="1.6"/><path d="M8 10.5V7.4a4 4 0 0 1 7.6-1.7"/></g></symbol>
+
+  <symbol id="i-trash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.2h17M9 6.2V4.4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.8"/><path d="M5.6 6.2 6.6 20a1.6 1.6 0 0 0 1.6 1.5h7.6a1.6 1.6 0 0 0 1.6-1.5l1-13.8"/><path d="M10.3 10.4v6.6M13.7 10.4v6.6"/></g></symbol>
+
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.4 2 4.6 13.4h6L10 22l9.4-11.9h-6.6L13.4 2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+
+  <symbol id="i-skull" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.6c-4.7 0-8 3.3-8 7.7 0 2.7 1.3 4.5 2.7 5.6v3a1.4 1.4 0 0 0 1.4 1.4h7.8a1.4 1.4 0 0 0 1.4-1.4v-3c1.4-1.1 2.7-2.9 2.7-5.6 0-4.4-3.3-7.7-8-7.7Z"/><circle cx="9" cy="11" r="1.7"/><circle cx="15" cy="11" r="1.7"/></g></symbol>
+
+  <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3.5 4.4h6a3 3 0 0 1 2.5 1.3 3 3 0 0 1 2.5-1.3h6v14h-6a3 3 0 0 0-2.5 1.3 3 3 0 0 0-2.5-1.3h-6v-14Z"/><path d="M12 5.7v13.3"/></g></symbol>
+
+  <symbol id="i-save" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4.4 3.6h11.3L20.4 8.3v12.1H4.4V3.6Z"/><path d="M8 3.6v5.6h7V3.6M8 20.4v-5.9h8v5.9"/></g></symbol>
+
+  <symbol id="i-flask" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.6 2.8v6.4L4.3 18a2.1 2.1 0 0 0 1.8 3.2h11.8a2.1 2.1 0 0 0 1.8-3.2l-5.3-8.8V2.8"/><path d="M8.2 2.8h7.6M6.6 14.6h10.8"/></g></symbol>
+
+  <symbol id="i-pack" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 8.2h12a3 3 0 0 1 3 3v7.2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7.2a3 3 0 0 1 3-3Z"/><path d="M8.6 8.2V6a3.4 3.4 0 0 1 6.8 0v2.2M3 13.6h18"/></g></symbol>
+
+  <symbol id="i-bow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3.2A14 14 0 0 1 4.5 20.8"/><path d="M4.5 3.2 20 12 4.5 20.8"/><path d="M13 12h8"/></g></symbol>
+
+  <symbol id="i-orb" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="10.4" r="7.4"/><path d="M8.6 8a4.6 4.6 0 0 1 3.4-2.2" stroke-linecap="round"/><path d="M6.6 20.6h10.8" stroke-linecap="round"/></g></symbol>
+
+  <symbol id="i-leaf" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5C10 3.5 4 8.4 4 15.2a5.6 5.6 0 0 0 5.6 5.6c6.8 0 10.9-6.6 10.9-17.3Z"/><path d="M3.5 20.5 12 12"/></g></symbol>
+
+  <symbol id="i-dagger" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 9.6 13.6h4.8L12 2Z"/><path d="M7.6 15.4h8.8M12 15.4V22"/></g></symbol>
+
+  <symbol id="i-export" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.6V3.4M8 7.2 12 3.2l4 4"/><path d="M4 14.4v4.4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4.4"/></g></symbol>
+
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2.8 2.9 6.1 6.6.9-4.8 4.7 1.2 6.7L12 18l-5.9 3.2 1.2-6.7-4.8-4.7 6.6-.9L12 2.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+
+  <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 20.6h17.2"/><path d="M4.4 16.6 9.6 11l3.6 3.4 6.4-7.6"/><path d="M15.4 6.8h4.2V11"/></g></symbol>
+
+  <symbol id="i-fleur" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.4c-1.9 2.6-1.9 5.1 0 7.6 1.9-2.5 1.9-5 0-7.6Z"/><path d="M12 10c-2.6-2-5.2-1.6-7 .8 2 2 4.6 2 7-.8Zm0 0c2.6-2 5.2-1.6 7 .8-2 2-4.6 2-7-.8Z"/><path d="M8.4 14.2h7.2M12 10v11.2"/></g></symbol>
+
+  <symbol id="i-food" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 3v7.4a3 3 0 0 0 3 3h.2V21"/><path d="M6.4 3v4.8M9.6 3v4.8"/><path d="M17.6 3c-1.6 0-2.8 2-2.8 5.2 0 2.4.9 3.6 2.2 3.9V21"/></g></symbol>
+
+  <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 2.8s6.4 7 6.4 11.2a6.4 6.4 0 1 1-12.8 0C5.6 9.8 12 2.8 12 2.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.4A8.6 8.6 0 0 1 9.6 3.5a8.9 8.9 0 1 0 10.9 10.9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+
+  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></g></symbol>
+
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10.6" cy="10.6" r="6.6"/><path d="m15.4 15.4 4.6 4.6"/></g></symbol>
+
+  <symbol id="i-pencil" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M16.4 3.6a2.3 2.3 0 0 1 3.2 3.2L7.4 19h-3.4v-3.4L16.4 3.6Z"/><path d="m14.6 5.4 4 4"/></g></symbol>
+
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8.8 4.4H6.6a1.8 1.8 0 0 0-1.8 1.8v13.4a1.8 1.8 0 0 0 1.8 1.8h10.8a1.8 1.8 0 0 0 1.8-1.8V6.2a1.8 1.8 0 0 0-1.8-1.8h-2.2"/><rect x="8.8" y="2.4" width="6.4" height="4" rx="1.2"/></g></symbol>
+
+  <symbol id="i-scroll" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6.4 3.4h11.2a2.4 2.4 0 0 1 2.4 2.4v12.8a2.4 2.4 0 0 1-2.4 2.4H6.4"/><path d="M6.4 3.4A2.4 2.4 0 0 0 4 5.8v1.8h3.2M6.4 21a2.4 2.4 0 0 0 2.4-2.4v-1.8H5.6"/><path d="M9.6 8.4h7.2M9.6 12h7.2"/></g></symbol>
+
+  <symbol id="i-people" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.2" cy="8" r="3.4"/><path d="M2.8 20.4a6.4 6.4 0 0 1 12.8 0"/><path d="M16 5a3.4 3.4 0 0 1 0 6.6M17.4 14.6a6.4 6.4 0 0 1 3.8 5.8"/></g></symbol>
+
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.6 15.2a2 2 0 0 1-2 2H7.4L3.4 21V5.2a2 2 0 0 1 2-2h13.2a2 2 0 0 1 2 2v10Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+
+  <symbol id="i-link" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10.2 13.8a4 4 0 0 0 5.6 0l3-3a4 4 0 0 0-5.6-5.6l-1.6 1.6"/><path d="M13.8 10.2a4 4 0 0 0-5.6 0l-3 3a4 4 0 0 0 5.6 5.6l1.6-1.6"/></g></symbol>
+
+  <symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 12a8.4 8.4 0 1 1-2.6-6"/><path d="M20.4 3.6V9h-5.4"/></g></symbol>
+
+  <symbol id="i-palette" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.2a8.8 8.8 0 0 0 0 17.6c1.2 0 1.8-.8 1.8-1.7 0-1.4-1.2-1.6-1.2-2.7 0-.9.7-1.6 1.7-1.6h1.6a4.9 4.9 0 0 0 4.9-4.9c0-3.7-3.8-6.7-8.8-6.7Z"/><circle cx="8" cy="9.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="7" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="9.4" r="1.1" fill="currentColor" stroke="none"/></g></symbol>
+
+  <symbol id="i-image" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.2" y="4.4" width="17.6" height="15.2" rx="2"/><path d="m3.6 16.6 4.8-4.6 3.4 3.2 3.6-3.8 5 5.2"/><circle cx="8.6" cy="9" r="1.5"/></g></symbol>
+
+  <symbol id="i-install" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6.4" y="2.6" width="11.2" height="18.8" rx="2"/><path d="M12 7v7M9 11l3 3 3-3"/></g></symbol>
+</svg>
+
 
 <nav class="top-nav" id="main-nav"></nav>
 
@@ -3010,7 +3099,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   <div class="j-screen active" id="screen-auth">
     <div class="auth-wrap">
       <div class="auth-box">
-        <div class="auth-emblem">⚔</div>
+        <div class="auth-emblem"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
         <div class="auth-title">Espace Joueurs</div>
         <div class="auth-subtitle">Access your character sheet</div>
         <div class="auth-error" id="auth-error"></div>
@@ -3073,7 +3162,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <!-- Sélecteur de personnage -->
       <div class="char-selector" id="char-selector">
         <button class="char-selector-btn" id="char-selector-btn" title="Switch character">
-          <span class="char-selector-avatar" id="char-selector-avatar">⚔</span>
+          <span class="char-selector-avatar" id="char-selector-avatar"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></span>
           <span class="char-selector-name" id="char-selector-name">Character</span>
           <span class="char-selector-arrow">▾</span>
         </button>
@@ -3088,12 +3177,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="tab-btn" data-tab="parametres">Settings</button>
         <button class="tab-btn" data-tab="aide">Reference</button>
         <button class="tab-btn" data-tab="familiers">Familiars</button>
-        <button class="tab-btn" data-tab="lvlup">📈 Level Plan</button>
-        <button class="tab-btn" data-tab="admin" id="tab-admin-btn" style="display:none;color:var(--danger);">👁 Admin</button>
+        <button class="tab-btn" data-tab="lvlup"><svg class="ic" aria-hidden="true"><use href="#i-chart"></use></svg> Level Plan</button>
+        <button class="tab-btn" data-tab="admin" id="tab-admin-btn" style="display:none;color:var(--danger);"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Admin</button>
       </div>
       <!-- Hidden player info (kept for JS) -->
       <div class="dash-player" style="display:none;">
-        <div class="dash-avatar" id="dash-avatar">⚔</div>
+        <div class="dash-avatar" id="dash-avatar"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
         <div>
           <div class="dash-name" id="dash-name">—</div>
           <div class="dash-char-info" id="dash-info">No character</div>
@@ -3107,9 +3196,9 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="btn btn-sm btn-gold" id="btn-new-char" title="New character" onclick="openNewCharModal()" style="font-size:1rem;padding:0 0.55rem;line-height:1;">+</button>
         <button class="btn btn-sm" id="btn-layout-edit" title="Rearrange sections">⠿</button>
         <button class="btn btn-sm" id="btn-undo" title="Cancel (Ctrl+Z)" disabled style="opacity:0.4;">↩</button>
-        <button class="btn btn-sm" id="btn-field-lock" title="Lock fields (view mode)">✏</button>
+        <button class="btn btn-sm" id="btn-field-lock" title="Lock fields (view mode)"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg></button>
         <button class="btn btn-sm" id="dice-tray-btn" title="Dice Roller">⚄</button>
-        <button class="btn btn-sm" id="btn-install-app" title="Installer l'application" style="display:none;">📲</button>
+        <button class="btn btn-sm" id="btn-install-app" title="Installer l'application" style="display:none;"><svg class="ic" aria-hidden="true"><use href="#i-install"></use></svg></button>
         <button class="btn btn-sm btn-danger" id="btn-logout">Log out</button>
       </div>
     </div>
@@ -3150,7 +3239,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <!-- Portrait column -->
         <div id="vb-hero-portrait">
           <div class="vb-portrait-frame" id="vb-portrait-frame" title="Change portrait">
-            <div class="vb-portrait-placeholder" id="vb-portrait-placeholder">⚔</div>
+            <div class="vb-portrait-placeholder" id="vb-portrait-placeholder"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
             <img id="vb-portrait-img" src="" alt="Portrait" style="display:none;width:100%;height:100%;object-fit:cover;">
             <span class="vb-corner tl">✦</span>
             <span class="vb-corner tr">✦</span>
@@ -3266,7 +3355,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             </div>
             <!-- HP change rapide : ⚔ [val] ✚ -->
             <div class="hp-quick">
-              <button class="vb-btn-dmg vb-btn-quick" onclick="document.getElementById('btn-apply-dmg').click()" title="Apply damage">⚔</button>
+              <button class="vb-btn-dmg vb-btn-quick" onclick="document.getElementById('btn-apply-dmg').click()" title="Apply damage"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></button>
               <input type="number" class="hp-quick-input" id="hp-quick-val" min="0" placeholder="0">
               <button class="vb-btn-heal vb-btn-quick" onclick="document.getElementById('btn-apply-heal').click()" title="Appliquer soin">✚</button>
             </div>
@@ -3302,7 +3391,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <div>
                 <div style="display:flex;align-items:center;gap:0.4rem;">
                   <div class="vb-section-label">Death Saves</div>
-                  <button id="death-save-roll-btn" title="Roll a death save (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">🎲</button>
+                  <button id="death-save-roll-btn" title="Roll a death save (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg></button>
                 </div>
                 <!-- Pips cliquables — data-idx / data-type gérés par renderCombat -->
                 <div class="vb-death-pips" id="vb-hero-death-pips" style="cursor:pointer;" title="Click to toggle"></div>
@@ -3377,7 +3466,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
                 Jack of All Trades
               </label>
               <div class="skill-filter-wrap">
-                <span class="skill-filter-icon">🔍</span>
+                <span class="skill-filter-icon"><svg class="ic" aria-hidden="true"><use href="#i-search"></use></svg></span>
                 <input type="search" id="skill-filter" placeholder="Filtrer…" autocomplete="off">
               </div>
               <div id="skills-col"></div>
@@ -3574,7 +3663,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <table class="exp-table spell-table">
               <thead><tr>
                 <th style="width:22px;" title="Prepared">★</th>
-                <th style="width:22px;" title="Always prepared — does not count against your maximum">🔒</th>
+                <th style="width:22px;" title="Always prepared — does not count against your maximum"><svg class="ic" aria-hidden="true"><use href="#i-lock"></use></svg></th>
                 <th style="width:44px;">Lvl.</th>
                 <th>Spell Name</th>
                 <th style="width:70px;">Damage</th>
@@ -3701,18 +3790,18 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <!-- ── Inventory Tab ── -->
     <div class="tab-panel" id="tab-inventaire">
       <div class="sheet-section" id="section-worn-armor">
-        <div class="sheet-section-title">🛡 Worn Armor</div>
+        <div class="sheet-section-title"><svg class="ic" aria-hidden="true"><use href="#i-shield"></use></svg> Worn Armor</div>
         <div id="worn-armor-card-container"></div>
       </div>
       <div class="sheet-section">
         <div class="sheet-section-title">Items</div>
         <div class="inv-cat-tabs" id="inv-cat-tabs">
           <button class="inv-cat-tab active" data-cat="">All <span class="inv-cat-badge" id="icat-badge-all"></span></button>
-          <button class="inv-cat-tab" data-cat="arme">⚔ Weapons</button>
-          <button class="inv-cat-tab" data-cat="armure">🛡 Armor</button>
-          <button class="inv-cat-tab" data-cat="consommable">⚗ Consumables</button>
+          <button class="inv-cat-tab" data-cat="arme"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Weapons</button>
+          <button class="inv-cat-tab" data-cat="armure"><svg class="ic" aria-hidden="true"><use href="#i-shield"></use></svg> Armor</button>
+          <button class="inv-cat-tab" data-cat="consommable"><svg class="ic" aria-hidden="true"><use href="#i-flask"></use></svg> Consumables</button>
           <button class="inv-cat-tab" data-cat="magique">✦ Magical</button>
-          <button class="inv-cat-tab" data-cat="equipement">🎒 Equipment</button>
+          <button class="inv-cat-tab" data-cat="equipement"><svg class="ic" aria-hidden="true"><use href="#i-pack"></use></svg> Equipment</button>
         </div>
         <div class="inv-controls">
           <input type="text" class="field-input" id="inv-search" placeholder="Search items…" style="flex:1;min-width:120px;">
@@ -3776,8 +3865,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="notes-editor-wrap">
           <div class="notes-page-title-row">
             <input class="notes-page-title-input" id="notes-page-title" placeholder="Page name…" />
-            <button class="notes-preview-btn" id="btn-notes-preview" title="Preview: formatting and wiki links">👁 Preview</button>
-            <button class="notes-del-page-btn" id="btn-del-note-page" title="Delete this page">🗑</button>
+            <button class="notes-preview-btn" id="btn-notes-preview" title="Preview: formatting and wiki links"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Preview</button>
+            <button class="notes-del-page-btn" id="btn-del-note-page" title="Delete this page"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg></button>
           </div>
           <textarea class="notes-editor" id="notes-editor" placeholder="Your session notes, quests, key NPCs…"></textarea>
           <div class="notes-preview" id="notes-preview" style="display:none;"></div>
@@ -3802,11 +3891,11 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <input class="notes-page-title-input" id="canvas-page-title" placeholder="Page name…" />
               <span class="canvas-sync" id="canvas-sync" title="Drawing sync to the cloud"></span>
               <button class="canvas-tool-btn" id="ctool-download" title="Download as PNG">⤓ PNG</button>
-              <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page">🗑</button>
+              <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg></button>
             </div>
             <div class="canvas-toolbar">
               <!-- Outils -->
-              <button class="canvas-tool-btn active" id="ctool-pen" title="Crayon">✏ Crayon</button>
+              <button class="canvas-tool-btn active" id="ctool-pen" title="Crayon"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg> Crayon</button>
               <button class="canvas-tool-btn" id="ctool-highlight" title="Surligneur">▬ Surligneur</button>
               <button class="canvas-tool-btn" id="ctool-line" title="Ligne droite">╱ Ligne</button>
               <button class="canvas-tool-btn" id="ctool-text" title="Texte">T Texte</button>
@@ -3857,7 +3946,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div>
             <div class="avatar-grid" id="avatar-picker"></div>
             <div class="av-png-upload">
-              <label class="btn btn-sm" style="cursor:pointer;" title="Upload a PNG/JPG image">🖼 Portrait PNG
+              <label class="btn btn-sm" style="cursor:pointer;" title="Upload a PNG/JPG image"><svg class="ic" aria-hidden="true"><use href="#i-image"></use></svg> Portrait PNG
                 <input type="file" id="avatar-png-input" accept="image/*" style="display:none;">
               </label>
               <img id="av-png-preview" class="av-png-preview" alt="portrait">
@@ -3878,7 +3967,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="settings-row" style="margin-top:0.5rem;">
           <div class="settings-label">Portrait colors<div class="settings-desc">Extract from your portrait image</div></div>
           <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-            <button class="btn btn-sm" id="btn-extract-portrait-color" title="Generate a theme from the portrait colors">🎨 Extract from portrait</button>
+            <button class="btn btn-sm" id="btn-extract-portrait-color" title="Generate a theme from the portrait colors"><svg class="ic" aria-hidden="true"><use href="#i-palette"></use></svg> Extract from portrait</button>
             <div id="portrait-palette" style="display:flex;gap:5px;align-items:center;"></div>
           </div>
         </div>
@@ -3939,7 +4028,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="settings-row">
           <div class="settings-label">Character background<div class="settings-desc">Appears behind your sheet with a dark overlay</div></div>
           <div class="bg-upload-row">
-            <label class="btn btn-sm" style="cursor:pointer;">🖼 Choose image
+            <label class="btn btn-sm" style="cursor:pointer;"><svg class="ic" aria-hidden="true"><use href="#i-image"></use></svg> Choose image
               <input type="file" id="bg-img-input" accept="image/*" style="display:none;">
             </label>
             <img id="bg-preview" class="bg-preview" alt="background">
@@ -4001,7 +4090,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <h3>Sharing</h3>
         <div class="settings-row">
           <div class="settings-label">Read-only sheet<div class="settings-desc">A public link to view your sheet without logging in</div></div>
-          <button class="btn btn-sm btn-gold" id="btn-share-sheet">🔗 Copy link</button>
+          <button class="btn btn-sm btn-gold" id="btn-share-sheet"><svg class="ic" aria-hidden="true"><use href="#i-link"></use></svg> Copy link</button>
         </div>
         <div id="share-link-display" style="display:none;margin-top:0.5rem;font-size:0.75rem;color:#888;word-break:break-all;padding:0.4rem 0.6rem;background:var(--j-input,#0d0d14);border-radius:5px;border:1px solid var(--j-border-col,#2a2a3a);"></div>
       </div>
@@ -4017,7 +4106,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         </div>
       </div>
       <div class="settings-section">
-        <h3>⚔ Importer depuis D&amp;D Beyond</h3>
+        <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Importer depuis D&amp;D Beyond</h3>
         <div style="font-size:0.78rem;color:#999;margin-bottom:0.85rem;">
           ⓘ The character must be set to <strong style="color:var(--gold);">Public</strong>
           (Settings → Character Privacy) sur dndbeyond.com.
@@ -4033,7 +4122,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <button class="btn btn-sm btn-gold" id="ddb-fetch-btn">⤓ Fetch</button>
           </div>
           <div class="ddb-method-hint">
-            ⚠ If fetch fails (CORS), copy the ID and use method ②.
+            <svg class="ic" aria-hidden="true"><use href="#i-warn"></use></svg> If fetch fails (CORS), copy the ID and use method ②.
           </div>
         </div>
 
@@ -4041,7 +4130,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
         <!-- Method 2 : drop / file / paste -->
         <div class="ddb-dropzone" id="ddb-dropzone">
-          <div class="ddb-dropzone-icon">⚔</div>
+          <div class="ddb-dropzone-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
           <div class="ddb-dropzone-title">Drop .json file here</div>
           <div class="ddb-dropzone-sub">or</div>
           <label class="btn btn-sm btn-gold" style="cursor:pointer;">
@@ -4067,7 +4156,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <h3>Account</h3>
         <div class="settings-row">
           <div class="settings-label">Reset this character<div class="settings-desc">Clears the active character sheet (account stays)</div></div>
-          <button class="btn btn-sm btn-danger" id="btn-reset-char">🗑 Reset</button>
+          <button class="btn btn-sm btn-danger" id="btn-reset-char"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg> Reset</button>
         </div>
       </div>
     </div><!-- /tab-parametres -->
@@ -4079,7 +4168,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
         <!-- Actions de combat -->
         <div class="cheat-section">
-          <h3>⚔ Combat Actions</h3>
+          <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Combat Actions</h3>
 
           <div class="cheat-item">
             <div class="cheat-item-name">Attack <span class="cheat-item-badge badge-action">Action</span></div>
@@ -4224,7 +4313,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div class="tab-panel" id="tab-familiers">
       <div class="fam-toolbar">
         <span class="fam-toolbar-title">⟡ Familiers &amp; Compagnons</span>
-        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view">👁 Afficher</button>
+        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Afficher</button>
         <button class="btn btn-sm fam-toolbar-edit-only" id="btn-open-compendium-monster" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
         <button class="btn btn-sm btn-gold fam-toolbar-edit-only" id="btn-add-familiar">+ Add</button>
       </div>
@@ -4254,13 +4343,13 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
   <!-- ══ Barre de navigation mobile (bas) ══ -->
   <nav id="mobile-bottom-nav" aria-label="Navigation">
-    <button class="mbn-btn active" data-tab="personnage"><span class="mbn-icon">⚔</span><span class="mbn-label">Char.</span></button>
+    <button class="mbn-btn active" data-tab="personnage"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></span><span class="mbn-label">Char.</span></button>
     <button class="mbn-btn" data-tab="identite"><span class="mbn-icon">👤</span><span class="mbn-label">Identity</span></button>
-    <button class="mbn-btn" data-tab="inventaire"><span class="mbn-icon">🎒</span><span class="mbn-label">Bag</span></button>
-    <button class="mbn-btn" data-tab="notes"><span class="mbn-icon">✏</span><span class="mbn-label">Notes</span></button>
+    <button class="mbn-btn" data-tab="inventaire"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-pack"></use></svg></span><span class="mbn-label">Bag</span></button>
+    <button class="mbn-btn" data-tab="notes"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg></span><span class="mbn-label">Notes</span></button>
     <button class="mbn-btn" data-tab="parametres"><span class="mbn-icon">⚙</span><span class="mbn-label">Settings</span></button>
     <button class="mbn-btn" data-tab="familiers"><span class="mbn-icon">🐾</span><span class="mbn-label">Familiars</span></button>
-    <button class="mbn-btn" data-tab="lvlup"><span class="mbn-icon">📈</span><span class="mbn-label">Lvl Plan</span></button>
+    <button class="mbn-btn" data-tab="lvlup"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-chart"></use></svg></span><span class="mbn-label">Lvl Plan</span></button>
   </nav>
 
   <!-- ══ VUE FICHE PARTAGÉE (lecture seule) ══ -->
@@ -4275,7 +4364,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
 <!-- ══ Chat flottant ══ -->
 <button id="chat-fab" style="display:none;" title="Chat">
-  💬<span class="chat-unread" id="chat-unread"></span>
+  <svg class="ic" aria-hidden="true"><use href="#i-chat"></use></svg><span class="chat-unread" id="chat-unread"></span>
 </button>
 <div id="chat-panel">
   <!-- Vue : liste des conversations -->
@@ -4290,7 +4379,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="chat-close" id="chat-close" title="Close">✕</button>
       </div>
     </div>
-    <div class="chat-error-bar" id="chat-error-bar">⚠ Impossible de joindre le serveur</div>
+    <div class="chat-error-bar" id="chat-error-bar"><svg class="ic" aria-hidden="true"><use href="#i-warn"></use></svg> Impossible de joindre le serveur</div>
     <div id="chat-room-list"></div>
   </div>
   <!-- Vue : messages d'une conversation -->
@@ -4345,18 +4434,18 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div id="admin-char-bar" style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;"></div>
     <!-- Tabs -->
     <div class="modal-tabs">
-      <button class="modal-tab-btn active" data-mtab="fiche">⚔ Sheet</button>
+      <button class="modal-tab-btn active" data-mtab="fiche"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Sheet</button>
       <button class="modal-tab-btn" data-mtab="competences">🎯 Skills</button>
       <button class="modal-tab-btn" data-mtab="sorts">✨ Spells</button>
-      <button class="modal-tab-btn" data-mtab="inventaire">🎒 Inventory</button>
-      <button class="modal-tab-btn" data-mtab="notes">📜 Notes</button>
+      <button class="modal-tab-btn" data-mtab="inventaire"><svg class="ic" aria-hidden="true"><use href="#i-pack"></use></svg> Inventory</button>
+      <button class="modal-tab-btn" data-mtab="notes"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> Notes</button>
     </div>
     <!-- Contenu -->
     <div id="modal-body"></div>
     <!-- Actions -->
     <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem;border-top:1px solid var(--j-border-col,#4a3510);padding-top:1rem;">
       <button class="btn btn-danger" id="btn-admin-cancel">Cancel</button>
-      <button class="btn btn-gold" id="btn-admin-save">💾 Save</button>
+      <button class="btn btn-gold" id="btn-admin-save"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Save</button>
     </div>
   </div>
 </div>
@@ -7108,8 +7197,8 @@ function renderPassiveSkills() {
   if (!el) return;
   const c = C(); const bonus = pb(getTotalLevel(c));
   const passives = [
-    { label:'Perception passive',      key:'perception',   attr:'sag' },
-    { label:'Investigation passive',   key:'investigation',attr:'int' },
+    { label:'Passive Perception',      key:'perception',   attr:'sag' },
+    { label:'Passive Investigation',   key:'investigation',attr:'int' },
     { label:'Passive Insight',    key:'perspicacite', attr:'sag' },
   ];
   const html = passives.map(p => {
@@ -11437,6 +11526,12 @@ function applyFontSize(pct) {
 }
 
 /* Escape HTML pour innerHTML */
+/* Icône SVG monochrome. Le sprite est defini en haut du <body> ; on ne
+   transporte ici qu'une reference, donc le cout est negligeable meme repete. */
+function ic(nom, cls) {
+  return `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${nom}"></use></svg>`;
+}
+
 function esc(val) {
   if (!val) return '';
   return String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -14225,7 +14320,7 @@ document.addEventListener('keydown', e => {
         <div class="wiz-step" data-step="5">
           <div class="wiz-abil-head">
             <span class="field-label">Tableau standard <strong style="color:var(--gold);">15·14·13·12·10·8</strong></span>
-            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Assign the array based on the chosen class">⚡ Suggested spread</button>
+            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Assign the array based on the chosen class"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> Suggested spread</button>
           </div>
           <div class="wiz-abils" id="wiz-abils"></div>
           <div class="wiz-bg-bonus" id="wiz-bg-bonus"></div>
@@ -14346,7 +14441,7 @@ document.addEventListener('keydown', e => {
         <div class="sr-roll-result" id="sr-roll-result">—</div>
         <div class="sr-total" id="sr-total"></div>
         <div class="sr-btn-row">
-          <button class="btn btn-sm" id="sr-btn-roll" style="border-color:#3a6060;color:#7ababa;">🎲 Roll 1 die</button>
+          <button class="btn btn-sm" id="sr-btn-roll" style="border-color:#3a6060;color:#7ababa;"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg> Roll 1 die</button>
           <button class="btn btn-sm btn-gold" id="sr-btn-apply" disabled>✚ Apply</button>
           <button class="btn btn-sm" id="sr-btn-cancel" style="color:#888;">Cancel</button>
         </div>
@@ -14356,22 +14451,22 @@ document.addEventListener('keydown', e => {
     <!-- ── Modal Import D&D Beyond ── -->
     <div class="ddb-modal-overlay" id="ddb-modal-overlay">
       <div class="ddb-modal">
-        <h3>⚔ Import from D&D Beyond</h3>
+        <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Import from D&D Beyond</h3>
         <div class="ddb-modal-sub">Review the detected information before applying</div>
         <div id="ddb-error" class="ddb-error" style="display:none;"></div>
         <div class="ddb-preview" id="ddb-preview"></div>
         <div class="ddb-import-items" id="ddb-import-items"></div>
-        <div style="font-size:0.72rem;color:#555;margin-bottom:0.85rem;">⚠ The import will replace the active character. Inventory and notes are preserved and merged.</div>
+        <div style="font-size:0.72rem;color:#555;margin-bottom:0.85rem;"><svg class="ic" aria-hidden="true"><use href="#i-warn"></use></svg> The import will replace the active character. Inventory and notes are preserved and merged.</div>
         <div class="ddb-btn-row">
           <button class="btn btn-sm" id="ddb-btn-cancel" style="color:#888;">Cancel</button>
-          <button class="btn btn-sm btn-gold" id="ddb-btn-apply">⚔ Apply import</button>
+          <button class="btn btn-sm btn-gold" id="ddb-btn-apply"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Apply import</button>
         </div>
       </div>
     </div>
 
 <!-- ── Bannière mise à jour PWA ── -->
 <div id="sw-update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:var(--j-panel,#1a1408);border-top:1px solid var(--gold-dark);padding:0.55rem 1rem;align-items:center;justify-content:center;gap:0.8rem;font-size:0.82rem;color:var(--gold,#c9a96e);">
-  🔄 Une mise à jour est slot available.
+  <svg class="ic" aria-hidden="true"><use href="#i-refresh"></use></svg> Une mise à jour est slot available.
   <button onclick="document.getElementById('sw-update-banner').style.display='none';window._swReg&&window._swReg.waiting&&window._swReg.waiting.postMessage('skipWaiting');" style="background:var(--gold-dark);color:#fff;border:none;border-radius:4px;padding:0.25rem 0.7rem;font-size:0.78rem;cursor:pointer;font-family:'Cinzel',serif;">Actualiser</button>
   <button onclick="document.getElementById('sw-update-banner').style.display='none';" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.9rem;">✕</button>
 </div>
@@ -14393,7 +14488,7 @@ function _famDefault() {
     ac: 10, acNote: '', pvMax: 4, pvActuel: 4, speed: '30 ft.',
     for: 10, dex: 10, con: 10, int: 10, sag: 10, cha: 10,
     savesNote: '', skillsNote: '', vulnerabilities: '', resistances: '', immunities: '',
-    senses: 'Perception passive 10', languages: '—', cr: '0',
+    senses: 'Passive Perception 10', languages: '—', cr: '0',
     traits: [], actions: [], bonusActions: [], reactions: [],
     notes: '', _collapsed: false
   };
@@ -14755,7 +14850,7 @@ function startRealtime(username, _retry = 0) {
 <div id="compendium-overlay" role="dialog" aria-modal="true" aria-label="Compendium D&D">
   <div id="compendium-modal">
     <div id="compendium-modal-head">
-      <h2>⚔ Compendium D&D 5e</h2>
+      <h2><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Compendium D&D 5e</h2>
       <button id="btn-compendium-close" title="Close">✕</button>
     </div>
     <div class="comp-tabs" role="tablist">
@@ -14803,21 +14898,21 @@ function startRealtime(username, _retry = 0) {
       </select>
       <select class="comp-filter-select" id="comp-filter-startequip" title="Starting equipment by class" style="display:none;">
         <option value="">All classes</option>
-        <option value="Barbarian">⚔️ Barbare</option>
+        <option value="Barbarian"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Barbare</option>
         <option value="Bard">🎵 Barde</option>
         <option value="Cleric">✝️ Clerc</option>
-        <option value="Druid">🌿 Druide</option>
-        <option value="Fighter">🛡 Guerrier</option>
+        <option value="Druid"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> Druide</option>
+        <option value="Fighter"><svg class="ic" aria-hidden="true"><use href="#i-shield"></use></svg> Guerrier</option>
         <option value="Monk">🥋 Moine</option>
-        <option value="Paladin">⚜️ Paladin</option>
-        <option value="Ranger">🏹 Ranger</option>
-        <option value="Rogue">🗡 Roublard</option>
-        <option value="Sorcerer">🔮 Ensorceleur</option>
-        <option value="Warlock">👁 Occultiste</option>
-        <option value="Wizard">📚 Magicien</option>
+        <option value="Paladin"><svg class="ic" aria-hidden="true"><use href="#i-fleur"></use></svg> Paladin</option>
+        <option value="Ranger"><svg class="ic" aria-hidden="true"><use href="#i-bow"></use></svg> Ranger</option>
+        <option value="Rogue"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> Roublard</option>
+        <option value="Sorcerer"><svg class="ic" aria-hidden="true"><use href="#i-orb"></use></svg> Ensorceleur</option>
+        <option value="Warlock"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Occultiste</option>
+        <option value="Wizard"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg> Magicien</option>
       </select>
-      <button class="comp-startequip-btn" id="btn-startequip">⚔️ Starting equipment</button>
-      <button class="comp-summons-toggle" id="btn-comp-summons">📜 Invocations</button>
+      <button class="comp-startequip-btn" id="btn-startequip"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Starting equipment</button>
+      <button class="comp-summons-toggle" id="btn-comp-summons"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> Invocations</button>
     </div>
     <div id="comp-startequip-panel"></div>
     <div id="comp-summons-list" style="display:none;"></div>
