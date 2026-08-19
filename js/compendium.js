@@ -683,7 +683,7 @@
   // spirit = objet stat-block inline pour les esprits scalants
   const SUMMON_SPELLS = [
     // ── Familiars & Steeds (PHB 2024) ──
-    { spell:'Find Familiar', level:1, icon:'🐱',
+    { spell:'Find Familiar', level:1, icon:'paw',
       creatures:[
         {n:'Bat',k:'bat'},{n:'Cat',k:'cat'},{n:'Crab',k:'crab'},{n:'Frog',k:'frog'},
         {n:'Hawk',k:'hawk'},{n:'Lizard',k:'lizard'},{n:'Octopus',k:'octopus'},{n:'Owl',k:'owl'},
@@ -691,7 +691,7 @@
         {n:'Raven',k:'raven'},{n:'Sea Horse',k:'sea-horse'},{n:'Spider',k:'spider'},{n:'Weasel',k:'weasel'},
       ]
     },
-    { spell:'Find Steed', level:2, icon:'🐴', note:'Otherworldly Steed — scales with slot level',
+    { spell:'Find Steed', level:2, icon:'horse', note:'Otherworldly Steed — scales with slot level',
       creatures:[
         { n:'Otherworldly Steed — Celestial', spirit:{
             name:'Otherworldly Steed (Celestial)', type:'Celestial', size:'Large',
@@ -737,14 +737,14 @@
         },
       ]
     },
-    { spell:'Find Greater Steed', level:4, icon:'🦅', note:'Spirit — CR ≤5, Large or smaller',
+    { spell:'Find Greater Steed', level:4, icon:'dove', note:'Spirit — CR ≤5, Large or smaller',
       creatures:[
         {n:'Griffon',k:'griffon'},{n:'Hippogriff',k:'hippogriff'},{n:'Pegasus',k:'pegasus'},
         {n:'Peryton',k:'peryton'},{n:'Saber-Toothed Tiger',k:'saber-toothed-tiger'},
       ]
     },
     // ── Conjure (PHB 2024 — spirit in creature form) ──
-    { spell:'Conjure Animals', level:3, icon:'🐺', note:'Spirit in beast form — CR ≤2 examples',
+    { spell:'Conjure Animals', level:3, icon:'paw', note:'Spirit in beast form — CR ≤2 examples',
       creatures:[
         {n:'Black Bear',k:'black-bear'},{n:'Brown Bear',k:'brown-bear'},{n:'Dire Wolf',k:'dire-wolf'},
         {n:'Giant Eagle',k:'giant-eagle'},{n:'Giant Owl',k:'giant-owl'},
@@ -753,29 +753,29 @@
         {n:'Allosaurus',k:'allosaurus'},{n:'Giant Constrictor Snake',k:'giant-constrictor-snake'},
       ]
     },
-    { spell:'Conjure Elemental', level:5, icon:'🌀', note:'Spirit in elemental form — CR ≤5',
+    { spell:'Conjure Elemental', level:5, icon:'orb', note:'Spirit in elemental form — CR ≤5',
       creatures:[
         {n:'Air Elemental',k:'air-elemental'},{n:'Earth Elemental',k:'earth-elemental'},
         {n:'Fire Elemental',k:'fire-elemental'},{n:'Water Elemental',k:'water-elemental'},
       ]
     },
-    { spell:'Conjure Fey', level:6, icon:'🧚', note:'Spirit in fey form — CR ≤5',
+    { spell:'Conjure Fey', level:6, icon:'sparkle', note:'Spirit in fey form — CR ≤5',
       creatures:[
         {n:'Dryad',k:'dryad'},{n:'Green Hag',k:'green-hag'},{n:'Night Hag',k:'night-hag'},
         {n:'Pixie',k:'pixie'},{n:'Satyr',k:'satyr'},{n:'Sprite',k:'sprite'},
       ]
     },
     // ── Undead ──
-    { spell:'Animate Dead', level:3, icon:'💀',
+    { spell:'Animate Dead', level:3, icon:'skull',
       creatures:[{n:'Skeleton',k:'skeleton'},{n:'Zombie',k:'zombie'}]
     },
-    { spell:'Create Undead', level:6, icon:'🦴',
+    { spell:'Create Undead', level:6, icon:'bones',
       creatures:[
         {n:'Ghoul',k:'ghoul'},{n:'Ghast',k:'ghast'},{n:'Wight',k:'wight'},{n:'Mummy',k:'mummy'},
       ]
     },
     // ── Scaling Spirits (PHB 2024) ──
-    { spell:'Summon Beast', level:2, icon:'🦁', note:'AC/HP scale with slot level',
+    { spell:'Summon Beast', level:2, icon:'paw', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Bestial Spirit — Air', spirit:{name:'Bestial Spirit (Air)',type:'Beast',size:'Small',
             ac:11,acNote:'11 + slot level',hp:20,hpNote:'20 (Air) + 5 per slot above 2nd',
@@ -822,7 +822,7 @@
         },
       ]
     },
-    { spell:'Summon Fey', level:3, icon:'✨', note:'AC/HP scale with slot level',
+    { spell:'Summon Fey', level:3, icon:'sparkle', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Fey Spirit — Fuming', spirit:{name:'Fey Spirit (Fuming)',type:'Fey',size:'Small',
             ac:12,acNote:'12 + slot level',hp:30,hpNote:'30 + 10 per slot above 3rd',
@@ -865,7 +865,7 @@
         },
       ]
     },
-    { spell:'Summon Undead', level:3, icon:'💀', note:'AC/HP scale with slot level',
+    { spell:'Summon Undead', level:3, icon:'skull', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Undead Spirit — Ghostly', spirit:{name:'Undead Spirit (Ghostly)',type:'Undead',size:'Medium',
             ac:11,acNote:'11 + slot level',hp:30,hpNote:'30 (Ghostly/Putrid) + 10 per slot above 3rd',
@@ -911,7 +911,7 @@
         },
       ]
     },
-    { spell:'Summon Elemental', level:4, icon:'🌊', note:'AC/HP scale with slot level',
+    { spell:'Summon Elemental', level:4, icon:'wave', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Elemental Spirit — Air', spirit:{name:'Elemental Spirit (Air)',type:'Elemental',size:'Medium',
             ac:11,acNote:'11 + slot level',hp:50,hpNote:'50 + 10 per slot above 4th',
@@ -975,7 +975,7 @@
         },
       ]
     },
-    { spell:'Summon Aberration', level:4, icon:'🐙', note:'AC/HP scale with slot level',
+    { spell:'Summon Aberration', level:4, icon:'brain', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Aberrant Spirit — Beholderkin', spirit:{name:'Aberrant Spirit (Beholderkin)',type:'Aberration',size:'Medium',
             ac:11,acNote:'11 + slot level',hp:40,hpNote:'40 + 10 per slot above 4th',
@@ -1021,7 +1021,7 @@
         },
       ]
     },
-    { spell:'Summon Construct', level:4, icon:'⚙️', note:'AC/HP scale with slot level',
+    { spell:'Summon Construct', level:4, icon:'gear', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Construct Spirit — Clay', spirit:{name:'Construct Spirit (Clay)',type:'Construct',size:'Medium',
             ac:13,acNote:'13 + slot level',hp:40,hpNote:'40 + 15 per slot above 4th',
@@ -1071,7 +1071,7 @@
         },
       ]
     },
-    { spell:'Summon Celestial', level:5, icon:'✨', note:'AC/HP scale with slot level',
+    { spell:'Summon Celestial', level:5, icon:'dove', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Celestial Spirit — Avenger', spirit:{name:'Celestial Spirit (Avenger)',type:'Celestial',size:'Large',
             ac:11,acNote:'11 + slot level',hp:40,hpNote:'40 + 10 per slot above 5th',
@@ -1103,7 +1103,7 @@
         },
       ]
     },
-    { spell:'Summon Fiend', level:6, icon:'😈', note:'AC/HP scale with slot level',
+    { spell:'Summon Fiend', level:6, icon:'goblin', note:'AC/HP scale with slot level',
       creatures:[
         { n:'Fiendish Spirit — Demon', spirit:{name:'Fiendish Spirit (Demon)',type:'Fiend',size:'Large',
             ac:12,acNote:'12 + slot level',hp:50,hpNote:'50 (Demon) + 15 per slot above 6th',
@@ -1176,6 +1176,7 @@
       div.innerHTML = `
         <div class="summon-group-hd">
           <span class="summon-group-lvl">Lv.${grp.level}</span>
+          <span class="summon-group-icon">${ic(grp.icon)}</span>
           <span class="summon-group-name">${grp.spell}</span>
           ${noteHtml}
         </div>
@@ -1246,7 +1247,7 @@
         chip.classList.remove('importing');
         chip.classList.add('done');
         chip.textContent = '✓ ' + creature.n;
-        setTimeout(() => { chip.classList.remove('done'); chip.innerHTML = `<span class="summon-chip-icon">${grp.icon}</span>${creature.n}<span class="summon-spirit-badge">esprit</span>`; }, 2500);
+        setTimeout(() => { chip.classList.remove('done'); chip.innerHTML = `${creature.n}<span class="summon-spirit-badge">spirit</span>`; }, 2500);
       } else {
         // Fetch depuis Open5e — v1 (slug simple, endpoint stable)
         let data = null;
@@ -1266,12 +1267,12 @@
         chip.classList.remove('importing');
         chip.classList.add('done');
         chip.textContent = '✓ ' + creature.n;
-        setTimeout(() => { chip.classList.remove('done'); chip.innerHTML = `<span class="summon-chip-icon">${grp.icon}</span>${creature.n}`; }, 2500);
+        setTimeout(() => { chip.classList.remove('done'); chip.innerHTML = creature.n; }, 2500);
       }
     } catch {
       chip.classList.remove('importing');
-      chip.textContent = '✗ Erreur';
-      setTimeout(() => { chip.innerHTML = `<span class="summon-chip-icon">${grp.icon}</span>${creature.n}`; }, 2000);
+      chip.textContent = '✗ Error';
+      setTimeout(() => { chip.innerHTML = creature.n; }, 2000);
     }
   });
 

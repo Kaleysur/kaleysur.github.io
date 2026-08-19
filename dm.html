@@ -591,7 +591,7 @@ input,select{font-family:inherit;color-scheme:dark;}
 
 /* ── Delay chip ── */
 .init-chip.delayed{opacity:0.5;border-style:dashed;}
-.init-chip.delayed::after{content:'⏸';position:absolute;top:2px;right:4px;font-size:0.5rem;color:var(--text-dim);}
+.init-chip.delayed::after{content:'\2016';position:absolute;top:2px;right:4px;font-size:0.5rem;color:var(--text-dim);}
 .chip-delay-btn{
   background:none;border:none;color:var(--text-dim);font-size:0.55rem;
   cursor:pointer;padding:0;line-height:1;transition:color 0.1s;
@@ -1223,6 +1223,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
 </style>
 </head>
 <body>
+<script src="js/icons.js"></script>
 
 <!-- ══ Wiki nav + sidebar (injectés par components.js) ══ -->
 <nav class="top-nav" id="main-nav"></nav>
@@ -1232,7 +1233,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
 <!-- ══ Auth ══ -->
 <div id="screen-auth">
   <div class="auth-box">
-    <div class="auth-icon">⚔</div>
+    <div class="auth-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
     <div class="auth-title">DM Screen</div>
     <div class="auth-sub">Kaleysur</div>
     <label class="auth-label" for="auth-user">Identifiant</label>
@@ -1247,14 +1248,14 @@ body.sidebar-open #sidebar-backdrop{display:block;}
 <!-- ══ DM Screen ══ -->
 <div id="screen-dm">
   <nav id="dm-nav">
-    <button id="btn-wiki-sidebar-toggle" class="nav-btn" title="Afficher/masquer la navigation wiki">⚜</button>
+    <button id="btn-wiki-sidebar-toggle" class="nav-btn" title="Afficher/masquer la navigation wiki"><svg class="ic" aria-hidden="true"><use href="#i-fleur"></use></svg></button>
     <button id="btn-sidebar-toggle" class="nav-btn" title="Réduire / afficher le panneau joueurs">☰</button>
     <span class="brand">DM Screen<span class="brand-sep"></span><span class="brand-sub">Kaleysur</span></span>
-    <button id="btn-init-open" class="nav-btn">⚔ Initiative</button>
+    <button id="btn-init-open" class="nav-btn"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Initiative</button>
     <button id="btn-compact" class="nav-btn" title="Vue compacte">⊞ Compact</button>
-    <button id="btn-focus" class="nav-btn" title="Mode focus (masquer sidebar)">⛶ Focus</button>
+    <button id="btn-focus" class="nav-btn" title="Mode focus (masquer sidebar)"><svg class="ic" aria-hidden="true"><use href="#i-expand"></use></svg> Focus</button>
     <div id="nav-dice-wrap">
-      <button id="btn-dice" class="nav-btn">🎲 Dés</button>
+      <button id="btn-dice" class="nav-btn"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg> Dés</button>
       <div class="dice-popup" id="dice-popup">
         <div class="dice-grid">
           <button class="dice-btn" data-sides="4">d4</button>
@@ -1268,8 +1269,8 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         <div class="dice-result" id="dice-result">—</div>
       </div>
     </div>
-    <button id="btn-group-action" class="nav-btn">⚡ Groupe</button>
-    <button id="btn-open-drawer" class="nav-btn">📋 Fiches</button>
+    <button id="btn-group-action" class="nav-btn"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> Groupe</button>
+    <button id="btn-open-drawer" class="nav-btn"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Fiches</button>
     <div class="nav-right">
       <span id="poll-indicator">—</span>
       <button id="btn-refresh" class="nav-btn">↺</button>
@@ -1281,7 +1282,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
   <div id="group-overlay" class="group-overlay">
     <div class="group-modal">
       <div class="group-head">
-        <span>⚡ Action de groupe</span>
+        <span><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> Action de groupe</span>
         <button id="group-close" class="group-x" title="Fermer">✕</button>
       </div>
 
@@ -1305,7 +1306,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         <div class="group-row">
           <label>Montant</label>
           <input type="number" id="group-amount" min="0" value="0">
-          <button class="group-btn dmg" id="group-damage">⚔ Dégâts</button>
+          <button class="group-btn dmg" id="group-damage"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Dégâts</button>
           <button class="group-btn heal" id="group-heal">✚ Soins</button>
         </div>
         <div class="group-hint">Les PV temporaires absorbent les dégâts en premier.</div>
@@ -1319,7 +1320,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <div class="group-pane" id="group-pane-rest" style="display:none;">
         <div class="group-row">
           <button class="group-btn" id="group-short-rest">☽ Repos court</button>
-          <button class="group-btn heal" id="group-long-rest">☀ Repos long</button>
+          <button class="group-btn heal" id="group-long-rest"><svg class="ic" aria-hidden="true"><use href="#i-sun"></use></svg> Repos long</button>
         </div>
         <div class="group-hint">Le repos court rend les ressources a recharge courte et les emplacements de pacte. Les des de vie restent au joueur — le MJ ne les depense pas a sa place.</div>
       </div>
@@ -1329,7 +1330,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
           <select id="group-save-abil"></select>
           <label>DD</label>
           <input type="number" id="group-save-dc" min="1" value="15">
-          <button class="group-btn" id="group-roll">🎲 Lancer</button>
+          <button class="group-btn" id="group-roll"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg> Lancer</button>
         </div>
         <div class="group-results" id="group-results"></div>
         <div class="group-row" id="group-apply-row" style="display:none;">
@@ -1354,7 +1355,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <!-- Chat -->
       <div id="chat-section">
         <div id="chat-section-header">
-          <span>💬 Chat joueurs</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-chat"></use></svg> Chat joueurs</span>
           <span class="chat-unread" id="chat-unread-badge">0</span>
           <span id="chat-section-chevron">▼</span>
         </div>
@@ -1376,7 +1377,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         <div id="monster-form">
           <div class="m-form-row">
             <input class="m-inp" id="mf-name" placeholder="Name" autocomplete="off">
-            <input class="m-inp m-inp-sm" id="mf-avatar" placeholder="🐉" maxlength="2">
+            <input class="m-inp m-inp-sm" id="mf-avatar" placeholder="" maxlength="2">
           </div>
           <div class="m-form-row">
             <input class="m-inp" id="mf-hp" placeholder="HP max" type="number" min="1">
@@ -1391,14 +1392,14 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <!-- Friendly NPCs -->
       <div id="friendly-section">
         <div id="friendly-section-title">
-          <span>🤝 Friendly NPCs</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-people"></use></svg> Friendly NPCs</span>
           <button id="btn-add-friendly">+ New</button>
         </div>
         <div id="friendly-list"></div>
         <div id="friendly-form">
           <div class="m-form-row">
             <input class="m-inp" id="ff-name" placeholder="Name" autocomplete="off">
-            <input class="m-inp m-inp-sm" id="ff-avatar" placeholder="😊" maxlength="2">
+            <input class="m-inp m-inp-sm" id="ff-avatar" placeholder="" maxlength="2">
           </div>
           <div class="m-form-row">
             <input class="m-inp" id="ff-hp" placeholder="HP max" type="number" min="1">
@@ -1413,8 +1414,8 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <!-- Encounters (bibliothèque de rencontres préparées) -->
       <div id="encounter-section">
         <div id="encounter-section-title">
-          <span>📜 Rencontres</span>
-          <button id="btn-save-encounter" title="Sauvegarder les monstres/PNJ dont le panneau est ouvert comme rencontre réutilisable">💾 Sauver</button>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> Rencontres</span>
+          <button id="btn-save-encounter" title="Sauvegarder les monstres/PNJ dont le panneau est ouvert comme rencontre réutilisable"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Sauver</button>
         </div>
         <div id="encounter-list"></div>
       </div>
@@ -1422,7 +1423,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <!-- References -->
       <div id="ref-section" class="collapsed">
         <div id="ref-section-header">
-          <span>📖 References</span>
+          <span><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg> References</span>
           <span id="ref-chevron">▼</span>
         </div>
         <div id="ref-body">
@@ -1442,7 +1443,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
           <span id="init-round-label">Tour 1</span>
           <button class="init-ctrl" id="init-next" title="Tour suivant">▶</button>
           <div class="init-sep"></div>
-          <button id="init-roll-all">🎲 Lancer tous</button>
+          <button id="init-roll-all"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg> Lancer tous</button>
           <button id="init-add-new" title="Ajoute les panneaux ouverts absents de l'initiative, sans toucher à l'ordre en cours">＋ Nouveaux</button>
           <button id="init-clear">Effacer</button>
         </div>
@@ -1452,12 +1453,12 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <!-- Panels -->
       <div id="panels-area">
         <div id="empty-state">
-          <div class="empty-icon">⚔</div>
+          <div class="empty-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
           <p>Sélectionne un personnage dans la barre latérale<br>pour ouvrir un panneau de combat.</p>
         </div>
         <div id="combat-panels-section" style="display:none;">
           <div class="panels-section-header combat-section-header">
-            <span class="panels-section-icon">⚔</span>
+            <span class="panels-section-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></span>
             <span class="panels-section-label">Combat — ordre d'initiative</span>
             <span class="panels-section-count" id="combat-panels-count"></span>
           </div>
@@ -1465,7 +1466,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         </div>
         <div id="player-panels-section" style="display:none;">
           <div class="panels-section-header">
-            <span class="panels-section-icon">🧙</span>
+            <span class="panels-section-icon"><svg class="ic" aria-hidden="true"><use href="#i-hat"></use></svg></span>
             <span class="panels-section-label">Joueurs</span>
             <span class="panels-section-count" id="player-panels-count"></span>
           </div>
@@ -1473,7 +1474,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         </div>
         <div id="monster-panels-section" style="display:none;">
           <div class="panels-section-header monster-section-header">
-            <span class="panels-section-icon">💀</span>
+            <span class="panels-section-icon"><svg class="ic" aria-hidden="true"><use href="#i-skull"></use></svg></span>
             <span class="panels-section-label">NPCs &amp; Monsters</span>
             <span class="panels-section-count" id="monster-panels-count"></span>
           </div>
@@ -1481,7 +1482,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
         </div>
         <div id="friendly-panels-section" style="display:none;">
           <div class="panels-section-header friendly-section-header">
-            <span class="panels-section-icon">🤝</span>
+            <span class="panels-section-icon"><svg class="ic" aria-hidden="true"><use href="#i-people"></use></svg></span>
             <span class="panels-section-label">Friendly NPCs</span>
             <span class="panels-section-count" id="friendly-panels-count"></span>
           </div>
@@ -1762,15 +1763,15 @@ function startRealtime(_retry = 0) {
         Object.keys(openPanels).filter(k => k.startsWith('p::' + row.username + '::')).forEach(k => updatePanel(k));
         renderInitChips();
         document.getElementById('poll-indicator').textContent =
-          '⚡ ' + new Date().toLocaleTimeString('fr', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+          new Date().toLocaleTimeString('fr', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
       })
       .subscribe(status => {
         if (status === 'SUBSCRIBED') {
           _rtHealthy = true;
-          document.getElementById('poll-indicator').textContent = '⚡ Realtime';
+          document.getElementById('poll-indicator').innerHTML = ic('bolt') + ' Realtime';
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           _rtHealthy = false;
-          document.getElementById('poll-indicator').textContent = '⚠ Polling';
+          document.getElementById('poll-indicator').innerHTML = ic('warn') + ' Polling';
         }
       });
   } catch(e) {
@@ -1830,7 +1831,7 @@ function renderSidebar() {
   filtered.forEach(player => {
     const data     = player.data || {};
     const chars    = Object.entries(data.characters || {});
-    const avatar   = data.avatar || '⚔';
+    const avatar   = data.avatar || 'swords';
     const expanded = expandedPlayers.has(player.username);
 
     const activeId   = data.activeCharId;
@@ -1844,7 +1845,7 @@ function renderSidebar() {
     item.dataset.username = player.username;
     item.innerHTML = `
       <div class="player-head">
-        <span class="player-avatar">${esc(avatar)}</span>
+        <span class="player-avatar">${avatarHtml(avatar)}</span>
         <div class="player-info">
           <div class="player-name">${esc(player.username)}</div>
           <div class="player-hp-mini"><div class="player-hp-mini-bar" style="width:${hpPct}%;background:${hpColor(hpPct)};"></div></div>
@@ -1903,34 +1904,41 @@ function updateSidebarPlayerHp(username) {
 /* ══════════════════════════════════════════
    Monster Templates
 ══════════════════════════════════════════ */
+/* Un avatar est soit un nom d'icone du sprite, soit un caractere saisi par
+   le MJ (ou herite d'une sauvegarde anterieure) : on rend ce qui convient. */
+function avatarHtml(av, defaut) {
+  const v = av || defaut || 'goblin';
+  return (window.ICON_NAMES || []).includes(v) ? ic(v) : esc(v);
+}
+
 const MONSTER_TEMPLATES = [
-  {name:'Goblin',       avatar:'👺', hp:7,   ac:15, init:2 },
-  {name:'Hobgoblin',    avatar:'🪖', hp:11,  ac:18, init:1 },
-  {name:'Kobold',       avatar:'🦎', hp:5,   ac:12, init:2 },
-  {name:'Orc',          avatar:'🪓', hp:15,  ac:13, init:0 },
-  {name:'Bugbear',      avatar:'🐻', hp:27,  ac:16, init:2 },
-  {name:'Gnoll',        avatar:'🐾', hp:22,  ac:15, init:1 },
-  {name:'Skeleton',     avatar:'💀', hp:13,  ac:13, init:2 },
-  {name:'Zombie',       avatar:'🧟', hp:22,  ac:8,  init:-2},
-  {name:'Wight',        avatar:'👻', hp:45,  ac:14, init:2 },
-  {name:'Wolf',         avatar:'🐺', hp:11,  ac:13, init:2 },
-  {name:'Dire Wolf',    avatar:'🦴', hp:37,  ac:14, init:2 },
-  {name:'Giant Spider', avatar:'🕷', hp:26,  ac:14, init:3 },
-  {name:'Bandit',       avatar:'🗡', hp:11,  ac:12, init:1 },
-  {name:'Guard',        avatar:'🛡', hp:11,  ac:16, init:0 },
-  {name:'Cultist',      avatar:'🧿', hp:9,   ac:12, init:1 },
-  {name:'Ogre',         avatar:'👹', hp:59,  ac:11, init:-1},
-  {name:'Troll',        avatar:'🧌', hp:84,  ac:15, init:2 },
-  {name:'Vampire Spawn',avatar:'🧛', hp:82,  ac:15, init:4 },
-  {name:'Young Dragon', avatar:'🐉', hp:178, ac:18, init:2 },
-  {name:'Beholder',     avatar:'👁', hp:180, ac:18, init:2 },
+  {name:'Goblin',       avatar:'goblin', hp:7,   ac:15, init:2 },
+  {name:'Hobgoblin',    avatar:'helmet', hp:11,  ac:18, init:1 },
+  {name:'Kobold',       avatar:'paw', hp:5,   ac:12, init:2 },
+  {name:'Orc',          avatar:'axe', hp:15,  ac:13, init:0 },
+  {name:'Bugbear',      avatar:'beast', hp:27,  ac:16, init:2 },
+  {name:'Gnoll',        avatar:'paw', hp:22,  ac:15, init:1 },
+  {name:'Skeleton',     avatar:'skull', hp:13,  ac:13, init:2 },
+  {name:'Zombie',       avatar:'grave', hp:22,  ac:8,  init:-2},
+  {name:'Wight',        avatar:'ghost', hp:45,  ac:14, init:2 },
+  {name:'Wolf',         avatar:'paw', hp:11,  ac:13, init:2 },
+  {name:'Dire Wolf',    avatar:'bones', hp:37,  ac:14, init:2 },
+  {name:'Giant Spider', avatar:'paw', hp:26,  ac:14, init:3 },
+  {name:'Bandit',       avatar:'dagger', hp:11,  ac:12, init:1 },
+  {name:'Guard',        avatar:'shield', hp:11,  ac:16, init:0 },
+  {name:'Cultist',      avatar:'eye', hp:9,   ac:12, init:1 },
+  {name:'Ogre',         avatar:'goblin', hp:59,  ac:11, init:-1},
+  {name:'Troll',        avatar:'goblin', hp:84,  ac:15, init:2 },
+  {name:'Vampire Spawn',avatar:'blood', hp:82,  ac:15, init:4 },
+  {name:'Young Dragon', avatar:'beast', hp:178, ac:18, init:2 },
+  {name:'Beholder',     avatar:'eye', hp:180, ac:18, init:2 },
 ];
 
 (function initMonsterTemplates() {
   const container = document.getElementById('monster-templates');
   if (!container) return;
   container.innerHTML = MONSTER_TEMPLATES.map(t =>
-    `<button class="m-tpl" data-tpl="${esc(t.name)}">${t.avatar} ${esc(t.name)}</button>`
+    `<button class="m-tpl" data-tpl="${esc(t.name)}">${avatarHtml(t.avatar)} ${esc(t.name)}</button>`
   ).join('');
   container.addEventListener('click', e => {
     const btn = e.target.closest('.m-tpl');
@@ -1971,7 +1979,7 @@ function createFriendly() {
   const hp    = parseInt(document.getElementById('ff-hp').value) || 10;
   const ac    = parseInt(document.getElementById('ff-ac').value) || 10;
   const init  = parseInt(document.getElementById('ff-init').value) || 0;
-  const avatar= document.getElementById('ff-avatar').value.trim() || '😊';
+  const avatar= document.getElementById('ff-avatar').value.trim() || 'paw';
   if (!name) { document.getElementById('ff-name').focus(); return; }
 
   const id = 'friendly-' + (++friendlyCounter);
@@ -2012,7 +2020,7 @@ function saveCurrentEncounter() {
   encounters[id] = { id, name: name.trim(), monsters: openM.map(tpl), friendlies: openF.map(tpl) };
   renderEncounters();
   saveDmState();
-  dmToast(`💾 « ${name.trim()} » sauvegardée (${openM.length + openF.length} créature${openM.length + openF.length > 1 ? 's' : ''})`);
+  dmToast(`« ${name.trim()} » sauvegardée (${openM.length + openF.length} créature${openM.length + openF.length > 1 ? 's' : ''})`, false, 'save');
 }
 
 function launchEncounter(id) {
@@ -2039,7 +2047,7 @@ function launchEncounter(id) {
   renderFriendlySidebar();
   renderInitChips();
   saveDmState();
-  dmToast(`⚔ « ${enc.name} » lancée !`);
+  dmToast(`« ${enc.name} » lancée !`, false, 'swords');
 }
 
 function deleteEncounter(id) {
@@ -2055,7 +2063,7 @@ function renderEncounters() {
   if (!list) return;
   const ids = Object.keys(encounters);
   if (!ids.length) {
-    list.innerHTML = '<div class="enc-empty">Aucune rencontre. Ouvre des panneaux de monstres puis 💾 Sauver.</div>';
+    list.innerHTML = '<div class="enc-empty">Aucune rencontre. Ouvre des panneaux de monstres puis ' + ic('save') + ' Sauver.</div>';
     return;
   }
   list.innerHTML = ids.map(id => {
@@ -2103,7 +2111,7 @@ function createMonster() {
   const hp    = parseInt(document.getElementById('mf-hp').value) || 1;
   const ac    = parseInt(document.getElementById('mf-ac').value) || 10;
   const init  = parseInt(document.getElementById('mf-init').value) || 0;
-  const avatar= document.getElementById('mf-avatar').value.trim() || '👹';
+  const avatar= document.getElementById('mf-avatar').value.trim() || 'goblin';
   if (!name) { document.getElementById('mf-name').focus(); return; }
 
   const id = 'monster-' + (++monsterCounter);
@@ -2136,7 +2144,7 @@ function renderMonsterSidebar() {
     const isOpen = !!openPanels[key];
     return `<div class="monster-sidebar-entry${isOpen?' open':''}" data-mkey="${esc(key)}">
       <span class="m-dot"></span>
-      <span>${esc(m.avatar)} ${esc(m.name)}</span>
+      <span>${avatarHtml(m.avatar)} ${esc(m.name)}</span>
       <span style="margin-left:auto;font-size:0.68rem;">${m.hp}/${m.hpMax}</span>
     </div>`;
   }).join('');
@@ -2257,7 +2265,7 @@ function renderPlayerPanel(panel, key) {
   const slot     = pData?.characters?.[charId];
   const c        = slot?.character || {};
   const charName = slot?.name || 'Inconnu';
-  const avatar   = pData?.avatar || '⚔';
+  const avatar   = pData?.avatar || 'swords';
   const sub      = [c.classe, c.niveau ? 'Niv.'+c.niveau : '', c.species].filter(Boolean).join(' · ');
 
   const pvMax  = parseInt(c.pvMax)    || 0;
@@ -2288,22 +2296,22 @@ function renderPlayerPanel(panel, key) {
 
   panel.innerHTML = `
     <div class="panel-header">
-      <span class="panel-avatar">${esc(avatar)}</span>
+      <span class="panel-avatar">${avatarHtml(avatar)}</span>
       <div class="panel-title">
         <div class="panel-char-name">${esc(charName)}</div>
         <div class="panel-badges">
           ${c.ca !== undefined ? `<span class="pbadge">AC ${c.ca}</span>` : ''}
-          <span class="pbadge pbadge-pp" title="Perception passive">👁 ${dmCalc(c).passivePerc}</span>
+          <span class="pbadge pbadge-pp" title="Perception passive">${ic('eye')} ${dmCalc(c).passivePerc}</span>
           ${c.initiative !== undefined ? `<span class="pbadge">${fmtInit(c.initiative)} Init</span>` : ''}
           ${c.vitesse ? `<span class="pbadge">${esc(String(c.vitesse))} ft</span>` : ''}
-          ${c.concentration ? `<span class="pbadge pbadge-conc">🎯 ${esc(String(c.concentration).slice(0,12))}</span>` : ''}
-          ${c.inspiration ? `<span class="pbadge pbadge-insp">⭐ Inspi.</span>` : ''}
+          ${c.concentration ? `<span class="pbadge pbadge-conc">${ic('target')} ${esc(String(c.concentration).slice(0,12))}</span>` : ''}
+          ${c.inspiration ? `<span class="pbadge pbadge-insp">${ic('star')} Inspi.</span>` : ''}
         </div>
       </div>
       <div class="panel-acts">
-        <button class="pact" data-sheet="${esc(key)}" title="Ouvrir la fiche complète">📋</button>
-        <button class="pact${c.inspiration?' insp-on':''}" data-insp="${esc(key)}" title="Inspiration">⭐</button>
-        <button class="pact rest-long" data-key="${esc(key)}" title="Long Rest">☀</button>
+        <button class="pact" data-sheet="${esc(key)}" title="Ouvrir la fiche complète">${ic('clipboard')}</button>
+        <button class="pact${c.inspiration?' insp-on':''}" data-insp="${esc(key)}" title="Inspiration">${ic('star')}</button>
+        <button class="pact rest-long" data-key="${esc(key)}" title="Long Rest">${ic('sun')}</button>
         <button class="pact pdet${_panelExpanded.has(key)?' expanded':''}" data-expand="${esc(key)}" title="Details">▾</button>
         <button class="pact danger" data-close="${esc(key)}" title="Close">✕</button>
       </div>
@@ -2316,7 +2324,7 @@ function renderPlayerPanel(panel, key) {
         <span class="php-slash">/</span>
         <span class="php-max">${pvMax} HP</span>
         ${pvTemp > 0 ? `<span class="php-temp">+${pvTemp}</span>` : ''}
-        ${dead ? `<span class="php-dead">💀</span>` : ''}
+        ${dead ? `<span class="php-dead">${ic('skull')}</span>` : ''}
         <div class="php-ctrl">
           <button class="hp-qbtn m" data-delta="-5">−5</button>
           <button class="hp-qbtn m" data-delta="-1">−1</button>
@@ -2329,7 +2337,7 @@ function renderPlayerPanel(panel, key) {
     </div>
 
     ${dead ? `<div class="death-compact">
-      <span class="dc-label">💀 Jets de mort</span>
+      <span class="dc-label">${ic('skull')} Jets de mort</span>
       <span class="dc-dots">${[0,1,2].map(i=>`<span class="ds-dot${i<succ?' s':''}" data-ds="s" data-i="${i}" title="Réussite ${i+1}"></span>`).join('')}</span>
       <span class="dc-sep">·</span>
       <span class="dc-dots">${[0,1,2].map(i=>`<span class="ds-dot${i<fail?' f':''}" data-ds="f" data-i="${i}" title="Échec ${i+1}"></span>`).join('')}</span>
@@ -2403,7 +2411,7 @@ function renderPlayerPanel(panel, key) {
       </div>
 
       <div class="panel-dm-notes">
-        <div class="dm-notes-label">🗒 DM Notes (local)</div>
+        <div class="dm-notes-label">${ic('clipboard')} DM Notes (local)</div>
         <textarea class="dm-notes-inp" data-dm-notes="${esc(key)}" rows="2" placeholder="Private notes…">${esc(_panelNotes[key]||'')}</textarea>
       </div>
 
@@ -2556,20 +2564,20 @@ function renderCombatantPanel(panel, key, kind) {
 
   panel.innerHTML = `
     <div class="panel-header" style="cursor:pointer;" data-toggle-panel="${esc(key)}">
-      <span class="panel-avatar">${esc(e.avatar)}</span>
+      <span class="panel-avatar">${avatarHtml(e.avatar)}</span>
       <div class="panel-title">
         <input class="panel-name-input" data-rename="${esc(id)}" value="${esc(e.name)}" title="Renommer" onclick="event.stopPropagation()">
         <div class="panel-compact-info">
           <span>AC ${e.ac}</span>
           <span>·</span>
           <span class="panel-compact-hp" style="color:${dead?'var(--danger)':'var(--text)'};">${e.hp}<span style="color:var(--text-dim);font-size:0.72rem;">/${e.hpMax}</span></span>
-          ${dead ? `<span style="color:var(--danger);">💀</span>` : ''}
+          ${dead ? `<span style="color:var(--danger);">${ic('skull')}</span>` : ''}
         </div>
       </div>
       <div class="panel-acts">
         <span class="panel-expand-arrow">▶</span>
         <button class="pact" data-clone="${esc(key)}" title="Dupliquer" onclick="event.stopPropagation()">⎘</button>
-        <button class="pact danger" data-close="${esc(key)}" title="Supprimer" onclick="event.stopPropagation()">🗑</button>
+        <button class="pact danger" data-close="${esc(key)}" title="Supprimer" onclick="event.stopPropagation()">${ic('trash')}</button>
       </div>
     </div>
     <div class="panel-mini-bar"><div class="panel-mini-bar-fill" style="width:${pct}%;background:${hpColor(pct)};"></div></div>
@@ -2579,7 +2587,7 @@ function renderCombatantPanel(panel, key, kind) {
         <div class="hp-row">
           <span class="hp-num" style="color:${dead?'var(--danger)':'var(--text)'};">${e.hp}</span>
           <span class="hp-max">/ ${e.hpMax} HP</span>
-          ${dead ? `<span style="color:var(--danger);font-size:0.72rem;margin-left:auto;">💀 ${cfg.deadLabel}</span>` : ''}
+          ${dead ? `<span style="color:var(--danger);font-size:0.72rem;margin-left:auto;">${ic('skull')} ${cfg.deadLabel}</span>` : ''}
         </div>
         <div class="hp-controls">
           <button class="hp-qbtn m" data-delta="-10">−10</button>
@@ -2724,7 +2732,7 @@ function renderFriendlySidebar() {
     const isOpen = !!openPanels[key];
     return `<div class="friendly-sidebar-entry${isOpen?' open':''}" data-fkey="${esc(key)}">
       <span class="f-dot"></span>
-      <span>${esc(f.avatar)} ${esc(f.name)}</span>
+      <span>${avatarHtml(f.avatar)} ${esc(f.name)}</span>
       <span style="margin-left:auto;font-size:0.68rem;">${f.hp}/${f.hpMax}</span>
     </div>`;
   }).join('');
@@ -2805,18 +2813,18 @@ function _commitPlayerSave(username, data) {
     const n = (_saveRetries[username] || 0) + 1;
     _saveRetries[username] = n;
     if (n < 3) {
-      dmToast(`⚠ Sauvegarde de ${username} échouée — nouvel essai…`, true);
+      dmToast(`Sauvegarde de ${username} échouée — nouvel essai…`, true, 'warn');
       _pendingSaves[username] = data;
       saveTimers[username] = setTimeout(() => _commitPlayerSave(username, data), 4000);
     } else {
       _saveRetries[username] = 0;
       dmToast(`✗ Impossible de sauvegarder ${username} — vérifie la connexion puis refais la modification`, true);
-      document.getElementById('poll-indicator').textContent = '⚠ Sauvegarde KO';
+      document.getElementById('poll-indicator').innerHTML = ic('warn') + ' Sauvegarde KO';
     }
   });
 }
 /* Toast DM (vert = info, rouge = erreur) */
-function dmToast(msg, isError = false) {
+function dmToast(msg, isError = false, type = '') {
   let t = document.getElementById('dm-toast');
   if (!t) {
     t = document.createElement('div');
@@ -2827,7 +2835,9 @@ function dmToast(msg, isError = false) {
   t.style.background  = isError ? 'rgba(70,15,15,0.97)' : 'rgba(20,40,22,0.97)';
   t.style.border      = '1px solid ' + (isError ? 'var(--danger, #d94040)' : 'rgba(61,184,122,0.5)');
   t.style.color       = isError ? '#f0a0a0' : '#8aba8a';
-  t.textContent = msg; t.style.opacity = '1';
+  if (type) t.innerHTML = ic(type) + ' ' + esc(String(msg));
+  else t.textContent = msg;
+  t.style.opacity = '1';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, isError ? 5000 : 2600);
 }
@@ -3072,7 +3082,7 @@ document.addEventListener('DOMContentLoaded', function initGroupActions() {
       const on = selection.has(t.id);
       const pct = t.hpMax > 0 ? Math.round(t.hp / t.hpMax * 100) : 0;
       const etat = t.hp <= 0 ? ' down' : pct <= 50 ? ' bloodied' : '';
-      const icone = t.kind === 'player' ? '🛡' : (t.kind === 'monster' ? '👹' : '🤝');
+      const icone = ic(t.kind === 'player' ? 'shield' : (t.kind === 'monster' ? 'goblin' : 'people'));
       return `<button type="button" class="group-target${on ? ' on' : ''}${etat}" data-gt="${esc(t.id)}">`
            + `<span class="gt-kind">${icone}</span>`
            + `<span class="gt-name">${esc(t.label)}</span>`
@@ -3283,7 +3293,7 @@ function enumerateOpenCombatants(roll = false, skip = null) {
       const c = slot.character || {};
       out.push({
         id: key, label: slot.name || player.username,
-        avatar: data.avatar || '⚔', type: 'player',
+        avatar: data.avatar || 'swords', type: 'player',
         initVal: rollInit(parseInt(c.initiative) || 0),
         hp: parseInt(c.pvActuel)||0, hpMax: parseInt(c.pvMax)||0
       });
@@ -3352,14 +3362,14 @@ function renderInitChips() {
 
     const chip = document.createElement('div');
     chip.className = 'init-chip' + (active ? ' active-turn' : '') + (dead ? ' dead' : '') + (ct.delayed ? ' delayed' : '');
-    const hpTxt = ct.hpMax > 0 ? (dead ? '💀 0' : `${ct.hp}/${ct.hpMax}`) : '—';
+    const hpTxt = ct.hpMax > 0 ? (dead ? ic('skull') + ' 0' : `${ct.hp}/${ct.hpMax}`) : '—';
     chip.innerHTML = `
-      <span class="chip-avatar">${esc(ct.avatar)}</span>
+      <span class="chip-avatar">${avatarHtml(ct.avatar)}</span>
       <input class="init-chip-inp" type="number" value="${ct.initVal}" title="Modifier initiative">
       <span class="chip-name">${esc(ct.label)}</span>
       <div class="chip-hp-bar"><div class="chip-hp-fill" style="width:${pct}%;background:${hpColor(pct)};"></div></div>
       <span class="chip-hp-txt">${hpTxt}</span>
-      <button class="chip-delay-btn" title="${ct.delayed ? 'Reprendre' : 'Passer (delay)'}">⏸</button>`;
+      <button class="chip-delay-btn" title="${ct.delayed ? 'Reprendre' : 'Passer (delay)'}">${ic('pause')}</button>`;
 
     chip.addEventListener('click', e => {
       if (e.target.classList.contains('init-chip-inp') || e.target.classList.contains('chip-delay-btn')) return;
@@ -3402,7 +3412,9 @@ function removeInitCombatant(key) {
 
 /* ══════════════════════════════════════════
    Accessibilité — enhancer générique
-   title → aria-label sur les boutons-icônes (📋 ⭐ ☀ ▾ ✕ ⎘ 🗑 ⏸ …) +
+   title → aria-label sur les boutons-icônes. Depuis le passage aux icones
+   SVG ces boutons n'ont souvent aucun texte : le title est leur seul nom
+   accessible. +
    contrôles non-natifs (jets de mort, pips de ressources, badges de
    conditions) focusables et activables au clavier. Le MutationObserver
    couvre les re-renders des panneaux.
@@ -3475,7 +3487,7 @@ document.getElementById('btn-focus').addEventListener('click', () => {
 });
 
 /* ══════════════════════════════════════════
-   Wiki sidebar toggle (⚜)
+   Wiki sidebar toggle
 ══════════════════════════════════════════ */
 document.getElementById('btn-wiki-sidebar-toggle').addEventListener('click', () => {
   const hidden = document.body.classList.toggle('wiki-sidebar-hidden');
@@ -3829,22 +3841,22 @@ function renderDrawerBody() {
 
   const modStr = v => { const m = Math.floor(((parseInt(v)||10)-10)/2); return (m>=0?'+':'')+m; };
   const fv = (f, def='') => c[f] ?? def;
-  const avatar   = pdata.avatar || '🧙';
+  const avatar   = pdata.avatar || 'hat';
   const charName = slot?.name || 'Personnage';
   const charSub  = [c.classe, c.niveau ? 'Niv. '+c.niveau : '', c.race].filter(Boolean).join(' · ');
 
   const CAT_OPTIONS = [
     {value:'',label:'—'},
-    {value:'arme',label:'⚔ Arme'},
-    {value:'armure',label:'🛡 Armure'},
-    {value:'consommable',label:'⚗ Consommable'},
+    {value:'arme',label:'Arme'},
+    {value:'armure',label:'Armure'},
+    {value:'consommable',label:'Consommable'},
     {value:'magique',label:'✦ Magique'},
-    {value:'equipement',label:'🎒 Équipement'},
+    {value:'equipement',label:'Équipement'},
   ];
 
   body.innerHTML = `
     <div class="ds-player-header">
-      <span class="ds-avatar">${esc(avatar)}</span>
+      <span class="ds-avatar">${avatarHtml(avatar)}</span>
       <div>
         <div class="ds-player-name">${esc(charName)}</div>
         <div class="ds-player-sub">${esc(pdata.email || _drawerPlayer)}${charSub ? ' · '+esc(charSub) : ''}</div>
@@ -3856,9 +3868,9 @@ function renderDrawerBody() {
     ).join('')}</div>` : ''}
 
     <div class="drawer-inner-tabs">
-      <button class="drawer-inner-tab${_drawerSection==='perso'?' active':''}" data-sec="perso">🗡 Personnage</button>
-      <button class="drawer-inner-tab${_drawerSection==='inventaire'?' active':''}" data-sec="inventaire">🎒 Inventaire</button>
-      <button class="drawer-inner-tab${_drawerSection==='sorts'?' active':''}" data-sec="sorts">✨ Sorts</button>
+      <button class="drawer-inner-tab${_drawerSection==='perso'?' active':''}" data-sec="perso">${ic('dagger')} Personnage</button>
+      <button class="drawer-inner-tab${_drawerSection==='inventaire'?' active':''}" data-sec="inventaire">${ic('pack')} Inventaire</button>
+      <button class="drawer-inner-tab${_drawerSection==='sorts'?' active':''}" data-sec="sorts">${ic('sparkle')} Sorts</button>
     </div>
 
     ${_drawerSection === 'sorts' ? (() => {
@@ -3897,9 +3909,9 @@ function renderDrawerBody() {
                     ${s.conc ? `<span class="ds-spell-conc" title="Concentration">C</span>` : ''}
                   </div>
                   <div class="ds-spell-meta">
-                    ${s.action ? `<span class="ds-spell-tag">⏱ ${esc(s.action)}</span>` : ''}
+                    ${s.action ? `<span class="ds-spell-tag">${ic('clock')} ${esc(s.action)}</span>` : ''}
                     ${s.portee ? `<span class="ds-spell-tag">⦾ ${esc(s.portee)}</span>` : ''}
-                    ${(s.degat || s.damage) ? `<span class="ds-spell-tag ds-spell-dmg">⚔ ${esc(s.degat || s.damage)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''}</span>` : ''}
+                    ${(s.degat || s.damage) ? `<span class="ds-spell-tag ds-spell-dmg">${ic('swords')} ${esc(s.degat || s.damage)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''}</span>` : ''}
                     ${s.desc ? `<span class="ds-spell-tag" style="color:var(--text-dim);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(s.desc)}">${esc(s.desc.slice(0,40))}${s.desc.length>40?'…':''}</span>` : ''}
                   </div>
                 </div>`).join('')}
@@ -3922,7 +3934,7 @@ function renderDrawerBody() {
       </div>
     </div>
     <div class="ds-section">
-      <div class="ds-section-title">❤ Points de vie</div>
+      <div class="ds-section-title">${ic('heart')} Points de vie</div>
       <div class="ds-grid ds-grid-3">
         <div class="ds-field"><label class="ds-label">PV Actuels</label><input class="ds-input big center heal" type="number" data-field="pvActuel" value="${esc(fv('pvActuel','0'))}"></div>
         <div class="ds-field"><label class="ds-label">PV Max</label><input class="ds-input big center" type="number" data-field="pvMax" value="${esc(fv('pvMax','0'))}"></div>
@@ -3930,7 +3942,7 @@ function renderDrawerBody() {
       </div>
     </div>
     <div class="ds-section">
-      <div class="ds-section-title">⚡ Caractéristiques</div>
+      <div class="ds-section-title">${ic('bolt')} Caractéristiques</div>
       <div class="ds-grid ds-grid-6">
         ${['for','dex','con','int','sag','cha'].map(stat => `
           <div class="ds-score-cell">
@@ -3941,7 +3953,7 @@ function renderDrawerBody() {
       </div>
     </div>
     <div class="ds-section">
-      <div class="ds-section-title">🛡 Combat</div>
+      <div class="ds-section-title">${ic('shield')} Combat</div>
       <div class="ds-grid ds-grid-3">
         <div class="ds-field"><label class="ds-label">Classe d'armure</label><input class="ds-input center" type="number" data-field="ca" value="${esc(fv('ca',fv('ac','10')))}"></div>
         <div class="ds-field"><label class="ds-label">Vitesse (m)</label><input class="ds-input center" data-field="vitesse" value="${esc(fv('vitesse','30'))}"></div>
@@ -3953,11 +3965,11 @@ function renderDrawerBody() {
       const dc = dmCalc(c);
       return `
       <div class="ds-section ds-ref">
-        <div class="ds-section-title">🎲 Référence MJ
+        <div class="ds-section-title">${ic('die')} Référence MJ
           <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;margin-left:auto;">PB +${dc.pb} · Niv. ${dc.totalLevel}</span>
         </div>
         <div class="ds-ref-pp">
-          <span class="ds-ref-pp-label">👁 Perception passive</span>
+          <span class="ds-ref-pp-label">${ic('eye')} Perception passive</span>
           <span class="ds-ref-pp-val">${dc.passivePerc}</span>
         </div>
         <div class="ds-ref-grid">
@@ -3970,7 +3982,7 @@ function renderDrawerBody() {
     })()}
     ${(c.attaques||[]).length ? `
     <div class="ds-section">
-      <div class="ds-section-title">⚔ Attaques</div>
+      <div class="ds-section-title">${ic('swords')} Attaques</div>
       <div class="ds-list">
         ${(c.attaques||[]).map(a => `<div class="ds-list-item">
           <span class="ds-list-name">${esc(a.name||'—')}</span>
@@ -3981,7 +3993,7 @@ function renderDrawerBody() {
     </div>` : ''}
     ${(c.spells||[]).length ? `
     <div class="ds-section">
-      <div class="ds-section-title">✨ Spells <span style="font-size:0.72rem;color:var(--text-dim);font-weight:400;">(${(c.spells||[]).length})</span></div>
+      <div class="ds-section-title">${ic('sparkle')} Spells <span style="font-size:0.72rem;color:var(--text-dim);font-weight:400;">(${(c.spells||[]).length})</span></div>
       <div class="ds-list">
         ${(c.spells||[]).map(s => `<div class="ds-list-item">
           <span class="ds-list-name">${esc(s.name||'—')}</span>
@@ -3992,14 +4004,14 @@ function renderDrawerBody() {
       </div>
     </div>` : ''}
     <div class="ds-section">
-      <div class="ds-section-title">📝 Notes</div>
+      <div class="ds-section-title">${ic('pencil')} Notes</div>
       <textarea class="ds-textarea" data-field="backstory" rows="4" placeholder="Backstory…">${esc(fv('backstory',''))}</textarea>
       <textarea class="ds-textarea" data-field="personnalite" rows="2" placeholder="Personnalité…" style="margin-top:0.4rem;">${esc(fv('personnalite',''))}</textarea>
     </div>
     ` : `
     <!-- ══ ONGLET INVENTAIRE ══ -->
     <div class="ds-section">
-      <div class="ds-section-title">💰 Monnaie</div>
+      <div class="ds-section-title">${ic('coin')} Monnaie</div>
       <div class="ds-currency">
         ${[['pp','Platine'],['gp','Or'],['ep','Electrum'],['sp','Argent'],['cp','Cuivre']].map(([k,lbl]) => `
           <div class="ds-currency-cell">
@@ -4010,7 +4022,7 @@ function renderDrawerBody() {
     </div>
     <div class="ds-section">
       <div class="ds-section-title" style="justify-content:space-between;">
-        <span>🎒 Objets <span style="color:var(--text-dim);font-size:0.8em;">(${items.length})</span></span>
+        <span>${ic('pack')} Objets <span style="color:var(--text-dim);font-size:0.8em;">(${items.length})</span></span>
       </div>
       ${items.length ? `
       <table class="ds-inv-table">

@@ -2454,7 +2454,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .summon-chip:hover { border-color:var(--gold-dark,#8a6e1a); background:rgba(201,169,110,0.1); color:var(--gold,#c9a96e); }
 .summon-chip.importing { opacity:0.5; pointer-events:none; }
 .summon-chip.done { border-color:var(--gold,#c9a96e); background:rgba(201,169,110,0.18); color:var(--gold,#c9a96e); }
-.summon-chip-icon { font-size:0.8rem; }
+.summon-group-icon { font-size:0.9rem; color:var(--gold-dark,#8a6e1a); display:inline-flex; align-items:center; }
 .summon-spirit-badge {
   font-size:0.58rem; padding:0.05rem 0.25rem; border-radius:2px;
   background:rgba(90,150,230,0.15); color:#7ab0ee; border:1px solid rgba(90,150,230,0.3);
@@ -2993,107 +2993,9 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
-<!-- ── Jeu d'icônes ──
-     Trait monochrome héritant de currentColor : les icônes prennent la couleur
-     du texte, donc le thème du personnage, sans variante à maintenir.
-     Inline plutôt qu'une police externe : la PWA doit fonctionner hors ligne
-     et la CSP interdit les ressources tierces. -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-  <defs>
-    <g id="sk" fill="none" stroke="currentColor" stroke-width="1.6"
-       stroke-linecap="round" stroke-linejoin="round"></g>
-  </defs>
-
-  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4 2.5 20.5h19L12 4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.6v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
-
-  <symbol id="i-swords" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h3.2l9 9-3.2 3.2-9-9V3Z"/><path d="M21 3h-3.2l-9 9 3.2 3.2 9-9V3Z"/><path d="M5.5 18.5 8 21M18.5 18.5 16 21"/></g></symbol>
-
-  <symbol id="i-die" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.5 21 7.6v8.8L12 21.5 3 16.4V7.6L12 2.5Z"/><path d="M12 2.5v19M3 7.6l9 5.1 9-5.1"/></g></symbol>
-
-  <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 6.6V12l3.6 2.2"/></g></symbol>
-
-  <symbol id="i-user" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.7"/><path d="M4.9 20.2a7.1 7.1 0 0 1 14.2 0"/></g></symbol>
-
-  <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.3"/><path d="m20.2 14.5-.9-.5a7.5 7.5 0 0 0 0-4l.9-.5a1.2 1.2 0 0 0 .4-1.6l-1-1.7a1.2 1.2 0 0 0-1.6-.4l-.9.5a7.5 7.5 0 0 0-3.5-2V3.1a1.2 1.2 0 0 0-1.2-1.2h-2a1.2 1.2 0 0 0-1.2 1.2v1.2a7.5 7.5 0 0 0-3.5 2l-.9-.5a1.2 1.2 0 0 0-1.6.4l-1 1.7a1.2 1.2 0 0 0 .4 1.6l.9.5a7.5 7.5 0 0 0 0 4l-.9.5a1.2 1.2 0 0 0-.4 1.6l1 1.7a1.2 1.2 0 0 0 1.6.4l.9-.5a7.5 7.5 0 0 0 3.5 2v1.2a1.2 1.2 0 0 0 1.2 1.2h2a1.2 1.2 0 0 0 1.2-1.2v-1.2a7.5 7.5 0 0 0 3.5-2l.9.5a1.2 1.2 0 0 0 1.6-.4l1-1.7a1.2 1.2 0 0 0-.4-1.6Z"/></g></symbol>
-
-  <symbol id="i-paw" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="7.6" cy="9.6" r="1.9"/><circle cx="12" cy="7.6" r="1.9"/><circle cx="16.4" cy="9.6" r="1.9"/><path d="M12 12.2c2.7 0 4.8 2.1 4.8 4.4 0 1.7-1.3 2.9-3 2.9-1.1 0-1.5-.4-1.8-.4s-.7.4-1.8.4c-1.7 0-3-1.2-3-2.9 0-2.3 2.1-4.4 4.8-4.4Z"/></g></symbol>
-
-  <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.2"/></g><circle cx="12" cy="12" r="1.2" fill="currentColor"/></symbol>
-
-  <symbol id="i-folder" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 6.6h5.3l1.8 2.2h10.5v9.3a1.4 1.4 0 0 1-1.4 1.4H4.6a1.4 1.4 0 0 1-1.4-1.4V6.6Z"/></g></symbol>
-
-  <symbol id="i-status" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7.2 12h2.3l1.5-3.4 2.1 6.5 1.4-3.1h2.3"/></g></symbol>
-
-  <symbol id="i-sparkle" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4l1.8 4.8 4.8 1.8-4.8 1.8L12 16.6l-1.8-4.8-4.8-1.8 4.8-1.8L12 3.4Z"/><path d="M18.4 15.6l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7.7-1.9Z"/></g></symbol>
-
-  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.6 4.5 5.6v6.1c0 4.4 3.1 8.3 7.5 9.7 4.4-1.4 7.5-5.3 7.5-9.7V5.6L12 2.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-
-  <symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1.8 12S5.5 5.5 12 5.5 22.2 12 22.2 12 18.5 18.5 12 18.5 1.8 12 1.8 12Z"/><circle cx="12" cy="12" r="3.1"/></g></symbol>
-
-  <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="1.6"/><path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/></g></symbol>
-
-  <symbol id="i-unlock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="1.6"/><path d="M8 10.5V7.4a4 4 0 0 1 7.6-1.7"/></g></symbol>
-
-  <symbol id="i-trash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.2h17M9 6.2V4.4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1.8"/><path d="M5.6 6.2 6.6 20a1.6 1.6 0 0 0 1.6 1.5h7.6a1.6 1.6 0 0 0 1.6-1.5l1-13.8"/><path d="M10.3 10.4v6.6M13.7 10.4v6.6"/></g></symbol>
-
-  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.4 2 4.6 13.4h6L10 22l9.4-11.9h-6.6L13.4 2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-
-  <symbol id="i-skull" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.6c-4.7 0-8 3.3-8 7.7 0 2.7 1.3 4.5 2.7 5.6v3a1.4 1.4 0 0 0 1.4 1.4h7.8a1.4 1.4 0 0 0 1.4-1.4v-3c1.4-1.1 2.7-2.9 2.7-5.6 0-4.4-3.3-7.7-8-7.7Z"/><circle cx="9" cy="11" r="1.7"/><circle cx="15" cy="11" r="1.7"/></g></symbol>
-
-  <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3.5 4.4h6a3 3 0 0 1 2.5 1.3 3 3 0 0 1 2.5-1.3h6v14h-6a3 3 0 0 0-2.5 1.3 3 3 0 0 0-2.5-1.3h-6v-14Z"/><path d="M12 5.7v13.3"/></g></symbol>
-
-  <symbol id="i-save" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4.4 3.6h11.3L20.4 8.3v12.1H4.4V3.6Z"/><path d="M8 3.6v5.6h7V3.6M8 20.4v-5.9h8v5.9"/></g></symbol>
-
-  <symbol id="i-flask" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.6 2.8v6.4L4.3 18a2.1 2.1 0 0 0 1.8 3.2h11.8a2.1 2.1 0 0 0 1.8-3.2l-5.3-8.8V2.8"/><path d="M8.2 2.8h7.6M6.6 14.6h10.8"/></g></symbol>
-
-  <symbol id="i-pack" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 8.2h12a3 3 0 0 1 3 3v7.2a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-7.2a3 3 0 0 1 3-3Z"/><path d="M8.6 8.2V6a3.4 3.4 0 0 1 6.8 0v2.2M3 13.6h18"/></g></symbol>
-
-  <symbol id="i-bow" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3.2A14 14 0 0 1 4.5 20.8"/><path d="M4.5 3.2 20 12 4.5 20.8"/><path d="M13 12h8"/></g></symbol>
-
-  <symbol id="i-orb" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="10.4" r="7.4"/><path d="M8.6 8a4.6 4.6 0 0 1 3.4-2.2" stroke-linecap="round"/><path d="M6.6 20.6h10.8" stroke-linecap="round"/></g></symbol>
-
-  <symbol id="i-leaf" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5C10 3.5 4 8.4 4 15.2a5.6 5.6 0 0 0 5.6 5.6c6.8 0 10.9-6.6 10.9-17.3Z"/><path d="M3.5 20.5 12 12"/></g></symbol>
-
-  <symbol id="i-dagger" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 9.6 13.6h4.8L12 2Z"/><path d="M7.6 15.4h8.8M12 15.4V22"/></g></symbol>
-
-  <symbol id="i-export" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.6V3.4M8 7.2 12 3.2l4 4"/><path d="M4 14.4v4.4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4.4"/></g></symbol>
-
-  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2.8 2.9 6.1 6.6.9-4.8 4.7 1.2 6.7L12 18l-5.9 3.2 1.2-6.7-4.8-4.7 6.6-.9L12 2.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-
-  <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 20.6h17.2"/><path d="M4.4 16.6 9.6 11l3.6 3.4 6.4-7.6"/><path d="M15.4 6.8h4.2V11"/></g></symbol>
-
-  <symbol id="i-fleur" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2.4c-1.9 2.6-1.9 5.1 0 7.6 1.9-2.5 1.9-5 0-7.6Z"/><path d="M12 10c-2.6-2-5.2-1.6-7 .8 2 2 4.6 2 7-.8Zm0 0c2.6-2 5.2-1.6 7 .8-2 2-4.6 2-7-.8Z"/><path d="M8.4 14.2h7.2M12 10v11.2"/></g></symbol>
-
-  <symbol id="i-food" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 3v7.4a3 3 0 0 0 3 3h.2V21"/><path d="M6.4 3v4.8M9.6 3v4.8"/><path d="M17.6 3c-1.6 0-2.8 2-2.8 5.2 0 2.4.9 3.6 2.2 3.9V21"/></g></symbol>
-
-  <symbol id="i-water" viewBox="0 0 24 24"><path d="M12 2.8s6.4 7 6.4 11.2a6.4 6.4 0 1 1-12.8 0C5.6 9.8 12 2.8 12 2.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-
-  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.4A8.6 8.6 0 0 1 9.6 3.5a8.9 8.9 0 1 0 10.9 10.9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-
-  <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></g></symbol>
-
-  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10.6" cy="10.6" r="6.6"/><path d="m15.4 15.4 4.6 4.6"/></g></symbol>
-
-  <symbol id="i-pencil" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M16.4 3.6a2.3 2.3 0 0 1 3.2 3.2L7.4 19h-3.4v-3.4L16.4 3.6Z"/><path d="m14.6 5.4 4 4"/></g></symbol>
-
-  <symbol id="i-clipboard" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M8.8 4.4H6.6a1.8 1.8 0 0 0-1.8 1.8v13.4a1.8 1.8 0 0 0 1.8 1.8h10.8a1.8 1.8 0 0 0 1.8-1.8V6.2a1.8 1.8 0 0 0-1.8-1.8h-2.2"/><rect x="8.8" y="2.4" width="6.4" height="4" rx="1.2"/></g></symbol>
-
-  <symbol id="i-scroll" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6.4 3.4h11.2a2.4 2.4 0 0 1 2.4 2.4v12.8a2.4 2.4 0 0 1-2.4 2.4H6.4"/><path d="M6.4 3.4A2.4 2.4 0 0 0 4 5.8v1.8h3.2M6.4 21a2.4 2.4 0 0 0 2.4-2.4v-1.8H5.6"/><path d="M9.6 8.4h7.2M9.6 12h7.2"/></g></symbol>
-
-  <symbol id="i-people" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.2" cy="8" r="3.4"/><path d="M2.8 20.4a6.4 6.4 0 0 1 12.8 0"/><path d="M16 5a3.4 3.4 0 0 1 0 6.6M17.4 14.6a6.4 6.4 0 0 1 3.8 5.8"/></g></symbol>
-
-  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.6 15.2a2 2 0 0 1-2 2H7.4L3.4 21V5.2a2 2 0 0 1 2-2h13.2a2 2 0 0 1 2 2v10Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-
-  <symbol id="i-link" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10.2 13.8a4 4 0 0 0 5.6 0l3-3a4 4 0 0 0-5.6-5.6l-1.6 1.6"/><path d="M13.8 10.2a4 4 0 0 0-5.6 0l-3 3a4 4 0 0 0 5.6 5.6l1.6-1.6"/></g></symbol>
-
-  <symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 12a8.4 8.4 0 1 1-2.6-6"/><path d="M20.4 3.6V9h-5.4"/></g></symbol>
-
-  <symbol id="i-palette" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.2a8.8 8.8 0 0 0 0 17.6c1.2 0 1.8-.8 1.8-1.7 0-1.4-1.2-1.6-1.2-2.7 0-.9.7-1.6 1.7-1.6h1.6a4.9 4.9 0 0 0 4.9-4.9c0-3.7-3.8-6.7-8.8-6.7Z"/><circle cx="8" cy="9.4" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="7" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="9.4" r="1.1" fill="currentColor" stroke="none"/></g></symbol>
-
-  <symbol id="i-image" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.2" y="4.4" width="17.6" height="15.2" rx="2"/><path d="m3.6 16.6 4.8-4.6 3.4 3.2 3.6-3.8 5 5.2"/><circle cx="8.6" cy="9" r="1.5"/></g></symbol>
-
-  <symbol id="i-install" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6.4" y="2.6" width="11.2" height="18.8" rx="2"/><path d="M12 7v7M9 11l3 3 3-3"/></g></symbol>
-</svg>
+<!-- Jeu d'icônes partagé par toutes les pages : sprite SVG + helper ic().
+     En tête de <body> pour que les <use href="#i-…"> aient leur cible. -->
+<script src="js/icons.js"></script>
 
 
 <nav class="top-nav" id="main-nav"></nav>
@@ -4479,7 +4381,16 @@ const SB_URL = 'https://hevwgdsvgepiieuvhclg.supabase.co';
 const SB_KEY = 'sb_publishable_TDTCogCSFP-Lvus2x3rAAg_60l036tq';
 const SB_HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 const ADMIN_USER = 'dm';
-const AVATARS = ['⚔','🧙','🏹','🛡','🔮','⚡','🌿','🔥','❄','🐉','🗡','🎭','🐺','🦅','💀','⚜'];
+const AVATARS = ['swords','hat','bow','shield','orb','bolt','leaf','flame',
+                 'snow','beast','dagger','mask','paw','dove','skull','fleur'];
+const AVATAR_DEFAUT = 'swords';
+
+/* Un avatar enregistre avant le passage aux icones est un caractere : on le
+   rend tel quel plutot que de le perdre. */
+function avatarHtml(av) {
+  const v = av || AVATAR_DEFAUT;
+  return (window.ICON_NAMES || []).includes(v) ? ic(v) : esc(v);
+}
 
 /* Données de règles 2024 → js/rules-2024.js (chargé juste avant ce script) */
 
@@ -4680,7 +4591,7 @@ function emptyCharSlot(name) {
 }
 function emptyPlayerData(username) {
   const id = newCharId();
-  return { username, avatar:'⚔', activeCharId:id, characters:{ [id]: emptyCharSlot('Personnage 1') } };
+  return { username, avatar:AVATAR_DEFAUT, activeCharId:id, characters:{ [id]: emptyCharSlot('Character 1') } };
 }
 
 /* ── Accesseurs ── */
@@ -5852,7 +5763,7 @@ async function openDashboard() {
 function renderDashboard() {
   const _dac = C(); const _daAv = document.getElementById('dash-avatar');
   if (_dac && _dac.avatarPng) { _daAv.innerHTML = `<img src="${_dac.avatarPng}" alt="avatar">`; }
-  else { _daAv.textContent = (_dac && _dac.avatar) || playerData.avatar || '⚔'; }
+  else { _daAv.innerHTML = avatarHtml((_dac && _dac.avatar) || playerData.avatar); }
   document.getElementById('dash-name').textContent = playerData.username || currentUser;
   renderCharCards();
   renderAll();
@@ -5880,7 +5791,7 @@ function renderCharSelector() {
   // Mettre à jour le bouton
   const avatar = document.getElementById('char-selector-avatar');
   const name   = document.getElementById('char-selector-name');
-  if (avatar) avatar.textContent = ac.avatarPng ? '' : (ac.avatar || playerData.avatar || '⚔');
+  if (avatar) avatar.innerHTML = ac.avatarPng ? '' : avatarHtml(ac.avatar || playerData.avatar);
   if (avatar && ac.avatarPng) { avatar.innerHTML = `<img src="${ac.avatarPng}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">`; }
   if (name) name.textContent = ac.characterName || 'Personnage';
 
@@ -5895,7 +5806,7 @@ function renderCharSelector() {
     item.className = 'char-sel-item' + (isActive ? ' active' : '');
     const classStr = getClasses(c).filter(cl=>cl.classe).map(cl=>cl.classe+' '+cl.niveau).join(' / ') || '—';
     item.innerHTML = `
-      <div class="char-sel-item-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : (c.avatar || '⚔')}</div>
+      <div class="char-sel-item-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : avatarHtml(c.avatar)}</div>
       <div class="char-sel-item-info">
         <div class="char-sel-item-name">${c.characterName || 'Unnamed'}</div>
         <div class="char-sel-item-sub">${classStr}</div>
@@ -6035,7 +5946,7 @@ function renderCharCards() {
     const subClasse = c.sousClasse ? ' — ' + c.sousClasse : '';
     card.innerHTML = `
       <button class="char-card-del" data-del-char="${id}" title="Delete">✕</button>
-      <div class="char-card-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" alt="avatar">` : (c.avatar || playerData.avatar || '⚔')}</div>
+      <div class="char-card-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" alt="avatar">` : avatarHtml(c.avatar || playerData.avatar)}</div>
       <div class="char-card-name">${c.characterName || 'Unnamed'}</div>
       <div class="char-card-sub">${getClasses(c).filter(cl=>cl.classe).map(cl=>cl.classe+' '+cl.niveau).join(' / ') || '—'}</div>
       ${c.species ? `<div class="char-card-species">${c.species}</div>` : ''}
@@ -6279,7 +6190,7 @@ function renderHero() {
       img.src = c.avatarPng; img.style.display = ''; ph.style.display = 'none';
     } else {
       img.style.display = 'none'; ph.style.display = '';
-      ph.textContent = c.avatar || '⚔';
+      ph.innerHTML = avatarHtml(c.avatar);
     }
   }
 
@@ -9626,7 +9537,7 @@ function _updateUndoBtn() {
 /* ── Avatar picker (per-character) ── */
 function getCharAvatarDisplay(c) {
   if (c && c.avatarPng) return `<img src="${c.avatarPng}" alt="avatar">`;
-  return (c && c.avatar) || playerData.avatar || '⚔';
+  return avatarHtml((c && c.avatar) || playerData.avatar);
 }
 function renderAvatarPicker() {
   const c    = C();
@@ -9643,7 +9554,8 @@ function renderAvatarPicker() {
   AVATARS.forEach(av => {
     const btn = document.createElement('button');
     btn.className = 'av-btn' + (av === curAv && !curPng ? ' selected' : '');
-    btn.textContent = av;
+    btn.innerHTML = ic(av);
+    btn.dataset.av = av;
     btn.onclick = () => {
       grid.querySelectorAll('.av-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
@@ -9693,12 +9605,12 @@ function renderAvatarPicker() {
   const clearBtn = document.getElementById('av-png-clear');
   if (clearBtn) {
     clearBtn.onclick = () => {
-      if (c) { delete c.avatarPng; c.avatar = c.avatar || '⚔'; }
+      if (c) { delete c.avatarPng; c.avatar = c.avatar || AVATAR_DEFAUT; }
       syncAvatarDisplay();
       renderCharCards();
       updatePngPreviewUI();
       grid.querySelectorAll('.av-btn').forEach(b => {
-        b.classList.toggle('selected', b.textContent === ((c && c.avatar) || '⚔'));
+        b.classList.toggle('selected', b.dataset.av === ((c && c.avatar) || AVATAR_DEFAUT));
       });
       triggerSave();
     };
@@ -9709,7 +9621,7 @@ function syncAvatarDisplay() {
   const el = document.getElementById('dash-avatar');
   if (!el) return;
   if (c && c.avatarPng) { el.innerHTML = `<img src="${c.avatarPng}" alt="avatar">`; }
-  else { el.textContent = (c && c.avatar) || playerData.avatar || '⚔'; }
+  else { el.innerHTML = avatarHtml((c && c.avatar) || playerData.avatar); }
 }
 function updatePngPreviewUI() {
   const c   = C();
@@ -9804,7 +9716,7 @@ async function renderAdminPanel() {
       const classLine = getClasses(activeChar).filter(cl=>cl.classe).map(cl=>`${cl.classe} ${cl.niveau}`).join(' / ') || '—';
       const avatarStr = activeChar.avatarPng
         ? `<img src="${activeChar.avatarPng}" style="width:1.6rem;height:1.6rem;border-radius:50%;object-fit:cover;vertical-align:middle;">`
-        : (activeChar.avatar || data.avatar || '⚔');
+        : avatarHtml(activeChar.avatar || data.avatar);
 
       const card = document.createElement('div');
       card.className = 'mj-player-card';
@@ -9852,7 +9764,7 @@ function openAdminEdit(username, data) {
   adminEditData   = JSON.parse(JSON.stringify(data)); // deep copy
   adminEditCharId = data.activeCharId || Object.keys(data.characters || {})[0];
   adminActiveTab  = 'fiche';
-  document.getElementById('modal-title').textContent = (data.avatar || '⚔') + ' ' + username;
+  document.getElementById('modal-title').innerHTML = avatarHtml(data.avatar) + ' ' + esc(username);
   renderAdminCharBar();
   renderAdminModalTab();
   document.getElementById('admin-modal').classList.add('open');
@@ -10893,7 +10805,7 @@ function renderViewSheet(el, pd, c, slot, username) {
   // ── Header
   const avatarHtml = c.avatarPng
     ? `<div class="view-avatar"><img src="${c.avatarPng}" alt="avatar"></div>`
-    : `<div class="view-avatar">${esc(c.avatar||pd.avatar||'⚔')}</div>`;
+    : `<div class="view-avatar">${avatarHtml(c.avatar || pd.avatar)}</div>`;
   const classes = (c.classes||[{classe:c.classe,niveau:c.niveau}]).filter(cl=>cl.classe).map(cl=>`${cl.classe} ${cl.niveau}`).join(' / ') || '—';
   // ── Ability score boxes
   const statsHtml = ABILITIES.map(ab => {
@@ -11544,12 +11456,6 @@ function applyFontSize(pct) {
 }
 
 /* Escape HTML pour innerHTML */
-/* Icône SVG monochrome. Le sprite est defini en haut du <body> ; on ne
-   transporte ici qu'une reference, donc le cout est negligeable meme repete. */
-function ic(nom, cls) {
-  return `<svg class="ic${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${nom}"></use></svg>`;
-}
-
 function esc(val) {
   if (!val) return '';
   return String(val).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -12872,7 +12778,7 @@ ${car} characters of notes.
     AVATARS.forEach(av => {
       const btn = document.createElement('button');
       btn.className = 'new-char-av-btn' + (av === newCharSelectedAvatar ? ' selected' : '');
-      btn.type = 'button'; btn.textContent = av;
+      btn.type = 'button'; btn.innerHTML = ic(av);
       btn.addEventListener('click', () => {
         grid.querySelectorAll('.new-char-av-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');

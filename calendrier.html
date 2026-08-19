@@ -19,6 +19,7 @@
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
+<script src="js/icons.js"></script>
 <nav class="top-nav" id="main-nav"></nav>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar" id="sidebar"></aside>
@@ -32,14 +33,14 @@
 
     <div class="page-header">
       <div class="page-category">Référence · Temps</div>
-      <h1 class="page-title">📅 Calendrier de Kaleysur</h1>
+      <h1 class="page-title"><svg class="ic" aria-hidden="true"><use href="#i-calendar"></use></svg> Calendrier de Kaleysur</h1>
       <p class="page-subtitle">333 jours · 9 mois · Semaine de 9 jours · 3 lunes. Cliquez sur un jour pour le marquer ou y ajouter une note de session.</p>
     </div>
 
     <!-- Current day header -->
     <div class="cal-header">
       <div class="cal-current-day">
-        <div class="cal-current-label">📍 Jour actuel des joueurs</div>
+        <div class="cal-current-label"><svg class="ic" aria-hidden="true"><use href="#i-pin"></use></svg> Jour actuel des joueurs</div>
         <div class="cal-current-date" id="display-date">—</div>
         <div class="cal-current-sub" id="display-sub">—</div>
       </div>
@@ -54,7 +55,7 @@
     <!-- Moon phases -->
     <div class="moons-bar">
       <div class="moon-item moon-blanche">
-        <div class="moon-icon" id="moon-blanche-icon">🌕</div>
+        <div class="moon-icon" id="moon-blanche-icon"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg></div>
         <div>
           <div class="moon-name">Lune Blanche · cycle 29j</div>
           <div class="moon-phase-name" id="moon-blanche-phase">—</div>
@@ -66,7 +67,7 @@
       </div>
       <div style="width:1px; background:var(--border)"></div>
       <div class="moon-item moon-bleue">
-        <div class="moon-icon" id="moon-bleue-icon">🌕</div>
+        <div class="moon-icon" id="moon-bleue-icon"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg></div>
         <div>
           <div class="moon-name">Lune Bleue · cycle 41j</div>
           <div class="moon-phase-name" id="moon-bleue-phase">—</div>
@@ -78,7 +79,7 @@
       </div>
       <div style="width:1px; background:var(--border)"></div>
       <div class="moon-item moon-rouge">
-        <div class="moon-icon" id="moon-rouge-icon">🌕</div>
+        <div class="moon-icon" id="moon-rouge-icon"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg></div>
         <div>
           <div class="moon-name">Lune Rouge · cycle 18j</div>
           <div class="moon-phase-name" id="moon-rouge-phase">—</div>
@@ -122,20 +123,20 @@
 
     <!-- Events list -->
     <div class="events-section">
-      <h3>📌 Événements & Notes de Session</h3>
+      <h3><svg class="ic" aria-hidden="true"><use href="#i-pin"></use></svg> Événements & Notes de Session</h3>
       <div id="events-list"><p class="no-events">Aucun événement noté. Cliquez sur un jour pour ajouter une note.</p></div>
     </div>
 
   </main>
 </div>
-<footer><span>⚜ Kaleysur Wiki</span><span style="color:var(--text-muted)">Wiki de campagne D&D</span></footer>
+<footer><span><svg class="ic" aria-hidden="true"><use href="#i-fleur"></use></svg> Kaleysur Wiki</span><span style="color:var(--text-muted)">Wiki de campagne D&D</span></footer>
 
 <!-- Day modal -->
 <div class="modal-backdrop" id="modal-backdrop" onclick="closeModalIfBackdrop(event)">
   <div class="modal">
     <h2 id="modal-title">Jour</h2>
     <button class="modal-set-today-btn" id="modal-set-today" onclick="setAsToday()">
-      <span>📍</span> <span id="modal-today-text">Marquer comme jour actuel des joueurs</span>
+      <span><svg class="ic" aria-hidden="true"><use href="#i-pin"></use></svg></span> <span id="modal-today-text">Marquer comme jour actuel des joueurs</span>
     </button>
     <div class="modal-label">Note de session</div>
     <textarea class="modal-input" id="modal-note" rows="3" placeholder="Que s'est-il passé ce jour ? (combat, voyage, repos…)"></textarea>
@@ -150,8 +151,8 @@
       <button class="tag-btn" data-tag="révélation">Révélation</button>
     </div>
     <div class="modal-actions">
-      <button class="modal-btn modal-btn-primary" onclick="saveModal()">💾 Enregistrer</button>
-      <button class="modal-btn modal-btn-danger" onclick="deleteEvent()">🗑 Supprimer</button>
+      <button class="modal-btn modal-btn-primary" onclick="saveModal()"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Enregistrer</button>
+      <button class="modal-btn modal-btn-danger" onclick="deleteEvent()"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg> Supprimer</button>
       <button class="modal-btn modal-btn-secondary" onclick="closeModal()">✕ Annuler</button>
     </div>
   </div>
@@ -164,15 +165,15 @@
 //  CALENDAR DATA
 // ════════════════════════════════════════════════════════
 const MONTHS = [
-  { name: 'Réolta',   days: 41, saison: 'hiver',   icon: '🌙', trinite: 'Trinité des Lunes',      color: '#1a2a4a' },
-  { name: 'Togail',   days: 37, saison: 'hiver',   icon: '🪨', trinite: 'Trinité des Maçons',     color: '#1e2a3a' },
-  { name: 'Amrean',   days: 37, saison: 'hiver',   icon: '⌛', trinite: 'Trinité du Temps',       color: '#1a2040' },
-  { name: 'Brònair',  days: 37, saison: 'ete',     icon: '💛', trinite: 'Trinité des Émotions',   color: '#3a2800' },
-  { name: 'Féasach',  days: 35, saison: 'ete',     icon: '🌿', trinite: 'Trinité de la Nature',   color: '#1e3010' },
-  { name: 'Soillse',  days: 31, saison: 'ete',     icon: '☀️', trinite: 'Trinité de la Lumière',  color: '#3a2a00' },
-  { name: 'Cogadhán', days: 38, saison: 'automne', icon: '⚔️', trinite: 'Trinité des Conflits',   color: '#3a1000' },
-  { name: 'Fiadhra',  days: 38, saison: 'automne', icon: '🐺', trinite: 'Trinité du Bestial',     color: '#2a1a00' },
-  { name: 'Sealbh',   days: 39, saison: 'automne', icon: '🗄️', trinite: 'Trinité des Fondements', color: '#201a10' },
+  { name: 'Réolta',   days: 41, saison: 'hiver',   icon: 'moon',     trinite: 'Trinité des Lunes',      color: '#1a2a4a' },
+  { name: 'Togail',   days: 37, saison: 'hiver',   icon: 'rock',     trinite: 'Trinité des Maçons',     color: '#1e2a3a' },
+  { name: 'Amrean',   days: 37, saison: 'hiver',   icon: 'hourglass',trinite: 'Trinité du Temps',       color: '#1a2040' },
+  { name: 'Brònair',  days: 37, saison: 'ete',     icon: 'heart',    trinite: 'Trinité des Émotions',   color: '#3a2800' },
+  { name: 'Féasach',  days: 35, saison: 'ete',     icon: 'leaf',     trinite: 'Trinité de la Nature',   color: '#1e3010' },
+  { name: 'Soillse',  days: 31, saison: 'ete',     icon: 'sun',      trinite: 'Trinité de la Lumière',  color: '#3a2a00' },
+  { name: 'Cogadhán', days: 38, saison: 'automne', icon: 'swords',   trinite: 'Trinité des Conflits',   color: '#3a1000' },
+  { name: 'Fiadhra',  days: 38, saison: 'automne', icon: 'paw',      trinite: 'Trinité du Bestial',     color: '#2a1a00' },
+  { name: 'Sealbh',   days: 39, saison: 'automne', icon: 'bricks',   trinite: 'Trinité des Fondements', color: '#201a10' },
 ];
 
 const WEEK_DAYS = [
@@ -195,7 +196,7 @@ const MOONS = [
 
 // Special days: absolute day number → label
 const SPECIAL_DAYS = {
-  190: { label: '☀️ Zénith', desc: 'Zénith de l\'Année — 3 Soillse. Jour sacré dans tout Kaleysur.' },
+  190: { label: 'Zénith', icon: 'sun', desc: 'Zénith de l\'Année — 3 Soillse. Jour sacré dans tout Kaleysur.' },
 };
 
 // Month start offsets (0-indexed weekday)
@@ -349,17 +350,19 @@ function moonPhase(absDay, cycle) {
   // 0 = new, 0.5 = full
   return ((absDay - 1) % cycle) / cycle;
 }
-function moonEmoji(phase) {
+/* Renvoie le NOM du symbole de phase, pas son markup : certains appelants
+   veulent l'icone, d'autres seulement le nom. */
+function moonPhaseIcon(phase) {
   const p = phase;
-  if (p < 0.0625) return '🌑';
-  if (p < 0.1875) return '🌒';
-  if (p < 0.3125) return '🌓';
-  if (p < 0.4375) return '🌔';
-  if (p < 0.5625) return '🌕';
-  if (p < 0.6875) return '🌖';
-  if (p < 0.8125) return '🌗';
-  if (p < 0.9375) return '🌘';
-  return '🌑';
+  if (p < 0.0625) return 'newmoon';
+  if (p < 0.1875) return 'moon-wax-cres';
+  if (p < 0.3125) return 'moon-first-q';
+  if (p < 0.4375) return 'moon-wax-gib';
+  if (p < 0.5625) return 'moon-full';
+  if (p < 0.6875) return 'moon-wan-gib';
+  if (p < 0.8125) return 'moon-last-q';
+  if (p < 0.9375) return 'moon-wan-cres';
+  return 'newmoon';
 }
 function moonPhaseName(phase) {
   const p = phase;
@@ -399,8 +402,8 @@ function renderHeader() {
   const mIdx = monthOfDay(d);
   const m = MONTHS[mIdx];
   document.getElementById('display-date').textContent = formatDate(d, y);
-  document.getElementById('display-sub').textContent =
-    `${weekdayName(d)} · ${saison(mIdx)} · ${m.trinite} ${m.icon}`;
+  document.getElementById('display-sub').innerHTML =
+    `${weekdayName(d)} · ${saison(mIdx)} · ${m.trinite} ${ic(m.icon)}`;
   document.getElementById('year-input').value = y;
 }
 
@@ -410,7 +413,7 @@ function renderMoons() {
   MOONS.forEach(moon => {
     const phase = moonPhase(d, moon.cycle);
     const dayInCycle = ((d - 1) % moon.cycle) + 1;
-    document.getElementById(`moon-${moon.id}-icon`).textContent = moonEmoji(phase);
+    document.getElementById(`moon-${moon.id}-icon`).innerHTML = ic(moonPhaseIcon(phase));
     document.getElementById(`moon-${moon.id}-phase`).textContent = moonPhaseName(phase);
     document.getElementById(`moon-${moon.id}-day`).textContent = `Jour ${dayInCycle} / ${moon.cycle}`;
     document.getElementById(`moon-${moon.id}-bar`).style.width = Math.round(phase * 100) + '%';
@@ -432,7 +435,7 @@ function renderMonth() {
 
   // Title
   document.getElementById('month-title').innerHTML =
-    `${m.icon} ${m.name} <span class="season-badge saison-${m.saison}">${saison(viewMonth)}</span>`;
+    `${ic(m.icon)} ${m.name} <span class="season-badge saison-${m.saison}">${saison(viewMonth)}</span>`;
   document.getElementById('month-meta').textContent =
     `${m.days} jours · ${m.trinite} · Jours ${firstAbsDay}–${firstAbsDay + m.days - 1}`;
 
@@ -487,12 +490,12 @@ function renderMonth() {
     const govMoon = MOONS.find(m => m.id === wdGroup);
     if (govMoon) {
       const phase = moonPhase(absDay, govMoon.cycle);
-      const emoji = moonEmoji(phase);
+      const iconePhase = moonPhaseIcon(phase);
       const phaseName = moonPhaseName(phase);
       const moonSpan = document.createElement('span');
       moonSpan.title = `${govMoon.name} · ${phaseName}`;
       moonSpan.style.cssText = 'font-size:.75rem;line-height:1;opacity:.75;';
-      moonSpan.textContent = emoji;
+      moonSpan.innerHTML = ic(iconePhase);
       topRow.appendChild(moonSpan);
     }
     cell.appendChild(topRow);
@@ -500,7 +503,8 @@ function renderMonth() {
     if (isSpecial && SPECIAL_DAYS[absDay]) {
       const badge = document.createElement('div');
       badge.className = 'day-badge';
-      badge.textContent = SPECIAL_DAYS[absDay].label;
+      const sp = SPECIAL_DAYS[absDay];
+      badge.innerHTML = (sp.icon ? ic(sp.icon) + ' ' : '') + sp.label;  // libelle interne, pas de saisie
       cell.appendChild(badge);
     }
     if (ev && ev.note) {
@@ -516,8 +520,8 @@ function renderMonth() {
     MOONS.forEach(moon => {
       if (moon.id === govGroup) return; // already shown in top row
       const phase = moonPhase(absDay, moon.cycle);
-      if (phase < 0.04 || phase > 0.96) moonHighlights.push({ moon, label: 'Nouvelle lune', emoji: '🌑' });
-      else if (phase > 0.46 && phase < 0.54) moonHighlights.push({ moon, label: 'Pleine lune', emoji: '🌕' });
+      if (phase < 0.04 || phase > 0.96) moonHighlights.push({ moon, label: 'Nouvelle lune', icone: 'newmoon' });
+      else if (phase > 0.46 && phase < 0.54) moonHighlights.push({ moon, label: 'Pleine lune', icone: 'moon-full' });
     });
     if (moonHighlights.length > 0) {
       const mhl = document.createElement('div');
@@ -525,7 +529,7 @@ function renderMonth() {
       moonHighlights.forEach(h => {
         const s = document.createElement('span');
         s.title = `${h.moon.name} · ${h.label}`;
-        s.textContent = h.emoji;
+        s.innerHTML = ic(h.icone);
         mhl.appendChild(s);
       });
       cell.appendChild(mhl);
@@ -546,7 +550,7 @@ function renderYearOverview() {
     const ld = fd + m.days - 1;
     const isCurrentMonth = state.currentDay >= fd && state.currentDay <= ld;
     div.innerHTML = `
-      <div class="mini-month-name">${m.icon} ${m.name}${isCurrentMonth ? ' <span style="color:var(--gold);font-size:.6rem">◀ ici</span>' : ''}</div>
+      <div class="mini-month-name">${ic(m.icon)} ${m.name}${isCurrentMonth ? ' <span style="color:var(--gold);font-size:.6rem">◀ ici</span>' : ''}</div>
       <div class="mini-month-meta">${m.days} jours · ${saison(i)} · J.${fd}–${ld}</div>
     `;
     div.addEventListener('click', () => { viewMonth = i; render(); });
@@ -602,8 +606,8 @@ function openModal(absDay) {
   const special = SPECIAL_DAYS[absDay];
 
   document.getElementById('modal-title').innerHTML =
-    `${dim} ${m.name} ${m.icon} — ${weekdayName(absDay)}` +
-    (special ? `<br><small style="color:var(--gold);font-size:.7rem">${special.label}</small>` : '');
+    `${dim} ${m.name} ${ic(m.icon)} — ${weekdayName(absDay)}` +
+    (special ? `<br><small style="color:var(--gold);font-size:.7rem">${special.icon ? ic(special.icon) + ' ' : ''}${special.label}</small>` : '');
 
   const todayBtn = document.getElementById('modal-set-today');
   const todayText = document.getElementById('modal-today-text');

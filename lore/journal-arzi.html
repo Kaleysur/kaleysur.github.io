@@ -19,6 +19,7 @@
   <link rel="icon" type="image/png" href="../favicon.png">
 </head>
 <body>
+<script src="../js/icons.js"></script>
 <nav class="top-nav" id="main-nav"></nav>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar" id="sidebar"></aside>
@@ -39,7 +40,7 @@
 
     <div class="infobox">
       <div class="infobox-title">Journal d'Arzi Barmene</div>
-      <div class="infobox-image">📖</div>
+      <div class="infobox-image"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg></div>
       <table class="infobox-table">
         <tr><td>Auteure</td><td><a href="personnages.html#arzi-barmene">Arzi Barmene</a></td></tr>
         <tr><td>Période couverte</td><td>980 EDS → 280 AS / 0 EdT (4 volumes)</td></tr>
@@ -51,45 +52,45 @@
 
     <!-- Chapter selector + progress -->
     <div class="journal-chapter-bar">
-      <span class="journal-chapter-label">📑 Aller à :</span>
+      <span class="journal-chapter-label"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg> Aller à :</span>
       <select class="journal-chapter-select" id="chapterSelect" onchange="goToPage(parseInt(this.value))">
-        <option value="0">📜 980 EDS — Musiyav, sous la Lune Noire</option>
-<option value="1">📜 1 AS — Retour d’Astoryem</option>
-<option value="2">📜 2 AS</option>
-<option value="3">🌑 11 AS</option>
-<option value="4">🌑 61 AS</option>
-<option value="5">⚔️ 81 AS</option>
-<option value="6">⚔️ 81 AS (suite)</option>
-<option value="7">⚔️ 85 AS</option>
-<option value="8">⚔️ 93 AS</option>
-<option value="9">⚔️ 93 AS (suite)</option>
-<option value="10">⚔️ 99 AS</option>
-<option value="11">🗡️ 101 AS</option>
-<option value="12">🗡️ 106 AS</option>
-<option value="13">🗡️ 106 AS (2)</option>
-<option value="14">⚡ 121 AS</option>
-<option value="15">⚡ 131 AS</option>
-<option value="16">🌿 141 AS</option>
-<option value="17">🌿 151 AS</option>
-<option value="18">🌿 161 AS</option>
-<option value="19">📜 181 AS</option>
-<option value="20">💀 181 AS : L’Ombre des Illithids</option>
-<option value="21">📖 185 AS : La Stèle des Fragments</option>
-<option value="22">🪓 187 AS : L’Annonce aux Orcs</option>
-<option value="23">🔮 188 AS : L’Annonce aux Gnomes</option>
-<option value="24">🌙 189 AS : L’Annonce à Myriel Topaz</option>
-<option value="25">🔥 190 AS : L’Annonce à Silitiama</option>
-<option value="26">✨ 238 AS : Naissance des Élus</option>
-<option value="27">🪶 251 AS : La Plume Bleue (Veille secrète)</option>
-<option value="28">⚔️ 261 AS : La Reconquête d’Astoryem</option>
-<option value="29">🤝 266 AS : Le Ralliement des Peuples</option>
-<option value="30">⛈️ -10 EdT : La Colère de l’Orage</option>
-<option value="31">🏆 276 AS : La Chute des Flagelleurs Mentaux</option>
-<option value="32">🌸 276 AS : L’Invitation de Silitiama</option>
-<option value="33">🌟 277 AS : Le Rituel des Archfées</option>
-<option value="34">🌿 Époque Inconnue : Immersion féerique</option>
-<option value="35">🔮 Époque Inconnue : Préparatifs du Retour</option>
-<option value="36">⚡ 280 AS / 0 EdT : L’Éveil des Trinités</option>
+        <option value="0"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 980 EDS — Musiyav, sous la Lune Noire</option>
+<option value="1"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 1 AS — Retour d’Astoryem</option>
+<option value="2"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 2 AS</option>
+<option value="3"><svg class="ic" aria-hidden="true"><use href="#i-newmoon"></use></svg> 11 AS</option>
+<option value="4"><svg class="ic" aria-hidden="true"><use href="#i-newmoon"></use></svg> 61 AS</option>
+<option value="5"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 81 AS</option>
+<option value="6"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 81 AS (suite)</option>
+<option value="7"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 85 AS</option>
+<option value="8"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 93 AS</option>
+<option value="9"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 93 AS (suite)</option>
+<option value="10"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 99 AS</option>
+<option value="11"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> 101 AS</option>
+<option value="12"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> 106 AS</option>
+<option value="13"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> 106 AS (2)</option>
+<option value="14"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> 121 AS</option>
+<option value="15"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> 131 AS</option>
+<option value="16"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> 141 AS</option>
+<option value="17"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> 151 AS</option>
+<option value="18"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> 161 AS</option>
+<option value="19"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 181 AS</option>
+<option value="20"><svg class="ic" aria-hidden="true"><use href="#i-skull"></use></svg> 181 AS : L’Ombre des Illithids</option>
+<option value="21"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg> 185 AS : La Stèle des Fragments</option>
+<option value="22"><svg class="ic" aria-hidden="true"><use href="#i-axe"></use></svg> 187 AS : L’Annonce aux Orcs</option>
+<option value="23"><svg class="ic" aria-hidden="true"><use href="#i-orb"></use></svg> 188 AS : L’Annonce aux Gnomes</option>
+<option value="24"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg> 189 AS : L’Annonce à Myriel Topaz</option>
+<option value="25"><svg class="ic" aria-hidden="true"><use href="#i-flame"></use></svg> 190 AS : L’Annonce à Silitiama</option>
+<option value="26"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"></use></svg> 238 AS : Naissance des Élus</option>
+<option value="27"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg> 251 AS : La Plume Bleue (Veille secrète)</option>
+<option value="28"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 261 AS : La Reconquête d’Astoryem</option>
+<option value="29"><svg class="ic" aria-hidden="true"><use href="#i-people"></use></svg> 266 AS : Le Ralliement des Peuples</option>
+<option value="30"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg>️ -10 EdT : La Colère de l’Orage</option>
+<option value="31"><svg class="ic" aria-hidden="true"><use href="#i-star"></use></svg> 276 AS : La Chute des Flagelleurs Mentaux</option>
+<option value="32"><svg class="ic" aria-hidden="true"><use href="#i-flower"></use></svg> 276 AS : L’Invitation de Silitiama</option>
+<option value="33"><svg class="ic" aria-hidden="true"><use href="#i-star"></use></svg> 277 AS : Le Rituel des Archfées</option>
+<option value="34"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> Époque Inconnue : Immersion féerique</option>
+<option value="35"><svg class="ic" aria-hidden="true"><use href="#i-orb"></use></svg> Époque Inconnue : Préparatifs du Retour</option>
+<option value="36"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> 280 AS / 0 EdT : L’Éveil des Trinités</option>
       </select>
     </div>
 
@@ -102,7 +103,7 @@
       <div class="journal-page" id="page-0" style="display:block">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.1 — 980 EDS — 81 AS</div>
-    <h2 class="journal-entry-title">📜 980 EDS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 980 EDS</h2>
     <div class="journal-entry-location">Musiyav · Sous la Lune Noire</div>
   </div>
   <div class="journal-entry-body">
@@ -118,7 +119,7 @@
 <div class="journal-page" id="page-1" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.1 — 980 EDS — 81 AS</div>
-    <h2 class="journal-entry-title">📜 1 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 1 AS</h2>
     <div class="journal-entry-location">Côtes de Musiyav · Le retour d'Astoryem</div>
   </div>
   <div class="journal-entry-body">
@@ -136,7 +137,7 @@
 <div class="journal-page" id="page-2" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.1 — 980 EDS — 81 AS</div>
-    <h2 class="journal-entry-title">📜 2 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 2 AS</h2>
     <div class="journal-entry-location">Astoryem · La terre retrouvée</div>
   </div>
   <div class="journal-entry-body">
@@ -157,7 +158,7 @@
 <div class="journal-page" id="page-3" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.1 — 980 EDS — 81 AS</div>
-    <h2 class="journal-entry-title">🌑 11 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-newmoon"></use></svg> 11 AS</h2>
     <div class="journal-entry-location">Musiyav · La Chute de Calethe</div>
   </div>
   <div class="journal-entry-body">
@@ -178,7 +179,7 @@
 <div class="journal-page" id="page-4" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.1 — 980 EDS — 81 AS</div>
-    <h2 class="journal-entry-title">🌑 61 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-newmoon"></use></svg> 61 AS</h2>
     <div class="journal-entry-location">Musiyav · Vingt ans de domination Illithid</div>
   </div>
   <div class="journal-entry-body">
@@ -197,7 +198,7 @@
 <div class="journal-page" id="page-5" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.1 — 980 EDS — 81 AS</div>
-    <h2 class="journal-entry-title">⚔️ 81 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 81 AS</h2>
     <div class="journal-entry-location">Viremarche · La mort du Dieu Unique</div>
   </div>
   <div class="journal-entry-body">
@@ -219,7 +220,7 @@
 <div class="journal-page" id="page-6" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚔️ 81 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 81 AS</h2>
     <div class="journal-entry-location">Feymundi, Astoryem · Dernier bastion libre</div>
   </div>
   <div class="journal-entry-body">
@@ -230,7 +231,7 @@
 <div class="journal-page" id="page-7" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚔️ 85 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 85 AS</h2>
     <div class="journal-entry-location">Lisières de Feymundi · Escarmouche</div>
   </div>
   <div class="journal-entry-body">
@@ -242,7 +243,7 @@
 <div class="journal-page" id="page-8" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚔️ 93 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 93 AS</h2>
     <div class="journal-entry-location">Feymundi · Décision de partir</div>
   </div>
   <div class="journal-entry-body">
@@ -253,7 +254,7 @@
 <div class="journal-page" id="page-9" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚔️ 93 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 93 AS</h2>
     <div class="journal-entry-location">Îles orques du nord de Musiyav</div>
   </div>
   <div class="journal-entry-body">
@@ -265,7 +266,7 @@
 <div class="journal-page" id="page-10" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚔️ 99 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 99 AS</h2>
     <div class="journal-entry-location">Kaelyth · Les Chevaliers du Lys</div>
   </div>
   <div class="journal-entry-body">
@@ -277,7 +278,7 @@
 <div class="journal-page" id="page-11" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">🗡️ 101 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> 101 AS</h2>
     <div class="journal-entry-location">Gol-Monra · Raid souterrain</div>
   </div>
   <div class="journal-entry-body">
@@ -291,7 +292,7 @@
 <div class="journal-page" id="page-12" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">🗡️ 106 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> 106 AS</h2>
     <div class="journal-entry-location">Mont Miradal · La prophétie découverte</div>
   </div>
   <div class="journal-entry-body">
@@ -304,7 +305,7 @@
 <div class="journal-page" id="page-13" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">🗡️ 106 AS (2)</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-dagger"></use></svg> 106 AS (2)</h2>
     <div class="journal-entry-location">Musiyav · La quête des Élus commence</div>
   </div>
   <div class="journal-entry-body">
@@ -317,7 +318,7 @@
 <div class="journal-page" id="page-14" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚡ 121 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> 121 AS</h2>
     <div class="journal-entry-location">Musiyav · Trois Élus retrouvés</div>
   </div>
   <div class="journal-entry-body">
@@ -330,7 +331,7 @@
 <div class="journal-page" id="page-15" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">⚡ 131 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> 131 AS</h2>
     <div class="journal-entry-location">Plaine de Lyréone · La colère de l'orage</div>
   </div>
   <div class="journal-entry-body">
@@ -343,7 +344,7 @@
 <div class="journal-page" id="page-16" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">🌿 141 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> 141 AS</h2>
     <div class="journal-entry-location">Clairière de Selviana · Bilan de la lutte</div>
   </div>
   <div class="journal-entry-body">
@@ -355,7 +356,7 @@
 <div class="journal-page" id="page-17" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">🌿 151 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> 151 AS</h2>
     <div class="journal-entry-location">Ayakan · Terres sauvages inconnues</div>
   </div>
   <div class="journal-entry-body">
@@ -367,7 +368,7 @@
 <div class="journal-page" id="page-18" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">🌿 161 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> 161 AS</h2>
     <div class="journal-entry-location">Waterflow, Astoryem · Contact de résistance</div>
   </div>
   <div class="journal-entry-body">
@@ -378,7 +379,7 @@
 <div class="journal-page" id="page-19" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.2 — 81 AS — 181 AS</div>
-    <h2 class="journal-entry-title">📜 181 AS</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> 181 AS</h2>
     <div class="journal-entry-location">Kaleysur · Un siècle de lutte</div>
   </div>
   <div class="journal-entry-body">
@@ -394,7 +395,7 @@
 <div class="journal-page" id="page-20" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">💀 181 AS : L’Ombre des Illithids</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-skull"></use></svg> 181 AS : L’Ombre des Illithids</h2>
     <div class="journal-entry-location">Kaleysur · Sous le joug mental</div>
   </div>
   <div class="journal-entry-body">
@@ -405,7 +406,7 @@
 <div class="journal-page" id="page-21" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">📖 185 AS : La Stèle des Fragments</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg> 185 AS : La Stèle des Fragments</h2>
     <div class="journal-entry-location">La prophétie complète déchiffrée</div>
   </div>
   <div class="journal-entry-body">
@@ -424,7 +425,7 @@
 <div class="journal-page" id="page-22" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🪓 187 AS : L’Annonce aux Orcs</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-axe"></use></svg> 187 AS : L’Annonce aux Orcs</h2>
     <div class="journal-entry-location">Îles nordiques · Thoy'Kayl</div>
   </div>
   <div class="journal-entry-body">
@@ -438,7 +439,7 @@
 <div class="journal-page" id="page-23" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🔮 188 AS : L’Annonce aux Gnomes</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-orb"></use></svg> 188 AS : L’Annonce aux Gnomes</h2>
     <div class="journal-entry-location">Farondir · Alliance secrète</div>
   </div>
   <div class="journal-entry-body">
@@ -452,7 +453,7 @@
 <div class="journal-page" id="page-24" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🌙 189 AS : L’Annonce à Myriel Topaz</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg> 189 AS : L’Annonce à Myriel Topaz</h2>
     <div class="journal-entry-location">Feymundi, Astoryem</div>
   </div>
   <div class="journal-entry-body">
@@ -467,7 +468,7 @@
 <div class="journal-page" id="page-25" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🔥 190 AS : L’Annonce à Silitiama</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-flame"></use></svg> 190 AS : L’Annonce à Silitiama</h2>
     <div class="journal-entry-location">Le Feywild · La Phénix Radiante</div>
   </div>
   <div class="journal-entry-body">
@@ -482,7 +483,7 @@
 <div class="journal-page" id="page-26" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">✨ 238 AS : Naissance des Élus</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"></use></svg> 238 AS : Naissance des Élus</h2>
     <div class="journal-entry-location">Kaleysur · 3 du 6ème, Zénith</div>
   </div>
   <div class="journal-entry-body">
@@ -499,7 +500,7 @@
 <div class="journal-page" id="page-27" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🪶 251 AS : La Plume Bleue (Veille secrète)</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg> 251 AS : La Plume Bleue (Veille secrète)</h2>
     <div class="journal-entry-location">Kaleysur · Veille secrète sur les Élus</div>
   </div>
   <div class="journal-entry-body">
@@ -514,7 +515,7 @@
 <div class="journal-page" id="page-28" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">⚔️ 261 AS : La Reconquête d’Astoryem</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> 261 AS : La Reconquête d’Astoryem</h2>
     <div class="journal-entry-location">Île Marie · Rassemblement des 27</div>
   </div>
   <div class="journal-entry-body">
@@ -531,7 +532,7 @@
 <div class="journal-page" id="page-29" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🤝 266 AS : Le Ralliement des Peuples</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-people"></use></svg> 266 AS : Le Ralliement des Peuples</h2>
     <div class="journal-entry-location">Kaleysur · La coalition grandit</div>
   </div>
   <div class="journal-entry-body">
@@ -548,7 +549,7 @@
 <div class="journal-page" id="page-30" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">⛈️ -10 EdT : La Colère de l’Orage</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg>️ -10 EdT : La Colère de l’Orage</h2>
     <div class="journal-entry-location">Dernier bastion Illithid · Assaut final</div>
   </div>
   <div class="journal-entry-body">
@@ -564,7 +565,7 @@
 <div class="journal-page" id="page-31" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.3 — 181 AS — 276 AS</div>
-    <h2 class="journal-entry-title">🏆 276 AS : La Chute des Flagelleurs Mentaux</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-star"></use></svg> 276 AS : La Chute des Flagelleurs Mentaux</h2>
     <div class="journal-entry-location">Murmure-Profond · Victoire finale</div>
   </div>
   <div class="journal-entry-body">
@@ -586,7 +587,7 @@
 <div class="journal-page" id="page-32" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.4 — 276 AS — 280 AS / 0 EdT</div>
-    <h2 class="journal-entry-title">🌸 276 AS : L’Invitation de Silitiama</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-flower"></use></svg> 276 AS : L’Invitation de Silitiama</h2>
     <div class="journal-entry-location">Le Feywild · L'après-guerre</div>
   </div>
   <div class="journal-entry-body">
@@ -612,7 +613,7 @@
 <div class="journal-page" id="page-33" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.4 — 276 AS — 280 AS / 0 EdT</div>
-    <h2 class="journal-entry-title">🌟 277 AS : Le Rituel des Archfées</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-star"></use></svg> 277 AS : Le Rituel des Archfées</h2>
     <div class="journal-entry-location">Le Feywild · Ascension éternelle</div>
   </div>
   <div class="journal-entry-body">
@@ -624,7 +625,7 @@
 <div class="journal-page" id="page-34" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.4 — 276 AS — 280 AS / 0 EdT</div>
-    <h2 class="journal-entry-title">🌿 Époque Inconnue : Immersion féerique</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-leaf"></use></svg> Époque Inconnue : Immersion féerique</h2>
     <div class="journal-entry-location">Le Feywild · Temps suspendu</div>
   </div>
   <div class="journal-entry-body">
@@ -636,7 +637,7 @@
 <div class="journal-page" id="page-35" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.4 — 276 AS — 280 AS / 0 EdT</div>
-    <h2 class="journal-entry-title">🔮 Époque Inconnue : Préparatifs du Retour</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-orb"></use></svg> Époque Inconnue : Préparatifs du Retour</h2>
     <div class="journal-entry-location">Le Feywild · L'appel de Kaleysur</div>
   </div>
   <div class="journal-entry-body">
@@ -661,7 +662,7 @@
 <div class="journal-page" id="page-36" style="display:none">
   <div class="journal-entry-header">
     <div class="journal-part-label">P.4 — 276 AS — 280 AS / 0 EdT</div>
-    <h2 class="journal-entry-title">⚡ 280 AS / 0 EdT : L’Éveil des Trinités</h2>
+    <h2 class="journal-entry-title"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> 280 AS / 0 EdT : L’Éveil des Trinités</h2>
     <div class="journal-entry-location">Plaine Sacrée · An 0 de l’Ère des Trinités (fin de l’Ère d’Astoryem)</div>
   </div>
   <div class="journal-entry-body">
@@ -701,7 +702,7 @@
 
   </main>
 </div>
-<footer><span>⚜ Kaleysur Wiki</span><span style="color: var(--text-muted)">Wiki de campagne D&D</span></footer>
+<footer><span><svg class="ic" aria-hidden="true"><use href="#i-fleur"></use></svg> Kaleysur Wiki</span><span style="color: var(--text-muted)">Wiki de campagne D&D</span></footer>
 <script src="../js/components.js"></script>
 <script src="../js/wiki.js"></script>
 <script>

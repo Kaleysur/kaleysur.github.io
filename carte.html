@@ -19,6 +19,7 @@
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
+<script src="js/icons.js"></script>
 <nav class="top-nav" id="main-nav"></nav>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar" id="sidebar"></aside>
@@ -32,7 +33,7 @@
 
     <div class="page-header">
       <div class="page-category">Navigation · Géographie</div>
-      <h1 class="page-title">🗺️ Carte de Kaleysur</h1>
+      <h1 class="page-title"><svg class="ic" aria-hidden="true"><use href="#i-map"></use></svg> Carte de Kaleysur</h1>
       <p class="page-subtitle">Survolez un continent pour le mettre en évidence. Cliquez pour afficher ses informations et naviguer vers sa page.</p>
     </div>
 
@@ -61,7 +62,7 @@
 
           <!-- Placeholder shown if image is missing -->
           <div class="map-placeholder" id="map-placeholder" style="display:none">
-            <div class="placeholder-icon">🗺️</div>
+            <div class="placeholder-icon"><svg class="ic" aria-hidden="true"><use href="#i-map"></use></svg></div>
             <div>
               <strong style="color:var(--gold)">Carte non trouvée</strong><br>
               Place le fichier image dans :<br>
@@ -253,7 +254,7 @@
 
       <!-- Info panel -->
       <div class="map-info" id="map-info">
-        <div class="map-info-icon" id="info-icon">🗺️</div>
+        <div class="map-info-icon" id="info-icon"><svg class="ic" aria-hidden="true"><use href="#i-map"></use></svg></div>
         <div>
           <div class="map-info-name" id="info-name">Survole une zone pour l'explorer</div>
           <div class="map-info-desc" id="info-desc">Clique sur un continent ou une région pour naviguer vers sa page</div>
@@ -265,32 +266,32 @@
     <h2>Navigation Rapide</h2>
     <div class="map-quick-nav">
       <a class="map-quick-card" href="astoryem/astoryem.html">
-        <span class="qc-icon">🌐</span>
+        <span class="qc-icon"><svg class="ic" aria-hidden="true"><use href="#i-globe"></use></svg></span>
         <div class="qc-name">Astoryem</div>
         <div class="qc-desc">Continent des Miroirs</div>
       </a>
       <a class="map-quick-card" href="ayakan/ayakan.html">
-        <span class="qc-icon">🌐</span>
+        <span class="qc-icon"><svg class="ic" aria-hidden="true"><use href="#i-globe"></use></svg></span>
         <div class="qc-name">Ayakan</div>
         <div class="qc-desc">Continent des Quatre Fronts</div>
       </a>
       <a class="map-quick-card" href="musiyav/musiyav.html">
-        <span class="qc-icon">🌐</span>
+        <span class="qc-icon"><svg class="ic" aria-hidden="true"><use href="#i-globe"></use></svg></span>
         <div class="qc-name">Musiyav</div>
         <div class="qc-desc">Le Grand Continent</div>
       </a>
       <a class="map-quick-card" href="musiyav/anneau-dieux.html">
-        <span class="qc-icon">⚫</span>
+        <span class="qc-icon"><svg class="ic" aria-hidden="true"><use href="#i-newmoon"></use></svg></span>
         <div class="qc-name">Anneau des Dieux</div>
         <div class="qc-desc">14 îles hors du temps</div>
       </a>
       <a class="map-quick-card" href="musiyav/archipel-ombres.html">
-        <span class="qc-icon">🌙</span>
+        <span class="qc-icon"><svg class="ic" aria-hidden="true"><use href="#i-moon"></use></svg></span>
         <div class="qc-name">Archipel des Ombres</div>
         <div class="qc-desc">Brume éternelle et vampires</div>
       </a>
       <a class="map-quick-card" href="musiyav/iles-hagruk.html">
-        <span class="qc-icon">⚔️</span>
+        <span class="qc-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></span>
         <div class="qc-name">Îles Hagruk</div>
         <div class="qc-desc">Clans orcs du nord gelé</div>
       </a>
@@ -298,7 +299,7 @@
 
   </main>
 </div>
-<footer><span>⚜ Kaleysur Wiki</span><span style="color: var(--text-muted)">Wiki de campagne D&D</span></footer>
+<footer><span><svg class="ic" aria-hidden="true"><use href="#i-fleur"></use></svg> Kaleysur Wiki</span><span style="color: var(--text-muted)">Wiki de campagne D&D</span></footer>
 
 <script src="js/components.js"></script>
 <script src="js/wiki.js"></script>
