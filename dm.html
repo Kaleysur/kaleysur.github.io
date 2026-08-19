@@ -348,6 +348,70 @@ input,select{font-family:inherit;color-scheme:dark;}
   .gres{grid-template-columns:1fr auto 30px;}
   .gres-verdict{grid-column:1 / -1;text-align:left;}
 }
+/* ── Bestiaire ── */
+.best-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:9600;align-items:center;justify-content:center;padding:1rem;}
+.best-overlay.open{display:flex;}
+.best-modal{background:var(--bg-panel,#15120c);border:1px solid var(--border,#3a3020);border-radius:8px;width:760px;max-width:100%;height:82vh;display:flex;flex-direction:column;box-shadow:0 10px 44px rgba(0,0,0,0.7);}
+.best-head{display:flex;align-items:center;gap:0.6rem;padding:0.8rem 1rem;border-bottom:1px solid var(--border,#3a3020);font-family:'Cinzel',serif;color:var(--gold,#e8c96a);font-size:0.92rem;letter-spacing:0.05em;}
+.best-head .best-x{margin-left:auto;background:none;border:none;color:var(--text-dim,#8a8272);cursor:pointer;font-size:0.95rem;padding:0.2rem 0.45rem;border-radius:4px;}
+.best-head .best-x:hover{color:#e08080;background:rgba(224,128,128,0.12);}
+.best-filters{display:flex;gap:0.4rem;padding:0.7rem 1rem;border-bottom:1px solid var(--border,#3a3020);flex-wrap:wrap;}
+.best-filters input,.best-filters select{background:var(--bg-input,#0f0d08);border:1px solid var(--border,#3a3020);border-radius:4px;color:var(--text,#ddd4c0);font-family:inherit;font-size:0.8rem;padding:0.3rem 0.5rem;}
+.best-filters input:focus,.best-filters select:focus{outline:none;border-color:var(--gold-dark,#8a6e1a);}
+#best-q{flex:1;min-width:140px;}
+.best-count{margin-left:auto;align-self:center;font-size:0.72rem;color:var(--text-dim,#8a8272);}
+.best-body{flex:1;display:flex;min-height:0;}
+.best-list{width:46%;overflow-y:auto;border-right:1px solid var(--border,#3a3020);}
+.best-row{display:grid;grid-template-columns:1fr auto;gap:0.4rem;align-items:center;padding:0.42rem 0.75rem;cursor:pointer;border-bottom:1px solid rgba(58,48,32,0.5);}
+.best-row:hover{background:rgba(232,201,106,0.07);}
+.best-row.on{background:rgba(232,201,106,0.14);}
+.best-row-n{font-size:0.82rem;color:var(--text,#ddd4c0);}
+.best-row-s{font-size:0.68rem;color:var(--text-dim,#8a8272);}
+.best-row-cr{font-family:'Cinzel',serif;font-size:0.76rem;color:var(--gold,#e8c96a);white-space:nowrap;}
+.best-detail{flex:1;overflow-y:auto;padding:0.9rem 1rem;}
+.best-detail-empty{color:var(--text-dim,#8a8272);font-style:italic;font-size:0.8rem;padding:1.2rem 0;text-align:center;}
+.best-detail-head{display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.5rem;}
+.best-detail-name{font-family:'Cinzel',serif;color:var(--gold,#e8c96a);font-size:1.05rem;}
+.best-detail-src{font-size:0.66rem;color:var(--text-dim,#8a8272);border:1px solid var(--border,#3a3020);border-radius:99px;padding:0.05rem 0.4rem;}
+.best-add{display:flex;align-items:center;gap:0.45rem;padding:0.6rem 1rem;border-top:1px solid var(--border,#3a3020);}
+.best-add input{width:64px;background:var(--bg-input,#0f0d08);border:1px solid var(--border,#3a3020);border-radius:4px;color:var(--text,#ddd4c0);font-family:inherit;font-size:0.85rem;padding:0.3rem 0.5rem;text-align:center;}
+.best-add-btn{background:var(--bg-input,#0f0d08);border:1px solid var(--gold-dark,#8a6e1a);border-radius:5px;color:var(--gold,#e8c96a);cursor:pointer;font-family:'Cinzel',serif;font-size:0.82rem;letter-spacing:0.04em;padding:0.35rem 0.9rem;transition:all 0.12s;}
+.best-add-btn:hover:not(:disabled){background:rgba(232,201,106,0.14);}
+.best-add-btn:disabled{opacity:0.4;cursor:default;}
+.best-add-hint{font-size:0.7rem;color:var(--text-dim,#8a8272);font-style:italic;}
+.best-loading{padding:1.4rem;text-align:center;color:var(--text-dim,#8a8272);font-style:italic;font-size:0.82rem;}
+
+/* Fiche — partagee entre la modale et le panneau de combat */
+.mst{font-size:0.78rem;line-height:1.5;color:var(--text,#ddd4c0);}
+.mst-sub{font-style:italic;color:var(--text-dim,#8a8272);font-size:0.74rem;margin-bottom:0.45rem;}
+.mst-core{display:flex;flex-wrap:wrap;gap:0.15rem 1rem;padding:0.4rem 0;border-top:1px solid var(--gold-dark,#8a6e1a);border-bottom:1px solid var(--gold-dark,#8a6e1a);}
+.mst-core b{color:var(--gold,#e8c96a);font-weight:600;}
+.mst-abils{display:grid;grid-template-columns:repeat(6,1fr);gap:0.25rem;padding:0.5rem 0;border-bottom:1px solid var(--gold-dark,#8a6e1a);}
+.mst-ab{text-align:center;display:flex;flex-direction:column;gap:0.05rem;}
+.mst-ab-l{font-size:0.62rem;letter-spacing:0.07em;color:var(--gold,#e8c96a);}
+.mst-ab-s{font-size:0.86rem;}
+.mst-ab-m{font-size:0.68rem;color:var(--text-dim,#8a8272);}
+.mst-lines{padding:0.45rem 0;border-bottom:1px solid var(--gold-dark,#8a6e1a);display:flex;flex-direction:column;gap:0.12rem;}
+.mst-lines b{color:var(--gold,#e8c96a);font-weight:600;}
+.mst-sect{padding-top:0.55rem;}
+.mst-sect-t{font-family:'Cinzel',serif;color:var(--gold,#e8c96a);font-size:0.82rem;letter-spacing:0.04em;border-bottom:1px solid rgba(138,110,26,0.5);margin-bottom:0.3rem;}
+.mst-a{margin:0 0 0.35rem;}
+.mst-a b{color:var(--text,#ddd4c0);}
+
+/* Fiche repliee dans le panneau de combat */
+.panel-stat{border-top:1px solid var(--border,#3a3020);}
+.panel-stat-toggle{width:100%;background:none;border:none;color:var(--text-dim,#8a8272);cursor:pointer;font-family:inherit;font-size:0.74rem;text-align:left;padding:0.4rem 0;display:flex;align-items:center;gap:0.35rem;letter-spacing:0.04em;text-transform:uppercase;}
+.panel-stat-toggle:hover{color:var(--gold,#e8c96a);}
+.panel-stat-toggle .arw{transition:transform 0.15s;display:inline-block;}
+.panel-stat.open .panel-stat-toggle .arw{transform:rotate(90deg);}
+.panel-stat-body{display:none;padding:0 0 0.6rem;}
+.panel-stat.open .panel-stat-body{display:block;}
+@media(max-width:700px){
+  .best-modal{height:92vh;}
+  .best-body{flex-direction:column;}
+  .best-list{width:100%;max-height:38%;border-right:none;border-bottom:1px solid var(--border,#3a3020);}
+}
+
 /* ── References sidebar section ── */
 #ref-section{border-top:1px solid var(--border-bright);padding:0.6rem 0.8rem 0.55rem;}
 #ref-section-header{
@@ -1224,6 +1288,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
 </head>
 <body>
 <script src="js/icons.js"></script>
+<script src="js/monsters.js"></script>
 
 <!-- ══ Wiki nav + sidebar (injectés par components.js) ══ -->
 <nav class="top-nav" id="main-nav"></nav>
@@ -1279,6 +1344,41 @@ body.sidebar-open #sidebar-backdrop{display:block;}
   </nav>
 
   <!-- Actions de groupe -->
+  <!-- ══ Bestiaire ══ -->
+  <div id="best-overlay" class="best-overlay" role="dialog" aria-modal="true" aria-label="Bestiaire">
+    <div class="best-modal">
+      <div class="best-head">
+        <span id="best-title">Bestiaire</span>
+        <button class="best-x" id="best-close" title="Fermer" aria-label="Fermer">✕</button>
+      </div>
+      <div class="best-filters">
+        <input type="search" id="best-q" placeholder="Chercher un monstre…" autocomplete="off">
+        <select id="best-cr" title="Facteur de puissance">
+          <option value="">Tout FP</option>
+          <option value="0">FP &lt; 1</option>
+          <option value="5">FP 1–5</option>
+          <option value="10">FP 6–10</option>
+          <option value="20">FP 11–20</option>
+          <option value="21">FP 21+</option>
+        </select>
+        <select id="best-type" title="Type de créature"><option value="">Tout type</option></select>
+        <span class="best-count" id="best-count"></span>
+      </div>
+      <div class="best-body">
+        <div class="best-list" id="best-list"><div class="best-loading">Chargement du bestiaire…</div></div>
+        <div class="best-detail" id="best-detail">
+          <div class="best-detail-empty">Choisis un monstre pour voir sa fiche.</div>
+        </div>
+      </div>
+      <div class="best-add">
+        <label for="best-qty" style="font-size:0.74rem;color:var(--text-dim,#8a8272);">Nombre</label>
+        <input type="number" id="best-qty" value="1" min="1" max="20">
+        <button class="best-add-btn" id="best-add" disabled>Ajouter au combat</button>
+        <span class="best-add-hint" id="best-hint"></span>
+      </div>
+    </div>
+  </div>
+
   <div id="group-overlay" class="group-overlay">
     <div class="group-modal">
       <div class="group-head">
@@ -1371,6 +1471,7 @@ body.sidebar-open #sidebar-backdrop{display:block;}
       <div id="monster-section">
         <div id="monster-section-title">
           <span>NPCs / Monsters</span>
+          <button id="btn-bestiaire" title="Chercher un monstre dans le bestiaire">Bestiaire</button>
           <button id="btn-add-monster">+ New</button>
         </div>
         <div id="monster-list"></div>
@@ -1548,10 +1649,12 @@ let allPlayers     = [];
 let openPanels     = {};       // key → {type:'player'|'monster'|'friendly', username?, charId?, monsterId?}
 let _panelExpanded = new Set();  // keys of panels with details open
 let _expandedMonsterPanels = new Set(); // monster/friendly panels with full details open
+let _openStatBlocks        = new Set(); // panneaux dont la fiche de bestiaire est dépliée
 let expandedPlayers= new Set();
 let localMonsters  = {};       // id → {id,name,avatar,hpMax,hp,ac,initiative,conditions}
 let localFriendlies= {};       // id → {id,name,avatar,hpMax,hp,ac,initiative,conditions}
 let encounters     = {};       // id → {id,name,monsters:[tpl],friendlies:[tpl]} — bibliothèque de rencontres
+let monsterStats   = {};       // clé de bestiaire → fiche complète, partagée par tous ses exemplaires
 let monsterCounter = 0;
 let friendlyCounter= 0;
 let pollTimer      = null;
@@ -1590,6 +1693,7 @@ function saveDmState() {
       sidebarCollapsed: document.body.classList.contains('dm-sidebar-collapsed'),
       panelNotes: _panelNotes,
       encounters,
+      monsterStats,
       initState: {
         ...initState,
         // Ne pas persister les joueurs dans l'initiative — seulement monstres et NPCs
@@ -1611,6 +1715,7 @@ function restoreDmState() {
     if (s.expandedPlayers) expandedPlayers = new Set(s.expandedPlayers);
     if (s.panelNotes) Object.assign(_panelNotes, s.panelNotes);
     if (s.encounters) { encounters = s.encounters; renderEncounters(); }
+    if (s.monsterStats) monsterStats = s.monsterStats;
     if (typeof s.compactMode === 'boolean') {
       compactMode = s.compactMode;
       document.body.classList.toggle('compact', compactMode);
@@ -2248,6 +2353,17 @@ function refreshOpenPanels() {
 /* ══════════════════════════════════════════
    Panel rendering
 ══════════════════════════════════════════ */
+/* Fiche de bestiaire attachée à une créature, repliée dans son panneau. */
+function fichePanneauHtml(e, key) {
+  const m = e.statKey && monsterStats[e.statKey];
+  if (!m || typeof Bestiaire === 'undefined') return '';
+  const ouverte = _openStatBlocks.has(key);
+  return `<div class="panel-stat${ouverte ? ' open' : ''}">
+    <button class="panel-stat-toggle" type="button"><span class="arw">▶</span> Fiche — ${esc(m.name)}</button>
+    <div class="panel-stat-body">${Bestiaire.ficheHtml(m)}</div>
+  </div>`;
+}
+
 function updatePanel(key) {
   const panel = document.getElementById('panel-' + key);
   if (!panel) return;
@@ -2623,7 +2739,16 @@ function renderCombatantPanel(panel, key, kind) {
           </div>
         </div>
       </div>
+      ${fichePanneauHtml(e, key)}
     </div>`;
+
+  // Repli / dépli de la fiche
+  panel.querySelector('.panel-stat-toggle')?.addEventListener('click', ev => {
+    ev.stopPropagation();
+    const box = panel.querySelector('.panel-stat');
+    const ouverte = box.classList.toggle('open');
+    if (ouverte) _openStatBlocks.add(key); else _openStatBlocks.delete(key);
+  });
 
   // Toggle expand on header click
   panel.querySelector('[data-toggle-panel]')?.addEventListener('click', (ev) => {
@@ -2651,6 +2776,8 @@ function renderCombatantPanel(panel, key, kind) {
   panel.querySelector('[data-close]')?.addEventListener('click', () => {
     delete cfg.store()[id];
     _expandedMonsterPanels.delete(key);
+    _openStatBlocks.delete(key);
+    purgerFiches();
     closePanel(key);
     cfg.sidebar();
     removeInitCombatant(key);
@@ -3409,6 +3536,174 @@ function removeInitCombatant(key) {
   if (initState.currentIdx >= initState.combatants.length) initState.currentIdx = Math.max(0, initState.combatants.length - 1);
   renderInitChips();
 }
+
+/* ══════════════════════════════════════════
+   Bestiaire — recherche, fiche, ajout au combat
+   Les fiches sont stockées une seule fois dans monsterStats, chaque créature
+   posée sur la table n'en garde que la clé : huit gobelins ne recopient pas
+   huit fois le même bloc.
+══════════════════════════════════════════ */
+let _bestListe   = [];     // catalogue normalisé (chargé une fois)
+let _bestChoisi  = null;   // monstre sélectionné dans la modale
+
+function bestOverlay() { return document.getElementById('best-overlay'); }
+
+async function openBestiaire() {
+  bestOverlay().classList.add('open');
+  document.getElementById('best-q').focus();
+  if (_bestListe.length) return;
+  try {
+    _bestListe = await Bestiaire.charger();
+  } catch (e) {
+    document.getElementById('best-list').innerHTML =
+      '<div class="best-loading">Bestiaire indisponible — vérifie la connexion.</div>';
+    return;
+  }
+  const sel = document.getElementById('best-type');
+  Bestiaire.typesConnus(_bestListe).forEach(t => {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t;
+    sel.appendChild(o);
+  });
+  renderBestListe();
+}
+
+function closeBestiaire() { bestOverlay().classList.remove('open'); }
+
+function renderBestListe() {
+  const liste = Bestiaire.filtrer(_bestListe, {
+    q:    document.getElementById('best-q').value,
+    cr:   document.getElementById('best-cr').value,
+    type: document.getElementById('best-type').value
+  });
+  document.getElementById('best-count').textContent =
+    liste.length + ' / ' + _bestListe.length;
+  const box = document.getElementById('best-list');
+  if (!liste.length) {
+    box.innerHTML = '<div class="best-loading">Aucun monstre ne correspond.</div>';
+    return;
+  }
+  /* Au-delà de 300 lignes le rendu devient sensible ; la recherche est là pour
+     affiner, on annonce simplement la coupe. */
+  const vues = liste.slice(0, 300);
+  box.innerHTML = vues.map(m =>
+    `<div class="best-row${_bestChoisi && _bestChoisi.key === m.key ? ' on' : ''}" data-bkey="${esc(m.key)}">
+       <div><div class="best-row-n">${esc(m.name)}</div>
+            <div class="best-row-s">${esc(m.size)} ${esc(m.type)} · CA ${m.ac} · ${m.hp} PV</div></div>
+       <div class="best-row-cr">FP ${esc(Bestiaire.crLabel(m.cr))}</div>
+     </div>`).join('')
+    + (liste.length > vues.length
+       ? `<div class="best-loading">… ${liste.length - vues.length} de plus — affine la recherche.</div>`
+       : '');
+}
+
+function selectBestMonstre(key) {
+  _bestChoisi = _bestListe.find(m => m.key === key) || null;
+  renderBestListe();
+  const det = document.getElementById('best-detail');
+  const btn = document.getElementById('best-add');
+  if (!_bestChoisi) {
+    det.innerHTML = '<div class="best-detail-empty">Choisis un monstre pour voir sa fiche.</div>';
+    btn.disabled = true;
+    return;
+  }
+  det.innerHTML =
+    `<div class="best-detail-head">
+       <span class="best-detail-name">${esc(_bestChoisi.name)}</span>
+       <span class="best-detail-src">${esc(_bestChoisi.source)}</span>
+     </div>` + Bestiaire.ficheHtml(_bestChoisi);
+  det.scrollTop = 0;
+  btn.disabled = false;
+  majBestHint();
+}
+
+function majBestHint() {
+  const n = Math.max(1, parseInt(document.getElementById('best-qty').value, 10) || 1);
+  const hint = document.getElementById('best-hint');
+  if (!_bestChoisi) { hint.textContent = ''; return; }
+  const xp = _bestChoisi.xp * n;
+  hint.textContent = n > 1
+    ? n + ' créatures · ' + xp.toLocaleString('fr-FR') + ' PX au total'
+    : _bestChoisi.xp.toLocaleString('fr-FR') + ' PX';
+}
+
+/* Ajoute n exemplaires numérotés, chacun avec sa propre initiative. */
+function ajouterDepuisBestiaire() {
+  if (!_bestChoisi) return;
+  const n = Math.min(20, Math.max(1, parseInt(document.getElementById('best-qty').value, 10) || 1));
+  const m = _bestChoisi;
+  monsterStats[m.key] = m;               // la fiche, une seule fois
+
+  for (let i = 1; i <= n; i++) {
+    const id  = 'monster-' + (++monsterCounter);
+    const nom = n > 1 ? m.name + ' ' + i : m.name;
+    localMonsters[id] = {
+      id, name: nom, avatar: avatarPourType(m.type),
+      hpMax: m.hp, hp: m.hp, ac: m.ac,
+      initiative: m.initiative, conditions: [], statKey: m.key
+    };
+    const key = 'm::' + id;
+    openPanel(key);
+    initState.combatants.push({
+      id: key, label: nom, avatar: localMonsters[id].avatar, type: 'monster',
+      initVal: Math.floor(Math.random() * 20) + 1 + (m.initiative || 0),
+      hp: m.hp, hpMax: m.hp, delayed: false
+    });
+  }
+  initState.combatants.sort((a, b) => b.initVal - a.initVal);
+  if (!initState.open) {
+    initState.open = true;
+    document.getElementById('init-bar').className = 'open';
+    document.getElementById('btn-init-open').classList.add('active');
+  }
+  renderMonsterSidebar();
+  renderInitChips();
+  saveDmState();
+  closeBestiaire();
+  dmToast(n > 1 ? n + ' × ' + m.name + ' ajoutés' : m.name + ' ajouté', false, 'goblin');
+}
+
+/* Une icône par grand type de créature — le MJ peut toujours la changer. */
+const AVATAR_PAR_TYPE = {
+  aberration: 'brain',   beast: 'paw',        celestial: 'dove',
+  construct: 'gear',     dragon: 'beast',     elemental: 'flame',
+  fey: 'sparkle',        fiend: 'goblin',     giant: 'helmet',
+  humanoid: 'user',      monstrosity: 'beast', ooze: 'water',
+  plant: 'leaf',         undead: 'skull'
+};
+function avatarPourType(type) {
+  return AVATAR_PAR_TYPE[String(type || '').toLowerCase()] || 'goblin';
+}
+
+/* Fiches devenues orphelines : plus aucune créature ne les référence. */
+function purgerFiches() {
+  const utilisees = new Set(Object.values(localMonsters).map(m => m.statKey).filter(Boolean));
+  Object.keys(monsterStats).forEach(k => { if (!utilisees.has(k)) delete monsterStats[k]; });
+}
+
+(function initBestiaire() {
+  const ouvre = document.getElementById('btn-bestiaire');
+  if (!ouvre) return;
+  ouvre.addEventListener('click', openBestiaire);
+  document.getElementById('best-close').addEventListener('click', closeBestiaire);
+  bestOverlay().addEventListener('click', e => { if (e.target === bestOverlay()) closeBestiaire(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && bestOverlay().classList.contains('open')) closeBestiaire();
+  });
+  let tFiltre = null;
+  document.getElementById('best-q').addEventListener('input', () => {
+    clearTimeout(tFiltre);
+    tFiltre = setTimeout(renderBestListe, 140);
+  });
+  document.getElementById('best-cr').addEventListener('change', renderBestListe);
+  document.getElementById('best-type').addEventListener('change', renderBestListe);
+  document.getElementById('best-qty').addEventListener('input', majBestHint);
+  document.getElementById('best-list').addEventListener('click', e => {
+    const row = e.target.closest('[data-bkey]');
+    if (row) selectBestMonstre(row.dataset.bkey);
+  });
+  document.getElementById('best-add').addEventListener('click', ajouterDepuisBestiaire);
+})();
 
 /* ══════════════════════════════════════════
    Accessibilité — enhancer générique
