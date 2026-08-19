@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kaleysur-v199';
+const CACHE_NAME = 'kaleysur-v203';
 
 const ASSETS = [
   'index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   'calendrier.html',
   'editeur-carte.html',
   'css/style.css',
+  'js/icons.js',
   'js/components.js',
   'js/wiki.js',
   'js/compendium.js',

@@ -169,6 +169,13 @@
     .btn-prep-filter:hover { border-color:var(--gold-dark); color:var(--gold-dark); }
     .btn-prep-filter.active { border-color:var(--gold-dark); background:rgba(201,169,110,0.12); color:var(--gold); }
     /* ── Spell prep counter ── */
+    /* Icônes : héritent de la couleur et de la taille du texte environnant */
+    .ic { width:1em; height:1em; vertical-align:-0.14em; flex-shrink:0; }
+    .ic-lg { width:1.25em; height:1.25em; }
+    .spell-always-btn { background:none; border:none; cursor:pointer; font-size:0.72rem; padding:0 2px; line-height:1; color:#4a4a52; transition:color 0.12s, transform 0.12s; }
+    .spell-always-btn:hover { color:#c9a227; transform:scale(1.12); }
+    .spell-always-btn.on { color:#c9a227; }
+    .spell-prep-btn.locked { cursor:default; opacity:0.85; }
     .spell-prep-counter { font-size:0.75rem; padding:0.15rem 0.55rem; border-radius:5px; background:var(--j-input,#0d0d14); border:1px solid var(--j-border-col,#2a2a3a); color:#888; font-family:'Cinzel',serif; }
     .spell-prep-counter.ok  { border-color:#3a6a3a; color:#8aba8a; }
     .spell-prep-counter.over { border-color:#6a3a3a; color:#e07070; }
@@ -1700,19 +1707,23 @@
   #spell-tbody .spell-lvl-header td { display:block; padding:4px 0 2px; }
   #spell-tbody .exp-row { display:flex !important; align-items:center; gap:6px; padding:7px 10px; border:1px solid var(--j-border-col,#2a1f0d); border-radius:4px; background:var(--j-panel,#1a1308); }
   #spell-tbody .exp-row td { padding:0; display:flex; align-items:center; }
-  /* Colonnes réelles : 1=★préparé 2=niveau 3=nom 4=dégâts 5=type 6=portée 7=action 8=conc 9=▾ 10=✕ */
-  #spell-tbody .exp-row td:nth-child(1) { flex:0 0 32px; }
+  /* Colonnes réelles : 1=★préparé 2=🔒toujours 3=niveau 4=nom 5=dégâts 6=type
+     7=portée 8=action 9=conc 10=▾ 11=✕
+     ⚠ Ces règles désignent les colonnes par leur POSITION : ajouter une colonne
+     au tableau décale tout. Mettre à jour ce bloc en même temps. */
+  #spell-tbody .exp-row td:nth-child(1) { flex:0 0 28px; }
+  #spell-tbody .exp-row td:nth-child(2) { flex:0 0 26px; }
   /* Niveau : redondant sur mobile (les sorts sont groupés par en-têtes de niveau) */
-  #spell-tbody .exp-row td:nth-child(2) { display:none !important; }
+  #spell-tbody .exp-row td:nth-child(3) { display:none !important; }
   /* Nom : prend toute la largeur disponible */
-  #spell-tbody .exp-row td:nth-child(3) { flex:1; min-width:0; }
-  #spell-tbody .exp-row td:nth-child(3) .atk-inp { width:100%; }
-  #spell-tbody .exp-row td:nth-child(3) .atk-dmg-wrap { width:100%; }
+  #spell-tbody .exp-row td:nth-child(4) { flex:1; min-width:0; }
+  #spell-tbody .exp-row td:nth-child(4) .atk-inp { width:100%; }
+  #spell-tbody .exp-row td:nth-child(4) .atk-dmg-wrap { width:100%; }
   /* Badges méta (action · portée · dégâts · conc) visibles dans le déplié ▾ */
   .spell-meta-mobile { display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:0.4rem; }
   /* Masquer dégâts, type, portée, action — visibles dans la description via ▾ */
-  #spell-tbody .exp-row td:nth-child(4),#spell-tbody .exp-row td:nth-child(5),
-  #spell-tbody .exp-row td:nth-child(6),#spell-tbody .exp-row td:nth-child(7) { display:none !important; }
+  #spell-tbody .exp-row td:nth-child(5),#spell-tbody .exp-row td:nth-child(6),
+  #spell-tbody .exp-row td:nth-child(7),#spell-tbody .exp-row td:nth-child(8) { display:none !important; }
   #spell-tbody .exp-desc-row td { display:block; }
 }
 
@@ -2443,7 +2454,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .summon-chip:hover { border-color:var(--gold-dark,#8a6e1a); background:rgba(201,169,110,0.1); color:var(--gold,#c9a96e); }
 .summon-chip.importing { opacity:0.5; pointer-events:none; }
 .summon-chip.done { border-color:var(--gold,#c9a96e); background:rgba(201,169,110,0.18); color:var(--gold,#c9a96e); }
-.summon-chip-icon { font-size:0.8rem; }
+.summon-group-icon { font-size:0.9rem; color:var(--gold-dark,#8a6e1a); display:inline-flex; align-items:center; }
 .summon-spirit-badge {
   font-size:0.58rem; padding:0.05rem 0.25rem; border-radius:2px;
   background:rgba(90,150,230,0.15); color:#7ab0ee; border:1px solid rgba(90,150,230,0.3);
@@ -2982,6 +2993,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
+<!-- Jeu d'icônes partagé par toutes les pages : sprite SVG + helper ic().
+     En tête de <body> pour que les <use href="#i-…"> aient leur cible. -->
+<script src="js/icons.js"></script>
+
 
 <nav class="top-nav" id="main-nav"></nav>
 
@@ -3002,7 +3017,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
   <div class="j-screen active" id="screen-auth">
     <div class="auth-wrap">
       <div class="auth-box">
-        <div class="auth-emblem">⚔</div>
+        <div class="auth-emblem"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
         <div class="auth-title">Espace Joueurs</div>
         <div class="auth-subtitle">Access your character sheet</div>
         <div class="auth-error" id="auth-error"></div>
@@ -3065,7 +3080,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <!-- Sélecteur de personnage -->
       <div class="char-selector" id="char-selector">
         <button class="char-selector-btn" id="char-selector-btn" title="Switch character">
-          <span class="char-selector-avatar" id="char-selector-avatar">⚔</span>
+          <span class="char-selector-avatar" id="char-selector-avatar"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></span>
           <span class="char-selector-name" id="char-selector-name">Character</span>
           <span class="char-selector-arrow">▾</span>
         </button>
@@ -3080,12 +3095,12 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="tab-btn" data-tab="parametres">Settings</button>
         <button class="tab-btn" data-tab="aide">Reference</button>
         <button class="tab-btn" data-tab="familiers">Familiars</button>
-        <button class="tab-btn" data-tab="lvlup">📈 Level Plan</button>
-        <button class="tab-btn" data-tab="admin" id="tab-admin-btn" style="display:none;color:var(--danger);">👁 Admin</button>
+        <button class="tab-btn" data-tab="lvlup"><svg class="ic" aria-hidden="true"><use href="#i-chart"></use></svg> Level Plan</button>
+        <button class="tab-btn" data-tab="admin" id="tab-admin-btn" style="display:none;color:var(--danger);"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Admin</button>
       </div>
       <!-- Hidden player info (kept for JS) -->
       <div class="dash-player" style="display:none;">
-        <div class="dash-avatar" id="dash-avatar">⚔</div>
+        <div class="dash-avatar" id="dash-avatar"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
         <div>
           <div class="dash-name" id="dash-name">—</div>
           <div class="dash-char-info" id="dash-info">No character</div>
@@ -3095,13 +3110,13 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <div class="dash-actions">
         <span class="conn-indicator" id="conn-indicator" title="Cloud connection status">…</span>
         <span class="save-badge" id="save-badge"></span>
-        <button class="inspiration-btn" id="btn-inspiration" title="Inspiration (avantage sur un jet)">✦</button>
+        <button class="inspiration-btn" id="btn-inspiration" title="Inspiration (advantage on one roll)" aria-label="Inspiration (advantage on one roll)">✦</button>
         <button class="btn btn-sm btn-gold" id="btn-new-char" title="New character" onclick="openNewCharModal()" style="font-size:1rem;padding:0 0.55rem;line-height:1;">+</button>
         <button class="btn btn-sm" id="btn-layout-edit" title="Rearrange sections">⠿</button>
         <button class="btn btn-sm" id="btn-undo" title="Cancel (Ctrl+Z)" disabled style="opacity:0.4;">↩</button>
-        <button class="btn btn-sm" id="btn-field-lock" title="Lock fields (view mode)">✏</button>
+        <button class="btn btn-sm" id="btn-field-lock" title="Lock fields (view mode)"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg></button>
         <button class="btn btn-sm" id="dice-tray-btn" title="Dice Roller">⚄</button>
-        <button class="btn btn-sm" id="btn-install-app" title="Installer l'application" style="display:none;">📲</button>
+        <button class="btn btn-sm" id="btn-install-app" title="Installer l'application" style="display:none;"><svg class="ic" aria-hidden="true"><use href="#i-install"></use></svg></button>
         <button class="btn btn-sm btn-danger" id="btn-logout">Log out</button>
       </div>
     </div>
@@ -3126,7 +3141,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="drm-btn norm active" id="drm-norm" title="Normal">NORM</button>
         <button class="drm-btn dis"  id="drm-dis"  title="Disadvantage — 2d20 keep lowest">DIS</button>
       </div>
-      <div class="dice-tray-title" style="margin-top:0.4rem;">Historique</div>
+      <div class="dice-tray-title" style="margin-top:0.4rem;">History</div>
       <div id="roll-history"><div class="rh-empty">No rolls yet.</div></div>
     </div>
 
@@ -3142,7 +3157,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <!-- Portrait column -->
         <div id="vb-hero-portrait">
           <div class="vb-portrait-frame" id="vb-portrait-frame" title="Change portrait">
-            <div class="vb-portrait-placeholder" id="vb-portrait-placeholder">⚔</div>
+            <div class="vb-portrait-placeholder" id="vb-portrait-placeholder"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
             <img id="vb-portrait-img" src="" alt="Portrait" style="display:none;width:100%;height:100%;object-fit:cover;">
             <span class="vb-corner tl">✦</span>
             <span class="vb-corner tr">✦</span>
@@ -3258,7 +3273,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             </div>
             <!-- HP change rapide : ⚔ [val] ✚ -->
             <div class="hp-quick">
-              <button class="vb-btn-dmg vb-btn-quick" onclick="document.getElementById('btn-apply-dmg').click()" title="Apply damage">⚔</button>
+              <button class="vb-btn-dmg vb-btn-quick" onclick="document.getElementById('btn-apply-dmg').click()" title="Apply damage"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></button>
               <input type="number" class="hp-quick-input" id="hp-quick-val" min="0" placeholder="0">
               <button class="vb-btn-heal vb-btn-quick" onclick="document.getElementById('btn-apply-heal').click()" title="Appliquer soin">✚</button>
             </div>
@@ -3269,13 +3284,13 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <button class="hp-step-btn pos" onclick="applyHpChange(1)"  title="+1 HP">+1</button>
               <button class="hp-step-btn pos" onclick="applyHpChange(5)"  title="+5 HP">+5</button>
             </div>
-            <div class="hp-log-toggle j-hidden" id="hp-log-toggle">▾ Historique</div>
+            <div class="hp-log-toggle j-hidden" id="hp-log-toggle">▾ History</div>
             <div class="hp-log j-hidden" id="hp-log"></div>
             <!-- Concentration tracker -->
             <div id="conc-banner" style="display:none;margin-top:8px;padding:5px 8px;background:rgba(160,112,224,0.12);border:1px solid rgba(160,112,224,0.35);border-radius:4px;display:none;align-items:center;gap:6px;">
               <span style="color:#c090f8;font-size:0.78rem;flex-shrink:0;">◉ Conc.</span>
               <span id="conc-spell-name" style="color:#e8e0d0;font-size:0.78rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</span>
-              <button id="conc-break-btn" title="Break concentration" style="background:none;border:1px solid rgba(160,112,224,0.4);border-radius:3px;color:#a070e0;cursor:pointer;font-size:0.68rem;padding:1px 5px;flex-shrink:0;line-height:1.4;">✕ Briser</button>
+              <button id="conc-break-btn" title="Break concentration" style="background:none;border:1px solid rgba(160,112,224,0.4);border-radius:3px;color:#a070e0;cursor:pointer;font-size:0.68rem;padding:1px 5px;flex-shrink:0;line-height:1.4;">✕ Break</button>
             </div>
             <div class="vb-vitals-sep"></div>
 
@@ -3294,7 +3309,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <div>
                 <div style="display:flex;align-items:center;gap:0.4rem;">
                   <div class="vb-section-label">Death Saves</div>
-                  <button id="death-save-roll-btn" title="Roll a death save (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">🎲</button>
+                  <button id="death-save-roll-btn" title="Roll a death save (d20)" style="background:transparent;border:none;color:var(--gold-dark);cursor:pointer;font-size:0.85rem;padding:0;line-height:1;opacity:0.65;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg></button>
                 </div>
                 <!-- Pips cliquables — data-idx / data-type gérés par renderCombat -->
                 <div class="vb-death-pips" id="vb-hero-death-pips" style="cursor:pointer;" title="Click to toggle"></div>
@@ -3369,7 +3384,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
                 Jack of All Trades
               </label>
               <div class="skill-filter-wrap">
-                <span class="skill-filter-icon">🔍</span>
+                <span class="skill-filter-icon"><svg class="ic" aria-hidden="true"><use href="#i-search"></use></svg></span>
                 <input type="search" id="skill-filter" placeholder="Filtrer…" autocomplete="off">
               </div>
               <div id="skills-col"></div>
@@ -3566,6 +3581,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <table class="exp-table spell-table">
               <thead><tr>
                 <th style="width:22px;" title="Prepared">★</th>
+                <th style="width:22px;" title="Always prepared — does not count against your maximum"><svg class="ic" aria-hidden="true"><use href="#i-lock"></use></svg></th>
                 <th style="width:44px;">Lvl.</th>
                 <th>Spell Name</th>
                 <th style="width:70px;">Damage</th>
@@ -3692,18 +3708,18 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <!-- ── Inventory Tab ── -->
     <div class="tab-panel" id="tab-inventaire">
       <div class="sheet-section" id="section-worn-armor">
-        <div class="sheet-section-title">🛡 Worn Armor</div>
+        <div class="sheet-section-title"><svg class="ic" aria-hidden="true"><use href="#i-shield"></use></svg> Worn Armor</div>
         <div id="worn-armor-card-container"></div>
       </div>
       <div class="sheet-section">
         <div class="sheet-section-title">Items</div>
         <div class="inv-cat-tabs" id="inv-cat-tabs">
           <button class="inv-cat-tab active" data-cat="">All <span class="inv-cat-badge" id="icat-badge-all"></span></button>
-          <button class="inv-cat-tab" data-cat="arme">⚔ Weapons</button>
-          <button class="inv-cat-tab" data-cat="armure">🛡 Armor</button>
-          <button class="inv-cat-tab" data-cat="consommable">⚗ Consumables</button>
+          <button class="inv-cat-tab" data-cat="arme"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Weapons</button>
+          <button class="inv-cat-tab" data-cat="armure"><svg class="ic" aria-hidden="true"><use href="#i-shield"></use></svg> Armor</button>
+          <button class="inv-cat-tab" data-cat="consommable"><svg class="ic" aria-hidden="true"><use href="#i-flask"></use></svg> Consumables</button>
           <button class="inv-cat-tab" data-cat="magique">✦ Magical</button>
-          <button class="inv-cat-tab" data-cat="equipement">🎒 Equipment</button>
+          <button class="inv-cat-tab" data-cat="equipement"><svg class="ic" aria-hidden="true"><use href="#i-pack"></use></svg> Equipment</button>
         </div>
         <div class="inv-controls">
           <input type="text" class="field-input" id="inv-search" placeholder="Search items…" style="flex:1;min-width:120px;">
@@ -3767,8 +3783,8 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="notes-editor-wrap">
           <div class="notes-page-title-row">
             <input class="notes-page-title-input" id="notes-page-title" placeholder="Page name…" />
-            <button class="notes-preview-btn" id="btn-notes-preview" title="Preview: formatting and wiki links">👁 Preview</button>
-            <button class="notes-del-page-btn" id="btn-del-note-page" title="Delete this page">🗑</button>
+            <button class="notes-preview-btn" id="btn-notes-preview" title="Preview: formatting and wiki links"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Preview</button>
+            <button class="notes-del-page-btn" id="btn-del-note-page" title="Delete this page"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg></button>
           </div>
           <textarea class="notes-editor" id="notes-editor" placeholder="Your session notes, quests, key NPCs…"></textarea>
           <div class="notes-preview" id="notes-preview" style="display:none;"></div>
@@ -3793,11 +3809,11 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
               <input class="notes-page-title-input" id="canvas-page-title" placeholder="Page name…" />
               <span class="canvas-sync" id="canvas-sync" title="Drawing sync to the cloud"></span>
               <button class="canvas-tool-btn" id="ctool-download" title="Download as PNG">⤓ PNG</button>
-              <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page">🗑</button>
+              <button class="notes-del-page-btn" id="btn-del-canvas-page" title="Delete this page"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg></button>
             </div>
             <div class="canvas-toolbar">
               <!-- Outils -->
-              <button class="canvas-tool-btn active" id="ctool-pen" title="Crayon">✏ Crayon</button>
+              <button class="canvas-tool-btn active" id="ctool-pen" title="Crayon"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg> Crayon</button>
               <button class="canvas-tool-btn" id="ctool-highlight" title="Surligneur">▬ Surligneur</button>
               <button class="canvas-tool-btn" id="ctool-line" title="Ligne droite">╱ Ligne</button>
               <button class="canvas-tool-btn" id="ctool-text" title="Texte">T Texte</button>
@@ -3848,7 +3864,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
           <div>
             <div class="avatar-grid" id="avatar-picker"></div>
             <div class="av-png-upload">
-              <label class="btn btn-sm" style="cursor:pointer;" title="Upload a PNG/JPG image">🖼 Portrait PNG
+              <label class="btn btn-sm" style="cursor:pointer;" title="Upload a PNG/JPG image"><svg class="ic" aria-hidden="true"><use href="#i-image"></use></svg> Portrait PNG
                 <input type="file" id="avatar-png-input" accept="image/*" style="display:none;">
               </label>
               <img id="av-png-preview" class="av-png-preview" alt="portrait">
@@ -3869,7 +3885,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="settings-row" style="margin-top:0.5rem;">
           <div class="settings-label">Portrait colors<div class="settings-desc">Extract from your portrait image</div></div>
           <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
-            <button class="btn btn-sm" id="btn-extract-portrait-color" title="Generate a theme from the portrait colors">🎨 Extract from portrait</button>
+            <button class="btn btn-sm" id="btn-extract-portrait-color" title="Generate a theme from the portrait colors"><svg class="ic" aria-hidden="true"><use href="#i-palette"></use></svg> Extract from portrait</button>
             <div id="portrait-palette" style="display:flex;gap:5px;align-items:center;"></div>
           </div>
         </div>
@@ -3930,7 +3946,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="settings-row">
           <div class="settings-label">Character background<div class="settings-desc">Appears behind your sheet with a dark overlay</div></div>
           <div class="bg-upload-row">
-            <label class="btn btn-sm" style="cursor:pointer;">🖼 Choose image
+            <label class="btn btn-sm" style="cursor:pointer;"><svg class="ic" aria-hidden="true"><use href="#i-image"></use></svg> Choose image
               <input type="file" id="bg-img-input" accept="image/*" style="display:none;">
             </label>
             <img id="bg-preview" class="bg-preview" alt="background">
@@ -3941,7 +3957,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
       <div class="settings-section">
         <h3>Sheet Sections</h3>
         <div class="settings-row">
-          <div class="settings-label">Section background<div class="settings-desc">Fond des sections (Attacks, Spells…) — utile avec une image de fond</div></div>
+          <div class="settings-label">Section background<div class="settings-desc">Background of the sections (Attacks, Spells…) — useful with a background image</div></div>
           <div style="display:flex;align-items:center;gap:0.65rem;">
             <span style="font-size:0.72rem;color:#666;">○</span>
             <input type="range" id="section-bg-slider" min="0" max="100" value="0" step="5" style="width:110px;">
@@ -3955,7 +3971,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <div class="settings-row">
           <div class="settings-label">Global background<div class="settings-desc">Replaces the solid background of the whole page</div></div>
           <div class="bg-upload-row">
-            <label class="btn btn-sm" style="cursor:pointer;">🌄 Choose image
+            <label class="btn btn-sm" style="cursor:pointer;"><svg class="ic" aria-hidden="true"><use href="#i-image"></use></svg> Choose image
               <input type="file" id="page-bg-input" accept="image/*" style="display:none;">
             </label>
             <img id="page-bg-preview" class="bg-preview" alt="page background">
@@ -3992,7 +4008,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <h3>Sharing</h3>
         <div class="settings-row">
           <div class="settings-label">Read-only sheet<div class="settings-desc">A public link to view your sheet without logging in</div></div>
-          <button class="btn btn-sm btn-gold" id="btn-share-sheet">🔗 Copy link</button>
+          <button class="btn btn-sm btn-gold" id="btn-share-sheet"><svg class="ic" aria-hidden="true"><use href="#i-link"></use></svg> Copy link</button>
         </div>
         <div id="share-link-display" style="display:none;margin-top:0.5rem;font-size:0.75rem;color:#888;word-break:break-all;padding:0.4rem 0.6rem;background:var(--j-input,#0d0d14);border-radius:5px;border:1px solid var(--j-border-col,#2a2a3a);"></div>
       </div>
@@ -4008,10 +4024,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         </div>
       </div>
       <div class="settings-section">
-        <h3>⚔ Importer depuis D&amp;D Beyond</h3>
+        <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Importer depuis D&amp;D Beyond</h3>
         <div style="font-size:0.78rem;color:#999;margin-bottom:0.85rem;">
           ⓘ The character must be set to <strong style="color:var(--gold);">Public</strong>
-          (Settings → Character Privacy) sur dndbeyond.com.
+          (Settings → Character Privacy) on dndbeyond.com.
         </div>
 
         <!-- Méthode 1 : URL / ID -->
@@ -4024,7 +4040,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
             <button class="btn btn-sm btn-gold" id="ddb-fetch-btn">⤓ Fetch</button>
           </div>
           <div class="ddb-method-hint">
-            ⚠ If fetch fails (CORS), copy the ID and use method ②.
+            <svg class="ic" aria-hidden="true"><use href="#i-warn"></use></svg> If fetch fails (CORS), copy the ID and use method ②.
           </div>
         </div>
 
@@ -4032,11 +4048,11 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
         <!-- Method 2 : drop / file / paste -->
         <div class="ddb-dropzone" id="ddb-dropzone">
-          <div class="ddb-dropzone-icon">⚔</div>
+          <div class="ddb-dropzone-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></div>
           <div class="ddb-dropzone-title">Drop .json file here</div>
           <div class="ddb-dropzone-sub">or</div>
           <label class="btn btn-sm btn-gold" style="cursor:pointer;">
-            📂 Select a file
+            <svg class="ic" aria-hidden="true"><use href="#i-folder"></use></svg> Select a file
             <input type="file" id="ddb-import-file" accept=".json,application/json" style="display:none;">
           </label>
         </div>
@@ -4058,7 +4074,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <h3>Account</h3>
         <div class="settings-row">
           <div class="settings-label">Reset this character<div class="settings-desc">Clears the active character sheet (account stays)</div></div>
-          <button class="btn btn-sm btn-danger" id="btn-reset-char">🗑 Reset</button>
+          <button class="btn btn-sm btn-danger" id="btn-reset-char"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg> Reset</button>
         </div>
       </div>
     </div><!-- /tab-parametres -->
@@ -4070,7 +4086,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
         <!-- Actions de combat -->
         <div class="cheat-section">
-          <h3>⚔ Combat Actions</h3>
+          <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Combat Actions</h3>
 
           <div class="cheat-item">
             <div class="cheat-item-name">Attack <span class="cheat-item-badge badge-action">Action</span></div>
@@ -4140,7 +4156,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
         <!-- Conditions -->
         <div class="cheat-section">
-          <h3>🩻 Conditions</h3>
+          <h3><svg class="ic" aria-hidden="true"><use href="#i-status"></use></svg> Conditions</h3>
 
           <div class="cond-cheat-item">
             <div class="cond-cheat-name">Blinded</div>
@@ -4215,7 +4231,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div class="tab-panel" id="tab-familiers">
       <div class="fam-toolbar">
         <span class="fam-toolbar-title">⟡ Familiers &amp; Compagnons</span>
-        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view">👁 Afficher</button>
+        <button class="btn btn-sm" id="btn-fam-lock" title="Toggle edit / view"><svg class="ic" aria-hidden="true"><use href="#i-eye"></use></svg> Show</button>
         <button class="btn btn-sm fam-toolbar-edit-only" id="btn-open-compendium-monster" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">⊕ Compendium</button>
         <button class="btn btn-sm btn-gold fam-toolbar-edit-only" id="btn-add-familiar">+ Add</button>
       </div>
@@ -4227,10 +4243,10 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div class="tab-panel" id="tab-admin">
       <div class="sheet-section">
         <div class="sheet-section-title" style="display:flex;justify-content:space-between;align-items:center;">
-          <span>Tous les joueurs</span>
+          <span>All players</span>
           <button class="btn btn-sm" id="btn-admin-refresh">↺ Actualiser</button>
         </div>
-        <div id="admin-loading" style="color:#666;font-style:italic;padding:0.75rem 0;">Chargement…</div>
+        <div id="admin-loading" style="color:#666;font-style:italic;padding:0.75rem 0;">Loading…</div>
         <div class="admin-grid" id="admin-grid"></div>
       </div>
     </div>
@@ -4245,19 +4261,19 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
   <!-- ══ Barre de navigation mobile (bas) ══ -->
   <nav id="mobile-bottom-nav" aria-label="Navigation">
-    <button class="mbn-btn active" data-tab="personnage"><span class="mbn-icon">⚔</span><span class="mbn-label">Char.</span></button>
-    <button class="mbn-btn" data-tab="identite"><span class="mbn-icon">👤</span><span class="mbn-label">Identity</span></button>
-    <button class="mbn-btn" data-tab="inventaire"><span class="mbn-icon">🎒</span><span class="mbn-label">Bag</span></button>
-    <button class="mbn-btn" data-tab="notes"><span class="mbn-icon">✏</span><span class="mbn-label">Notes</span></button>
-    <button class="mbn-btn" data-tab="parametres"><span class="mbn-icon">⚙</span><span class="mbn-label">Settings</span></button>
-    <button class="mbn-btn" data-tab="familiers"><span class="mbn-icon">🐾</span><span class="mbn-label">Familiars</span></button>
-    <button class="mbn-btn" data-tab="lvlup"><span class="mbn-icon">📈</span><span class="mbn-label">Lvl Plan</span></button>
+    <button class="mbn-btn active" data-tab="personnage"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg></span><span class="mbn-label">Char.</span></button>
+    <button class="mbn-btn" data-tab="identite"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-user"></use></svg></span><span class="mbn-label">Identity</span></button>
+    <button class="mbn-btn" data-tab="inventaire"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-pack"></use></svg></span><span class="mbn-label">Bag</span></button>
+    <button class="mbn-btn" data-tab="notes"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg></span><span class="mbn-label">Notes</span></button>
+    <button class="mbn-btn" data-tab="parametres"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-gear"></use></svg></span><span class="mbn-label">Settings</span></button>
+    <button class="mbn-btn" data-tab="familiers"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-paw"></use></svg></span><span class="mbn-label">Familiars</span></button>
+    <button class="mbn-btn" data-tab="lvlup"><span class="mbn-icon"><svg class="ic" aria-hidden="true"><use href="#i-chart"></use></svg></span><span class="mbn-label">Lvl Plan</span></button>
   </nav>
 
   <!-- ══ VUE FICHE PARTAGÉE (lecture seule) ══ -->
   <div class="j-screen" id="screen-view">
     <div class="view-screen-wrap" id="view-content">
-      <div style="text-align:center;padding:3rem;color:#666;font-style:italic;">Chargement…</div>
+      <div style="text-align:center;padding:3rem;color:#666;font-style:italic;">Loading…</div>
     </div>
   </div>
 
@@ -4266,7 +4282,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 
 <!-- ══ Chat flottant ══ -->
 <button id="chat-fab" style="display:none;" title="Chat">
-  💬<span class="chat-unread" id="chat-unread"></span>
+  <svg class="ic" aria-hidden="true"><use href="#i-chat"></use></svg><span class="chat-unread" id="chat-unread"></span>
 </button>
 <div id="chat-panel">
   <!-- Vue : liste des conversations -->
@@ -4281,7 +4297,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         <button class="chat-close" id="chat-close" title="Close">✕</button>
       </div>
     </div>
-    <div class="chat-error-bar" id="chat-error-bar">⚠ Impossible de joindre le serveur</div>
+    <div class="chat-error-bar" id="chat-error-bar"><svg class="ic" aria-hidden="true"><use href="#i-warn"></use></svg> Impossible de joindre le serveur</div>
     <div id="chat-room-list"></div>
   </div>
   <!-- Vue : messages d'une conversation -->
@@ -4336,18 +4352,18 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
     <div id="admin-char-bar" style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;"></div>
     <!-- Tabs -->
     <div class="modal-tabs">
-      <button class="modal-tab-btn active" data-mtab="fiche">⚔ Sheet</button>
-      <button class="modal-tab-btn" data-mtab="competences">🎯 Skills</button>
-      <button class="modal-tab-btn" data-mtab="sorts">✨ Spells</button>
-      <button class="modal-tab-btn" data-mtab="inventaire">🎒 Inventory</button>
-      <button class="modal-tab-btn" data-mtab="notes">📜 Notes</button>
+      <button class="modal-tab-btn active" data-mtab="fiche"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Sheet</button>
+      <button class="modal-tab-btn" data-mtab="competences"><svg class="ic" aria-hidden="true"><use href="#i-target"></use></svg> Skills</button>
+      <button class="modal-tab-btn" data-mtab="sorts"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"></use></svg> Spells</button>
+      <button class="modal-tab-btn" data-mtab="inventaire"><svg class="ic" aria-hidden="true"><use href="#i-pack"></use></svg> Inventory</button>
+      <button class="modal-tab-btn" data-mtab="notes"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> Notes</button>
     </div>
     <!-- Contenu -->
     <div id="modal-body"></div>
     <!-- Actions -->
     <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem;border-top:1px solid var(--j-border-col,#4a3510);padding-top:1rem;">
       <button class="btn btn-danger" id="btn-admin-cancel">Cancel</button>
-      <button class="btn btn-gold" id="btn-admin-save">💾 Save</button>
+      <button class="btn btn-gold" id="btn-admin-save"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Save</button>
     </div>
   </div>
 </div>
@@ -4365,7 +4381,16 @@ const SB_URL = 'https://hevwgdsvgepiieuvhclg.supabase.co';
 const SB_KEY = 'sb_publishable_TDTCogCSFP-Lvus2x3rAAg_60l036tq';
 const SB_HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 const ADMIN_USER = 'dm';
-const AVATARS = ['⚔','🧙','🏹','🛡','🔮','⚡','🌿','🔥','❄','🐉','🗡','🎭','🐺','🦅','💀','⚜'];
+const AVATARS = ['swords','hat','bow','shield','orb','bolt','leaf','flame',
+                 'snow','beast','dagger','mask','paw','dove','skull','fleur'];
+const AVATAR_DEFAUT = 'swords';
+
+/* Un avatar enregistre avant le passage aux icones est un caractere : on le
+   rend tel quel plutot que de le perdre. */
+function avatarHtml(av) {
+  const v = av || AVATAR_DEFAUT;
+  return (window.ICON_NAMES || []).includes(v) ? ic(v) : esc(v);
+}
 
 /* Données de règles 2024 → js/rules-2024.js (chargé juste avant ce script) */
 
@@ -4566,7 +4591,7 @@ function emptyCharSlot(name) {
 }
 function emptyPlayerData(username) {
   const id = newCharId();
-  return { username, avatar:'⚔', activeCharId:id, characters:{ [id]: emptyCharSlot('Personnage 1') } };
+  return { username, avatar:AVATAR_DEFAUT, activeCharId:id, characters:{ [id]: emptyCharSlot('Character 1') } };
 }
 
 /* ── Accesseurs ── */
@@ -4805,9 +4830,9 @@ function saveLocal(u, data, _json) {
 function updateConnIndicator(state) {
   const el = document.getElementById('conn-indicator');
   if (!el) return;
-  if (state === 'online')  { el.textContent = '🟢 Cloud';      el.className = 'conn-indicator online';  el.title = 'Data synced with the cloud'; }
-  if (state === 'offline') { el.textContent = '🟠 Hors ligne'; el.className = 'conn-indicator offline'; el.title = 'Hors ligne — sauvegarde locale active'; }
-  if (state === 'local')   { el.textContent = '⚠ Local';       el.className = 'conn-indicator local';   el.title = 'Cloud failed — data saved locally only'; }
+  if (state === 'online')  { el.textContent = '● Cloud';      el.className = 'conn-indicator online';  el.title = 'Data synced with the cloud'; }
+  if (state === 'offline') { el.textContent = '● Offline';    el.className = 'conn-indicator offline'; el.title = 'Offline — local saving is active'; }
+  if (state === 'local')   { el.textContent = '● Local';      el.className = 'conn-indicator local';   el.title = 'Cloud failed — data saved locally only'; }
 }
 
 /* ── Filet de securite en cas de conflit ──
@@ -4899,7 +4924,7 @@ function triggerSave() {
     const _json = JSON.stringify(playerData); // stringify une seule fois (peut peser plusieurs MB avec images)
     saveLocal(currentUser, null, _json); // backup local toujours
     if (!navigator.onLine) {
-      badge.textContent = '🟠 Local'; badge.className = 'save-badge';
+      badge.textContent = '● Local'; badge.className = 'save-badge';
       updateConnIndicator('offline');
       return;
     }
@@ -4917,7 +4942,7 @@ function triggerSave() {
             renderAll(); updateHpBar(); renderHero();
           }
         } catch {}
-        badge.textContent = '⚠ Synced from another device'; badge.className = 'save-badge err';
+        badge.innerHTML = ic('warn') + ' Synced from another device'; badge.className = 'save-badge err';
         setTimeout(() => { badge.textContent = ''; badge.className = 'save-badge'; }, 4000);
         showConflictBanner(currentUser);
         return;
@@ -4927,7 +4952,7 @@ function triggerSave() {
       updateConnIndicator('online');
       setTimeout(() => { badge.textContent = ''; badge.className = 'save-badge'; }, 2500);
     } catch(e) {
-      badge.textContent = '⚠ Local'; badge.className = 'save-badge err';
+      badge.innerHTML = ic('warn') + ' Local'; badge.className = 'save-badge err';
       updateConnIndicator('local');
     }
   }, 900);
@@ -4985,7 +5010,7 @@ function populateSubclassSelect(classe) {
   });
   // Custom option
   const customOpt = document.createElement('option');
-  customOpt.value = '__custom__'; customOpt.textContent = '✏ Custom…';
+  customOpt.value = '__custom__'; customOpt.textContent = 'Custom…';
   sel.appendChild(customOpt);
   // If current subclass is not in known list, it's a custom one
   const isCustom = current && !subs.includes(current);
@@ -5164,9 +5189,9 @@ function renderClassFeatures() {
   })();
 
   body.innerHTML = `
-    ${pending.length ? `<div class="cf-subclass-alert">⚠ Subclass à choisir —
+    ${pending.length ? `<div class="cf-subclass-alert">${ic('warn')} Subclass to choose —
       ${pending.map(cl => `<strong>${esc(cl.classe)} ${cl.niveau}</strong>`).join(', ')}
-      <span class="cf-alert-hint">(onglet Identity)</span></div>` : ''}
+      <span class="cf-alert-hint">(Identity tab)</span></div>` : ''}
     <div class="cf-profs">
       <div class="cf-prof-item"><span class="cf-prof-label">Saving Throws:</span> ${data.saves.map(s=>ABIL_LABEL[s]||s.toUpperCase()).join(' &amp; ')}</div>
       ${data.armorProf  ? `<div class="cf-prof-item"><span class="cf-prof-label">Armor:</span> ${data.armorProf}</div>` : ''}
@@ -5329,7 +5354,7 @@ function renderSpeciesTraits() {
       ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Bonus HP:</span>
         +${fx.hpPerLevel}/level — that is <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max at level ${totalLvl}
         <span style="color:#888;font-size:0.9em;">(applied at creation — add it yourself on each level up)</span></div>` : ''}
-      ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">⚠ Choose a lineage (Identity tab)</div>` : ''}
+      ${data.lineages && !lineage ? `<div class="cf-prof-item" style="color:var(--gold-dark);">${ic('warn')} Choose a lineage (Identity tab)</div>` : ''}
     </div>
   `;
 
@@ -5396,7 +5421,7 @@ function populateSpeciesUI() {
 
   sel.innerHTML = '<option value="">— Species —</option>'
     + names.map(n => `<option value="${n}"${c.species === n ? ' selected' : ''}>${n}</option>`).join('')
-    + `<option value="__custom__"${c.species && !isKnown ? ' selected' : ''}>✏ Custom…</option>`;
+    + `<option value="__custom__"${c.species && !isKnown ? ' selected' : ''}>Custom…</option>`;
   custom.style.display = (c.species && !isKnown) ? '' : 'none';
 
   const data = SPECIES_DATA[c.species];
@@ -5514,7 +5539,7 @@ function populateBackgroundUI() {
   const isKnown = names.includes(c.background);
   sel.innerHTML = '<option value="">— Background —</option>'
     + names.map(n => `<option value="${n}"${c.background === n ? ' selected' : ''}>${n}</option>`).join('')
-    + `<option value="__custom__"${c.background && !isKnown ? ' selected' : ''}>✏ Custom…</option>`;
+    + `<option value="__custom__"${c.background && !isKnown ? ' selected' : ''}>Custom…</option>`;
   custom.style.display = (c.background && !isKnown) ? '' : 'none';
 }
 document.getElementById('background-select')?.addEventListener('change', () => {
@@ -5738,7 +5763,7 @@ async function openDashboard() {
 function renderDashboard() {
   const _dac = C(); const _daAv = document.getElementById('dash-avatar');
   if (_dac && _dac.avatarPng) { _daAv.innerHTML = `<img src="${_dac.avatarPng}" alt="avatar">`; }
-  else { _daAv.textContent = (_dac && _dac.avatar) || playerData.avatar || '⚔'; }
+  else { _daAv.innerHTML = avatarHtml((_dac && _dac.avatar) || playerData.avatar); }
   document.getElementById('dash-name').textContent = playerData.username || currentUser;
   renderCharCards();
   renderAll();
@@ -5751,7 +5776,7 @@ function renderInspiration() {
   if (!btn || !playerData) return;
   const active = !!playerData.inspiration;
   btn.classList.toggle('active', active);
-  btn.title = active ? 'Inspiration active — click to use' : 'Inspiration (avantage sur un jet)';
+  btn.title = active ? 'Inspiration active — click to use' : 'Inspiration (advantage on one roll)';
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -5766,7 +5791,7 @@ function renderCharSelector() {
   // Mettre à jour le bouton
   const avatar = document.getElementById('char-selector-avatar');
   const name   = document.getElementById('char-selector-name');
-  if (avatar) avatar.textContent = ac.avatarPng ? '' : (ac.avatar || playerData.avatar || '⚔');
+  if (avatar) avatar.innerHTML = ac.avatarPng ? '' : avatarHtml(ac.avatar || playerData.avatar);
   if (avatar && ac.avatarPng) { avatar.innerHTML = `<img src="${ac.avatarPng}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">`; }
   if (name) name.textContent = ac.characterName || 'Personnage';
 
@@ -5781,7 +5806,7 @@ function renderCharSelector() {
     item.className = 'char-sel-item' + (isActive ? ' active' : '');
     const classStr = getClasses(c).filter(cl=>cl.classe).map(cl=>cl.classe+' '+cl.niveau).join(' / ') || '—';
     item.innerHTML = `
-      <div class="char-sel-item-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : (c.avatar || '⚔')}</div>
+      <div class="char-sel-item-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;">` : avatarHtml(c.avatar)}</div>
       <div class="char-sel-item-info">
         <div class="char-sel-item-name">${c.characterName || 'Unnamed'}</div>
         <div class="char-sel-item-sub">${classStr}</div>
@@ -5823,7 +5848,7 @@ function deleteCharacter(id) {
   const slot  = chars[id];
   if (!slot) return;
   if (Object.keys(chars).length <= 1) {
-    showToast('⚠ Not possible: at least one character must remain.');
+    showToast('Not possible: at least one character must remain.', 'warn');
     return;
   }
   const c    = slot.character || {};
@@ -5851,7 +5876,7 @@ function deleteCharacter(id) {
   if (etaitActif) { applyCharTheme(); applyCharBg(C()); }
   triggerSave();
 
-  showCharUndoToast(`🗑 "${nom}" deleted`, () => {
+  showCharUndoToast(`"${nom}" deleted`, () => {
     // Réinsertion à sa place d'origine
     const rest = Object.entries(playerData.characters);
     rest.splice(position, 0, [id, slot]);
@@ -5921,7 +5946,7 @@ function renderCharCards() {
     const subClasse = c.sousClasse ? ' — ' + c.sousClasse : '';
     card.innerHTML = `
       <button class="char-card-del" data-del-char="${id}" title="Delete">✕</button>
-      <div class="char-card-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" alt="avatar">` : (c.avatar || playerData.avatar || '⚔')}</div>
+      <div class="char-card-avatar">${c.avatarPng ? `<img src="${c.avatarPng}" alt="avatar">` : avatarHtml(c.avatar || playerData.avatar)}</div>
       <div class="char-card-name">${c.characterName || 'Unnamed'}</div>
       <div class="char-card-sub">${getClasses(c).filter(cl=>cl.classe).map(cl=>cl.classe+' '+cl.niveau).join(' / ') || '—'}</div>
       ${c.species ? `<div class="char-card-species">${c.species}</div>` : ''}
@@ -6165,7 +6190,7 @@ function renderHero() {
       img.src = c.avatarPng; img.style.display = ''; ph.style.display = 'none';
     } else {
       img.style.display = 'none'; ph.style.display = '';
-      ph.textContent = c.avatar || '⚔';
+      ph.innerHTML = avatarHtml(c.avatar);
     }
   }
 
@@ -6504,7 +6529,7 @@ function renderCombat() {
     const inp = document.getElementById('inp-initiative');
     if (inp) inp.value = c.initiative || 0;
     const lbl = document.getElementById('init-auto-label');
-    if (lbl) lbl.textContent = 'manuel';
+    if (lbl) lbl.textContent = 'manual';
   }
   // Death Saves
   ['success','fail'].forEach(type => {
@@ -6577,7 +6602,10 @@ function updateSpellCalcs() {
   if (prepEl) {
     const spells = c.spells || [];
     const leveled  = spells.filter(s => s.level && s.level !== '0' && s.level !== 0);
-    const prepared = leveled.filter(s => s.prepared !== false);
+    // Les sorts « toujours prepares » (domaine, cercle, serment, don…) sont
+    // prepares en permanence SANS compter dans le maximum : on les ecarte.
+    const prepared = leveled.filter(s => !s.always && s.prepared !== false);
+    const gratuits = leveled.filter(s => s.always).length;
     const maxPrep = getClasses(c).reduce((sum, cl) => {
       const table = PREPARED_SPELLS[cl.classe];
       if (!table) return sum;
@@ -6585,8 +6613,10 @@ function updateSpellCalcs() {
     }, 0);
     if (maxPrep > 0) {
       prepEl.style.display = '';
-      prepEl.textContent = `${prepared.length} / ${maxPrep}`;
-      prepEl.title = `Prepared spells — maximum ${maxPrep} at this level (PHB 2024)`;
+      prepEl.textContent = `${prepared.length} / ${maxPrep}` + (gratuits ? ` (+${gratuits})` : '');
+      prepEl.title = `Prepared spells — maximum ${maxPrep} at this level (PHB 2024)`
+        + (gratuits ? `
+${gratuits} always-prepared spell(s), free of the maximum` : '');
       prepEl.className = 'spell-prep-counter' + (prepared.length > maxPrep ? ' over' : prepared.length > 0 ? ' ok' : '');
     } else {
       // Classe sans préparation de sorts (guerrier, roublard…) : compteur masqué
@@ -6609,7 +6639,7 @@ function renderPrepStyle() {
       ? '<strong>prepared</strong> spells — you swap your selection on each <strong>Long Rest</strong>'
       : "<strong>fixed</strong> list — you only swap a spell when you <strong>gain a level</strong>";
     const book = st.book
-      ? " · 📖 = in your <em>spellbook</em> but not prepared today"
+      ? " · " + ic('book') + " = in your <em>spellbook</em> but not prepared today"
       : '';
     return `<div>✦ <strong>${esc(cls)}</strong> — ${swap}${book}</div>`;
   }).join('');
@@ -6637,9 +6667,9 @@ function calcAtkBonus(atk) {
   const manualTotal = (parseInt(v) || 0) + globalAtk;
   if (globalAtk && !isNaN(parseInt(v))) {
     const sign = manualTotal >= 0 ? '+' : '';
-    return { val: sign + manualTotal, tip: `Manuel + Mod. ${globalAtk >= 0 ? '+' : ''}${globalAtk}`, num: manualTotal };
+    return { val: sign + manualTotal, tip: `Manual + Mod. ${globalAtk >= 0 ? '+' : ''}${globalAtk}`, num: manualTotal };
   }
-  return { val: v, tip: 'Bonus manuel', num: parseInt(v) || 0 };
+  return { val: v, tip: 'Manual bonus', num: parseInt(v) || 0 };
 }
 function renderAttacks() {
   const tbody = document.getElementById('attack-tbody');
@@ -6654,7 +6684,7 @@ function renderAttacks() {
     const statSelOpts = [['','—'],['for','STR'],['dex','DEX'],['int','INT'],['sag','WIS'],['cha','CHA'],['sort','Spell']].map(([val, lbl]) =>
       `<option value="${val}"${(atk.atkType||'') === val ? ' selected' : ''}>${lbl}</option>`
     ).join('');
-    const dmgDiceBtn = atk.degats ? `<button class="atk-dice-btn" data-atk="${i}" title="Roll ${atk.degats}">🎲</button>` : '';
+    const dmgDiceBtn = atk.degats ? `<button class="atk-dice-btn" data-atk="${i}" title="Roll ${atk.degats}">${ic('die')}</button>` : '';
     const tr = document.createElement('tr');
     if (isMobile) {
       tr.innerHTML = `<td colspan="7" style="padding:0;border:none;">
@@ -6735,7 +6765,7 @@ function scheduleCanvasSync(delay = 6000) {
 function setCanvasSyncBadge(etat) {
   const el = document.getElementById('canvas-sync');
   if (!el) return;
-  const TXT = { pending: '· pending', up: '↑ uploading…', ok: '✓ saved', err: '⚠ local only', none: '' };
+  const TXT = { pending: '· pending', up: '↑ uploading…', ok: '✓ saved', err: '✗ local only', none: '' };
   el.textContent = TXT[etat] ?? '';
   el.className = 'canvas-sync ' + etat;
 }
@@ -6821,7 +6851,7 @@ function loadCanvasPages() {
 }
 function saveCanvasPages() {
   try { localStorage.setItem(canvasPageStorageKey(), JSON.stringify(canvasPages)); } catch(e) {
-    showToast('⚠ Storage full — drawing not saved. Delete pages or clear the cache.');
+    showToast('Storage full — drawing not saved. Delete pages or clear the cache.', 'warn');
   }
 }
 function renderCanvasPagesSidebar() {
@@ -7094,8 +7124,8 @@ function renderPassiveSkills() {
   if (!el) return;
   const c = C(); const bonus = pb(getTotalLevel(c));
   const passives = [
-    { label:'Perception passive',      key:'perception',   attr:'sag' },
-    { label:'Investigation passive',   key:'investigation',attr:'int' },
+    { label:'Passive Perception',      key:'perception',   attr:'sag' },
+    { label:'Passive Investigation',   key:'investigation',attr:'int' },
     { label:'Passive Insight',    key:'perspicacite', attr:'sag' },
   ];
   const html = passives.map(p => {
@@ -7765,10 +7795,12 @@ function doLongRest() {
   const hdLeft = totalHd - c.nbDeVieUtilises;
   showToast(`Long Rest — full HP, spells and resources restored · hit dice ${hdLeft}/${totalHd} (+${Math.min(regained, spentHd)})`);
 }
-function showToast(msg) {
+function showToast(msg, type) {
   let t = document.getElementById('rest-toast');
   if (!t) { t = document.createElement('div'); t.id = 'rest-toast'; t.style.cssText='position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#1a2a1a;border:1px solid #3a6a3a;color:#8aba8a;padding:0.5rem 1.2rem;border-radius:6px;font-size:0.82rem;z-index:9999;transition:opacity 0.4s;pointer-events:none;'; document.body.appendChild(t); }
-  t.textContent = msg; t.style.opacity = '1';
+  if (type) t.innerHTML = ic(type) + ' ' + esc(String(msg));
+  else t.textContent = msg;
+  t.style.opacity = '1';
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
 }
@@ -7912,7 +7944,7 @@ function renderLvlupTab() {
       <div class="lvlplan-bar-val">+6</div>
     </div>
     <div class="lvlplan-bar-actions">
-      <button class="btn btn-sm" id="lvlp-roll-all" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">🎲 Roll All HP</button>
+      <button class="btn btn-sm" id="lvlp-roll-all" style="background:rgba(201,169,110,0.1);border:1px solid var(--gold-dark);color:var(--gold);">${ic('die')} Roll All HP</button>
       <button class="btn btn-sm" id="lvlp-avg-all"  style="background:rgba(100,200,150,0.07);border:1px solid rgba(100,200,150,0.3);color:#7ac0a0;">⊘ Average All</button>
       <button class="btn btn-sm" id="lvlp-reset"    style="background:none;border:1px solid #444;color:#666;">↺ Reset</button>
     </div>
@@ -7963,7 +7995,7 @@ function renderLvlupTab() {
       <div class="lvlrow-hp-row">
         ${lvl===1
           ? `<button class="btn btn-sm btn-gold" data-roll="${i}" title="Take max at level 1">★ Take Max (+${d.hitDieNum+d.conMod})</button>`
-          : `<button class="btn btn-sm btn-gold" data-roll="${i}">🎲 Roll ${d.hitDie}</button>
+          : `<button class="btn btn-sm btn-gold" data-roll="${i}">${ic('die')} Roll ${d.hitDie}</button>
              <button class="btn btn-sm" data-avg="${i}" style="background:rgba(201,169,110,0.08);border:1px solid var(--gold-dark);color:var(--gold);">⊘ Avg (+${d.avgHp})</button>`}
         ${row.hp!=null?`<span class="lvlrow-hp-result">✔ +${row.hp} HP</span>
           <button class="btn btn-sm" data-clrhp="${i}" style="background:none;border:1px solid #444;color:#666;padding:0.1rem 0.35rem;font-size:0.7rem;">✕</button>`:''}
@@ -8006,7 +8038,7 @@ function renderLvlupTab() {
     // Body: Spell picks (known-spell classes)
     if (d.hasKnown) {
       bodyHtml += `<div class="lvlrow-section">
-        <div class="lvlrow-sec-title">📖 Spell Picks</div>
+        <div class="lvlrow-sec-title">${ic('book')} Spell Picks</div>
         <textarea class="lvlrow-textarea" data-spl="${i}" placeholder="Spells to learn, cantrips to swap…">${esc(row.spells||'')}</textarea>
       </div>`;
     }
@@ -8207,12 +8239,14 @@ function renderSpells() {
 
     // Apply prepared filter (cantrips always show; leveled: hide unprepared)
     if (_spellPrepFilter && !isCantrip) {
-      entries = entries.filter(({ s }) => s.prepared !== false);
+      entries = entries.filter(({ s }) => s.always || s.prepared !== false);
     }
 
     if (!entries.length) return;
 
-    const preparedCount = isCantrip ? null : entries.filter(({ s }) => s.prepared !== false).length;
+    const preparedCount = isCantrip ? null
+      : entries.filter(({ s }) => s.always || s.prepared !== false).length;
+    const alwaysCount = isCantrip ? 0 : entries.filter(({ s }) => s.always).length;
 
     // Level header
     const hdr = document.createElement('tr');
@@ -8224,24 +8258,33 @@ function renderSpells() {
           ? `${entries.length}`
           : (hasBook
               ? `${preparedCount} prepared${preparedCount > 1 ? 's' : ''} · ${entries.length - preparedCount} in spellbook`
-              : `${preparedCount}/${entries.length} prepared`));
-    hdr.innerHTML = `<td colspan="10">${lvlLabel}<span class="spell-lvl-count">${countLabel}</span></td>`;
+              : `${preparedCount}/${entries.length} prepared`))
+      + (alwaysCount ? ` · ${alwaysCount} always` : '');
+    hdr.innerHTML = `<td colspan="11">${lvlLabel}<span class="spell-lvl-count">${countLabel}</span></td>`;
     frag.appendChild(hdr);
 
     entries.forEach(({ s, i }) => {
       const isConc    = !!s.conc;
-      const isPrepared = isCantrip || s.prepared !== false;
+      // Un sort « toujours prepare » (domaine, cercle, serment, don…) est
+      // prepare quoi qu'il arrive et ne consomme pas le quota.
+      const isAlways   = !isCantrip && !!s.always;
+      const isPrepared = isCantrip || isAlways || s.prepared !== false;
       const tr = document.createElement('tr');
       tr.className = 'exp-row' + (!isPrepared && !isCantrip ? ' spell-unprepared' : '');
 
       // Prepared toggle cell
       const prepCell = isCantrip
         ? `<td style="text-align:center;"><span style="color:#555;font-size:0.7rem;" title="Cantrips are always available">✦</span></td>`
-        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}" data-prep-spell="${i}" title="${isPrepared ? 'Prepared — click to unprepare' : (hasBook ? 'In your spellbook — click to prepare' : 'Not prepared — click to prepare')}">${isPrepared ? '★' : (hasBook ? '📖' : '☆')}</button></td>`;
+        : `<td style="text-align:center;"><button class="spell-prep-btn${isPrepared?' prepared':''}${isAlways?' locked':''}" data-prep-spell="${i}"${isAlways?' disabled':''} title="${isAlways ? 'Always prepared — use the lock button to change' : (isPrepared ? 'Prepared — click to unprepare' : (hasBook ? 'In your spellbook — click to prepare' : 'Not prepared — click to prepare'))}">${isPrepared ? '★' : (hasBook ? ic('book') : '☆')}</button></td>`;
 
-      const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Cast the spell (uses a level ${esc(s.level||'1')}+ slot)">⚡</button>` : '';
-      const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Roll ${esc(s.degat)}">🎲</button>` : '';
-      tr.innerHTML = prepCell
+      // Bouton « toujours prepare » : le sort reste actif sans compter dans le quota
+      const alwaysCell = isCantrip
+        ? `<td></td>`
+        : `<td style="text-align:center;"><button class="spell-always-btn${isAlways?' on':''}" data-always-spell="${i}" title="${isAlways ? 'Always prepared — click to make it an ordinary prepared spell' : 'Mark as always prepared (domain, circle, oath, feat…) — free of the maximum'}">${isAlways ? ic('lock') : ic('unlock')}</button></td>`;
+
+      const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Cast the spell (uses a level ${esc(s.level||'1')}+ slot)">${ic('bolt')}</button>` : '';
+      const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Roll ${esc(s.degat)}">${ic('die')}</button>` : '';
+      tr.innerHTML = prepCell + alwaysCell
         + `<td style="text-align:center;"><input class="atk-inp" data-spell="${i}" data-sk="level" value="${esc(s.level||'0')}" placeholder="0" style="width:38px;text-align:center;font-size:0.78rem;"></td>`
         + `<td><div class="atk-dmg-wrap"><input class="atk-inp" data-spell="${i}" data-sk="name" value="${esc(s.name||'')}" placeholder="Spell name">${castBtn}</div></td>`
         + `<td><div class="atk-dmg-wrap"><input class="atk-inp" data-spell="${i}" data-sk="degat" value="${esc(s.degat||'')}" placeholder="2d6" style="font-size:0.75rem;">${spellDice}</div></td>`
@@ -8256,9 +8299,9 @@ function renderSpells() {
       if (s._open) {
         // Badges méta — surtout pour mobile où dégâts/portée/action sont masqués en colonnes
         const metaBits = [
-          s.action ? `<span class="spell-meta-badge">⏱ ${esc(s.action)}</span>` : '',
+          s.action ? `<span class="spell-meta-badge">${ic('clock')} ${esc(s.action)}</span>` : '',
           s.portee ? `<span class="spell-meta-badge">⦾ ${esc(s.portee)}</span>` : '',
-          s.degat  ? `<button class="spell-meta-badge" data-spell-dice="${i}" title="Roll damage">⚔ ${esc(s.degat)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''} 🎲</button>` : '',
+          s.degat  ? `<button class="spell-meta-badge" data-spell-dice="${i}" title="Roll damage">${ic('swords')} ${esc(s.degat)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''} ${ic('die')}</button>` : '',
           s.conc   ? `<span class="spell-meta-badge" style="color:#c090f8;border-color:rgba(160,112,224,0.4);">◉ Concentration</span>` : ''
         ].filter(Boolean).join('');
         const dr = document.createElement('tr');
@@ -8303,7 +8346,7 @@ function renderRationTracker() {
 
   el.innerHTML = `
     <div class="ration-row">
-      <span class="ration-icon">🍖</span>
+      <span class="ration-icon">${ic('food')}</span>
       <span class="ration-label">Food rations</span>
       <div class="ration-counter">
         <button class="ration-btn" data-ration-adj="food" data-d="-1" title="Remove a ration">−</button>
@@ -8311,10 +8354,10 @@ function renderRationTracker() {
         <button class="ration-btn" data-ration-adj="food" data-d="1" title="Add a ration">+</button>
       </div>
       <span class="ration-warn ${wf.cls}">${wf.txt}</span>
-      ${r.joursPriveFood > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveFood}d without food</span>` : ''}
+      ${r.joursPriveFood > 0 ? `<span class="ration-depriv danger">${ic('warn')} ${r.joursPriveFood}d without food</span>` : ''}
     </div>
     <div class="ration-row">
-      <span class="ration-icon">💧</span>
+      <span class="ration-icon">${ic('water')}</span>
       <span class="ration-label">Water (days)</span>
       <div class="ration-counter">
         <button class="ration-btn" data-ration-adj="water" data-d="-1" title="Remove a day of water">−</button>
@@ -8322,11 +8365,11 @@ function renderRationTracker() {
         <button class="ration-btn" data-ration-adj="water" data-d="1" title="Add a day of water">+</button>
       </div>
       <span class="ration-warn ${ww.cls}">${ww.txt}</span>
-      ${r.joursPriveWater > 0 ? `<span class="ration-depriv danger">⚠ ${r.joursPriveWater}d without water</span>` : ''}
+      ${r.joursPriveWater > 0 ? `<span class="ration-depriv danger">${ic('warn')} ${r.joursPriveWater}d without water</span>` : ''}
     </div>
     <div class="ration-actions">
-      <button class="btn btn-sm ration-day-btn" id="btn-ration-day" title="Consume 1 ration and 1 day of water. Updates deprivation if lacking.">🌙 End of day</button>
-      <button class="btn btn-sm" id="btn-ration-rest" title="Reset deprivation to zero (long rest with food and water)">☀ Full Rest</button>
+      <button class="btn btn-sm ration-day-btn" id="btn-ration-day" title="Consume 1 ration and 1 day of water. Updates deprivation if lacking.">${ic('moon')} End of day</button>
+      <button class="btn btn-sm" id="btn-ration-rest" title="Reset deprivation to zero (long rest with food and water)">${ic('sun')} Full Rest</button>
     </div>`;
 
   // +/- buttons
@@ -9159,7 +9202,7 @@ function renderWornArmor() {
     </div>
     <div class="wa-formula" id="wa-formula">—</div>
     ${(() => { const m = equippedArmorMismatch(C(), INV());
-      return m ? `<div class="wa-mismatch">⚠ ${esc(m)} isn't equipped from any item in your inventory.</div>` : ''; })()}
+      return m ? `<div class="wa-mismatch">${ic('warn')} ${esc(m)} isn't equipped from any item in your inventory.</div>` : ''; })()}
   </div>`;
 
   calcAndSetAC(); // compute and fill badge + formula
@@ -9314,11 +9357,11 @@ function renderInventory() {
   const items = INV().items || [];
   const CAT_OPTIONS = [
     { value:'', label:'—' },
-    { value:'arme', label:'⚔ Arme' },
-    { value:'armure', label:'🛡 Armure' },
-    { value:'consommable', label:'⚗ Consommable' },
-    { value:'magique', label:'✦ Magique' },
-    { value:'equipement', label:'🎒 Equipment' },
+    { value:'arme', label:'Weapon' },
+    { value:'armure', label:'Armor' },
+    { value:'consommable', label:'Consumable' },
+    { value:'magique', label:'Magical' },
+    { value:'equipement', label:'Equipment' },
   ];
   const catOpts = CAT_OPTIONS.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
   items.forEach((item, i) => {
@@ -9329,7 +9372,7 @@ function renderInventory() {
     tr.className = (item.equipped ? 'inv-row-equipped ' : '') + (item.attuned ? 'inv-row-attuned' : '');
     tr.innerHTML = `
       <td><input class="inv-inp" style="width:50px;text-align:center;" data-item="${i}" data-ik="qty"   type="number" value="${item.qty||1}" min="0"></td>
-      <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Nom de l'objet"></td>
+      <td><input class="inv-inp" data-item="${i}" data-ik="name"  value="${esc(item.name||'')}"  placeholder="Item name"></td>
       <td><input class="inv-inp" data-item="${i}" data-ik="notes" value="${esc(item.notes||'')}" placeholder="Description"></td>
       <td><input class="inv-inp" style="width:52px;text-align:center;" data-item="${i}" data-ik="weight" type="number" step="0.1" min="0" value="${item.weight ?? ''}" placeholder="—" title="Unit weight (lb)"></td>
       <td><select class="inv-inp" style="padding:0.18rem 0.25rem;font-size:0.74rem;" data-item="${i}" data-ik="cat">${selOpts}</select></td>
@@ -9338,7 +9381,7 @@ function renderInventory() {
         : ''}${isAttunable(item)
         ? `<button class="inv-attune-btn${item.attuned ? ' on' : ''}" data-attune-item="${i}" title="${item.attuned ? 'Break attunement' : 'Attune to this item'}" aria-label="${item.attuned ? 'Break attunement with' : 'Attune to'} ${esc(item.name||'')}">⟡</button>`
         : ''}${isEquippable(item)
-        ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Remove' : 'Equip'}" aria-label="${item.equipped ? 'Remove' : 'Equip'} ${esc(item.name||'')}">${item.equipped ? '🛡' : '○'}</button>`
+        ? `<button class="inv-equip-btn${item.equipped ? ' on' : ''}" data-equip-item="${i}" title="${item.equipped ? 'Remove' : 'Equip'}" aria-label="${item.equipped ? 'Remove' : 'Equip'} ${esc(item.name||'')}">${item.equipped ? ic('shield') : '○'}</button>`
         : ''}<button class="atk-del" data-del-item="${i}" title="Delete">✕</button></td>
     `;
     tbody.appendChild(tr);
@@ -9433,7 +9476,7 @@ function castSpell(i) {
   c.emplacementsUtilises[castLvl] = (parseInt(c.emplacementsUtilises[castLvl]) || 0) + 1;
   const max = parseInt(c.emplacementsSort[castLvl]) || 0;
   renderSpellSlots(); updateConcBanner(); triggerSave();
-  showToast(`✨ ${s.name || 'Sort'} — emplacement niv.${castLvl} utilisé (${Math.max(0, max - c.emplacementsUtilises[castLvl])}/${max} restants)`);
+  showToast(`${s.name || 'Spell'} — level ${castLvl} slot used (${Math.max(0, max - c.emplacementsUtilises[castLvl])}/${max} left)`, 'sparkle');
 }
 
 /* ══ Système Undo ══ */
@@ -9494,7 +9537,7 @@ function _updateUndoBtn() {
 /* ── Avatar picker (per-character) ── */
 function getCharAvatarDisplay(c) {
   if (c && c.avatarPng) return `<img src="${c.avatarPng}" alt="avatar">`;
-  return (c && c.avatar) || playerData.avatar || '⚔';
+  return avatarHtml((c && c.avatar) || playerData.avatar);
 }
 function renderAvatarPicker() {
   const c    = C();
@@ -9511,7 +9554,8 @@ function renderAvatarPicker() {
   AVATARS.forEach(av => {
     const btn = document.createElement('button');
     btn.className = 'av-btn' + (av === curAv && !curPng ? ' selected' : '');
-    btn.textContent = av;
+    btn.innerHTML = ic(av);
+    btn.dataset.av = av;
     btn.onclick = () => {
       grid.querySelectorAll('.av-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
@@ -9561,12 +9605,12 @@ function renderAvatarPicker() {
   const clearBtn = document.getElementById('av-png-clear');
   if (clearBtn) {
     clearBtn.onclick = () => {
-      if (c) { delete c.avatarPng; c.avatar = c.avatar || '⚔'; }
+      if (c) { delete c.avatarPng; c.avatar = c.avatar || AVATAR_DEFAUT; }
       syncAvatarDisplay();
       renderCharCards();
       updatePngPreviewUI();
       grid.querySelectorAll('.av-btn').forEach(b => {
-        b.classList.toggle('selected', b.textContent === ((c && c.avatar) || '⚔'));
+        b.classList.toggle('selected', b.dataset.av === ((c && c.avatar) || AVATAR_DEFAUT));
       });
       triggerSave();
     };
@@ -9577,7 +9621,7 @@ function syncAvatarDisplay() {
   const el = document.getElementById('dash-avatar');
   if (!el) return;
   if (c && c.avatarPng) { el.innerHTML = `<img src="${c.avatarPng}" alt="avatar">`; }
-  else { el.textContent = (c && c.avatar) || playerData.avatar || '⚔'; }
+  else { el.innerHTML = avatarHtml((c && c.avatar) || playerData.avatar); }
 }
 function updatePngPreviewUI() {
   const c   = C();
@@ -9662,8 +9706,8 @@ async function renderAdminPanel() {
 
       // Badges d'état
       let badgesHtml = '';
-      if (isDead)       badgesHtml += `<span class="mj-badge mj-badge-dead">💀 Down</span>`;
-      if (pct < 25 && !isDead) badgesHtml += `<span class="mj-badge mj-badge-low">⚠ PV bas</span>`;
+      if (isDead)       badgesHtml += `<span class="mj-badge mj-badge-dead">${ic('skull')} Down</span>`;
+      if (pct < 25 && !isDead) badgesHtml += `<span class="mj-badge mj-badge-low">${ic('warn')} Low HP</span>`;
       if (isConc)       badgesHtml += `<span class="mj-badge mj-badge-conc">◉ Conc.</span>`;
       if (hasInsp)      badgesHtml += `<span class="mj-badge mj-badge-insp">✦ Insp.</span>`;
       if (exhaustion)   badgesHtml += `<span class="mj-badge mj-badge-cond">Exhaust. ${exhaustion}</span>`;
@@ -9672,7 +9716,7 @@ async function renderAdminPanel() {
       const classLine = getClasses(activeChar).filter(cl=>cl.classe).map(cl=>`${cl.classe} ${cl.niveau}`).join(' / ') || '—';
       const avatarStr = activeChar.avatarPng
         ? `<img src="${activeChar.avatarPng}" style="width:1.6rem;height:1.6rem;border-radius:50%;object-fit:cover;vertical-align:middle;">`
-        : (activeChar.avatar || data.avatar || '⚔');
+        : avatarHtml(activeChar.avatar || data.avatar);
 
       const card = document.createElement('div');
       card.className = 'mj-player-card';
@@ -9691,7 +9735,7 @@ async function renderAdminPanel() {
         ${pvMax > 0 ? `<div class="mj-hp-bar"><div class="mj-hp-fill" style="width:${pct}%;background:${hpColor};"></div></div>` : ''}
         ${badgesHtml ? `<div class="mj-badges">${badgesHtml}</div>` : ''}
         ${slotsHtml ? `<div class="mj-slots-row">${slotsHtml}</div>` : ''}
-        <button class="mj-edit-btn">✏ Edit sheet</button>
+        <button class="mj-edit-btn">${ic('pencil')} Edit sheet</button>
       `;
       card.querySelector('.mj-edit-btn').addEventListener('click', () => openAdminEdit(row.username, data));
       mjGrid.appendChild(card);
@@ -9720,7 +9764,7 @@ function openAdminEdit(username, data) {
   adminEditData   = JSON.parse(JSON.stringify(data)); // deep copy
   adminEditCharId = data.activeCharId || Object.keys(data.characters || {})[0];
   adminActiveTab  = 'fiche';
-  document.getElementById('modal-title').textContent = (data.avatar || '⚔') + ' ' + username;
+  document.getElementById('modal-title').innerHTML = avatarHtml(data.avatar) + ' ' + esc(username);
   renderAdminCharBar();
   renderAdminModalTab();
   document.getElementById('admin-modal').classList.add('open');
@@ -10199,11 +10243,11 @@ async function adminSaveEdit() {
     btn.style.background = 'var(--success)';
     setTimeout(() => {
       document.getElementById('admin-modal').classList.remove('open');
-      btn.disabled = false; btn.textContent = '💾 Save'; btn.style.background = '';
+      btn.disabled = false; btn.innerHTML = ic('save') + ' Save'; btn.style.background = '';
       renderAdminPanel();
     }, 1200);
   } catch(e) {
-    btn.disabled = false; btn.textContent = '💾 Save'; btn.style.background = '';
+    btn.disabled = false; btn.innerHTML = ic('save') + ' Save'; btn.style.background = '';
     alert('Save error: ' + e.message);
   }
 }
@@ -10761,7 +10805,7 @@ function renderViewSheet(el, pd, c, slot, username) {
   // ── Header
   const avatarHtml = c.avatarPng
     ? `<div class="view-avatar"><img src="${c.avatarPng}" alt="avatar"></div>`
-    : `<div class="view-avatar">${esc(c.avatar||pd.avatar||'⚔')}</div>`;
+    : `<div class="view-avatar">${avatarHtml(c.avatar || pd.avatar)}</div>`;
   const classes = (c.classes||[{classe:c.classe,niveau:c.niveau}]).filter(cl=>cl.classe).map(cl=>`${cl.classe} ${cl.niveau}`).join(' / ') || '—';
   // ── Ability score boxes
   const statsHtml = ABILITIES.map(ab => {
@@ -10881,10 +10925,10 @@ function _roomName(room) {
   return room.name || room.id;
 }
 function _roomIcon(room) {
-  if (!room) return '💬';
-  if (room.id === 'general') return '⚔';
-  if (room.type === 'private') return '🔒';
-  return '👥';
+  if (!room) return ic('chat');
+  if (room.id === 'general') return ic('swords');
+  if (room.type === 'private') return ic('lock');
+  return ic('people');
 }
 function _isMember(room) {
   if (room.id === 'general') return true;
@@ -11075,7 +11119,7 @@ function _renderOneBubble(m, box, prevUser, prevDay) {
       .replace(/\b(\d{1,2})\b(?=\s*=\s*\d)/g, '<span class="roll-result">$1</span>')
       .replace(/d20=20/g, '<span class="roll-result roll-nat20">20</span>')
       .replace(/d20=1\b/g, '<span class="roll-result roll-nat1">1</span>');
-    bubble.innerHTML = '<span class="roll-die">🎲</span>' + bubble.innerHTML;
+    bubble.innerHTML = '<span class="roll-die">' + ic('die') + '</span>' + bubble.innerHTML;
   } else {
     bubble.innerHTML = escHtml(m.message);
   }
@@ -11810,7 +11854,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('ddb-modal-overlay').classList.add('open');
       document.getElementById('ddb-preview').innerHTML = '';
       document.getElementById('ddb-import-items').innerHTML = '';
-      if (errEl) { errEl.textContent = '⚠ ' + err.message; errEl.style.display='block'; }
+      if (errEl) { errEl.innerHTML = ic('warn') + ' ' + esc(err.message); errEl.style.display='block'; }
     }
   }
   function handleDdbFile(file) {
@@ -11834,7 +11878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!v) return;
     // Extraire l'ID
     const m = v.match(/(\d{6,})/);
-    if (!m) { showToast('⚠ ID invalide'); return; }
+    if (!m) { showToast('Invalid ID', 'warn'); return; }
     const id = m[1];
     const url = `https://character-service.dndbeyond.com/character/v5/character/${id}`;
     const orig = btn.textContent;
@@ -11846,7 +11890,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       handleDdbJsonText(txt);
     } catch(err) {
       // CORS bloqué : ouvrir l'URL et inviter à coller
-      showToast('⚠ Récupération bloquée — ouvre l\'URL puis colle le JSON ci-dessous');
+      showToast('Fetch blocked — open the URL, then paste the JSON below', 'warn');
       window.open(url, '_blank', 'noopener');
       document.getElementById('ddb-paste-area')?.focus();
     } finally {
@@ -11857,7 +11901,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Bouton "Importer le JSON collé"
   document.getElementById('ddb-paste-btn')?.addEventListener('click', () => {
     const txt = document.getElementById('ddb-paste-area')?.value?.trim();
-    if (!txt) { showToast('⚠ The field is empty'); return; }
+    if (!txt) { showToast('The field is empty', 'warn'); return; }
     handleDdbJsonText(txt);
     document.getElementById('ddb-paste-area').value = '';
   });
@@ -11987,6 +12031,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       const si = parseInt(togBtn.dataset.spellToggle);
       C().spells[si]._open = !C().spells[si]._open;
       renderSpells(); return;
+    }
+    // Toujours prepare : le sort reste actif sans consommer le quota
+    const alwaysBtn = e.target.closest('[data-always-spell]');
+    if (alwaysBtn) {
+      const idx = parseInt(alwaysBtn.dataset.alwaysSpell);
+      const sp = C().spells[idx];
+      if (sp) {
+        sp.always = !sp.always;
+        // Devenir « toujours prepare » implique d'etre prepare : sinon le sort
+        // afficherait l'etoile pleine tout en etant marque non prepare.
+        if (sp.always) sp.prepared = true;
+      }
+      renderSpells(); updateSpellCalcs(); triggerSave(); return;
     }
     // Prepared toggle
     const prepBtn = e.target.closest('[data-prep-spell]');
@@ -12132,7 +12189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const enApercu = pv.style.display !== 'none';
     if (enApercu) {
       pv.style.display = 'none'; ed.style.display = '';
-      btn.textContent = '👁 Preview'; btn.classList.remove('on');
+      btn.innerHTML = ic('eye') + ' Preview'; btn.classList.remove('on');
       ed.focus();
       return;
     }
@@ -12174,7 +12231,7 @@ ${car} characters of notes.
     pages.splice(idx, 1);
     if (activeNotesPageIdx >= pages.length) activeNotesPageIdx = pages.length - 1;
     renderNotesPages(); loadCurrentNoteInEditor(); renderNotesSearch(); triggerSave();
-    showCharUndoToast(`🗑 Page "${nom}" deleted`, () => {
+    showCharUndoToast(`Page "${nom}" deleted`, () => {
       const p2 = getNotePages();
       p2.splice(Math.min(idx, p2.length), 0, page);
       activeNotesPageIdx = Math.min(idx, p2.length - 1);
@@ -12381,7 +12438,7 @@ ${car} characters of notes.
     if (!logEl) return;
     const open = logEl.classList.contains('j-hidden');
     logEl.classList.toggle('j-hidden', !open);
-    if (togEl) togEl.textContent = open ? '▴ Historique' : '▾ Historique';
+    if (togEl) togEl.textContent = open ? '▴ History' : '▾ History';
     if (open) renderHpLog();
   });
 
@@ -12392,7 +12449,7 @@ ${car} characters of notes.
     const disp = document.getElementById('share-link-display');
     if (disp) { disp.textContent = url; disp.style.display = 'block'; }
     const btn = document.getElementById('btn-share-sheet');
-    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '🔗 Copy link'; }, 2500); }
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.innerHTML = ic('link') + ' Copy link'; }, 2500); }
   });
 
   /* ── Chat ── */
@@ -12421,7 +12478,7 @@ ${car} characters of notes.
       document.getElementById('layout-toolbar')?.classList.remove('visible');
       document.querySelectorAll('.sec-col-btn').forEach(b => b.remove());
       const lb = document.getElementById('btn-layout-edit');
-      if (lb) { lb.textContent = '⠿ Organiser'; lb.classList.remove('btn-gold'); }
+      if (lb) { lb.textContent = '⠿'; lb.classList.remove('btn-gold'); }
     }
     applyLayout();
   });
@@ -12433,7 +12490,7 @@ ${car} characters of notes.
     const src = c?.avatarPng || c?.bgImage;
     if (!src) {
       const btn = document.getElementById('btn-extract-portrait-color');
-      if (btn) { btn.textContent = '⚠ No portrait'; setTimeout(() => { btn.innerHTML = '🎨 Extract from portrait'; }, 2000); }
+      if (btn) { btn.innerHTML = ic('warn') + ' No portrait'; setTimeout(() => { btn.innerHTML = ic('palette') + ' Extract from portrait'; }, 2000); }
       return;
     }
     extractPortraitPalette(src);
@@ -12614,7 +12671,7 @@ ${car} characters of notes.
     c.initiative = parseInt(e.target.value) || 0;
     c.initiativeManuelle = true;
     const lbl = document.getElementById('init-auto-label');
-    if (lbl) lbl.textContent = 'manuel';
+    if (lbl) lbl.textContent = 'manual';
     triggerSave();
   });
 
@@ -12721,7 +12778,7 @@ ${car} characters of notes.
     AVATARS.forEach(av => {
       const btn = document.createElement('button');
       btn.className = 'new-char-av-btn' + (av === newCharSelectedAvatar ? ' selected' : '');
-      btn.type = 'button'; btn.textContent = av;
+      btn.type = 'button'; btn.innerHTML = ic(av);
       btn.addEventListener('click', () => {
         grid.querySelectorAll('.new-char-av-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
@@ -12799,7 +12856,7 @@ ${car} characters of notes.
         const same = s2.value === s1.value;
         wizBgOk = !same;   // bloque « Suivant » : sinon les +2/+1 sont perdus en silence
         document.getElementById('wiz-bgb-warn').textContent =
-          same ? '⚠ Pick two different abilities (or set +1/+1/+1 by hand on the sheet).' : '';
+          same ? ic('warn') + ' Pick two different abilities (or set +1/+1/+1 by hand on the sheet).' : '';
         // Aperçu du total dans les cellules
         abilBox.querySelectorAll('.wiz-abil-cell').forEach(cell => {
           const k = cell.querySelector('.wiz-abil-sel').dataset.abil;
@@ -12831,7 +12888,7 @@ ${car} characters of notes.
         if (sel) sel.value = String(STD_ARRAY[i]);
       });
       refreshAbils();
-      showToast(`⚡ Suggested spread for ${selClass.value}`);
+      showToast(`Suggested spread for ${selClass.value}`, 'bolt');
     });
 
     /* ── Aperçus ── */
@@ -13005,7 +13062,7 @@ ${car} characters of notes.
       const dup = selLang1.value && selLang1.value === selLang2.value;
       document.getElementById('wiz-lang-warn')?.remove();
       if (dup) selLang2.insertAdjacentHTML('afterend',
-        `<div class="wiz-lang-warn" id="wiz-lang-warn">⚠ Same language twice — you lose one.</div>`);
+        `<div class="wiz-lang-warn" id="wiz-lang-warn">${ic('warn')} Same language twice — you lose one.</div>`);
     };
     selLang1.addEventListener('change', syncLangs);
     selLang2.addEventListener('change', syncLangs);
@@ -13037,7 +13094,7 @@ ${car} characters of notes.
       ].filter(Boolean);
       const spellHint = startingSpellHint(selClass.value);
       el.innerHTML = (missing.length
-        ? `<span class="wiz-sum-warn">⚠ Not set: ${missing.join(', ')}</span> — the sheet will be created as is, to complete by hand.`
+        ? `<span class="wiz-sum-warn">${ic('warn')} Not set: ${missing.join(', ')}</span> — the sheet will be created as is, to complete by hand.`
         : `<span class="wiz-sum-ok">✓</span> ${esc(selSpecies.value)} · ${esc(selClass.value)} 1 · ${esc(selBg.value)} — AC, attacks and proficiencies will be filled in automatically.`)
         + (spellHint ? `<div class="wiz-sum-todo">✦ ${spellHint}</div>` : '');
     }
@@ -13045,7 +13102,7 @@ ${car} characters of notes.
     btnNext.addEventListener('click', () => {
       // Étape 5 : deux bonus sur la même caractéristique = +2/+1 perdus sans avertir
       if (step === 5 && selBg.value && !wizBgOk) {
-        showToast('⚠ Pick two different abilities for the background bonuses.');
+        showToast('Pick two different abilities for the background bonuses.', 'warn');
         return;
       }
       showStep(step + 1);
@@ -13272,7 +13329,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const eligibles = SKILLS.filter(sk => (parseInt(c[sk.key]) || 0) === 1);
     if (!eligibles.length) {
       box.innerHTML = '';
-      $('lvlup-exp-note').innerHTML = "⚠ No proficient skill to double — check your proficiencies first.";
+      $('lvlup-exp-note').innerHTML = ic('warn') + " No proficient skill to double — check your proficiencies first.";
       return;
     }
     const plein = expertisePick.size >= plan.expertiseCount;
@@ -13317,7 +13374,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
 
     // Prérequis de multiclassage
     $('lvlup-prereq').innerHTML = (plan.prereq && !plan.prereq.ok)
-      ? `⚠ Prerequisite de multiclassage non remplis — ${plan.prereq.missing.join(' ; ')}.
+      ? `${ic('warn')} Multiclassing prerequisites not met — ${plan.prereq.missing.join(' ; ')}.
          You can continue, but this doesn't follow the 2024 rules.`
       : '';
 
@@ -13325,7 +13382,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     if (chosenHp === null) chosenHp = plan.avgHp;
     $('lvlup-hp-row').innerHTML =
       `<button class="btn btn-sm btn-gold" id="lvlup-hp-avg">⊘ Average (+${plan.avgHp})</button>
-       <button class="btn btn-sm" id="lvlup-hp-roll">🎲 Roll ${plan.hitDie}</button>
+       <button class="btn btn-sm" id="lvlup-hp-roll">${ic('die')} Roll ${plan.hitDie}</button>
        <span class="lvlup-hp-pick" id="lvlup-hp-pick">+${chosenHp} PV</span>`;
     $('lvlup-hp-detail').innerHTML =
       `${plan.hitDie} ${plan.conMod < 0 ? '−' : '+'} <strong>${Math.abs(plan.conMod)}</strong> CON`
@@ -13400,8 +13457,8 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
   function syncAsiNote() {
     const a = $('lvlup-asi-a').value, b = $('lvlup-asi-b').value;
     $('lvlup-asi-note').innerHTML = !a ? 'Pick at least one ability.'
-      : (b && b !== a) ? `<strong>+1</strong> ${a.toUpperCase()} et <strong>+1</strong> ${b.toUpperCase()}`
-      : (b && b === a) ? '⚠ Same one twice — it will just be a +2.'
+      : (b && b !== a) ? `<strong>+1</strong> ${a.toUpperCase()} and <strong>+1</strong> ${b.toUpperCase()}`
+      : (b && b === a) ? ic('warn') + ' Same one twice — it will just be a +2.'
       : `<strong>+2</strong> ${a.toUpperCase()}`;
   }
   $('lvlup-asi-a').addEventListener('change', syncAsiNote);
@@ -13450,15 +13507,15 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
   $('lvlup-confirm').addEventListener('click', () => {
     if (!plan?.ok) return;
     if (plan.needsSubclass && !$('lvlup-sub').value) {
-      showToast('⚠ Choose your subclass — it is required at level 3.');
+      showToast('Choose your subclass — it is required at level 3.', 'warn');
       return;
     }
     if (plan.isAsi && asiMode === 'abil' && !$('lvlup-asi-a').value) {
-      showToast('⚠ Pick at least one ability to improve.');
+      showToast('Pick at least one ability to improve.', 'warn');
       return;
     }
     if (plan.isAsi && asiMode === 'feat' && !$('lvlup-feat').value) {
-      showToast('⚠ Pick a feat, or switch to Abilities.');
+      showToast('Pick a feat, or switch to Abilities.', 'warn');
       return;
     }
     const fcIncomplet = (plan.featureChoices || []).find(f => {
@@ -13466,12 +13523,12 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
       return n > 0 && n < f.pick;
     });
     if (fcIncomplet) {
-      showToast('⚠ Choose ' + fcIncomplet.pick + ' options for ' + fcIncomplet.name + ', or none.');
+      showToast('Choose ' + fcIncomplet.pick + ' options for ' + fcIncomplet.name + ', or none.', 'warn');
       return;
     }
     if (plan.expertiseCount && expertisePick.size
         && expertisePick.size < plan.expertiseCount) {
-      showToast(`⚠ Choose ${plan.expertiseCount} skills for Expertise, or none.`);
+      showToast(`Choose ${plan.expertiseCount} skills for Expertise, or none.`, 'warn');
       return;
     }
     const res = applyLevelUp(C(), plan, {
@@ -13482,7 +13539,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
       feat: $('lvlup-feat').value, featAbil: $('lvlup-feat-abil').value,
     });
     overlay.classList.remove('open');
-    if (!res.ok) { showToast('⚠ ' + res.error); return; }
+    if (!res.ok) { showToast(res.error, 'warn'); return; }
     renderAll(); renderCharCards(); renderCharSelector(); triggerSave();
     showToast(`⬆ Level ${res.totalLevel} — ${res.log.join(' · ')}`);
   });
@@ -13747,7 +13804,7 @@ document.addEventListener('keydown', e => {
     locked = on;
     localStorage.setItem('kaleysur_field_lock', on ? '1' : '0');
     dash.classList.toggle('fields-locked', locked);
-    btn.textContent = locked ? '🔒' : '✏';
+    btn.innerHTML = locked ? ic('lock') : ic('pencil');
     btn.classList.toggle('active', locked);
     btn.title = locked
       ? 'View mode — click to edit'
@@ -13782,7 +13839,7 @@ document.addEventListener('keydown', e => {
   // Inject toast DOM
   const t = document.createElement('div');
   t.id = 'dice-toast';
-  t.innerHTML = '<button id="dice-share-btn" title="Partager au chat">📤</button><div class="dice-toast-d20" id="dice-d20">—</div><div class="dice-toast-label" id="dice-label"></div><div class="dice-toast-total" id="dice-total"></div>';
+  t.innerHTML = '<button id="dice-share-btn" title="Share to chat" aria-label="Share to chat">' + ic('export') + '</button><div class="dice-toast-d20" id="dice-d20">—</div><div class="dice-toast-label" id="dice-label"></div><div class="dice-toast-total" id="dice-total"></div>';
   t.style.position = 'relative';
   document.body.appendChild(t);
 
@@ -13797,7 +13854,7 @@ document.addEventListener('keydown', e => {
     d20El.className = 'dice-toast-d20' + (roll === 20 ? ' nat20' : roll === 1 ? ' nat1' : '');
     lblEl.textContent = label;
     totEl.textContent = bonus !== 0 ? `${roll} ${bonus >= 0 ? '+' : ''}${bonus} = ${total}` : '';
-    _lastShareText = '🎲 ' + label + (bonus !== 0 ? ` (${bonus >= 0 ? '+' : ''}${bonus})` : '') + ' → **' + total + '**' + (roll === 20 ? ' 🌟' : roll === 1 ? ' 💀' : '');
+    _lastShareText = 'd20 · ' + label + (bonus !== 0 ? ` (${bonus >= 0 ? '+' : ''}${bonus})` : '') + ' → **' + total + '**' + (roll === 20 ? ' — crit!' : roll === 1 ? ' — fumble!' : '');
     t.classList.add('visible');
     clearTimeout(_diceTimer);
     _diceTimer = setTimeout(() => t.classList.remove('visible'), 2800);
@@ -13813,7 +13870,7 @@ document.addEventListener('keydown', e => {
     d20El.textContent = res.total;
     d20El.className = 'dice-toast-d20' + cls;
     document.getElementById('dice-total').textContent = res.detail !== String(res.total) ? res.detail : '';
-    _lastShareText = '🎲 ' + label + ' → **' + res.total + '**';
+    _lastShareText = 'd20 · ' + label + ' → **' + res.total + '**';
     t.classList.add('visible');
     clearTimeout(_diceTimer);
     _diceTimer = setTimeout(() => t.classList.remove('visible'), 2800);
@@ -13875,7 +13932,9 @@ function renderRollHistory() {
 }
 
 /* ── 11c. Accessibilité — enhancer générique ──
-   1) Copie title → aria-label sur les boutons-icônes qui n'en ont pas (✦ ↩ ✏ ⚄ ⚡ 🎲 ◉ …)
+   1) Copie title → aria-label sur les boutons-icônes qui n'en ont pas. Depuis
+      le passage aux icones SVG, ces boutons n'ont souvent aucun texte : la
+      copie du title est leur seul nom accessible.
    2) Rend les contrôles non-natifs (roll-triggers, death-dots) focusables et
       activables au clavier (Enter/Espace).
    Un MutationObserver couvre les re-renders — aucun template à modifier. */
@@ -14004,7 +14063,7 @@ window._rollMode = 'normal';
       d20El.className = 'dice-toast-d20' + (roll === 20 ? ' nat20' : roll === 1 ? ' nat1' : '');
       lblEl.textContent = (mode === 'adv' ? '⬆ ' : '⬇ ') + label;
       totEl.textContent = `(${r1}, ${r2})` + (bonusNum !== 0 ? ` ${bonusNum >= 0 ? '+' : ''}${bonusNum} = ${total}` : '');
-      _lastShareText = '🎲 ' + (mode === 'adv' ? '⬆ ' : '⬇ ') + label + (bonusNum !== 0 ? ` (${bonusNum >= 0 ? '+' : ''}${bonusNum})` : '') + ` (${r1},${r2}) → **${total}**` + (roll === 20 ? ' 🌟' : roll === 1 ? ' 💀' : '');
+      _lastShareText = 'd20 · ' + (mode === 'adv' ? '⬆ ' : '⬇ ') + label + (bonusNum !== 0 ? ` (${bonusNum >= 0 ? '+' : ''}${bonusNum})` : '') + ` (${r1},${r2}) → **${total}**` + (roll === 20 ? ' — crit!' : roll === 1 ? ' — fumble!' : '');
       t.classList.add('visible');
       clearTimeout(window._diceTimerAdv);
       window._diceTimerAdv = setTimeout(() => t.classList.remove('visible'), 3200);
@@ -14068,7 +14127,7 @@ document.addEventListener('keydown', e => {
     }
     case 's': {
       // S → forcer sauvegarde manuelle
-      if (playerData) { e.preventDefault(); triggerSave(); showToast('💾 Force-saving…'); }
+      if (playerData) { e.preventDefault(); triggerSave(); showToast('Force-saving…', 'save'); }
       break;
     }
     case 'r': {
@@ -14187,7 +14246,7 @@ document.addEventListener('keydown', e => {
         <div class="wiz-step" data-step="5">
           <div class="wiz-abil-head">
             <span class="field-label">Tableau standard <strong style="color:var(--gold);">15·14·13·12·10·8</strong></span>
-            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Assign the array based on the chosen class">⚡ Suggested spread</button>
+            <button class="btn btn-sm" id="wiz-suggest-abils" type="button" title="Assign the array based on the chosen class"><svg class="ic" aria-hidden="true"><use href="#i-bolt"></use></svg> Suggested spread</button>
           </div>
           <div class="wiz-abils" id="wiz-abils"></div>
           <div class="wiz-bg-bonus" id="wiz-bg-bonus"></div>
@@ -14308,7 +14367,7 @@ document.addEventListener('keydown', e => {
         <div class="sr-roll-result" id="sr-roll-result">—</div>
         <div class="sr-total" id="sr-total"></div>
         <div class="sr-btn-row">
-          <button class="btn btn-sm" id="sr-btn-roll" style="border-color:#3a6060;color:#7ababa;">🎲 Roll 1 die</button>
+          <button class="btn btn-sm" id="sr-btn-roll" style="border-color:#3a6060;color:#7ababa;"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg> Roll 1 die</button>
           <button class="btn btn-sm btn-gold" id="sr-btn-apply" disabled>✚ Apply</button>
           <button class="btn btn-sm" id="sr-btn-cancel" style="color:#888;">Cancel</button>
         </div>
@@ -14318,22 +14377,22 @@ document.addEventListener('keydown', e => {
     <!-- ── Modal Import D&D Beyond ── -->
     <div class="ddb-modal-overlay" id="ddb-modal-overlay">
       <div class="ddb-modal">
-        <h3>⚔ Import from D&D Beyond</h3>
+        <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Import from D&D Beyond</h3>
         <div class="ddb-modal-sub">Review the detected information before applying</div>
         <div id="ddb-error" class="ddb-error" style="display:none;"></div>
         <div class="ddb-preview" id="ddb-preview"></div>
         <div class="ddb-import-items" id="ddb-import-items"></div>
-        <div style="font-size:0.72rem;color:#555;margin-bottom:0.85rem;">⚠ The import will replace the active character. Inventory and notes are preserved and merged.</div>
+        <div style="font-size:0.72rem;color:#555;margin-bottom:0.85rem;"><svg class="ic" aria-hidden="true"><use href="#i-warn"></use></svg> The import will replace the active character. Inventory and notes are preserved and merged.</div>
         <div class="ddb-btn-row">
           <button class="btn btn-sm" id="ddb-btn-cancel" style="color:#888;">Cancel</button>
-          <button class="btn btn-sm btn-gold" id="ddb-btn-apply">⚔ Apply import</button>
+          <button class="btn btn-sm btn-gold" id="ddb-btn-apply"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Apply import</button>
         </div>
       </div>
     </div>
 
 <!-- ── Bannière mise à jour PWA ── -->
 <div id="sw-update-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:var(--j-panel,#1a1408);border-top:1px solid var(--gold-dark);padding:0.55rem 1rem;align-items:center;justify-content:center;gap:0.8rem;font-size:0.82rem;color:var(--gold,#c9a96e);">
-  🔄 Une mise à jour est slot available.
+  <svg class="ic" aria-hidden="true"><use href="#i-refresh"></use></svg> Une mise à jour est slot available.
   <button onclick="document.getElementById('sw-update-banner').style.display='none';window._swReg&&window._swReg.waiting&&window._swReg.waiting.postMessage('skipWaiting');" style="background:var(--gold-dark);color:#fff;border:none;border-radius:4px;padding:0.25rem 0.7rem;font-size:0.78rem;cursor:pointer;font-family:'Cinzel',serif;">Actualiser</button>
   <button onclick="document.getElementById('sw-update-banner').style.display='none';" style="background:none;border:none;color:#666;cursor:pointer;font-size:0.9rem;">✕</button>
 </div>
@@ -14355,7 +14414,7 @@ function _famDefault() {
     ac: 10, acNote: '', pvMax: 4, pvActuel: 4, speed: '30 ft.',
     for: 10, dex: 10, con: 10, int: 10, sag: 10, cha: 10,
     savesNote: '', skillsNote: '', vulnerabilities: '', resistances: '', immunities: '',
-    senses: 'Perception passive 10', languages: '—', cr: '0',
+    senses: 'Passive Perception 10', languages: '—', cr: '0',
     traits: [], actions: [], bonusActions: [], reactions: [],
     notes: '', _collapsed: false
   };
@@ -14408,7 +14467,7 @@ function renderFamiliars() {
         <div class="fam-head-name">${esc(fam.name)||'—'}</div>
         <div class="fam-head-type">${esc(fam.size)} ${esc(fam.type)}</div>
         <div class="fam-head-hp">♥ ${fam.pvActuel}/${fam.pvMax}</div>
-        <button class="btn-fam-del" data-fi="${fi}" title="Delete ce familier">🗑</button>
+        <button class="btn-fam-del" data-fi="${fi}" title="Delete this familiar" aria-label="Delete this familiar">${ic('trash')}</button>
       </div>
       <div class="fam-body">
         <div class="fam-sb-header">
@@ -14605,7 +14664,7 @@ function renderFamiliars() {
       const isLocked = wrap?.classList.toggle('fam-locked');
       tab?.classList.toggle('fam-tab-locked', isLocked);
       btn?.classList.toggle('fam-locked-active', isLocked);
-      if (btn) btn.innerHTML = isLocked ? '✏ Edit' : '👁 Afficher';
+      if (btn) btn.innerHTML = isLocked ? ic('pencil') + ' Edit' : ic('eye') + ' Show';
     }
   });
 
@@ -14717,16 +14776,16 @@ function startRealtime(username, _retry = 0) {
 <div id="compendium-overlay" role="dialog" aria-modal="true" aria-label="Compendium D&D">
   <div id="compendium-modal">
     <div id="compendium-modal-head">
-      <h2>⚔ Compendium D&D 5e</h2>
+      <h2><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Compendium D&D 5e</h2>
       <button id="btn-compendium-close" title="Close">✕</button>
     </div>
     <div class="comp-tabs" role="tablist">
-      <button class="comp-tab-btn active" data-comp-tab="spells" role="tab">Sorts</button>
+      <button class="comp-tab-btn active" data-comp-tab="spells" role="tab">Spells</button>
       <button class="comp-tab-btn" data-comp-tab="equipment" role="tab">Equipment</button>
-      <button class="comp-tab-btn" data-comp-tab="monsters" role="tab">Monstres</button>
+      <button class="comp-tab-btn" data-comp-tab="monsters" role="tab">Monsters</button>
     </div>
     <div class="comp-filters">
-      <input type="search" class="comp-search" id="comp-search" placeholder="Rechercher…" autocomplete="off">
+      <input type="search" class="comp-search" id="comp-search" placeholder="Search…" autocomplete="off">
       <select class="comp-filter-select" id="comp-filter-level" title="Filter by level">
         <option value="">Any level</option>
         <option value="0">Cantrip</option>
@@ -14740,50 +14799,50 @@ function startRealtime(username, _retry = 0) {
         <option value="8">Level 8</option>
         <option value="9">Level 9</option>
       </select>
-      <select class="comp-filter-select" id="comp-filter-class" title="Filtrer par classe">
-        <option value="">Toute classe</option>
-        <option value="Artificer">Artificier</option>
-        <option value="Bard">Barde</option>
-        <option value="Cleric">Clerc</option>
-        <option value="Druid">Druide</option>
+      <select class="comp-filter-select" id="comp-filter-class" title="Filter by class">
+        <option value="">Any class</option>
+        <option value="Artificer">Artificer</option>
+        <option value="Bard">Bard</option>
+        <option value="Cleric">Cleric</option>
+        <option value="Druid">Druid</option>
         <option value="Paladin">Paladin</option>
         <option value="Ranger">Ranger</option>
-        <option value="Sorcerer">Ensorceleur</option>
-        <option value="Warlock">Occultiste</option>
-        <option value="Wizard">Magicien</option>
+        <option value="Sorcerer">Sorcerer</option>
+        <option value="Warlock">Warlock</option>
+        <option value="Wizard">Wizard</option>
       </select>
-      <select class="comp-filter-select" id="comp-filter-cr" title="Filtrer par FC" style="display:none;">
-        <option value="">Tout FC</option>
-        <option value="0">FC 0</option><option value="1/8">FC 1/8</option>
-        <option value="1/4">FC 1/4</option><option value="1/2">FC 1/2</option>
-        <option value="1">FC 1</option><option value="2">FC 2</option>
-        <option value="3">FC 3</option><option value="4">FC 4</option>
-        <option value="5">FC 5</option><option value="6">FC 6+</option>
+      <select class="comp-filter-select" id="comp-filter-cr" title="Filter by CR" style="display:none;">
+        <option value="">Any CR</option>
+        <option value="0">CR 0</option><option value="1/8">CR 1/8</option>
+        <option value="1/4">CR 1/4</option><option value="1/2">CR 1/2</option>
+        <option value="1">CR 1</option><option value="2">CR 2</option>
+        <option value="3">CR 3</option><option value="4">CR 4</option>
+        <option value="5">CR 5</option><option value="6">CR 6+</option>
       </select>
       <select class="comp-filter-select" id="comp-filter-cat" title="Filter by category" style="display:none;">
         <option value="">Any category</option>
       </select>
       <select class="comp-filter-select" id="comp-filter-startequip" title="Starting equipment by class" style="display:none;">
         <option value="">All classes</option>
-        <option value="Barbarian">⚔️ Barbare</option>
-        <option value="Bard">🎵 Barde</option>
-        <option value="Cleric">✝️ Clerc</option>
-        <option value="Druid">🌿 Druide</option>
-        <option value="Fighter">🛡 Guerrier</option>
-        <option value="Monk">🥋 Moine</option>
-        <option value="Paladin">⚜️ Paladin</option>
-        <option value="Ranger">🏹 Ranger</option>
-        <option value="Rogue">🗡 Roublard</option>
-        <option value="Sorcerer">🔮 Ensorceleur</option>
-        <option value="Warlock">👁 Occultiste</option>
-        <option value="Wizard">📚 Magicien</option>
+        <option value="Barbarian">Barbarian</option>
+        <option value="Bard">Bard</option>
+        <option value="Cleric">Cleric</option>
+        <option value="Druid">Druid</option>
+        <option value="Fighter">Fighter</option>
+        <option value="Monk">Monk</option>
+        <option value="Paladin">Paladin</option>
+        <option value="Ranger">Ranger</option>
+        <option value="Rogue">Rogue</option>
+        <option value="Sorcerer">Sorcerer</option>
+        <option value="Warlock">Warlock</option>
+        <option value="Wizard">Wizard</option>
       </select>
-      <button class="comp-startequip-btn" id="btn-startequip">⚔️ Starting equipment</button>
-      <button class="comp-summons-toggle" id="btn-comp-summons">📜 Invocations</button>
+      <button class="comp-startequip-btn" id="btn-startequip"><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Starting equipment</button>
+      <button class="comp-summons-toggle" id="btn-comp-summons"><svg class="ic" aria-hidden="true"><use href="#i-scroll"></use></svg> Summons</button>
     </div>
     <div id="comp-startequip-panel"></div>
     <div id="comp-summons-list" style="display:none;"></div>
-    <div id="compendium-list"><div class="comp-loading">Loadment…</div></div>
+    <div id="compendium-list"><div class="comp-loading">Loading…</div></div>
   </div>
 </div>
 

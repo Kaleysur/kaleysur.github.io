@@ -190,17 +190,18 @@ textarea { min-height: 60px; }
   <link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
+<script src="js/icons.js"></script>
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <h1>🗺️ Éditeur de Carte Kaleysur</h1>
+  <h1><svg class="ic" aria-hidden="true"><use href="#i-map"></use></svg> Éditeur de Carte Kaleysur</h1>
   <div class="sep"></div>
 
-  <button class="btn" id="btn-zone" onclick="setMode('zone')">✏️ Dessiner zone</button>
-  <button class="btn" id="btn-marker" onclick="setMode('marker')">📍 Placer marqueur</button>
+  <button class="btn" id="btn-zone" onclick="setMode('zone')"><svg class="ic" aria-hidden="true"><use href="#i-pencil"></use></svg> Dessiner zone</button>
+  <button class="btn" id="btn-marker" onclick="setMode('marker')"><svg class="ic" aria-hidden="true"><use href="#i-pin"></use></svg> Placer marqueur</button>
   <button class="btn" id="btn-select" onclick="setMode('select')">↖ Sélectionner</button>
   <div class="sep"></div>
-  <button class="btn" id="btn-finish" onclick="finishPolygon()" style="display:none">✅ Terminer zone</button>
+  <button class="btn" id="btn-finish" onclick="finishPolygon()" style="display:none"><svg class="ic" aria-hidden="true"><use href="#i-check"></use></svg> Terminer zone</button>
   <button class="btn danger" id="btn-cancel" onclick="cancelDrawing()" style="display:none">✕ Annuler</button>
   <div class="sep"></div>
   <button class="btn" onclick="zoomIn()">＋</button>
@@ -226,14 +227,14 @@ textarea { min-height: 60px; }
       <label>Nom</label>
       <input type="text" id="f-name" placeholder="ex: Musiyav">
       <label>Icône</label>
-      <input type="text" id="f-icon" placeholder="ex: 🩸">
+      <input type="text" id="f-icon" placeholder="ex: ">
       <label>URL (relative à wiki/)</label>
       <input type="text" id="f-url" placeholder="ex: musiyav/musiyav.html">
       <label>Description</label>
       <textarea id="f-desc" placeholder="Description courte du continent…"></textarea>
       <div style="margin-top:0.5rem; display:flex; gap:0.4rem">
-        <button class="btn success" onclick="saveZoneProps()" style="flex:1">💾 Appliquer</button>
-        <button class="btn danger" onclick="deleteSelected()" style="flex:1">🗑 Supprimer</button>
+        <button class="btn success" onclick="saveZoneProps()" style="flex:1"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Appliquer</button>
+        <button class="btn danger" onclick="deleteSelected()" style="flex:1"><svg class="ic" aria-hidden="true"><use href="#i-trash"></use></svg> Supprimer</button>
       </div>
     </div>
 
@@ -247,9 +248,9 @@ textarea { min-height: 60px; }
     <div class="panel-section">
       <h3>Exporter le code SVG</h3>
       <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-        <button class="btn" onclick="exportCode()" style="flex:1">📋 Générer</button>
+        <button class="btn" onclick="exportCode()" style="flex:1"><svg class="ic" aria-hidden="true"><use href="#i-clipboard"></use></svg> Générer</button>
         <button class="btn success" onclick="copyCode()" style="flex:1">⎘ Copier</button>
-        <button class="btn success" onclick="applyToCarteHtml()" style="flex:1; border-color:#4080c0; color:#80a0e0">💾 Sauvegarder</button>
+        <button class="btn success" onclick="applyToCarteHtml()" style="flex:1; border-color:#4080c0; color:#80a0e0"><svg class="ic" aria-hidden="true"><use href="#i-save"></use></svg> Sauvegarder</button>
       </div>
       <div class="export-box" id="export-box">Cliquez "Générer" pour voir le code SVG des zones.</div>
       <div class="copy-feedback" id="copy-feedback">✓ Copié !</div>
@@ -410,9 +411,9 @@ function render() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillText((z.icon||'📍')+' '+(z.name||'?'), c.x+1, c.y+r+3);
+      ctx.fillText((z.icon||'◆')+' '+(z.name||'?'), c.x+1, c.y+r+3);
       ctx.fillStyle = '#c9a227';
-      ctx.fillText((z.icon||'📍')+' '+(z.name||'?'), c.x, c.y+r+2);
+      ctx.fillText((z.icon||'◆')+' '+(z.name||'?'), c.x, c.y+r+2);
     }
   });
 
@@ -605,7 +606,7 @@ function addZone(data) {
     id:     nextId++,
     type:   data.type || 'polygon',
     name:   data.name || '',
-    icon:   data.icon || (data.type==='marker'?'📍':''),
+    icon:   data.icon || (data.type==='marker'?'◆':''),
     url:    data.url  || '',
     desc:   data.desc || '',
     points: data.points || [],
@@ -669,9 +670,9 @@ function cancelDrawing() {
 
 function updateFinishButton() {
   const btn = document.getElementById('btn-finish');
-  btn.textContent = currentPoints.length >= 3
-    ? `✅ Terminer zone (${currentPoints.length} pts)`
-    : `✅ Terminer zone`;
+  btn.innerHTML = ic('check') + (currentPoints.length >= 3
+    ? ` Terminer zone (${currentPoints.length} pts)`
+    : ` Terminer zone`);
   btn.disabled = currentPoints.length < 3;
 }
 
