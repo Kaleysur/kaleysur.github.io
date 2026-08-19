@@ -461,134 +461,49 @@
     renderInventory(); triggerSave();
   }
 
-  /* ── Add monster as familiar — triple schema :
-       Open5e v2 2024 : type objet, ability_scores imbriqué, speed numbers,
-                         senses absents (champs séparés), skill_bonuses, traits
-       dnd5eapi v1    : proficiencies array, senses objet, armor_class [{value}]
-       local Eberron  : schéma proche v1/code attendu (type string, scores top-level) ── */
+  /* ── Ajout d'un monstre en compagnon ──
+     La normalisation des trois schémas (Open5e v2, dnd5eapi v1, fichiers locaux)
+     vit dans js/monsters.js : elle sert aussi au bestiaire du MJ, et elle trie
+     correctement actions, actions bonus, réactions et actions légendaires — ce
+     que faisait mal la version qui vivait ici. ── */
+  function _famDepuisMonstre(m) {
+    const signe = n => (n >= 0 ? '+' : '') + n;
+    const ABIL = { for:'STR', dex:'DEX', con:'CON', int:'INT', sag:'WIS', cha:'CHA' };
+    const vitesse = Object.entries(m.speed)
+      .filter(([k]) => k !== 'hover')
+      .map(([k, v]) => (k === 'walk' ? '' : k + ' ') + v + ' ft.')
+      .join(', ');
+    return {
+      name: m.name, type: m.type || 'Beast', size: m.size || 'Medium',
+      alignment: m.alignment || 'Unaligned',
+      ac: m.ac, acNote: m.acDesc || '',
+      pvMax: m.hp || 4, pvActuel: m.hp || 4,
+      speed: vitesse || '30 ft.',
+      for: m.scores.for, dex: m.scores.dex, con: m.scores.con,
+      int: m.scores.int, sag: m.scores.sag, cha: m.scores.cha,
+      savesNote: Object.keys(m.saves).map(k => ABIL[k] + ' ' + signe(m.saves[k])).join(', '),
+      skillsNote: Object.keys(m.skills)
+        .map(k => k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ') + ' ' + signe(m.skills[k]))
+        .join(', '),
+      vulnerabilities: m.vulnerabilites.join(', '),
+      resistances:     m.resistances.join(', '),
+      immunities:      [...m.immunites, ...m.immunitesEtat].join(', '),
+      senses: m.sens.texte, languages: m.langues || '—',
+      cr: String(m.cr ?? '0'),
+      traits: m.traits, actions: m.actions,
+      bonusActions: m.bonusActions, reactions: m.reactions,
+      legendaryActions: m.legendaires,
+      notes: '', _collapsed: false
+    };
+  }
+
   function _addMonsterAsFamiliar(data) {
     if (!playerData) return;
     const c = C();
     if (!c.familiars) c.familiars = [];
-    const sizeMap = { Tiny:'Tiny', Small:'Small', Medium:'Medium', Large:'Large', Huge:'Huge', Gargantuan:'Gargantuan' };
-
-    // ── Type ──
-    // v2 : data.type = {name, key} | local/v1 : string
-    const typeRaw = data.creature_type?.name || (typeof data.type === 'string' ? data.type : data.type?.name) || '';
-    const typeStr = [typeRaw, data.subtype].filter(Boolean).join(', ');
-
-    // ── AC ──
-    // v2 : number | v1 : [{value, type}] | local : number
-    const acVal  = typeof data.armor_class === 'number' ? data.armor_class
-                 : data.armor_class?.[0]?.value ?? 10;
-    const acNote = typeof data.armor_class === 'number' ? (data.armor_desc || '')
-                 : data.armor_class?.[0]?.type ?? '';
-
-    // ── Scores de caractéristiques ──
-    // v2 : data.ability_scores.{strength,dexterity,...} | local/v1 : data.{strength,...}
-    const ab    = data.ability_scores || data;
-    const abStr = ab.strength     ?? 10;
-    const abDex = ab.dexterity    ?? 10;
-    const abCon = ab.constitution ?? 10;
-    const abInt = ab.intelligence ?? 10;
-    const abWis = ab.wisdom       ?? 10;
-    const abCha = ab.charisma     ?? 10;
-
-    // ── Vitesse ──
-    // v2 : {walk:30, fly:60, unit:'feet'} (nombres) | local : {walk:'30 ft.'} (strings)
-    const speeds = data.speed
-      ? Object.entries(data.speed)
-          .filter(([k, v]) => k !== 'unit' && v && v !== 0 && v !== '0 ft.')
-          .map(([k, v]) => {
-            const val = typeof v === 'number' ? `${v} ft.` : v;
-            return k === 'walk' ? val : `${k} ${val}`;
-          }).join(', ')
-      : '';
-
-    // ── Sens ──
-    // v2 : champs séparés darkvision_range, blindsight_range, passive_perception
-    // v1  : data.senses = objet {darkvision:'60 ft.',...}
-    // local : data.senses = string directe
-    let senses;
-    if (typeof data.senses === 'string') {
-      senses = data.senses;
-    } else if (data.senses && typeof data.senses === 'object') {
-      senses = Object.entries(data.senses).map(([k, v]) => `${k.replace(/_/g,' ')} ${v}`).join(', ');
-    } else {
-      const sp = [];
-      if (data.darkvision_range)  sp.push(`darkvision ${data.darkvision_range} ft.`);
-      if (data.blindsight_range)  sp.push(`blindsight ${data.blindsight_range} ft.`);
-      if (data.tremorsense_range) sp.push(`tremorsense ${data.tremorsense_range} ft.`);
-      if (data.truesight_range)   sp.push(`truesight ${data.truesight_range} ft.`);
-      if (data.passive_perception) sp.push(`passive Perception ${data.passive_perception}`);
-      senses = sp.join(', ');
-    }
-
-    // ── Jets de sauvegarde ──
-    // v2 : {strength:5, dexterity:3} (clés longues, valeurs numériques)
-    // local : {str:'+4', dex:'+2'} (clés courtes, strings)
-    // v1 : proficiencies[]
-    const SAVE_LONG  = { strength:'STR', dexterity:'DEX', constitution:'CON', intelligence:'INT', wisdom:'WIS', charisma:'CHA' };
-    const SAVE_SHORT = { str:'STR', dex:'DEX', con:'CON', int:'INT', wis:'WIS', cha:'CHA' };
-    let savesNote = '';
-    if (data.saving_throws && typeof data.saving_throws === 'object' && !Array.isArray(data.saving_throws)) {
-      savesNote = Object.entries(data.saving_throws).map(([k, v]) => {
-        const label = SAVE_SHORT[k] || SAVE_LONG[k] || k.toUpperCase();
-        const val   = typeof v === 'number' ? (v >= 0 ? `+${v}` : `${v}`) : v;
-        return `${label} ${val}`;
-      }).join(', ');
-    } else {
-      savesNote = (data.proficiencies||[])
-        .filter(p => p.proficiency?.index?.startsWith('saving-throw'))
-        .map(p => `${p.proficiency.name?.replace('Saving Throw: ','')} +${p.value}`).join(', ');
-    }
-
-    // ── Compétences ──
-    // v2 : data.skill_bonuses = {history:12} (clés lowercase, valeurs numériques)
-    // local : data.skills = {perception:'+3'} (clés lowercase, strings)
-    // v1 : proficiencies[]
-    let skillsNote = '';
-    const skillsObj = data.skills || data.skill_bonuses;
-    if (skillsObj && typeof skillsObj === 'object' && !Array.isArray(skillsObj)) {
-      skillsNote = Object.entries(skillsObj).map(([k, v]) => {
-        const val = typeof v === 'number' ? (v >= 0 ? `+${v}` : `${v}`) : v;
-        return `${k} ${val}`;
-      }).join(', ');
-    } else {
-      skillsNote = (data.proficiencies||[])
-        .filter(p => p.proficiency?.index?.startsWith('skill-'))
-        .map(p => `${p.proficiency.name?.replace('Skill: ','')} +${p.value}`).join(', ');
-    }
-
-    // ── Résistances / immunités ──
-    // v2 : data.resistances_and_immunities.damage_resistances | local/v1 : data.damage_resistances
-    const ri = data.resistances_and_immunities || {};
-    const _joinArr = arr => Array.isArray(arr) ? arr.join(', ') : (arr || '');
-
-    const toList = arr => (arr||[]).map(x => ({ name: x.name||'', desc: x.desc||'' }));
-
-    const fam = {
-      name: data.name || 'Creature',
-      type: typeStr || 'Beast',
-      size: sizeMap[data.size] || data.size || 'Medium',
-      alignment: data.alignment || 'Unaligned',
-      ac: acVal, acNote,
-      pvMax: data.hit_points || 4, pvActuel: data.hit_points || 4,
-      speed: speeds,
-      for: abStr, dex: abDex, con: abCon, int: abInt, sag: abWis, cha: abCha,
-      savesNote, skillsNote,
-      vulnerabilities: _joinArr(ri.damage_vulnerabilities || data.damage_vulnerabilities),
-      resistances:     _joinArr(ri.damage_resistances     || data.damage_resistances),
-      immunities:      _joinArr(ri.damage_immunities      || data.damage_immunities),
-      senses, languages: data.languages || '—',
-      cr: String(data.challenge_rating ?? data.cr ?? '0'),
-      // v2 : traits | local/v1 : special_abilities
-      traits:       toList(data.traits || data.special_abilities),
-      actions:      toList(data.actions),
-      bonusActions: toList(data.bonus_actions),
-      reactions:    toList(data.reactions),
-      notes: '', _collapsed: false
-    };
+    const m = (typeof Bestiaire !== 'undefined') ? Bestiaire.normaliser(data) : null;
+    if (!m) return;
+    const fam = _famDepuisMonstre(m);
     c.familiars.push(fam);
     if (typeof _tabDirty !== 'undefined') _tabDirty.familiers = true;
     renderFamiliars(); triggerSave();
@@ -1229,7 +1144,7 @@
     if (!c.familiars) c.familiars = [];
     const toList = arr => (arr||[]).map(x => ({name:x.name||'',desc:x.desc||''}));
     c.familiars.push({
-      name: s.name, type: s.type, size: s.size, alignment: 'Neutre',
+      name: s.name, type: s.type, size: s.size, alignment: 'Neutral',
       ac: s.ac, acNote: s.acNote || '',
       pvMax: s.hp, pvActuel: s.hp, speed: s.speed,
       for: s.str||10, dex: s.dex||10, con: s.con||10, int: s.int||10, sag: s.wis||10, cha: s.cha||10,
