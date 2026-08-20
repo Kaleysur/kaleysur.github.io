@@ -2462,6 +2462,9 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
 .summon-chip.importing { opacity:0.5; pointer-events:none; }
 .summon-chip.done { border-color:var(--gold,#c9a96e); background:rgba(201,169,110,0.18); color:var(--gold,#c9a96e); }
 .summon-group-icon { font-size:0.9rem; color:var(--gold-dark,#8a6e1a); display:inline-flex; align-items:center; }
+/* Sort qui ne convoque aucune creature : on decrit ce qu.il fait plutot que
+   d.offrir des puces d.import qui n.auraient rien a importer. */
+.summon-desc { font-size:0.76rem; line-height:1.5; color:var(--j-text-dim,#9a8f7a); padding:0.35rem 0 0.15rem; font-style:italic; }
 .summon-spirit-badge {
   font-size:0.58rem; padding:0.05rem 0.25rem; border-radius:2px;
   background:rgba(90,150,230,0.15); color:#7ab0ee; border:1px solid rgba(90,150,230,0.3);
@@ -6396,9 +6399,14 @@ function getMod(cible) {
 
 /* Bonus de dégâts actifs, sous forme d'expression à accoler à un jet.
    « 1d4 » et « +1d4 » donnent le même résultat ; une valeur vide est ignorée. */
-function getDmgMod() {
+/* Les deux cibles de dégâts se saisissent en expression, pas en entier. */
+function estModDmg(cible) {
+  return cible === 'dmg' || cible === 'dmg_sort';
+}
+
+function getDmgMod(cible = 'dmg') {
   return (C()?.mods || [])
-    .filter(m => m.on && m.cible === 'dmg')
+    .filter(m => m.on && m.cible === cible)
     .map(m => String(m.val || '').trim())
     .filter(Boolean)
     .map(v => (/^[+-]/.test(v) ? v : '+' + v))
@@ -6407,9 +6415,9 @@ function getDmgMod() {
 
 /* Nom des modificateurs de dégâts actifs, pour que le joueur voie d'où vient
    le supplément dans le toast de jet. */
-function dmgModLabel() {
+function dmgModLabel(cible = 'dmg') {
   const noms = (C()?.mods || [])
-    .filter(m => m.on && m.cible === 'dmg' && String(m.val || '').trim())
+    .filter(m => m.on && m.cible === cible && String(m.val || '').trim())
     .map(m => m.name || 'bonus');
   return noms.length ? ' (' + noms.join(', ') + ')' : '';
 }
@@ -6417,7 +6425,8 @@ function dmgModLabel() {
 const MOD_TARGETS = [
   { v:'ac',      l:'AC' },
   { v:'atk',     l:'All Attacks' },
-  { v:'dmg',     l:'Damage' },
+  { v:'dmg',     l:'Damage (attacks)' },
+  { v:'dmg_sort',l:'Damage (spells)' },
   { v:'init',    l:'Initiative' },
   { v:'all_sv',  l:'All Saves' },
   { v:'sv_for',  l:'Save STR' },   { v:'sv_dex',  l:'Save DEX' },
@@ -6449,7 +6458,7 @@ function renderMods() {
       <select class="mod-target-select" data-mi="${i}" data-mk="cible">
         ${MOD_TARGETS.map(t => `<option value="${t.v}"${m.cible===t.v?' selected':''}>${t.l}</option>`).join('')}
       </select>
-      ${m.cible === 'dmg'
+      ${estModDmg(m.cible)
         ? `<input type="text" class="mod-val-input" data-mi="${i}" data-mk="val" value="${esc(String(m.val ?? ''))}" placeholder="1d4" title="Dice or flat bonus: 1d4, +2, 1d6+1">`
         : `<input type="number" class="mod-val-input" data-mi="${i}" data-mk="val" value="${parseInt(m.val) || 0}" placeholder="+0">`}
       <button class="btn-mod-del" data-mi="${i}" title="Delete">✕</button>`;
@@ -6459,7 +6468,7 @@ function renderMods() {
   // Summary badges
   if (summary) {
     const totals = {};
-    c.mods.filter(m => m.on && m.cible !== 'autre' && m.cible !== 'dmg').forEach(m => {
+    c.mods.filter(m => m.on && m.cible !== 'autre' && !estModDmg(m.cible)).forEach(m => {
       const t = MOD_TARGETS.find(t => t.v === m.cible);
       const label = t?.l || m.cible;
       totals[label] = (totals[label] || 0) + (parseInt(m.val) || 0);
@@ -6467,8 +6476,10 @@ function renderMods() {
     const badges = Object.entries(totals).filter(([,v]) => v !== 0).map(([label, val]) =>
       `<span class="mod-badge"><span>${label}</span><span class="mod-badge-val">${val >= 0 ? '+' : ''}${val}</span></span>`);
     /* Un bonus de dés ne s'additionne pas aux autres : il s'affiche tel quel. */
-    const sup = getDmgMod();
-    if (sup) badges.push(`<span class="mod-badge"><span>Damage</span><span class="mod-badge-val">${esc(sup)}</span></span>`);
+    const supAtk  = getDmgMod('dmg');
+    const supSort = getDmgMod('dmg_sort');
+    if (supAtk)  badges.push(`<span class="mod-badge"><span>Dmg atk.</span><span class="mod-badge-val">${esc(supAtk)}</span></span>`);
+    if (supSort) badges.push(`<span class="mod-badge"><span>Dmg spell</span><span class="mod-badge-val">${esc(supSort)}</span></span>`);
     summary.innerHTML = badges.join('');
     summary.style.display = badges.length ? '' : 'none';
   }
@@ -8318,7 +8329,8 @@ function renderSpells() {
         : `<td style="text-align:center;"><button class="spell-always-btn${isAlways?' on':''}" data-always-spell="${i}" title="${isAlways ? 'Always prepared — click to make it an ordinary prepared spell' : 'Mark as always prepared (domain, circle, oath, feat…) — free of the maximum'}">${isAlways ? ic('lock') : ic('unlock')}</button></td>`;
 
       const castBtn  = !isCantrip ? `<button class="spell-cast-btn" data-cast-spell="${i}" title="Cast the spell (uses a level ${esc(s.level||'1')}+ slot)">${ic('bolt')}</button>` : '';
-      const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Roll ${esc(s.degat)}">${ic('die')}</button>` : '';
+      const supSort = s.degat ? getDmgMod('dmg_sort') : '';
+      const spellDice = s.degat ? `<button class="atk-dice-btn" data-spell-dice="${i}" title="Roll ${esc(s.degat + supSort)}">${ic('die')}</button>` : '';
       tr.innerHTML = prepCell + alwaysCell
         + `<td style="text-align:center;"><input class="atk-inp" data-spell="${i}" data-sk="level" value="${esc(s.level||'0')}" placeholder="0" style="width:38px;text-align:center;font-size:0.78rem;"></td>`
         + `<td><div class="atk-dmg-wrap"><input class="atk-inp" data-spell="${i}" data-sk="name" value="${esc(s.name||'')}" placeholder="Spell name">${castBtn}</div></td>`
@@ -12037,14 +12049,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mk = el.dataset.mk;
     if (i === undefined || !mk || !C().mods?.[i]) return;
     if (mk === 'val') {
-      C().mods[i].val = C().mods[i].cible === 'dmg' ? el.value.trim() : (parseInt(el.value) || 0);
+      C().mods[i].val = estModDmg(C().mods[i].cible) ? el.value.trim() : (parseInt(el.value) || 0);
     } else if (mk === 'on') {
       C().mods[i].on = el.checked;
     } else {
       C().mods[i][mk] = el.value;
       /* En passant sur « Damage » la valeur numérique n'a plus de sens, et
          inversement : on repart de zéro plutôt que de garder un reste. */
-      if (mk === 'cible') C().mods[i].val = el.value === 'dmg' ? '' : 0;
+      if (mk === 'cible') C().mods[i].val = estModDmg(el.value) ? '' : 0;
     }
     renderMods(); renderSaves(); renderSkills(); renderAttacks(); updateSpellCalcs(); renderHero(); triggerSave();
   });
@@ -12120,7 +12132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sDice) {
       const s = (C().spells || [])[parseInt(sDice.dataset.spellDice)];
       if (!s?.degat) return;
-      showDamageRoll((s.name || 'Sort') + ' · ' + s.degat, rollDiceExpr(s.degat));
+      const sup = getDmgMod('dmg_sort');
+      const expr = s.degat + sup;
+      showDamageRoll((s.name || 'Spell') + ' · ' + expr + (sup ? dmgModLabel('dmg_sort') : ''), rollDiceExpr(expr));
       return;
     }
   });

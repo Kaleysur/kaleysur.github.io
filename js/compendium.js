@@ -678,26 +678,31 @@
       ]
     },
     // ── Conjure (PHB 2024 — spirit in creature form) ──
-    { spell:'Conjure Animals', level:3, icon:'paw', note:'Spirit in beast form — CR ≤2 examples',
-      creatures:[
-        {n:'Black Bear',k:'black-bear'},{n:'Brown Bear',k:'brown-bear'},{n:'Dire Wolf',k:'dire-wolf'},
-        {n:'Giant Eagle',k:'giant-eagle'},{n:'Giant Owl',k:'giant-owl'},
-        {n:'Giant Wolf Spider',k:'giant-wolf-spider'},{n:'Panther',k:'panther'},
-        {n:'Reef Shark',k:'reef-shark'},{n:'Wolf',k:'wolf'},
-        {n:'Allosaurus',k:'allosaurus'},{n:'Giant Constrictor Snake',k:'giant-constrictor-snake'},
-      ]
+    { spell:'Conjure Animals', level:3, icon:'paw', descriptif:true,
+      note:'No stat block — a Large pack of spectral animals',
+      resume:'Choose the animal form (wolves, serpents, birds…): flavour only. '
+           + 'Advantage on STR saves within 5 ft of the pack; move it 30 ft when you move. '
+           + 'A creature that comes within 10 ft of it makes a DEX save or takes damage.',
+      creatures:[]
     },
-    { spell:'Conjure Elemental', level:5, icon:'orb', note:'Spirit in elemental form — CR ≤5',
+    { spell:'Conjure Elemental', level:5, icon:'orb', descriptif:true,
+      note:'No stat block — a Large intangible spirit',
+      resume:'Choose the element, which sets the damage type: air (Lightning), earth (Thunder), '
+           + 'fire (Fire), water (Cold). DEX save on entering its space or starting within 5 ft: '
+           + '8d8 and Restrained until the spell ends.',
       creatures:[
+        /* Anciennes entrées 2014, conservées inertes le temps d une migration :
+           un groupe descriptif n affiche aucune puce. */
         {n:'Air Elemental',k:'air-elemental'},{n:'Earth Elemental',k:'earth-elemental'},
         {n:'Fire Elemental',k:'fire-elemental'},{n:'Water Elemental',k:'water-elemental'},
       ]
     },
-    { spell:'Conjure Fey', level:6, icon:'sparkle', note:'Spirit in fey form — CR ≤5',
-      creatures:[
-        {n:'Dryad',k:'dryad'},{n:'Green Hag',k:'green-hag'},{n:'Night Hag',k:'night-hag'},
-        {n:'Pixie',k:'pixie-a5e'},{n:'Satyr',k:'satyr'},{n:'Sprite',k:'sprite'},
-      ]
+    { spell:'Conjure Fey', level:6, icon:'sparkle', descriptif:true,
+      note:'No stat block — a Medium Feywild spirit',
+      resume:'It looks like a Fey creature of your choice: flavour only. '
+           + 'Melee spell attack on arrival and as a Bonus Action on later turns: '
+           + '3d12 Psychic plus your spellcasting modifier, and Frightened until your next turn.',
+      creatures:[]
     },
     // ── Undead ──
     { spell:'Animate Dead', level:3, icon:'skull',
@@ -1101,7 +1106,7 @@
       const div = document.createElement('div');
       div.className = 'summon-group';
       const noteHtml = grp.note ? `<span class="summon-group-note">${grp.note}</span>` : '';
-      const chipsHtml = grp.creatures.map((c, ci) => {
+      const chipsHtml = (grp.descriptif ? [] : grp.creatures).map((c, ci) => {
         const spiritBadge = c.spirit ? '<span class="summon-spirit-badge">spirit</span>' : '';
         return `<button class="summon-chip" data-sg="${gi}" data-sc="${ci}" title="${c.n}">
           ${c.n}${spiritBadge}
@@ -1114,7 +1119,9 @@
           <span class="summon-group-name">${grp.spell}</span>
           ${noteHtml}
         </div>
-        <div class="summon-chips">${chipsHtml}</div>`;
+        ${grp.descriptif
+          ? `<div class="summon-desc">${grp.resume}</div>`
+          : `<div class="summon-chips">${chipsHtml}</div>`}`;
       frag.appendChild(div);
     });
     el.innerHTML = '';
