@@ -1167,6 +1167,49 @@ function ok(cond, label) {
   eq(B.vitesseTexte({}), '—', 'aucune vitesse');
 }
 
+/* ══════════ Modificateur de dégâts ══════════ */
+{
+  const J = staged('joueurs.html');
+  eval(extract(J, 'function getDmgMod('));
+  eval(extract(J, 'function dmgModLabel('));
+
+  /* getDmgMod lit le personnage courant : on lui en fournit un. */
+  let _perso = { mods: [] };
+  C = () => _perso;
+
+  eq(getDmgMod(), '', 'aucun modificateur');
+
+  _perso.mods = [{ name:'Divine Favor', cible:'dmg', val:'1d4', on:true }];
+  eq(getDmgMod(), '+1d4', 'signe ajoute a un de sans signe');
+  eq(dmgModLabel(), ' (Divine Favor)', 'nom de la source');
+
+  _perso.mods[0].on = false;
+  eq(getDmgMod(), '', 'modificateur desactive : ignore');
+
+  _perso.mods = [{ cible:'dmg', val:'+1d6', on:true }];
+  eq(getDmgMod(), '+1d6', 'signe deja present : conserve');
+
+  _perso.mods = [{ cible:'dmg', val:'-2', on:true }];
+  eq(getDmgMod(), '-2', 'malus conserve');
+
+  _perso.mods = [
+    { name:'Divine Favor', cible:'dmg', val:'1d4', on:true },
+    { name:'Rage',         cible:'dmg', val:'2',   on:true }
+  ];
+  eq(getDmgMod(), '+1d4+2', 'deux bonus se cumulent dans l expression');
+  eq(dmgModLabel(), ' (Divine Favor, Rage)', 'les deux sources nommees');
+
+  /* Une valeur vide ne doit pas produire un « + » orphelin qui casserait le jet */
+  _perso.mods = [{ name:'Vide', cible:'dmg', val:'', on:true },
+                 { name:'Bon',  cible:'dmg', val:'1d4', on:true }];
+  eq(getDmgMod(), '+1d4', 'valeur vide ignoree');
+  eq(dmgModLabel(), ' (Bon)', 'source vide non nommee');
+
+  /* Les autres cibles ne polluent pas les degats */
+  _perso.mods = [{ cible:'atk', val:2, on:true }, { cible:'ac', val:1, on:true }];
+  eq(getDmgMod(), '', 'seules les cibles dmg comptent');
+}
+
 /* ══════════ Verdict ══════════ */
 if (failures.length) {
   console.error(`✗ Smoke-tests : ${failures.length} échec(s) sur ${assertions} assertions`);
