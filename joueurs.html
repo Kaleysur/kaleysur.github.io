@@ -251,6 +251,9 @@
     .atk-card-bottom { display:flex; align-items:center; gap:10px; }
     .atk-card .atk-bonus-cell { font-size:1.15rem; padding:0 4px; min-width:unset; }
     .atk-dmg-wrap { display:flex; gap:3px; align-items:center; }
+    /* Le bouton de dé partage la cellule : sans cette réduction, la valeur
+       est rognée au milieu d'un « 2d8 ». */
+    .atk-dmg-wrap .atk-inp { padding-left:0.3rem; padding-right:0.3rem; }
     .atk-dmg-wrap .atk-inp { flex:1; min-width:0; }
     .atk-dice-btn { background:none; border:none; cursor:pointer; font-size:0.85rem; padding:0 3px; line-height:1; color:#555; transition:color 0.12s; flex-shrink:0; }
     .atk-dice-btn:hover { color:var(--gold); }
@@ -2003,6 +2006,10 @@
 #btn-field-lock.active { border-color: var(--gold-dark); color: var(--gold); background: rgba(201,169,110,0.1); }
 
 /* Tous les inputs/textareas dans les sections de fiche — sauf checkboxes */
+/* Mode lecture : une invite de saisie n'est pas une donnée. */
+#screen-dashboard.fields-locked input::placeholder,
+#screen-dashboard.fields-locked textarea::placeholder { color: transparent !important; }
+
 #screen-dashboard.fields-locked .sheet-section input:not([type=checkbox]):not([data-currency]),
 #screen-dashboard.fields-locked .sheet-section textarea:not(.notes-editor),
 #screen-dashboard.fields-locked .sheet-section select,
@@ -3585,7 +3592,7 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
                 <th style="width:22px;" title="Always prepared — does not count against your maximum"><svg class="ic" aria-hidden="true"><use href="#i-lock"></use></svg></th>
                 <th style="width:44px;">Lvl.</th>
                 <th>Spell Name</th>
-                <th style="width:70px;">Damage</th>
+                <th style="width:96px;">Damage</th>
                 <th style="width:80px;">Type</th>
                 <th style="width:60px;">Range</th>
                 <th style="width:70px;">Action</th>
@@ -6387,9 +6394,30 @@ function getMod(cible) {
   return mods.filter(m => m.on && m.cible === cible).reduce((s, m) => s + (parseInt(m.val) || 0), 0);
 }
 
+/* Bonus de dégâts actifs, sous forme d'expression à accoler à un jet.
+   « 1d4 » et « +1d4 » donnent le même résultat ; une valeur vide est ignorée. */
+function getDmgMod() {
+  return (C()?.mods || [])
+    .filter(m => m.on && m.cible === 'dmg')
+    .map(m => String(m.val || '').trim())
+    .filter(Boolean)
+    .map(v => (/^[+-]/.test(v) ? v : '+' + v))
+    .join('');
+}
+
+/* Nom des modificateurs de dégâts actifs, pour que le joueur voie d'où vient
+   le supplément dans le toast de jet. */
+function dmgModLabel() {
+  const noms = (C()?.mods || [])
+    .filter(m => m.on && m.cible === 'dmg' && String(m.val || '').trim())
+    .map(m => m.name || 'bonus');
+  return noms.length ? ' (' + noms.join(', ') + ')' : '';
+}
+
 const MOD_TARGETS = [
   { v:'ac',      l:'AC' },
   { v:'atk',     l:'All Attacks' },
+  { v:'dmg',     l:'Damage' },
   { v:'init',    l:'Initiative' },
   { v:'all_sv',  l:'All Saves' },
   { v:'sv_for',  l:'Save STR' },   { v:'sv_dex',  l:'Save DEX' },
@@ -6421,7 +6449,9 @@ function renderMods() {
       <select class="mod-target-select" data-mi="${i}" data-mk="cible">
         ${MOD_TARGETS.map(t => `<option value="${t.v}"${m.cible===t.v?' selected':''}>${t.l}</option>`).join('')}
       </select>
-      <input type="number" class="mod-val-input" data-mi="${i}" data-mk="val" value="${m.val||0}" placeholder="+0">
+      ${m.cible === 'dmg'
+        ? `<input type="text" class="mod-val-input" data-mi="${i}" data-mk="val" value="${esc(String(m.val ?? ''))}" placeholder="1d4" title="Dice or flat bonus: 1d4, +2, 1d6+1">`
+        : `<input type="number" class="mod-val-input" data-mi="${i}" data-mk="val" value="${parseInt(m.val) || 0}" placeholder="+0">`}
       <button class="btn-mod-del" data-mi="${i}" title="Delete">✕</button>`;
     list.appendChild(row);
   });
@@ -6429,15 +6459,18 @@ function renderMods() {
   // Summary badges
   if (summary) {
     const totals = {};
-    c.mods.filter(m => m.on && m.cible !== 'autre').forEach(m => {
+    c.mods.filter(m => m.on && m.cible !== 'autre' && m.cible !== 'dmg').forEach(m => {
       const t = MOD_TARGETS.find(t => t.v === m.cible);
       const label = t?.l || m.cible;
       totals[label] = (totals[label] || 0) + (parseInt(m.val) || 0);
     });
-    summary.innerHTML = Object.entries(totals).filter(([,v]) => v !== 0).map(([label, val]) =>
-      `<span class="mod-badge"><span>${label}</span><span class="mod-badge-val">${val >= 0 ? '+' : ''}${val}</span></span>`
-    ).join('');
-    summary.style.display = Object.keys(totals).length ? '' : 'none';
+    const badges = Object.entries(totals).filter(([,v]) => v !== 0).map(([label, val]) =>
+      `<span class="mod-badge"><span>${label}</span><span class="mod-badge-val">${val >= 0 ? '+' : ''}${val}</span></span>`);
+    /* Un bonus de dés ne s'additionne pas aux autres : il s'affiche tel quel. */
+    const sup = getDmgMod();
+    if (sup) badges.push(`<span class="mod-badge"><span>Damage</span><span class="mod-badge-val">${esc(sup)}</span></span>`);
+    summary.innerHTML = badges.join('');
+    summary.style.display = badges.length ? '' : 'none';
   }
 }
 
@@ -6681,11 +6714,12 @@ function renderAttacks() {
   const isMobile = true;
   attacks.forEach((atk, i) => {
     const ab = calcAtkBonus(atk);
-    const dmgLine = [atk.degats, atk.typeDegat].filter(Boolean).join(' ') || '—';
+    const sup = atk.degats ? getDmgMod() : '';
+    const dmgLine = [atk.degats + sup, atk.typeDegat].filter(Boolean).join(' ') || '—';
     const statSelOpts = [['','—'],['for','STR'],['dex','DEX'],['int','INT'],['sag','WIS'],['cha','CHA'],['sort','Spell']].map(([val, lbl]) =>
       `<option value="${val}"${(atk.atkType||'') === val ? ' selected' : ''}>${lbl}</option>`
     ).join('');
-    const dmgDiceBtn = atk.degats ? `<button class="atk-dice-btn" data-atk="${i}" title="Roll ${atk.degats}">${ic('die')}</button>` : '';
+    const dmgDiceBtn = atk.degats ? `<button class="atk-dice-btn" data-atk="${i}" title="Roll ${esc(atk.degats + sup)}">${ic('die')}</button>` : '';
     const tr = document.createElement('tr');
     if (isMobile) {
       tr.innerHTML = `<td colspan="7" style="padding:0;border:none;">
@@ -11782,7 +11816,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (diceBtn) {
       const atk = (C().attaques || [])[parseInt(diceBtn.dataset.atk)];
       if (!atk?.degats) return;
-      showDamageRoll((atk.name || 'Damage') + ' · ' + atk.degats, rollDiceExpr(atk.degats));
+      const sup = getDmgMod();
+      const expr = atk.degats + sup;
+      showDamageRoll((atk.name || 'Damage') + ' · ' + expr + (sup ? dmgModLabel() : ''), rollDiceExpr(expr));
     }
   });
   document.getElementById('attack-tbody').addEventListener('change', e => {
@@ -12000,7 +12036,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const i = parseInt(el.dataset.mi);
     const mk = el.dataset.mk;
     if (i === undefined || !mk || !C().mods?.[i]) return;
-    C().mods[i][mk] = mk === 'val' ? (parseInt(el.value) || 0) : (mk === 'on' ? el.checked : el.value);
+    if (mk === 'val') {
+      C().mods[i].val = C().mods[i].cible === 'dmg' ? el.value.trim() : (parseInt(el.value) || 0);
+    } else if (mk === 'on') {
+      C().mods[i].on = el.checked;
+    } else {
+      C().mods[i][mk] = el.value;
+      /* En passant sur « Damage » la valeur numérique n'a plus de sens, et
+         inversement : on repart de zéro plutôt que de garder un reste. */
+      if (mk === 'cible') C().mods[i].val = el.value === 'dmg' ? '' : 0;
+    }
     renderMods(); renderSaves(); renderSkills(); renderAttacks(); updateSpellCalcs(); renderHero(); triggerSave();
   });
 
