@@ -22,7 +22,9 @@
   let globalChan    = null;
   let onlineUsers   = new Set();
   let groupMsgs     = [];
-  let dmConvs       = {};   // { peer: [{from,to,text,ts}] }
+  let dmConvs       = {};   // { clé: [{from,text,ts}] } — clé = joueur (privé) ou id de salon (groupe)
+  let salons        = {};   // id de salon de groupe → { id, name, members }
+  let titreOrigine  = document.title;
   let activePeer    = null;
   let unreadGroup   = 0;
   let unreadDm      = {};   // { peer: count }
@@ -74,7 +76,7 @@
              stroke-linecap="round" stroke-linejoin="round">
           <path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
         </svg>
-        Privé
+        Conversations
         <span id="klc-dm-badge"></span>
       </button>
     </div>
@@ -106,7 +108,7 @@
     <div id="klc-ulist">
       <div class="klc-section-lbl">En ligne</div>
       <div id="klc-online"></div>
-      <div class="klc-section-lbl klc-section-lbl2">Récents</div>
+      <div class="klc-section-lbl klc-section-lbl2">Conversations</div>
       <div id="klc-recent"></div>
     </div>
     <!-- Conversation -->
@@ -174,14 +176,18 @@
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, ({ new: m }) => {
         if (!m || m.username === ME) return;     // le mien est déjà affiché
         if ((m.room || GENERAL) === GENERAL) { pushGroupMsg(enMsg(m), false); return; }
-        if (!m.room.startsWith('private:')) return;
-        const pair = m.room.slice('private:'.length).split(':');
-        if (!pair.includes(ME)) return;          // conversation d'autrui
-        const peer = pair.find(u => u !== ME) || m.username;
-        if (!dmConvs[peer]) dmConvs[peer] = [];
-        dmConvs[peer].push({ from: m.username, to: ME, text: m.message, ts: Date.parse(m.created_at) || Date.now() });
-        if (activePeer === peer && panelOpen && activeTab === 'dm') renderDmMsgs(peer);
-        else { unreadDm[peer] = (unreadDm[peer] || 0) + 1; updateBadge(); }
+        let cle = null;
+        if (m.room.startsWith('private:')) {
+          const pair = m.room.slice('private:'.length).split(':');
+          if (!pair.includes(ME)) return;        // conversation d'autrui
+          cle = pair.find(u => u !== ME) || m.username;
+        } else if (salons[m.room]) {
+          cle = m.room;                          // salon de groupe dont je suis membre
+        } else return;
+        if (!dmConvs[cle]) dmConvs[cle] = [];
+        dmConvs[cle].push({ from: m.username, text: m.message, ts: Date.parse(m.created_at) || Date.now() });
+        if (activePeer === cle && panelOpen && activeTab === 'dm') renderDmMsgs(cle);
+        else { unreadDm[cle] = (unreadDm[cle] || 0) + 1; updateBadge(); }
         renderRecent();
       })
       .on('presence', { event: 'sync' }, () => {
@@ -235,6 +241,39 @@
       }
       renderRecent();
     } catch (e) {}
+    await chargerSalonsGroupe();
+  }
+
+  /* Les salons de groupe se découvrent par la table chat_rooms, comme sur la
+     fiche de personnage : c'est la liste des membres qui fait foi. */
+  async function chargerSalonsGroupe() {
+    try {
+      const r = await api(ROOMS + '?members=cs.{"' + encodeURIComponent(ME) + '"}&order=created_at.desc');
+      if (!r.ok) return;
+      const rows = await r.json();
+      const groupes = rows.filter(row => row.type === 'group');
+      if (!groupes.length) return;
+      groupes.forEach(row => { salons[row.id] = row; });
+      /* Un seul aller-retour pour tous les salons plutôt qu'un par salon. */
+      const liste = groupes.map(g => '"' + g.id + '"').join(',');
+      const rm = await api(TABLE + '?room=in.(' + encodeURIComponent(liste) + ')&order=id.asc&limit=300');
+      if (!rm.ok) return;
+      for (const m of await rm.json()) {
+        (dmConvs[m.room] = dmConvs[m.room] || []).push({
+          from: m.username, text: m.message, ts: Date.parse(m.created_at) || Date.now()
+        });
+      }
+      renderRecent();
+    } catch (e) {}
+  }
+
+  /* Clé de conversation → identifiant de salon. */
+  function salonDe(cle) {
+    return salons[cle] ? cle : roomPrivee(ME, cle);
+  }
+
+  function libelleDe(cle) {
+    return salons[cle] ? (salons[cle].name || cle) : cle;
   }
 
   async function envoyer(texte, room) {
@@ -283,17 +322,21 @@
   }
 
   /* ── DM ─────────────────────────────────────────────────── */
-  function openDM(peer) {
-    activePeer = peer;
-    $('klc-peer').textContent = peer;
-    $('klc-peer-dot').innerHTML = onlineUsers.has(peer)
-      ? '<span class="klc-dot klc-dot-on"></span>'
-      : '<span class="klc-dot"></span>';
+  function openDM(cle) {
+    activePeer = cle;
+    $('klc-peer').textContent = libelleDe(cle);
+    /* La pastille de présence ne veut rien dire pour un groupe : on y met son
+       nombre de membres. */
+    $('klc-peer-dot').innerHTML = salons[cle]
+      ? `<span class="klc-membres">${(salons[cle].members || []).length} membres</span>`
+      : (onlineUsers.has(cle)
+          ? '<span class="klc-dot klc-dot-on"></span>'
+          : '<span class="klc-dot"></span>');
     $('klc-ulist').classList.add('klc-hidden');
     $('klc-conv').classList.remove('klc-hidden');
-    unreadDm[peer] = 0;
+    unreadDm[cle] = 0;
     updateBadge();
-    renderDmMsgs(peer);
+    renderDmMsgs(cle);
     setTimeout(() => $('klc-dminput').focus(), 50);
   }
 
@@ -303,13 +346,14 @@
     const text = inp.value.trim();
     if (!text) return;
     inp.value = '';
-    const msg = { from: ME, to: activePeer, text, ts: Date.now() };
+    const msg = { from: ME, text, ts: Date.now() };
     if (!dmConvs[activePeer]) dmConvs[activePeer] = [];
     dmConvs[activePeer].push(msg);
     renderDmMsgs(activePeer);
     renderRecent();
-    const peer = activePeer;
-    assureRoom(peer).then(room => envoyer(text, room));
+    const cle = activePeer;
+    /* Un salon de groupe existe déjà ; seul un privé peut être à créer. */
+    (salons[cle] ? Promise.resolve(cle) : assureRoom(cle)).then(room => envoyer(text, room));
   }
 
   function renderDmMsgs(peer) {
@@ -339,19 +383,23 @@
 
   function renderRecent() {
     const c = $('klc-recent');
-    const peers = Object.keys(dmConvs);
-    if (!peers.length) { c.innerHTML = ''; return; }
-    peers.sort((a, b) => (dmConvs[b].at(-1)?.ts || 0) - (dmConvs[a].at(-1)?.ts || 0));
-    c.innerHTML = peers.map(u => userBtn(u, onlineUsers.has(u), dmConvs[u].at(-1)?.text)).join('');
+    /* Un salon de groupe sans message doit quand même apparaître : sinon on ne
+       peut pas y écrire le premier. */
+    const cles = [...new Set([...Object.keys(dmConvs), ...Object.keys(salons)])];
+    if (!cles.length) { c.innerHTML = ''; return; }
+    cles.sort((a, b) => (dmConvs[b]?.at(-1)?.ts || 0) - (dmConvs[a]?.at(-1)?.ts || 0));
+    c.innerHTML = cles.map(k =>
+      userBtn(k, onlineUsers.has(k), dmConvs[k]?.at(-1)?.text, !!salons[k])).join('');
     c.querySelectorAll('.klc-ubtn').forEach(b =>
       b.addEventListener('click', () => openDM(b.dataset.u)));
   }
 
-  function userBtn(u, online, preview) {
+  function userBtn(u, online, preview, estGroupe) {
     const ud = unreadDm[u] || 0;
     return `<button class="klc-ubtn" data-u="${esc(u)}">
-      <span class="klc-dot ${online ? 'klc-dot-on' : ''}"></span>
-      <span class="klc-uname">${esc(u)}</span>
+      ${estGroupe ? '<span class="klc-groupe">groupe</span>'
+                  : `<span class="klc-dot ${online ? 'klc-dot-on' : ''}"></span>`}
+      <span class="klc-uname">${esc(estGroupe ? libelleDe(u) : u)}</span>
       ${preview ? `<span class="klc-preview">${esc(trunc(preview, 20))}</span>` : ''}
       ${ud ? `<span class="klc-ubadge">${ud}</span>` : ''}
     </button>`;
@@ -396,6 +444,27 @@
     }
   }
 
+  /* Total non lu, tous salons confondus. */
+  function totalNonLus() {
+    return unreadGroup + Object.values(unreadDm).reduce((a, b) => a + b, 0);
+  }
+
+  /* Le titre reprend sa forme dès que l'onglet revient au premier plan. */
+  function majTitre() {
+    const n = document.hidden ? totalNonLus() : 0;
+    document.title = n > 0 ? '(' + n + ') ' + titreOrigine : titreOrigine;
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      /* De retour sur l'onglet : ce qui est affiché est lu. */
+      if (panelOpen && activeTab === 'group') unreadGroup = 0;
+      if (panelOpen && activeTab === 'dm' && activePeer) unreadDm[activePeer] = 0;
+      updateBadge();
+    }
+    majTitre();
+  });
+
   function updateBadge() {
     const dmTotal = Object.values(unreadDm).reduce((a, b) => a + b, 0);
     const total   = unreadGroup + dmTotal;
@@ -404,6 +473,7 @@
     b.style.display = total ? 'flex' : 'none';
     const db = $('klc-dm-badge');
     if (db) { db.textContent = dmTotal || ''; db.style.display = dmTotal ? 'flex' : 'none'; }
+    majTitre();
     // Petite animation sur le bouton si nouveau message et panel fermé
     if (total && !panelOpen) $('klc-btn').classList.add('klc-btn-ping');
     else $('klc-btn').classList.remove('klc-btn-ping');
