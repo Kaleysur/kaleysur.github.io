@@ -97,7 +97,8 @@
     <!-- ══════════════ CARTE DU MONDE ══════════════ -->
     <div class="world-map-section">
       <a href="carte.html" class="world-map-link">
-        <img src="img/carte-kaleysur.jpg" alt="Carte du Monde de Kaleysur" class="world-map-img">
+        <img src="img/carte-kaleysur.jpg" alt="Carte du Monde de Kaleysur" class="world-map-img"
+             width="4096" height="2304" loading="lazy" decoding="async">
         <div class="world-map-overlay">
           <span class="world-map-label">Carte du Monde</span>
           <span class="world-map-cta">Explorer la carte complète →</span>
@@ -274,7 +275,6 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')
-          .then(r => console.log('[SW] Enregistré:', r.scope))
           .catch(e => console.warn('[SW] Erreur:', e));
       });
     }

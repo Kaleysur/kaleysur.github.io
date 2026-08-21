@@ -262,7 +262,13 @@ const searchResults = document.getElementById('search-results');
 const ROOT = getWikiRoot();
 
 if (searchInput && searchResults) {
+  let _rechercheTimer = null;
   searchInput.addEventListener('input', () => {
+    clearTimeout(_rechercheTimer);
+    _rechercheTimer = setTimeout(lancerRecherche, 120);
+  });
+
+  function lancerRecherche() {
     const q = searchInput.value.trim().toLowerCase();
     if (q.length < 2) {
       searchResults.innerHTML = '';
@@ -288,7 +294,7 @@ if (searchInput && searchResults) {
     }
 
     searchResults.classList.add('visible');
-  });
+  }
 
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrap')) {
@@ -315,13 +321,13 @@ if (searchInput && searchResults) {
 
 // --- Indicateur utilisateur connecté (nav badge) ------
 (function initAuthNav() {
-  var navRight = document.querySelector('.nav-right');
+  const navRight = document.querySelector('.nav-right');
   if (!navRight) return;
 
-  var user = localStorage.getItem('kaleysur_user');
-  var root = getWikiRoot();
+  const user = localStorage.getItem('kaleysur_user');
+  const root = getWikiRoot();
 
-  var el = document.createElement('div');
+  const el = document.createElement('div');
   el.className = 'nav-user';
 
   if (user) {
@@ -335,7 +341,7 @@ if (searchInput && searchResults) {
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>' +
       '</button>';
 
-    var ham = document.getElementById('hamburger');
+    const ham = document.getElementById('hamburger');
     navRight.insertBefore(el, ham || null);
 
     document.getElementById('nav-logout-btn').addEventListener('click', function() {
@@ -352,7 +358,7 @@ if (searchInput && searchResults) {
           '<span class="nav-login-label">Connexion</span>' +
         '</a>';
 
-      var ham2 = document.getElementById('hamburger');
+      const ham2 = document.getElementById('hamburger');
       navRight.insertBefore(el, ham2 || null);
     }
   }
@@ -494,15 +500,15 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 // --- Les Trois Lunes — Logo & Icônes sidebar ----------------
 (function initMoonIcons() {
   // 1. Remplacer l'icône ⚜ de la barre de navigation par l'icône officielle de l'app
-  var brandIcon = document.querySelector('.nav-brand-icon');
+  const brandIcon = document.querySelector('.nav-brand-icon');
   if (brandIcon) {
-    var root = getWikiRoot();
+    const root = getWikiRoot();
     brandIcon.style.cssText = 'display:flex;align-items:center;font-size:0;line-height:1';
     brandIcon.innerHTML = '<img src="' + root + 'icons/icon-192.png" alt="Les Trois Lunes de Kaleysur" width="28" height="28" style="border-radius:50%;display:block;">';
   }
 
   // 2. Appliquer data-moon à chaque section de la sidebar
-  var moonMap = {
+  const moonMap = {
     'Navigation':        'white',
     'Astoryem':          'blue',
     'Ayakan':            'white',
@@ -511,11 +517,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     'Personnages & Lore':'gold'
   };
   document.querySelectorAll('.sidebar-section').forEach(function(section) {
-    var titleEl = section.querySelector('.sidebar-section-title');
+    const titleEl = section.querySelector('.sidebar-section-title');
     if (!titleEl) return;
     // Retirer le chevron ▾ injecté en CSS ::after
-    var text = titleEl.textContent.replace('▾','').trim();
-    var moon = moonMap[text];
+    const text = titleEl.textContent.replace('▾','').trim();
+    const moon = moonMap[text];
     if (moon) section.setAttribute('data-moon', moon);
   });
 })();
@@ -526,9 +532,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   if (!localStorage.getItem('kaleysur_user')) return;
   // Pages avec leur propre chat intégré (fiche joueur, DM screen) : ne pas doubler
   if (document.getElementById('chat-fab') || document.getElementById('dm-chat-input')) return;
-  var s = document.createElement('script');
+  const s = document.createElement('script');
   s.src = getWikiRoot() + 'js/chat.js';
   document.body.appendChild(s);
 })();
 
-console.log('✦ Kaleysur Wiki chargé ✦');

@@ -1,0 +1,15 @@
+# Kaleysur — wiki de campagne
+#
+# Le lore est public et gagne à être indexé. Les outils de jeu, non : ils
+# exigent une connexion, n'ont aucun contenu à offrir à un moteur de recherche,
+# et leurs URL n'ont pas à circuler.
+
+User-agent: *
+Allow: /
+
+Disallow: /joueurs.html
+Disallow: /dm.html
+Disallow: /editeur-carte.html
+Disallow: /design_handoff_joueurs/
+
+Sitemap: https://kaleysur.github.io/sitemap.xml
