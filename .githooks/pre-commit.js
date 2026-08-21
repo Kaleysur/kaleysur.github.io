@@ -92,7 +92,12 @@ const pageStagee = staged.some(f => f.endsWith('.html'));
 if (pageStagee && fs.existsSync(__dirname + '/gen-sitemap.js')) {
   try {
     execSync(`node "${__dirname}/gen-sitemap.js"`, { stdio: 'pipe' });
-    const avant = (() => { try { return sh('git show HEAD:sitemap.xml'); } catch { return ''; } })();
+    /* Au premier commit le fichier n'existe pas encore dans HEAD : git ecrit
+       alors sur stderr, ce qui ressemble a une erreur sans en etre une. */
+    const avant = (() => {
+      try { return execSync('git show HEAD:sitemap.xml', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }); }
+      catch { return ''; }
+    })();
     if (fs.readFileSync('sitemap.xml', 'utf8') !== avant) {
       sh('git add sitemap.xml');
       console.log('✓ sitemap.xml régénéré');
