@@ -1210,6 +1210,51 @@ function ok(cond, label) {
   eq(getDmgMod(), '', 'seules les cibles dmg comptent');
 }
 
+/* ══════════ Butin (dm.html) ══════════ */
+{
+  const D = staged('dm.html');
+  /* Un `const` declare dans un eval ne fuit pas vers la portee appelante :
+     on redeclare la liste en global, en verifiant qu.elle suit la source. */
+  BUT_MONNAIES = ['pp', 'gp', 'ep', 'sp', 'cp'];
+  ok(extract(D, 'const BUT_MONNAIES').includes("'pp', 'gp', 'ep', 'sp', 'cp'"),
+     'liste des monnaies inchangee dans la source');
+  eval(extract(D, 'function partagerButin('));
+  eval(extract(D, 'function lireLigneObjet('));
+  eval(extract(D, 'function lireObjets('));
+
+  /* Partage a parts egales, denomination par denomination */
+  const a = partagerButin({ gp: 100 }, 4);
+  eq(a.part.gp, 25, '100 po pour 4 : 25 chacun');
+  eq(a.reste.gp, 0, 'pas de reste');
+
+  const b = partagerButin({ gp: 7 }, 3);
+  eq(b.part.gp, 2, '7 po pour 3 : 2 chacun');
+  eq(b.reste.gp, 1, 'le reste est annonce, pas converti');
+
+  const c = partagerButin({ pp: 3, gp: 25, sp: 11 }, 2);
+  eq([c.part.pp, c.part.gp, c.part.sp], [1, 12, 5], 'chaque denomination se partage separement');
+  eq([c.reste.pp, c.reste.gp, c.reste.sp], [1, 1, 1], 'restes par denomination');
+
+  /* Sans beneficiaire, rien ne se distribue et tout reste */
+  const d = partagerButin({ gp: 10 }, 0);
+  eq(d.part.gp, 0, 'aucun beneficiaire : aucune part');
+  eq(d.reste.gp, 10, 'aucun beneficiaire : tout reste');
+
+  /* Valeurs absurdes : on ne distribue pas de dette */
+  const e = partagerButin({ gp: -5, sp: 'x' }, 2);
+  eq(e.part.gp, 0, 'montant negatif ramene a zero');
+  eq(e.part.sp, 0, 'montant illisible ramene a zero');
+
+  /* Lecture des objets */
+  eq(lireLigneObjet('Potion'), { qty: 1, name: 'Potion' }, 'objet simple');
+  eq(lireLigneObjet('2x Torch'), { qty: 2, name: 'Torch' }, 'quantite avec x');
+  eq(lireLigneObjet('3 × Arrow'), { qty: 3, name: 'Arrow' }, 'quantite avec le signe multiplier');
+  eq(lireLigneObjet('  '), null, 'ligne vide ignoree');
+  eq(lireLigneObjet('0x Rien'), { qty: 1, name: 'Rien' }, 'quantite nulle ramenee a un');
+  eq(lireObjets('Potion' + "\n" + "\n" + '2x Torch').length, 2, 'lignes vides sautees');
+  eq(lireObjets('').length, 0, 'texte vide');
+}
+
 /* ══════════ Verdict ══════════ */
 if (failures.length) {
   console.error(`✗ Smoke-tests : ${failures.length} échec(s) sur ${assertions} assertions`);
