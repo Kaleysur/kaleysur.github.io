@@ -8348,7 +8348,7 @@ function renderSpells() {
         const metaBits = [
           s.action ? `<span class="spell-meta-badge">${ic('clock')} ${esc(s.action)}</span>` : '',
           s.portee ? `<span class="spell-meta-badge">⦾ ${esc(s.portee)}</span>` : '',
-          s.degat  ? `<button class="spell-meta-badge" data-spell-dice="${i}" title="Roll damage">${ic('swords')} ${esc(s.degat)}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''} ${ic('die')}</button>` : '',
+          s.degat  ? `<button class="spell-meta-badge" data-spell-dice="${i}" title="Roll damage">${ic('swords')} ${esc(s.degat + getDmgMod('dmg_sort'))}${s.typeDegat ? ' ' + esc(s.typeDegat) : ''} ${ic('die')}</button>` : '',
           s.conc   ? `<span class="spell-meta-badge" style="color:#c090f8;border-color:rgba(160,112,224,0.4);">◉ Concentration</span>` : ''
         ].filter(Boolean).join('');
         const dr = document.createElement('tr');
