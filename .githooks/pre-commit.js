@@ -85,4 +85,21 @@ if (assetsStaged && fs.existsSync('service-worker.js')) {
   }
 }
 
+/* ── 4. Sitemap ──
+   Une page ajoutée sans sitemap à jour est une page invisible. Le hook le
+   régénère dès qu'une page est stagée, comme il bumpe le cache du SW. */
+const pageStagee = staged.some(f => f.endsWith('.html'));
+if (pageStagee && fs.existsSync(__dirname + '/gen-sitemap.js')) {
+  try {
+    execSync(`node "${__dirname}/gen-sitemap.js"`, { stdio: 'pipe' });
+    const avant = (() => { try { return sh('git show HEAD:sitemap.xml'); } catch { return ''; } })();
+    if (fs.readFileSync('sitemap.xml', 'utf8') !== avant) {
+      sh('git add sitemap.xml');
+      console.log('✓ sitemap.xml régénéré');
+    }
+  } catch (e) {
+    console.error('Sitemap non régénéré :', e.message);
+  }
+}
+
 console.log('✓ Pre-commit OK');
