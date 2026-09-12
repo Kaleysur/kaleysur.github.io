@@ -156,11 +156,11 @@ function ok(cond, label) {
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
           STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,
-          FEATURE_CHOICES } =
+          FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
       + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
-      + ' FEATURE_CHOICES,'
+      + ' FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -192,7 +192,7 @@ function ok(cond, label) {
   });
 
   // Espèces : vitesse et traits de base présents ; lignées non vides
-  const CREATURE_TYPES = ['Humanoid','Aberration','Construct','Elemental','Fey','Giant','Undead'];
+  const CREATURE_TYPES = ['Humanoid','Aberration','Construct','Elemental','Fey','Giant','Monstrosity','Plant','Undead'];
   Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
     ok(typeof d.speed === 'number' && d.speed > 0, `${sp} : vitesse définie`);
     ok(typeof d.size === 'string' && d.size.length > 0, `${sp} : taille définie`);
@@ -216,8 +216,76 @@ function ok(cond, label) {
     eq(k.traits[1].length, 4, 'Kalashtar : 4 traits, pas un de plus');
     ok(!k.lineages, 'Kalashtar : aucune lignée');
   }
-  eq(Object.values(SPECIES_DATA).filter(d => d.type !== 'Humanoid').length, 1,
-     'une seule espèce non-Humanoïde pour l\'instant');
+  eq(Object.values(SPECIES_DATA).filter(d => d.type !== 'Humanoid').length, 3,
+     'trois espèces non-Humanoïdes : Kalashtar, Drider, Myconid');
+
+  /* ── Étiquetage Unearthed Arcana ──
+     Une option de playtest doit s'annoncer au moment du choix, sinon le joueur
+     la découvre en partie. Le contrat : la clé reste le nom nu (c'est elle qui
+     part dans la fiche), seul l'affichage porte « (UA) ». */
+  {
+    const uaEspeces = Object.keys(SPECIES_DATA).filter(n => SPECIES_DATA[n].ua);
+    const uaClasses = Object.keys(CLASS_DATA).filter(n => CLASS_DATA[n].ua);
+
+    ok(uaEspeces.length > 0, 'au moins une espèce UA étiquetée');
+    ok(uaClasses.includes('Psion'), 'Psion : toujours du playtest (Dark Sun, pas encore paru)');
+    ok(!uaClasses.includes('Artificier') && !uaClasses.includes('Artificer'),
+       "Artificier : paru dans Eberron: Forge of the Artificer — plus du playtest");
+
+    // Chaque option UA dit d'où elle vient : sans ça, l'infobulle est muette.
+    [...uaEspeces, ...uaClasses].forEach(n => {
+      ok(typeof sourceUA(n) === 'string' && sourceUA(n).length > 10, `${n} : uaSource manquante`);
+      eq(nomUA(n), '(UA) ' + n, `${n} : préfixe « (UA) »`);
+      ok(titreUA(n).startsWith(' title="'), `${n} : infobulle de playtest`);
+    });
+
+    // Le nom affiché ne doit jamais devenir une clé : sinon un aller-retour
+    // fiche → liste enregistrerait « (UA) Myconid » et l'espèce serait perdue.
+    [...uaEspeces, ...uaClasses].forEach(n =>
+      ok(!SPECIES_DATA[nomUA(n)] && !CLASS_DATA[nomUA(n)], `${n} : le nom affiché n'est pas une clé`));
+
+    // Contenu officiel : jamais préfixé, jamais d'infobulle.
+    ['Human', 'Elf', 'Kalashtar', 'Wizard', 'Artificer'].forEach(n => {
+      ok(!estUA(n), `${n} : officiel, pas de drapeau UA`);
+      eq(nomUA(n), n, `${n} : nom inchangé`);
+      eq(titreUA(n), '', `${n} : aucune infobulle de playtest`);
+    });
+    eq(nomUA(''), '', 'nom vide : pas de préfixe');
+    ok(!estUA('EspeceInconnue'), 'espèce inconnue : pas UA');
+    eq(nomUA('EspeceInconnue'), 'EspeceInconnue', 'espèce inconnue : nom inchangé');
+
+    // Les cinq espèces de l'UA « Underdark Options 2 » (10 septembre 2026)
+    const UNDERDARK = ['Deep Imaskari', 'Drider', 'Illithidkin', 'Kuo-toa', 'Myconid'];
+    UNDERDARK.forEach(n => {
+      ok(!!SPECIES_DATA[n], `${n} : espèce présente`);
+      ok(SPECIES_DATA[n]?.ua, `${n} : étiquetée UA`);
+      eq(SPECIES_DATA[n]?.speed, 30, `${n} : 30 ft`);
+    });
+    eq(SPECIES_DATA['Drider'].type, 'Monstrosity', 'Drider : Monstruosité, pas Humanoïde');
+    eq(SPECIES_DATA['Myconid'].type, 'Plant', 'Myconid : Plante, pas Humanoïde');
+    // Sorts acquis en montant : le trait doit exister au niveau annoncé
+    ok(SPECIES_DATA['Drider'].traits[3]?.some(t => t.name === 'Faerie Fire'), 'Drider : Faerie Fire au niveau 3');
+    ok(SPECIES_DATA['Drider'].traits[5]?.some(t => t.name === 'Web'), 'Drider : Web au niveau 5');
+    ok(SPECIES_DATA['Illithidkin'].traits[3]?.some(t => t.name === 'Command'), 'Illithidkin : Command au niveau 3');
+    ok(SPECIES_DATA['Illithidkin'].traits[5]?.some(t => t.name === 'Levitate'), 'Illithidkin : Levitate au niveau 5');
+    ok(SPECIES_DATA['Deep Imaskari'].traits[3]?.some(t => t.name === 'Aura of Unlight'), 'Deep Imaskari : Aura of Unlight au niveau 3');
+    // Le Kuo-toa n'a aucune vision dans le noir dans le document publié : c'est
+    // voulu, pas un oubli de saisie. On fige le constat pour qu'il se voie.
+    ok(!SPECIES_DATA['Kuo-toa'].traits[1].some(t => t.name === 'Darkvision'),
+       'Kuo-toa : pas de Darkvision (conforme au document de playtest)');
+
+    // L'Ardling vient d'un autre playtest, écarté du PHB 2024
+    ok(SPECIES_DATA['Ardling']?.ua, 'Ardling : étiqueté UA');
+    ok(/2022/.test(sourceUA('Ardling')), 'Ardling : source datée de 2022');
+
+    // Télépathie à portée fixe (Illithidkin, Myconid) : entier positif
+    Object.entries(SPECIES_DATA).forEach(([sp, d]) => {
+      const t = d.effects?.telepathy;
+      if (t !== undefined) ok(Number.isInteger(t) && t > 0, `${sp} : telepathy invalide (${t})`);
+    });
+    eq(SPECIES_DATA['Illithidkin'].effects.telepathy, 30, 'Illithidkin : télépathie 30 ft');
+    eq(SPECIES_DATA['Myconid'].effects.telepathy, 30, 'Myconid : télépathie 30 ft');
+  }
 
   // Feats généraux : description non vide
   Object.entries(GENERAL_FEATS).forEach(([f, d]) =>

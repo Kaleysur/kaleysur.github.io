@@ -5345,7 +5345,7 @@ function renderSpeciesTraits() {
   const totalLvl = getTotalLevel(c);
   const lineage  = (data.lineages && data.lineages[c.lineage]) ? c.lineage : '';
   document.getElementById('species-title').textContent =
-    c.species + (lineage ? ' (' + lineage + ')' : '') + ' — Species Traits';
+    nomUA(c.species) + (lineage ? ' (' + lineage + ')' : '') + ' — Species Traits';
 
   // Effets mécaniques : ceux de l'espèce, surchargés par ceux de la lignée
   const fx = Object.assign({}, data.effects, (data.lineages?.[lineage]?.effects) || {});
@@ -5362,6 +5362,8 @@ function renderSpeciesTraits() {
                   : `<button class="apply-btn" id="sp-apply-speed">✓ Appliquer (${speedTarget} ft)</button>`}</div>
       ${fx.telepathyPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Telepathy:</span>
         ${fx.telepathyPerLevel} ft/niveau — soit <strong>${fx.telepathyPerLevel * totalLvl} ft</strong> at level ${totalLvl}</div>` : ''}
+      ${fx.telepathy ? `<div class="cf-prof-item"><span class="cf-prof-label">Telepathy:</span>
+        <strong>${fx.telepathy} ft</strong></div>` : ''}
       ${fx.hpPerLevel ? `<div class="cf-prof-item"><span class="cf-prof-label">Bonus HP:</span>
         +${fx.hpPerLevel}/level — that is <strong>+${fx.hpPerLevel * totalLvl}</strong> PV max at level ${totalLvl}
         <span style="color:#888;font-size:0.9em;">(applied at creation — add it yourself on each level up)</span></div>` : ''}
@@ -5431,7 +5433,7 @@ function populateSpeciesUI() {
   const isKnown = names.includes(c.species);
 
   sel.innerHTML = '<option value="">— Species —</option>'
-    + names.map(n => `<option value="${n}"${c.species === n ? ' selected' : ''}>${n}</option>`).join('')
+    + names.map(n => `<option value="${n}"${titreUA(n)}${c.species === n ? ' selected' : ''}>${nomUA(n)}</option>`).join('')
     + `<option value="__custom__"${c.species && !isKnown ? ' selected' : ''}>Custom…</option>`;
   custom.style.display = (c.species && !isKnown) ? '' : 'none';
 
@@ -6065,7 +6067,7 @@ function renderMulticlasses() {
   const classes   = c.classes;
   const container = document.getElementById('mc-classes-container');
   if (!container) return;
-  const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Psion','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
+  const CLASS_LIST = Object.keys(DND_CLASSES).sort();
   container.innerHTML = '';
   classes.forEach((cl, idx) => {
     const row = document.createElement('div');
@@ -6073,7 +6075,7 @@ function renderMulticlasses() {
     const subclasses = SUBCLASS_DATA[cl.classe] ? Object.keys(SUBCLASS_DATA[cl.classe]) : [];
     const isCustom   = cl.sousClasse === '__custom__' || (cl.sousClasse && !subclasses.includes(cl.sousClasse) && subclasses.length > 0);
     const subOptions = subclasses.map(s => `<option value="${s}"${cl.sousClasse===s?' selected':''}>${s}</option>`).join('');
-    const classOptions = CLASS_LIST.map(name => `<option value="${name}"${cl.classe===name?' selected':''}>${name}</option>`).join('');
+    const classOptions = CLASS_LIST.map(name => `<option value="${name}"${titreUA(name)}${cl.classe===name?' selected':''}>${nomUA(name)}</option>`).join('');
     row.innerHTML = `
       <select class="field-input mc-classe-sel" title="Class">
         <option value="">— Class —</option>${classOptions}
@@ -8096,7 +8098,7 @@ function renderLvlupTab() {
     </div>`;
 
     // Class options
-    const clsOpts = ALL_CLASSES.map(cls=>`<option value="${cls}"${cls===d.cls?'selected':''}>${cls}</option>`).join('');
+    const clsOpts = ALL_CLASSES.map(cls=>`<option value="${cls}"${titreUA(cls)}${cls===d.cls?'selected':''}>${nomUA(cls)}</option>`).join('');
 
     return `<div class="lvlrow${isOpen?' open':''}" data-ri="${i}">
       <div class="lvlrow-hd" data-hd="${i}">
@@ -12856,9 +12858,9 @@ ${car} characters of notes.
     const selLang1   = document.getElementById('wiz-lang1');
     const selLang2   = document.getElementById('wiz-lang2');
     selSpecies.innerHTML = '<option value="">— Choose —</option>'
-      + Object.keys(SPECIES_DATA).map(n => `<option>${n}</option>`).join('');
+      + Object.keys(SPECIES_DATA).map(n => `<option value="${n}"${titreUA(n)}>${nomUA(n)}</option>`).join('');
     selClass.innerHTML   = '<option value="">— Choose —</option>'
-      + Object.keys(CLASS_DATA).map(n => `<option>${n}</option>`).join('');
+      + Object.keys(CLASS_DATA).map(n => `<option value="${n}"${titreUA(n)}>${nomUA(n)}</option>`).join('');
     selBg.innerHTML      = '<option value="">— Choose —</option>'
       + Object.keys(BACKGROUND_DATA).map(n => `<option>${n}</option>`).join('');
 
@@ -13408,8 +13410,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     $('lvlup-exp-note').textContent = `${expertisePick.size} / ${plan.expertiseCount} chosen`;
   }
 
-  const CLASS_LIST = ['Artificer','Barbarian','Bard','Cleric','Druid','Fighter','Monk',
-                      'Paladin','Psion','Ranger','Rogue','Sorcerer','Warlock','Wizard'];
+  const CLASS_LIST = Object.keys(DND_CLASSES).sort();
 
   function refresh() {
     const c = C();
@@ -13609,9 +13610,9 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     const c = C();
     const cur = getClasses(c).map(cl => cl.classe).filter(Boolean);
     $('lvlup-class').innerHTML =
-        `<optgroup label="Your classes">${cur.map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`
+        `<optgroup label="Your classes">${cur.map(n => `<option value="${esc(n)}">${esc(nomUA(n))}</option>`).join('')}</optgroup>`
       + `<optgroup label="Multiclasser">${CLASS_LIST.filter(n => !cur.includes(n))
-            .map(n => `<option>${esc(n)}</option>`).join('')}</optgroup>`;
+            .map(n => `<option value="${esc(n)}">${esc(nomUA(n))}</option>`).join('')}</optgroup>`;
     chosenHp = null;
     asiMode = 'abil';
     expertisePick = new Set();
