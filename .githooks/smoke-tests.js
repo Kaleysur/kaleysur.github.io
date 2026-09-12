@@ -156,11 +156,13 @@ function ok(cond, label) {
   const { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS, ORIGIN_FEATS,
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
           STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,
-          FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA } =
+          FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,
+          CANTRIPS_KNOWN, CLASS_RESOURCES } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
       + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
       + ' FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,'
+      + ' CANTRIPS_KNOWN, CLASS_RESOURCES,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -960,9 +962,89 @@ function ok(cond, label) {
   // Le grimoire est propre au Magicien (PHB 2024)
   eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.book).map(([c]) => c).join(','),
      'Wizard', 'seul le Magicien a un grimoire');
-  // Liste fixe (échange au niveau) : Barde, Rôdeur, Ensorceleur, Occultiste
+
+  /* ── Psion — « Psion Update » (2 octobre 2025) ──
+     Les chiffres viennent de la table Psion Features du document. Ils sont
+     figés ici parce qu'une classe de playtest se fait rééditer : le jour où
+     une table bouge, l'écart doit se voir tout de suite. */
+  {
+    const p = CLASS_DATA.Psion;
+    eq(p.uaSource, 'Psion Update (Oct. 2025)', 'Psion : document de référence');
+
+    // Table des capacités, niveau par niveau
+    const attendu = {
+      1: ['Psionic Power', 'Spellcasting', 'Subtle Telekinesis'],
+      2: ['Psionic Discipline'],
+      3: ['Psion Subclass'],
+      4: ['Ability Score Improvement'],
+      5: ['Psionic Discipline', 'Psionic Restoration'],
+      6: ['Subclass Feature'],
+      7: ['Psionic Surge'],
+      8: ['Ability Score Improvement'],
+      10: ['Psionic Discipline', 'Subclass Feature'],
+      12: ['Ability Score Improvement'],
+      13: ['Psionic Discipline'],
+      14: ['Subclass Feature'],
+      16: ['Ability Score Improvement'],
+      17: ['Psionic Discipline'],
+      18: ['Psionic Reserves'],
+      19: ['Epic Boon'],
+      20: ['Enkindled Life Force'],
+    };
+    eq(Object.keys(p.features).map(Number).sort((a, b) => a - b),
+       Object.keys(attendu).map(Number).sort((a, b) => a - b),
+       'Psion : niveaux qui donnent une capacité');
+    Object.entries(attendu).forEach(([lvl, noms]) =>
+      eq((p.features[lvl] || []).map(f => f.name), noms, `Psion niveau ${lvl}`));
+
+    // Les Modes Psioniques ont été retirés de la classe par la mise à jour
+    const tousNoms = Object.values(p.features).flat().map(f => f.name);
+    ok(!tousNoms.includes('Psionic Modes'), 'Psion : Psionic Modes retiré');
+    ok(!JSON.stringify(SUBCLASS_DATA.Psion.Metamorph).includes('Attack Mode'),
+       'Metamorph : ne renvoie plus aux Modes Psioniques');
+    ok(!JSON.stringify(SUBCLASS_DATA.Psion.Telepath).includes('Defense Mode'),
+       'Telepath : ne renvoie plus aux Modes Psioniques');
+
+    // Sorts mineurs : 2 au niveau 1, 3 au 4, 4 au 10
+    eq(CANTRIPS_KNOWN.Psion[0], 2, 'Psion : 2 sorts mineurs au niveau 1');
+    eq(CANTRIPS_KNOWN.Psion[3], 3, 'Psion : 3 sorts mineurs au niveau 4');
+    eq(CANTRIPS_KNOWN.Psion[9], 4, 'Psion : 4 sorts mineurs au niveau 10');
+    eq(CANTRIPS_KNOWN.Psion[2], 2, 'Psion : encore 2 au niveau 3');
+    eq(CANTRIPS_KNOWN.Psion[8], 3, 'Psion : encore 3 au niveau 9');
+
+    // Sorts préparés : table de lanceur complet standard
+    eq(PREPARED_SPELLS.Psion, [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22],
+       'Psion : table des sorts préparés');
+
+    // Dés d'Énergie Psionique : 4 / 6 / 8 / 10 / 12 par tranches de quatre niveaux
+    const des = lvl => CLASS_RESOURCES.Psion(lvl)[0].max;
+    [[1,4],[4,4],[5,6],[8,6],[9,8],[12,8],[13,10],[16,10],[17,12],[20,12]].forEach(([lvl, n]) =>
+      eq(des(lvl), n, `Psion : ${n} dés d'énergie au niveau ${lvl}`));
+    eq(CLASS_RESOURCES.Psion(5).length, 1, 'Psion : une seule ressource (plus de Modes)');
+
+    // Quatre sous-classes : le Psi Warper n'est pas réimprimé dans la mise à
+    // jour, mais le document dit qu'il n'a pas besoin d'un autre playtest.
+    eq(Object.keys(SUBCLASS_DATA.Psion).sort(),
+       ['Metamorph', 'Psi Warper', 'Psykinetic', 'Telepath'], 'Psion : quatre sous-classes');
+    ['Metamorph', 'Psykinetic', 'Telepath'].forEach(sc => {
+      const f = SUBCLASS_DATA.Psion[sc];
+      eq(Object.keys(f).map(Number).sort((a, b) => a - b), [3, 6, 10, 14], `${sc} : paliers 3/6/10/14`);
+    });
+    ok(SUBCLASS_DATA.Psion.Metamorph[3].some(f => f.name === 'Mutable Form'),
+       'Metamorph : Mutable Form (ex-Extend Limbs) au niveau 3');
+    ok(SUBCLASS_DATA.Psion.Metamorph[6].some(f => f.name === 'Flesh Weaver'),
+       'Metamorph : Flesh Weaver, capacité neuve au niveau 6');
+    ok(SUBCLASS_DATA.Psion.Psykinetic[3].some(f => f.name === 'Stronger Telekinesis'),
+       'Psykinetic : Stronger Telekinesis, capacité neuve au niveau 3');
+    ok(SUBCLASS_DATA.Psion.Telepath[3].some(f => f.name === 'Telepathic Distraction'),
+       'Telepath : Telepathic Distraction remplace Telepathic Hub');
+  }
+
+  // Liste fixe (échange au niveau) : Barde, Rôdeur, Ensorceleur, Occultiste —
+  // et le Psion depuis « Psion Update » (oct. 2025), qui l'a fait passer de
+  // l'échange au repos long à l'échange en montant de niveau.
   eq(Object.entries(SPELL_PREP_STYLE).filter(([, s]) => s.swap === 'level').map(([c]) => c).sort().join(','),
-     'Bard,Ranger,Sorcerer,Warlock', 'classes à liste fixe (PHB 2024)');
+     'Bard,Psion,Ranger,Sorcerer,Warlock', 'classes à liste fixe');
 
   // La premiere capacite d'une sous-classe tombe au niveau 3 (PHB 2024).
   // Un reliquat 2014 (niveau 2 pour Druide/Magicien) laisserait le joueur sans

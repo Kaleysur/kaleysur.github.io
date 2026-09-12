@@ -43,8 +43,8 @@ const PREPARED_SPELLS = {
 
 /* ── Progression des sorts mineurs ──
    PHB 2024 : les lanceurs complets en gagnent un aux niveaux 4 et 10.
-   Paladin et Rodeur n'en ont pas. Le Psion suit le texte de sa propre classe
-   (2 au niveau 1, 3 au niveau 10, 4 au niveau 14 — UA 2025).
+   Paladin et Rodeur n'en ont pas. Le Psion suit la meme cadence depuis la
+   mise a jour d'octobre 2025 (2 au niveau 1, 3 au niveau 4, 4 au niveau 10).
    L'Artificier suit la progression Tasha's, faute de table 2024 publiee. */
 const CANTRIPS_KNOWN = {
   'Artificer': [2,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,5,5,5],
@@ -52,7 +52,7 @@ const CANTRIPS_KNOWN = {
   'Cleric':    [3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5],
   'Druid':     [2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
   'Paladin':   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-  'Psion':     [2,2,2,2,2,2,2,2,2,3,3,3,4,4,4,4,4,4,4,4],
+  'Psion':     [2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
   'Ranger':    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
   'Sorcerer':  [4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6],
   'Warlock':   [2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
@@ -70,9 +70,9 @@ const SPELL_PREP_STYLE = {
   'Cleric':    { swap:'long',  book:false },
   'Druid':     { swap:'long',  book:false },
   'Paladin':   { swap:'long',  book:false },
-  'Psion':     { swap:'long',  book:false },   // UA 2025
   'Wizard':    { swap:'long',  book:true  },   // grimoire + sorts préparés du jour
   'Bard':      { swap:'level', book:false },
+  'Psion':     { swap:'level', book:false },   // UA — Psion Update (oct. 2025)
   'Ranger':    { swap:'level', book:false },
   'Sorcerer':  { swap:'level', book:false },
   'Warlock':   { swap:'level', book:false },
@@ -1038,39 +1038,47 @@ const CLASS_DATA = {
   }
 },
 
-/* ── Psion — Unearthed Arcana 2025 (matériel de playtest, non officiel) ── */
+/* ── Psion — Unearthed Arcana (matériel de playtest, non officiel) ──
+   Aligné sur « Psion Update » (2 octobre 2025), qui remplace la version de
+   mai 2025 : les Modes Psioniques disparaissent, les Disciplines arrivent
+   plus tôt mais une à la fois, Réserves Psioniques est neuve, et les sorts
+   mineurs se gagnent aux niveaux 4 et 10 au lieu de 10 et 14. */
 'Psion': {
-  ua: true, uaSource: 'The Psion (May 2025)',
+  ua: true, uaSource: 'Psion Update (Oct. 2025)',
   saves: ['int','sag'],
   skillChoices: 2, skillList: ['arcanes','perspicacite','intimidation','investigation','medecine','perception','persuasion'],
   armorProf: 'None',
   weaponProf: 'Simple weapons',
   features: {
     1: [
-      { name:'Spellcasting', type:'feature', desc:"Full spellcaster using Intelligence. Prepare Psion spells; you know 2 cantrips at level 1 (3 at level 10, 4 at level 14). <em>Psionic Spellcasting</em>: your Psion spells need no Verbal or Material component (except costly materials)." },
-      { name:'Psionic Power', type:'feature', desc:"You have Psionic Energy Dice (d6 at level 1, growing to d12; 4 dice at level 1, up to 12). Regain one on a Short Rest, all on a Long Rest. Save DC = your spell save DC. Two powers: <em>Telekinetic Propel</em> (bonus action, push/pull a Large or smaller creature within 30 ft on a failed STR save, 5 ft × the roll) and <em>Telepathic Connection</em> (bonus action, expend a die to extend your 5-ft telepathy by 10 ft × the roll for a number of minutes equal to your level)." },
+      { name:'Psionic Power', type:'feature', desc:"Psionic Energy Dice: <strong>4d6</strong> at level 1, 6d8 at 5, 8d8 at 9, 8d10 at 11, 10d10 at 13, 12d12 at 17. Regain one on a Short Rest, all on a Long Rest. Save DC = your spell save DC. Two powers: <em>Telekinetic Propel</em> (bonus action — a Large or smaller creature within 30 ft makes a STR save or is moved 5 ft straight toward or away from you; you may instead roll a Psionic Energy Die and move it 5 ft × the roll, and the die is expended only if the save fails). <em>Telepathic Connection</em> (you have telepathy 30 ft; as a bonus action roll a die to extend the range by 10 ft × the roll for 1 hour — the first use after each Long Rest doesn't expend the die)." },
+      { name:'Spellcasting', type:'feature', desc:"Full spellcaster using Intelligence. You know 2 Psion cantrips (3 at level 4, 4 at level 10) and prepare Psion spells from your class table (4 at level 1). You may swap one prepared spell each time you gain a level. <em>Psionic Spellcasting</em>: your Psion spells need no Verbal or Material component, except Materials that are consumed or have a listed cost." },
       { name:'Subtle Telekinesis', type:'feature', desc:"You know Mage Hand. You can cast it without Somatic components and make the spectral hand Invisible." }
     ],
     2: [
-      { name:'Psionic Discipline', type:'feature', desc:"Learn 2 disciplines fuelled by your Psionic Energy Dice (e.g. Destructive Thoughts, Ego Whip, Expanded Awareness, Inerrant Aim). One discipline per turn. You gain 2 more at levels 10 and 17, and can swap one each level." },
-      { name:'Psionic Modes', type:'feature', desc:"Bonus action, 1 minute — <em>Attack Mode</em>: your damage ignores Psychic Resistance and you can expend a die to reroll damage dice up to your INT modifier. <em>Defense Mode</em>: Resistance to Psychic damage, and on a failed INT/WIS/CHA save you can react to expend a die and add the roll. Two uses, regained on a Long Rest." }
+      { name:'Psionic Discipline', type:'feature', desc:"You gain <strong>2</strong> disciplines fuelled by your Psionic Energy Dice — Biofeedback, Bolstering Precognition, Destructive Thoughts, Devilish Tongue, Expanded Awareness, Id Insinuation, Inerrant Aim, Observant Mind, Psionic Backlash, Psionic Guards, Sharpened Mind. One discipline per turn, once per turn (Psionic Guards and Sharpened Mind let you use another the same turn). You gain one more at levels 5, 10, 13 and 17, and can swap one each time you gain a level." }
     ],
     3: [{ name:'Psion Subclass', type:'subclass', desc:"Choose a subclass: Metamorph, Psi Warper, Psykinetic, or Telepath." }],
     4: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
-    5: [{ name:'Psionic Restoration', type:'feature', desc:"On a Short Rest, regain expended Psionic Energy Dice up to half your number of dice (round down). Once per Long Rest." }],
+    5: [
+      { name:'Psionic Discipline', type:'feature', desc:"You learn one additional Psionic Discipline." },
+      { name:'Psionic Restoration', type:'feature', desc:"A meditation of 1 minute restores your expended Psionic Energy Dice. Once per Long Rest." }
+    ],
     6: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Psion subclass." }],
-    7: [{ name:'Psionic Surge', type:'feature', desc:"When you roll Initiative, you can expend one Hit Point Die to regain an expended use of Psionic Modes." }],
+    7: [{ name:'Psionic Surge', type:'feature', desc:"After you roll one or more Psionic Energy Dice, you can expend one Hit Point Die and treat any roll of 1, 2 or 3 on those dice as a 4." }],
     8: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
     10: [
-      { name:'Psionic Discipline', type:'feature', desc:"You learn 2 additional Psionic Disciplines." },
+      { name:'Psionic Discipline', type:'feature', desc:"You learn one additional Psionic Discipline." },
       { name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Psion subclass." }
     ],
     12: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
+    13: [{ name:'Psionic Discipline', type:'feature', desc:"You learn one additional Psionic Discipline." }],
     14: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Psion subclass." }],
     16: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
-    17: [{ name:'Psionic Discipline', type:'feature', desc:"You learn 2 additional Psionic Disciplines." }],
+    17: [{ name:'Psionic Discipline', type:'feature', desc:"You learn one additional Psionic Discipline." }],
+    18: [{ name:'Psionic Reserves', type:'feature', desc:"When you roll Initiative, you regain expended Psionic Energy Dice until you have four, if you have fewer than that." }],
     19: [{ name:'Epic Boon', type:'epic', desc:"Gain an Epic Boon feat or another feat of your choice. Boon of Energy Resistance is recommended." }],
-    20: [{ name:'Enkindled Lifeforce', type:'feature', desc:"Once per turn, when you expend and roll a Psionic Energy Die for a Psion feature or Discipline, you can expend two Hit Point Dice to roll two extra Psionic Energy Dice and add their results." }]
+    20: [{ name:'Enkindled Life Force', type:'feature', desc:"Once per turn, when you roll one or more Psionic Energy Dice for a Psion feature or Discipline, you can expend one or two Hit Point Dice. For each one, roll an additional Psionic Energy Die and add it to the total — those extra dice are not expended." }]
   }
 },
 
@@ -1619,21 +1627,27 @@ const SUBCLASS_DATA = {
 
 },
 
-/* ── Psion (Unearthed Arcana 2025 — playtest) ── */
+/* ── Psion (Unearthed Arcana — playtest) ──
+   Metamorph, Psykinetic et Telepath suivent « Psion Update » (oct. 2025).
+   Le Psi Warper n'y est pas réimprimé : le document dit qu'il a si bien
+   marqué au sondage qu'il n'a pas besoin d'un second passage. Sa version de
+   mai 2025 reste donc valide, on la garde telle quelle. */
 'Psion': {
   'Metamorph': {
     3:[
-      { name:'Metamorph Spells', desc:'Always prepared as you gain levels: Cure Wounds, False Life · Alter Self, Enlarge/Reduce · Vampiric Touch · Polymorph · Contagion.' },
-      { name:'Organic Weapons', desc:'On the Attack action or an Opportunity Attack, reshape a free hand into an organic weapon (INT for attack and damage; Psychic damage optional). <em>Bone Blade</em>: Simple melee, Finesse, 1d8 Piercing, Advantage if an ally is within 5 ft of the target. <em>Flesh Maul</em>: Simple melee, 1d10 Bludgeoning, target has Disadvantage on its next STR or CON save. <em>Viscera Launcher</em>: Simple ranged 30/90, 1d6 Acid, +1d6 Acid once per turn on a hit.' },
-      { name:'Extend Limbs', desc:'Bonus action, expend a Psionic Energy Die: for 1 minute, +5 ft reach, +5 ft Speed, and your Touch-range spells with a casting time of an action reach 10 ft.' }
+      { name:'Metamorph Spells', desc:'Always prepared — <strong>3</strong>: Alter Self, Cure Wounds, Inflict Wounds, Lesser Restoration · <strong>5</strong>: Aura of Vitality, Haste · <strong>7</strong>: Polymorph, Stoneskin · <strong>9</strong>: Contagion, Mass Cure Wounds.' },
+      { name:'Mutable Form', desc:'Bonus action, expend one Psionic Energy Die: roll it and gain Temporary HP equal to the roll + your INT modifier (minimum 1). For 1 minute you also gain +5 ft reach, +5 ft Speed, and your Touch-range spells with a casting time of an action reach 10 ft.' },
+      { name:'Organic Weapons', desc:'Magic action (or as part of the Attack action, before the roll): reshape a free hand into an organic weapon. It keeps that form until you change it, fall Unconscious, or revert it. Use INT for attack and damage. <em>Bone Blade</em>: Simple melee, Finesse, 1d8 Piercing — Advantage if a non-Incapacitated ally is within 5 ft of the target. <em>Flesh Maul</em>: Simple melee, 1d10 Bludgeoning — the target has Disadvantage on its next STR or CON save. <em>Viscera Launcher</em>: Simple ranged 30/90, 1d6 Acid — +1d6 Acid once per turn on a hit.' }
     ],
     6:[
       { name:'Extra Attack', desc:'Attack twice on the Attack action. You can replace one attack with a Psion cantrip that has a casting time of an action.' },
-      { name:'Quickened Healing', desc:'When you cast Cure Wounds, expend two Psionic Energy Dice to cast it as a Bonus Action; roll one die and add the result to the HP restored.' }
+      { name:'Flesh Weaver', desc:'When you use Mutable Form, expend an additional Psionic Energy Die to gain, while it lasts: <em>Organic Defense</em> (+2 AC) and <em>Empowered Healing</em> (when a spell you cast with a slot restores HP, expend one die and add its roll to the HP regained).' }
     ],
-    10:[{ name:'Mutable Form', desc:'Extend Limbs lasts 10 minutes and grants one benefit: <em>Stony Epidermis</em> (Advantage on CON saves for Concentration + Resistance to a chosen damage type), <em>Superior Stride</em> (Dash as a Bonus Action, Climb and Swim Speed equal to your Speed, unarmoured), or <em>Unnatural Flexibility</em> (+2 AC, squeeze through 1-inch spaces, 5 ft of movement to escape restraints or a grapple).' }],
-    14:[{ name:'Life-Bending Weapons', desc:'Once per turn on a hit with your Organic Weapon, expend and roll a Psionic Energy Die: creatures of your choice in a 10-ft Emanation regain HP equal to the roll + your INT modifier, and one creature of your choice there takes that much Necrotic damage.' }],
+    10:[{ name:'Improved Mutable Form', desc:'Mutable Form lasts 10 minutes and grants one benefit of your choice until it ends: <em>Stony Epidermis</em> (Advantage on CON saves to keep Concentration, plus Resistance to a damage type of your choice), <em>Superior Stride</em> (while unarmoured: Dash as a Bonus Action, and Climb and Swim Speed equal to your Speed), or <em>Unnatural Flexibility</em> (+1 AC, move through spaces as narrow as 1 inch, and spend 5 ft of movement to escape nonmagical restraints or end the Grappled condition).' }],
+    14:[{ name:'Life-Bending Weapons', desc:'On a hit with your Organic Weapon, roll one Psionic Energy Die and deal that much extra Necrotic damage — this roll does not expend the die. Alternatively, expend one die: the target takes that much extra Necrotic damage and each creature of your choice in a 30-ft Emanation regains HP equal to the roll + your INT modifier. Once per turn.' }],
   },
+  /* Psi Warper — version « The Psion » (mai 2025), non réimprimée dans la
+     mise à jour : le document indique qu'elle n'a pas besoin d'un autre test. */
   'Psi Warper': {
     3:[
       { name:'Psi Warper Spells', desc:'Always prepared as you gain levels: Jump, Longstrider · Misty Step, Shatter · Blink, Thunder Step · Dimension Door · Far Step.' },
@@ -1649,28 +1663,29 @@ const SUBCLASS_DATA = {
   },
   'Psykinetic': {
     3:[
-      { name:'Psykinetic Spells', desc:'Always prepared as you gain levels: Shield, Telekinetic Crush · Levitate, Telekinetic Grasp · Fly · Telekinesis.' },
-      { name:'Telekinetic Techniques', desc:'When you use Telekinetic Propel, add one effect: <em>Boost</em> (target Speed +10 ft until your next turn), <em>Disorient</em> (no Opportunity Attacks until its next turn), or <em>Telekinetic Bolt</em> (on a failed save, Force damage equal to the die roll).' }
+      { name:'Psykinetic Spells', desc:'Always prepared — <strong>3</strong>: Cloud of Daggers, Levitate, Shield, Thunderwave · <strong>5</strong>: Slow, Telekinetic Crush · <strong>7</strong>: Otiluke\'s Resilient Sphere, Stone Shape · <strong>9</strong>: Telekinesis, Wall of Force.' },
+      { name:'Stronger Telekinesis', desc:'When you cast Mage Hand, its range increases by 30 ft and the spectral hand can carry up to 20 pounds.' },
+      { name:'Telekinetic Techniques', desc:'When you use Telekinetic Propel you can roll 1d4 and use that number instead of expending a Psionic Energy Die. When the target fails its save, add one effect: <em>Boost</em> (its Speed +10 ft until the start of your next turn), <em>Disorient</em> (no Opportunity Attacks until the start of its next turn), or <em>Telekinetic Bolt</em> (Force damage equal to the number rolled on the Psionic Energy Die).' }
     ],
     6:[
-      { name:'Empowered Attack Mode', desc:'While Attack Mode is active you gain a Fly Speed of 60 ft (and can hover), and you add your INT modifier to one damage roll of each Psion spell you cast.' },
-      { name:'Rebounding Field', desc:'When Shield makes a triggering attack miss, expend one Psionic Energy Die: the attacker makes a DEX save. Roll two dice — on a failure it takes that much Force damage and you gain that many Temporary HP; half damage on a success.' }
+      { name:'Destructive Trance', desc:'At the start of your turn, expend one Psionic Energy Die: for 10 minutes you gain a Fly Speed of 20 ft and can hover, and when you cast a Psion spell with a spell slot you can roll a Psionic Energy Die and add it to one damage roll of that spell — that roll does not expend the die.' },
+      { name:'Rebounding Field', desc:'When you cast Shield in response to being hit and the attack misses, expend one Psionic Energy Die: the attacker makes a DEX save, taking Force damage equal to a die roll + your INT modifier (half as much on a success). You gain Temporary HP equal to the damage dealt, whether the save succeeds or fails.' }
     ],
-    10:[{ name:'Enhanced Telekinetic Crush', desc:'When you cast Telekinetic Crush, expend one Psionic Energy Die so the target\'s Speed is halved until the start of your next turn, whether it saves or not.' }],
-    14:[{ name:'Heightened Telekinesis', desc:'When you cast Telekinesis, expend four Psionic Energy Dice to drop Concentration (duration becomes 1 minute) and to target Gargantuan creatures and objects.' }],
+    10:[{ name:'Enhanced Telekinetic Crush', desc:'When you cast Telekinetic Crush, expend one Psionic Energy Die: the target\'s Speed is halved until the start of your next turn whether it saves or not, and you add the die\'s roll to one damage roll of the spell.' }],
+    14:[{ name:'Heightened Telekinesis', desc:'Cast Telekinesis without a spell slot by expending four Psionic Energy Dice instead. Cast that way, you can drop Concentration — the duration becomes 1 minute — and you can target Gargantuan creatures and objects.' }],
   },
   'Telepath': {
     3:[
-      { name:'Telepath Spells', desc:'Always prepared as you gain levels: Charm Person, Detect Thoughts · Hold Person, Suggestion · Confusion · Modify Memory.' },
-      { name:'Mind Infiltrator', desc:'When you cast Detect Thoughts, expend two Psionic Energy Dice so it needs no components or Concentration, and the target doesn\'t notice you probing on a failed WIS save.' },
-      { name:'Telepathic Hub', desc:'Your telepathy has a range of 10 ft. When you expend a die to extend it with Telepathic Connection, you can contact 1 + the number rolled creatures at once for the duration.' }
+      { name:'Telepath Spells', desc:'Always prepared — <strong>3</strong>: Bane, Command, Detect Thoughts, Mind Spike · <strong>5</strong>: Counterspell, Slow · <strong>7</strong>: Compulsion, Confusion · <strong>9</strong>: Modify Memory, Yolande\'s Regal Presence.' },
+      { name:'Mind Infiltrator', desc:'When you cast Detect Thoughts, expend one Psionic Energy Die so the spell needs no components and no Concentration. With its Read Thoughts effect, a target that fails its WIS save doesn\'t notice you probing its mind.' },
+      { name:'Telepathic Distraction', desc:'Reaction when a creature you can see within range of your telepathy hits with an attack roll: roll one Psionic Energy Die and subtract it from the attack roll, possibly turning the hit into a miss. The die is expended only if the attack then misses.' }
     ],
     6:[
-      { name:'Empowered Defense Mode', desc:'While Defense Mode is active you add 1d4 to every saving throw, and you can extend that benefit to creatures you are telepathically connected with.' },
-      { name:'Potent Thoughts', desc:'You add your INT modifier to the damage of any Psion cantrip.' }
+      { name:'Bulwark Mind', desc:'At the start of your turn, expend one Psionic Energy Die: for 10 minutes you have Resistance to Psychic damage, and you add a roll of your Psionic Energy Die to every INT, WIS and CHA saving throw — that roll does not expend the die. Unusable while you have the Incapacitated condition.' },
+      { name:'Potent Thoughts', desc:'Your telepathy reaches 60 ft, and you add your INT modifier to the damage of any Psion cantrip.' }
     ],
-    10:[{ name:'Telepathic Bolstering', desc:'Your telepathy reaches 30 ft. Reaction when you or a creature within that range fails an ability check or misses an attack: expend and roll a Psionic Energy Die and add it to the d20. The die is expended only if the roll then succeeds.' }],
-    14:[{ name:'Scramble Minds', desc:'When you cast Confusion, expend four Psionic Energy Dice to widen the Sphere to a 30-ft radius. Affected creatures roll two d10s and you choose which result governs their turn.' }],
+    10:[{ name:'Telepathic Bolstering', desc:'Reaction when you, or a creature you can see within range of your telepathy, fails an ability check or misses an attack: expend one Psionic Energy Die and add its roll to the d20. The die is expended only if the check then succeeds or the attack hits.' }],
+    14:[{ name:'Scramble Minds', desc:'Cast Confusion without a spell slot by expending four Psionic Energy Dice instead. Cast that way, the Sphere\'s radius becomes 30 ft and one creature you can see in the area automatically succeeds on its save. While the spell lasts, you choose each affected creature\'s behaviour from the table instead of it rolling.' }],
   },
 },
 
@@ -2040,10 +2055,11 @@ const CLASS_RESOURCES = {
     return r;
   },
   Psion: lvl => [
-    // Dés d'Énergie Psionique — d6 → d12, 4 → 12 dés (UA 2025)
+    // Dés d'Énergie Psionique (Psion Update, oct. 2025) : 4d6 → 6d8 au niv. 5,
+    // 8d8 au 9, 8d10 au 11, 10d10 au 13, 12d12 au 17. Les Modes Psioniques,
+    // eux, ont été retirés de la classe.
     { name:'Psionic Energy Dice', used:0,
-      max:[4,4,4,6,6,6,8,8,8,10,10,10,12,12,12,12,12,12,12,12][Math.min(lvl,20)-1], reset:'long' },
-    { name:'Psionic Modes', used:0, max:2, reset:'long' }
+      max:[4,4,4,4,6,6,6,6,8,8,8,8,10,10,10,10,12,12,12,12][Math.min(lvl,20)-1], reset:'long' }
   ],
   Ranger: lvl => [
     { name:"Hunter's Mark", used:0, max:lvl>=17?3:lvl>=9?2:1, reset:'long' }
