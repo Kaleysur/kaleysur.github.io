@@ -634,6 +634,120 @@ const SPECIES_DATA = {
       5: [{ name:'Darkness', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }]
     }
   }
+},
+
+/* ════════════════════════════════════════════════════════════
+   ESPÈCES UNEARTHED ARCANA — matériel de playtest, pas encore officiel.
+   Sources : UA « Underdark Options 2 » (10 septembre 2026) pour cinq d'entre
+   elles, playtest du PHB (2022) pour l'Ardling.
+
+   Le drapeau `ua: true` suffit : nomUA() préfixe « (UA) » partout où le nom
+   est proposé au joueur. La clé, elle, reste le nom nu — c'est ce qui est
+   enregistré dans la fiche et ce qui sert d'index. Le jour où WotC publie
+   l'espèce pour de bon, on retire le drapeau et aucune fiche ne bouge.
+
+   Groupées en fin de liste pour ne pas hacher la liste officielle.
+   ════════════════════════════════════════════════════════════ */
+
+/* L'Ardling est le cas à part du lot : il a été joué en playtest en 2022,
+   puis écarté du PHB 2024 faute d'accueil favorable, et n'est jamais reparu.
+   Il n'est donc pas « à venir » comme les cinq autres — il est en suspens.
+   Gardé quand même : c'est du contenu UA jamais publié, et il coûte une clé. */
+'Ardling': {
+  ua: true, uaSource: "Player's Handbook Playtest 3 (Dec. 2022) — dropped before the 2024 PHB",
+  type: 'Humanoid', size: 'Medium or Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Animal Ancestry', desc:'Choose one celestial ancestry — Climber (bear, cat, lizard, squirrel): Climb Speed equal to your Speed, and once per turn you can add your Proficiency Bonus to the damage of an Unarmed Strike · Flyer (bat, eagle, owl, raven): when you fall at least 10 ft you can use your Reaction to glide down and take no falling damage, and you have Advantage on the check of the Jump action · Racer (deer, dog, horse, triceratops): when you take the Dash action, your Speed increases by ten times your Proficiency Bonus for that action · Swimmer (crocodile, dolphin, frog, shark): you can hold your breath for an hour, you have a Swim Speed equal to your Speed, and you have Resistance to Cold damage.' },
+      { name:'Divine Magic', desc:'You know the Thaumaturgy cantrip; on a Long Rest you can swap it for another Cleric cantrip. Spellcasting: INT, WIS or CHA (choose when you pick this species).' },
+      { name:'Keen Senses', desc:'You have proficiency in the Perception skill.' }
+    ]
+  }
+},
+
+'Deep Imaskari': {
+  ua: true, uaSource: 'Underdark Options 2 (Sept. 2026)',
+  type: 'Humanoid', size: 'Medium or Small', speed: 30,
+  traits: {
+    1: [
+      { name:'Photoresistant', desc:'You have Resistance to Radiant damage.' },
+      { name:'Resourceful', desc:'You gain Heroic Inspiration whenever you finish a Long Rest.' },
+      { name:'Unluminescent', desc:'Action: the crystals in your skin glow with Unlight — you shed Bright Light in a 5-ft radius until you take an action to stop it. They go dark if you die or have the Unconscious condition.' }
+    ],
+    3: [
+      { name:'Aura of Unlight', desc:'Bonus action (1/Long Rest, 1 minute): Bright Light in a 10-ft Emanation. Choose one effect each time you create it — Abjuring Unlight: you and your allies inside gain a bonus to AC equal to half your Proficiency Bonus (round down) · Brilliant Unlight: a creature that is not your ally and starts its turn inside makes a CON save (DC 8 + CHA mod + PB) or is Blinded until the end of your next turn · Corrupting Unlight: you can change the damage of your attacks and spells to Radiant, and roll one unexpended Hit Point Die to add that much extra Radiant damage (the die is spent).' }
+    ]
+  }
+},
+
+'Drider': {
+  ua: true, uaSource: 'Underdark Options 2 (Sept. 2026)',
+  type: 'Monstrosity', size: 'Medium', speed: 30,
+  traits: {
+    1: [
+      { name:'Arachnid Build', desc:'You count as one size larger when determining your carrying capacity.' },
+      { name:'Darkvision', desc:'Darkvision 120 ft.' },
+      { name:'Spells of the Spider Queen', desc:'You know the Dancing Lights cantrip. Spellcasting: INT, WIS or CHA (choose when you pick this species).' },
+      { name:'Spider Climb', desc:'You have a Climb Speed equal to your Speed.' },
+      { name:'Web Walker', desc:'You ignore movement restrictions caused by webs, and you know the location of any other creature in contact with the same web.' }
+    ],
+    3: [
+      { name:'Faerie Fire', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' },
+      { name:'Spider Climb (improved)', desc:'You can move up, down and across vertical surfaces and along ceilings while leaving your hands free.' }
+    ],
+    5: [
+      { name:'Web', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }
+    ]
+  }
+},
+
+'Illithidkin': {
+  ua: true, uaSource: 'Underdark Options 2 (Sept. 2026)',
+  type: 'Humanoid', size: 'Medium or Small', speed: 30,
+  effects: { telepathy: 30 },
+  traits: {
+    1: [
+      { name:'Darkvision', desc:'Darkvision 120 ft.' },
+      { name:'Psionic Aptitude', desc:'You know the Mage Hand cantrip and can make the spectral hand Invisible. Spellcasting: INT, WIS or CHA (choose when you pick this species).' },
+      { name:'Sharpened Mind', desc:'You have Resistance to Psychic damage, and Advantage on saving throws to avoid or end the Charmed condition.' },
+      { name:'Telepathy', desc:'You have telepathy with a range of 30 ft.' }
+    ],
+    3: [
+      { name:'Command', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }
+    ],
+    5: [
+      { name:'Levitate', desc:'Always prepared — cast 1/Long Rest without a slot (or with your slots).' }
+    ]
+  }
+},
+
+/* Kuo-toa : le document de playtest ne lui donne aucune vision dans le noir,
+   si surprenant que ce soit pour un peuple des profondeurs. On s'en tient au
+   texte publié — c'est le genre de trou qui se comble au prochain jet. */
+'Kuo-toa': {
+  ua: true, uaSource: 'Underdark Options 2 (Sept. 2026)',
+  type: 'Humanoid', size: 'Medium', speed: 30,
+  traits: {
+    1: [
+      { name:'Amphibious', desc:'You can breathe both air and water, and you have a Swim Speed equal to your Speed.' },
+      { name:'Deific Manifestation', desc:'You always have Find Familiar prepared and cast it without material components — once per Long Rest without a spell slot. The familiar is a Celestial and can take one of the usual forms or that of a Homunculus or a Myconid Sprout; pick a second form as well, and the familiar gains one action, Reaction or trait from it.' },
+      { name:'Slippery', desc:'Advantage on saving throws to avoid or end the Grappled and Restrained conditions.' }
+    ]
+  }
+},
+
+'Myconid': {
+  ua: true, uaSource: 'Underdark Options 2 (Sept. 2026)',
+  type: 'Plant', size: 'Medium or Small', speed: 30,
+  effects: { telepathy: 30 },
+  traits: {
+    1: [
+      { name:'Darkvision', desc:'Darkvision 120 ft.' },
+      { name:'Rapport Spores', desc:'Action (1/Long Rest): spores fill a 30-ft Emanation. Creatures in it with an Intelligence score of 2 or higher that are not Constructs, Elementals or Undead gain telepathy within a range of 30 ft for 1 hour.' },
+      { name:'Skill Meld', desc:'When you finish a Long Rest you can hold a melding ritual: choose up to six allies within 30 ft (yourself included if you wish) and one skill at least one participant is proficient in. All of them have proficiency in that skill until they finish a Long Rest.' },
+      { name:'Telepathy', desc:'You have telepathy with a range of 30 ft.' }
+    ]
+  }
 }
 };
 
@@ -926,6 +1040,7 @@ const CLASS_DATA = {
 
 /* ── Psion — Unearthed Arcana 2025 (matériel de playtest, non officiel) ── */
 'Psion': {
+  ua: true, uaSource: 'The Psion (May 2025)',
   saves: ['int','sag'],
   skillChoices: 2, skillList: ['arcanes','perspicacite','intimidation','investigation','medecine','perception','persuasion'],
   armorProf: 'None',
@@ -1953,3 +2068,40 @@ const CLASS_RESOURCES = {
     { name:'Infuse Item', used:0, max:Math.floor(lvl/2)+1, reset:'long' }
   ]
 };
+
+/* ════════════════════════════════════════════════════════════
+   UNEARTHED ARCANA — étiquetage des options de playtest
+
+   Une option UA n'est pas officielle : elle peut changer d'un document à
+   l'autre, ou ne jamais sortir. Le joueur doit le voir au moment où il
+   choisit, pas le découvrir en partie. D'où le préfixe « (UA) » partout où
+   le nom est *proposé*.
+
+   La clé d'une option UA reste le nom nu (« Psion », « Myconid ») : c'est
+   elle qui part dans la fiche et qui sert d'index dans les tables. Si WotC
+   publie l'option pour de bon, il suffit de retirer `ua: true` — aucune
+   fiche existante ne casse, aucune migration à écrire.
+   ════════════════════════════════════════════════════════════ */
+
+/** Cette espèce ou cette classe est-elle du matériel de playtest ? */
+function estUA(nom) {
+  if (!nom) return false;
+  return !!(SPECIES_DATA[nom]?.ua || CLASS_DATA[nom]?.ua);
+}
+
+/** Nom tel qu'on l'affiche dans une liste de choix : « (UA) Myconid ». */
+function nomUA(nom) {
+  return estUA(nom) ? '(UA) ' + nom : nom;
+}
+
+/** Document de playtest d'origine, pour l'infobulle d'une option. */
+function sourceUA(nom) {
+  if (!nom) return '';
+  return SPECIES_DATA[nom]?.uaSource || CLASS_DATA[nom]?.uaSource || '';
+}
+
+/** Attribut `title` prêt à coller sur une <option> (vide si l'option est officielle). */
+function titreUA(nom) {
+  const src = sourceUA(nom);
+  return src ? ` title="Unearthed Arcana — ${src} · playtest material, not official yet"` : '';
+}
