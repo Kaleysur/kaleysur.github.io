@@ -61,7 +61,8 @@ if (errors) {
    Ne tourne que si un fichier couvert par les tests est stagé. js/rules-2024.js
    en fait partie depuis que les données de règles y ont été extraites : sans lui
    dans cette liste, changer une table de classe ne déclenchait plus rien. */
-const TESTE = ['joueurs.html', 'dm.html', 'js/rules-2024.js', '.githooks/smoke-tests.js'];
+const TESTE = ['joueurs.html', 'dm.html', 'js/rules-2024.js', 'js/compendium.js',
+               'spells-2024.json', '.githooks/smoke-tests.js'];
 if (staged.some(f => TESTE.includes(f))) {
   try {
     execSync(`node "${__dirname}/smoke-tests.js"`, { stdio: 'inherit' });

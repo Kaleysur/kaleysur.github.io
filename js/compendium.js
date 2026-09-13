@@ -209,7 +209,7 @@
         div.innerHTML = `
           <div class="comp-level-badge">${lvl}</div>
           <div class="comp-item-info">
-            <div class="comp-item-name">${item.name}</div>
+            <div class="comp-item-name">${item.ua ? '(UA) ' : ''}${item.name}</div>
             <div class="comp-item-meta">${school}${conc}${ritual} · ${castTime} · ${range} · ${item.components||''}${mat}</div>
             <div class="comp-item-meta" style="color:#888;font-size:0.7rem;">${classes}</div>
             <div class="comp-item-desc">${preview}</div>
