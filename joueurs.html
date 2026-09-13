@@ -5015,7 +5015,8 @@ function populateSubclassSelect(classe) {
   sel.innerHTML = '<option value="">— None —</option>';
   subs.forEach(s => {
     const opt = document.createElement('option');
-    opt.value = s; opt.textContent = s;
+    opt.value = s; opt.textContent = nomUA(s);
+    const info = infoUA(s); if (info) opt.title = info;
     if (s === current) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -6074,7 +6075,7 @@ function renderMulticlasses() {
     row.className = 'mc-row';
     const subclasses = SUBCLASS_DATA[cl.classe] ? Object.keys(SUBCLASS_DATA[cl.classe]) : [];
     const isCustom   = cl.sousClasse === '__custom__' || (cl.sousClasse && !subclasses.includes(cl.sousClasse) && subclasses.length > 0);
-    const subOptions = subclasses.map(s => `<option value="${s}"${cl.sousClasse===s?' selected':''}>${s}</option>`).join('');
+    const subOptions = subclasses.map(s => `<option value="${s}"${titreUA(s)}${cl.sousClasse===s?' selected':''}>${nomUA(s)}</option>`).join('');
     const classOptions = CLASS_LIST.map(name => `<option value="${name}"${titreUA(name)}${cl.classe===name?' selected':''}>${nomUA(name)}</option>`).join('');
     row.innerHTML = `
       <select class="field-input mc-classe-sel" title="Class">
@@ -13462,7 +13463,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
     subBlock.style.display = plan.needsSubclass ? '' : 'none';
     if (plan.needsSubclass) {
       $('lvlup-sub').innerHTML = '<option value="">— Choose —</option>'
-        + plan.subOptions.map(s => `<option>${esc(s)}</option>`).join('');
+        + plan.subOptions.map(s => `<option value="${esc(s)}"${titreUA(s)}>${esc(nomUA(s))}</option>`).join('');
       $('lvlup-sub-preview').innerHTML = '';
     }
 

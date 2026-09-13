@@ -1272,11 +1272,13 @@ const CLASS_DATA = {
       { name:'Subclass Feature', type:'subclass', desc:"You gain the first feature of your Artificer Specialist." }
     ],
     4: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
-    5: [{ name:'Arcane Armament', type:'feature', desc:"You can now attune to up to 4 magic items at once (instead of the normal 3)." }],
-    6: [
-      { name:'Tool Expertise', type:'feature', desc:"Your Proficiency Bonus is doubled for any ability check you make that uses your proficiency with a tool." },
+    // L'Artificier prend ses capacités de spécialiste aux niveaux 3, 5, 9 et 15 —
+    // c'est ce que fait SUBCLASS_DATA. La ligne « Subclass Feature » était au 6.
+    5: [
+      { name:'Arcane Armament', type:'feature', desc:"You can now attune to up to 4 magic items at once (instead of the normal 3)." },
       { name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Artificer Specialist." }
     ],
+    6: [{ name:'Tool Expertise', type:'feature', desc:"Your Proficiency Bonus is doubled for any ability check you make that uses your proficiency with a tool." }],
     7: [{ name:'Flash of Genius', type:'feature', desc:"Reaction: when you or a creature you can see within 30 ft makes an ability check or saving throw, add your INT modifier to the roll. Uses = INT modifier/Long Rest." }],
     8: [{ name:'Ability Score Improvement', type:'asi', desc:"Increase one ability score by 2, or two scores by 1. Alternatively, take a feat." }],
     9: [{ name:'Subclass Feature', type:'subclass', desc:"You gain a feature from your Artificer Specialist." }],
@@ -1330,6 +1332,66 @@ const SUBCLASS_DATA = {
     6:[{ name:'Fanatical Focus', desc:'Once per Rage, reroll a failed saving throw (must use new result).' }],
     10:[{ name:'Zealous Presence', desc:'Bonus Action: choose up to 10 creatures within 60 ft. They gain advantage on attacks and saves until start of your next turn. 1/Long Rest.' }],
     14:[{ name:'Rage Beyond Death', desc:'While Raging, 0 HP doesn\'t make you Unconscious. You still make death saves. Rage ends when you reach 0 HP.' }],
+  },
+
+  /* ── Unearthed Arcana ── */
+  'Path of Lament': {
+    3:[
+      { name:"Banshee's Wail", desc:'When you activate your Rage or as a Bonus Action while Raging, each creature you choose in a 30-ft Emanation makes a CON save (DC 8 + your CON modifier + PB). On a failure it takes Psychic damage and has the Deafened condition for 1 minute; on a success it takes half damage only. Roll a number of d12s equal to your Rage Damage bonus for the damage. CON modifier uses (minimum of once) per Long Rest — you can also expend a use of Rage (no action) to regain all uses.' }
+    ],
+    6:[
+      { name:'Commune with the Dead', desc:'You can cast Speak with Dead, but only as a Ritual. WIS is your spellcasting ability for it.' },
+      { name:'Horrifying Strike', desc:'Once per turn when you hit a creature with a STR-based attack roll while your Rage is active, it must succeed on a WIS save (DC 8 + your CON modifier + PB) or have the Frightened condition until the start of your next turn.' }
+    ],
+    10:[
+      { name:'Otherworldly Anguish', desc:"Your sorrow reaches beyond the realm of the living. <em>Deathly Wail</em>: a target that fails its save against Banshee's Wail and has HP equal to twice your Barbarian level or fewer drops to 0 HP instead of taking the damage. <em>Impenetrable Sorrow</em>: you can't be possessed. <em>Resistance</em>: you have Resistance to Cold and Necrotic damage while your Rage is active." }
+    ],
+    14:[
+      { name:'Sorrow Form', desc:"When you activate your Rage, you can empower yourself with undeath for 1 minute or until you drop to 0 HP; once per Long Rest. <em>Immunities</em>: Immunity to the Charmed and Frightened conditions (those conditions end on you when you transform) and you can't gain Exhaustion levels. <em>Life-Draining Strike</em>: a creature that fails its save against your Horrifying Strike takes 2d10 Necrotic damage, and you regain HP equal to that damage. <em>Undead</em>: your creature type becomes Undead." }
+    ],
+  },
+  'Path of the Spiritual Guardian': {
+    3:[
+      { name:'Spiritual Protectors', desc:"While your Rage is active, when you hit a creature with a weapon or an Unarmed Strike, spectral warriors mark it with one effect of your choice. <em>Distract</em>: until the start of your next turn it has Disadvantage on attack rolls against anyone but you or another Barbarian with this feature. <em>Protect</em>: the next time it hits a creature other than you before the end of its next turn, that creature has Resistance to the attack's damage. <em>Strike</em>: it takes an extra 1d6 Acid, Cold, Fire, Force, Lightning, or Thunder damage (your choice)." }
+    ],
+    6:[
+      { name:'Spirit Shield', desc:'Reaction while your Rage is active, when another creature you can see within 30 ft takes damage: reduce that damage by the total of a number of d6s equal to your Rage Damage bonus.' }
+    ],
+    10:[
+      { name:'Consult the Spirits', desc:'Cast Augury or Clairvoyance without expending a spell slot or needing Material components, using WIS as your spellcasting ability. This Clairvoyance invisibly summons a guardian spirit at the chosen location instead of creating a sensor. Recharges on a Short or Long Rest.' }
+    ],
+    14:[
+      { name:'Vengeful Spirits', desc:'When you roll 18-20 on a Melee weapon attack roll made as part of the Attack action, you can make one additional attack roll with the same weapon as part of that action. Once used, it recharges at the start of your next turn.' }
+    ],
+  },
+  'Path of the Storm Herald': {
+    3:[
+      { name:'Storm Aura', desc:"When you activate your Rage, choose <em>Desert</em>, <em>Sea</em>, or <em>Tundra</em> and extend a 10-ft Emanation for the Rage's duration. Its effect triggers when you Rage and again as a Bonus Action on each of your turns; save DC is 8 + PB + CON. <em>Desert</em>: each creature in the aura makes a DEX save or takes Fire damage equal to the total of a number of d4s equal to your Rage Damage bonus — one creature you see automatically succeeds. <em>Sea</em>: hurl lightning at one creature in the aura, DEX save for Lightning damage equal to the total of that many d6s (half on a success). <em>Tundra</em>: one other creature in the aura makes a STR save or subtracts the total of that many d4s from its next damage roll before your next turn." }
+    ],
+    6:[
+      { name:'Storm Soul', desc:"You keep a benefit even when your aura isn't active, based on the environment chosen the last time you Raged. <em>Desert</em>: Fire Resistance, plus a Magic action to touch an unattended flammable object and set it burning. <em>Sea</em>: Lightning Resistance, you can breathe underwater, and you gain a Swim Speed equal to your Speed. <em>Tundra</em>: Cold Resistance, plus a Magic action to turn a 5-ft Cube of water you touch into ice for 1 minute (it fails if a creature is inside)." }
+    ],
+    10:[
+      { name:'Shielding Storm', desc:'Each creature of your choice within your Storm Aura gains the damage Resistance you have from Storm Soul.' }
+    ],
+    14:[
+      { name:'Raging Storm', desc:"Your aura's effect grows mightier, based on its environment. <em>Desert</em>: once per turn, a creature you can see that fails the save starts burning for 1 minute or until your Rage ends, taking an extra 1d4 Fire damage at the start of each of its turns. <em>Sea</em>: whether the target fails or succeeds, lightning leaps to a second target of your choice within 30 ft of it, which makes the same DEX save. <em>Tundra</em>: once per turn, a creature you can see that fails the save takes 2d4 Cold damage and has its Speed halved until the end of its next turn." }
+    ],
+  },
+  'Path of Unlight': {
+    3:[
+      { name:'Radiant Rage', desc:'While your Rage is active, any creature that hits you with a melee attack roll takes Radiant damage equal to your Rage Damage bonus. You also shed Bright Light in a 20-ft radius for the duration of the Rage.' }
+    ],
+    6:[
+      { name:'Unlight Revelation', desc:'You gain proficiency in Perception if you lack it, and Expertise in that skill. While your Rage is active, you have Blindsight with a range equal to the Bright Light shed by Radiant Rage.' }
+    ],
+    10:[
+      { name:'Infectious Unlight', desc:'Damage from your Brutal Strike can be Radiant or its usual type (your choice), and you gain a new option. <em>Radiant Infection</em>: for 1 minute the target sheds Bright Light in a 10-ft radius and takes 1d6 Radiant damage at the start of each of its turns; it makes a CON save (DC 8 + your STR modifier + PB) at the end of each of its turns, ending the effect on a success.' },
+      { name:'Harbinger of Unlight', desc:'The Unlight burning inside you no longer harms you: you gain Resistance to Radiant damage.' }
+    ],
+    14:[
+      { name:'Brilliant Rage', desc:'While your Rage is active, you now shed Bright Light in a 30-ft radius. Bonus Action: each creature of your choice within 30 ft makes a CON save (DC 8 + your STR modifier + PB), taking 1d12 Radiant damage and the Blinded condition until the end of your next turn on a failure, or half damage only on a success. Once per Long Rest, unless you expend a use of your Rage (no action required) to restore it.' }
+    ],
   },
 },
 
@@ -1388,6 +1450,20 @@ const SUBCLASS_DATA = {
     14:[{ name:'Moonlit Mantle', desc:'You can cast Invisibility on another willing creature once per Long Rest. Whenever a creature uses your Bardic Inspiration, you or they regain HP equal to your Bard level without expending a spell slot or Inspiration die.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'College of Spirits': {
+    3:[
+      { name:'Channeler', desc:'<em>Guiding Whispers</em>: you know the Guidance cantrip, and it has a 60-ft range when you cast it. <em>Spiritual Focus</em>: you gain a Gaming Set (Playing Cards) and proficiency with it, and you can use those cards, an Arcane Focus (Crystal or Orb), a Candle, or an Ink Pen as a Spellcasting Focus for your Bard spells.' },
+      { name:'Spirits from Beyond', desc:"Bonus Action while holding a Spellcasting Focus: expend one Bardic Inspiration, roll the die, and bestow that spirit on one creature you can see within 30 ft (save DC = your Bard spell save DC). <em>Beloved</em> (1): the target regains HP equal to a die roll + CHA · <em>Sharpshooter</em> (2): Force damage equal to a die roll + CHA · <em>Avenger</em> (3): until the end of your next turn, anything hitting the target with a melee attack takes a die roll of Force damage · <em>Renegade</em> (4): the target can take a Reaction to teleport up to 30 ft · <em>Fortune Teller</em> (5): Advantage on D20 Tests until your next turn · <em>Wayfarer</em> (6): Temp HP equal to a die roll + your Bard level, and +10 ft Speed while they last · <em>Trickster</em> (7): WIS save or two die rolls of Psychic damage and Charmed until your next turn, half damage only on a success · <em>Shade</em> (8): Invisible until the end of its next turn or until it attacks, damages, or casts, then everyone in a 5-ft Emanation makes a CON save or takes two die rolls of Necrotic damage · <em>Arsonist</em> (9): DEX save for four die rolls of Fire damage, half on a success · <em>Coward</em> (10): the target and chosen creatures in a 30-ft Emanation make a WIS save or are Frightened until your next turn with halved Speed and only an action or a Bonus Action, not both · <em>Brute</em> (11): chosen creatures in a 30-ft Emanation make a STR save or take three die rolls of Thunder damage and fall Prone, half damage on a success · <em>Controlled Channeling</em> (12): choose any other row's effect." }
+    ],
+    6:[
+      { name:'Empowered Channeling', desc:"<em>Power from Beyond</em>: once per turn when you cast a Bard spell that deals damage or restores HP, roll a d6 and add it to one of the spell's damage rolls or to the total HP restored. <em>Spiritual Manifestation</em>: Spirit Guardians is always prepared and you can cast it once per Long Rest without a spell slot; once per Short or Long Rest you can modify a casting so that you and allies inside its Emanation have Half Cover." }
+    ],
+    14:[
+      { name:'Mystical Connection', desc:'Whenever you roll on the Spirits from Beyond table, you can roll the die twice and choose which of the two spirit effects to bestow.' }
+    ],
+  },
 },
 
 'Cleric': {
@@ -1436,6 +1512,60 @@ const SUBCLASS_DATA = {
     8:[{ name:'Channel Divinity: Read Thoughts', desc:'Read the thoughts of one creature within 60 ft. It makes WIS save; on fail, read thoughts for 1 minute and can cast Suggestion without a slot.' }],
     17:[{ name:'Visions of the Past', desc:'Meditate 1 minute to see brief scenes from the history of an object held or a location you occupy.' }],
   },
+
+  /* ── Unearthed Arcana ── */
+  'Arcana Domain': {
+    3:[
+      { name:'Arcana Domain Spells', desc:"Always prepared — <strong>3</strong>: Detect Magic, Magic Missile, Magic Weapon, Nystul's Magic Aura · <strong>5</strong>: Counterspell, Dispel Magic · <strong>7</strong>: Arcane Eye, Leomund's Secret Chest · <strong>9</strong>: Bigby's Hand, Teleportation Circle." },
+      { name:'Arcane Initiate', desc:'<em>Arcane Knowledge</em>: you gain proficiency in Arcana if you lack it, and Expertise in that skill. <em>Cantrips</em>: you learn two Wizard cantrips, and can swap one of them for another Wizard cantrip whenever you gain a Cleric level.' },
+      { name:'Modify Magic', desc:'As you cast a spell, expend one use of Channel Divinity to alter it (no action required). <em>Fortifying Spell</em>: one target of the spell gains Temporary HP equal to 2d8 + your Cleric level. <em>Tenacious Spell</em>: when the spell forces a save, choose one target you can see and roll 1d6 as a penalty to that save.' }
+    ],
+    6:[
+      { name:'Dispelling Recovery', desc:'Immediately after you cast a spell with a slot that restores HP to a creature or ends a condition on it, you can cast Dispel Magic on that creature as a Bonus Action without a slot. Uses equal to your WIS modifier (minimum once), all regained on a Long Rest.' }
+    ],
+    17:[
+      { name:'Arcane Mastery', desc:'Learn four Wizard spells, one each from levels 6, 7, 8, and 9, and always have them prepared. Whenever you gain a Cleric level, you can replace one of them with another Wizard spell of the same level.' }
+    ],
+  },
+  'Freedom Domain': {
+    3:[
+      { name:'Freedom Domain Spells', desc:'Always prepared — <strong>3</strong>: Expeditious Retreat, Jump, Knock, Misty Step · <strong>5</strong>: Fly, Gaseous Form · <strong>7</strong>: Dimension Door, Freedom of Movement · <strong>9</strong>: Passwall, Tree Stride.' },
+      { name:'Invoke Liberty', desc:'Magic action, presenting your Holy Symbol and expending a use of Channel Divinity: each ally in a 30-ft Emanation from you ends one condition of its choice on itself — <em>Frightened</em> · <em>Grappled</em> · <em>Paralyzed</em> · <em>Restrained</em> — then may use its Reaction to move up to its Speed without provoking Opportunity Attacks. At Cleric level 9 the list also includes Charmed and Petrified.' },
+      { name:'Unencumbered Grace', desc:'While you wear no armor, your base AC equals 10 + DEX modifier + WIS modifier, and a Shield still works with it. You also gain Proficiency in Acrobatics, or Expertise in it if you are already proficient.' }
+    ],
+    6:[
+      { name:'Unstoppable', desc:'Difficult Terrain no longer affects your movement. You also gain proficiency in DEX saves, or proficiency in one save you lack if you already have DEX.' }
+    ],
+    17:[
+      { name:'Avatar of Freedom', desc:'Bonus Action: manifest a 30-ft Emanation around you for 10 minutes, ending early if you dismiss it or gain the Incapacitated condition. An ally entering it for the first time on a turn or starting its turn there gains +30 ft Speed until the end of its next turn; allies inside ignore Difficult Terrain and have Advantage on DEX checks. Once per Short or Long Rest.' }
+    ],
+  },
+  'Grave Domain': {
+    3:[
+      { name:'Circle of Mortality', desc:"<em>Pull of Death</em>: once per turn, when you cast a spell or hit with an attack roll and damage a Bloodied creature, it takes an extra 1d4 Necrotic damage. <em>Return to Life</em>: when a spell or Channel Divinity of yours restores HP to a creature at 0 HP, don't roll the healing dice — use the maximum on each one." },
+      { name:'Grave Domain Spells', desc:'Always prepared — <strong>3</strong>: Bane, Chill Touch, Detect Evil and Good, Gentle Repose, Ray of Enfeeblement · <strong>5</strong>: Revivify, Vampiric Touch · <strong>7</strong>: Blight, Dispel Evil and Good · <strong>9</strong>: Hold Monster, Raise Dead.' },
+      { name:'Path to the Grave', desc:'Bonus Action: present your Holy Symbol and expend a use of Channel Divinity to curse a creature you can see within 30 ft until the start of your next turn, giving it Disadvantage on attack rolls and saves. When you or an ally you can see hits the cursed target, you can end the curse early (no action required) to make that attack deal an extra 1d8 + your Cleric level Necrotic or Radiant damage, your choice.' }
+    ],
+    6:[
+      { name:"Sentinel at Death's Door", desc:"Reaction when you or a Bloodied creature you can see within 30 ft is hit by an attack roll: halve that attack's damage. Usable a number of times equal to your WIS modifier (min 1), regained on a Long Rest." }
+    ],
+    17:[
+      { name:'Divine Reaper', desc:'<em>Enhanced Necromancy</em>: when you cast a single-target Necromancy spell of level 5 or lower, or any spell from the Grave Domain Spells table, expend a use of Channel Divinity to target a second creature within range — costly or consumed Material components must be provided for each target. <em>Keeper of Souls</em>: when an enemy dies within 60 ft of you, you or a creature you can see within 60 ft regains HP equal to three times your Cleric level; unusable while Incapacitated, and once per Short or Long Rest.' }
+    ],
+  },
+  'Pestilence Domain': {
+    3:[
+      { name:'Blight Weaver', desc:"<em>Inoculated Soul</em>: you have Resistance to Necrotic and Poison damage and can't be infected by magical contagions. <em>Rot and Fester</em>: damage from your Cleric spells and Cleric features ignores Resistance to Necrotic and Poison damage, and when such a spell or feature deals Necrotic or Poison damage you can switch it to the other of those two types." },
+      { name:'Pestilence Domain Spells', desc:'Always prepared — <strong>3</strong>: Detect Poison and Disease, Protection from Poison, Ray of Enfeeblement, Ray of Sickness · <strong>5</strong>: Stinking Cloud, Vampiric Touch · <strong>7</strong>: Blight, Giant Insect · <strong>9</strong>: Contagion, Insect Plague.' },
+      { name:'Plague Blessing', desc:"Magic action, present your Holy Symbol and expend a use of Channel Divinity: a 5-ft Emanation of withering plague surrounds you or one willing creature you touch for 1 minute, ending early if you dismiss it, manifest it again, or are Incapacitated. Each creature of your choice that starts its turn in the Emanation makes a CON save against your spell save DC or gains 1 Exhaustion level — this can't push a creature past an Exhaustion level equal to your WIS modifier (minimum 1). Choose or roll the plague's symptom on the Plague Symptoms table." }
+    ],
+    6:[
+      { name:'Virulent Burst', desc:'Reaction when an enemy within 60 ft is reduced to 0 HP: plague bursts from it in a 10-ft Emanation originating from that enemy, or 20 ft if it had at least 1 Exhaustion level. Each creature of your choice in the area makes a CON save against your spell save DC, and on a failure suffers one of these: <em>Putrid Shock</em> — Incapacitated until the end of its next turn, with Speed 0 while Incapacitated · <em>Toxic Infection</em> — 3d6 Necrotic or Poison damage (your choice). Uses equal to your WIS modifier (minimum once), regained on a Long Rest.' }
+    ],
+    17:[
+      { name:'Vermin Form', desc:"Bonus Action: shape-shift into a Medium swarm of Tiny pests, keeping your shape, personality, memories, speech, and game statistics; your equipment doesn't transform but you can still use it. You gain Immunity to the Grappled, Paralyzed, Prone, and Restrained conditions, Resistance to Bludgeoning, Piercing, and Slashing damage, a Climb Speed equal to your Speed that scales difficult surfaces and ceilings without a check, and you can share other creatures' spaces. <em>Plague Bites</em>: a creature takes damage equal to your WIS modifier — Necrotic, Piercing, or Poison (your choice) — when you enter its space, or when it enters or ends its turn in yours, once per turn. You revert after 10 minutes, or if you end it (no action), are Incapacitated, or die; once per Long Rest, or restore the use by expending a level 5+ spell slot (no action required)." }
+    ],
+  },
 },
 
 'Druid': {
@@ -1483,6 +1613,58 @@ const SUBCLASS_DATA = {
     6:[{ name:'Enhanced Bond', desc:'When you cast a spell that deals Fire or restores HP, roll a bonus 1d8 and add it to one roll (fire dmg or healing). Must be within 60 ft of your wildfire spirit.' }],
     10:[{ name:'Cauterizing Flames', desc:'When a Small or larger creature dies within 30 ft, a spectral flame appears at its space for 1 minute. You or an ally can enter that space to heal 2d10+WIS HP (once per flame). Number of flames = WIS mod/Long Rest.' }],
     14:[{ name:'Blazing Revival', desc:'When your wildfire spirit vanishes and you are at 0 HP, you can have the spirit explode: each creature within 10 ft takes 2d10 Fire (DEX save for half) and you regain 1 HP. 1/Long Rest.' }],
+  },
+
+  /* ── Unearthed Arcana ── */
+  'Circle of Preservation': {
+    3:[
+      { name:'Circle of Preservation Spells', desc:'Always prepared — <strong>3</strong>: Bless, Lesser Restoration, Protection from Poison, Sanctuary · <strong>5</strong>: Beacon of Hope, Plant Growth · <strong>7</strong>: Aura of Life, Death Ward · <strong>9</strong>: Greater Restoration, Hallow.' },
+      { name:'Preserved Land', desc:'Bonus Action, expend a use of Wild Shape: fill a 15-ft Cube from a point on the ground within 120 ft with revitalizing energy for 1 minute (ends early if you are Incapacitated, end more than 120 ft away, or die). When a creature ends its turn inside, you can grant it <em>Bolster</em>: Temp HP equal to 1d4 + your Druid level · <em>Purify</em>: end one effect giving it the Frightened or Poisoned condition. Nonmagical local vegetation sprouts inside, and a Bonus Action on later turns moves the Cube up to 30 ft.' },
+      { name:'Student of Preservation', desc:"<em>Frugal Casting</em>: cast Druid spells without Material components, except those consumed or with a listed cost; a consumed component also has a 10 percent chance of not being used up. <em>Tool Proficiency</em>: gain proficiency with one type of Artisan's Tools." }
+    ],
+    6:[
+      { name:'Improved Preservation', desc:'<em>Fortify Protectors</em>: you and your allies inside the Preserved Land Cube gain a bonus to CON saves equal to your WIS modifier (min +1). <em>Reject Desecrators</em>: an enemy whose space the Cube enters, or that enters the Cube or ends its turn there, makes a WIS save vs your spell save DC — on a failure it takes 2d10 Radiant damage and its Speed is halved until the end of its next turn, half damage only on a success. Each enemy saves only once per turn.' }
+    ],
+    10:[
+      { name:'Facilitated Restoration', desc:'Cast Lesser Restoration or Greater Restoration without expending a spell slot or using components. You can do this a number of times equal to your WIS modifier (min once), regaining all uses on a Long Rest.' }
+    ],
+    14:[
+      { name:'Sacrosanct Land', desc:"The Cube of your Preserved Land grows to a 30-ft Cube. Reaction when a creature you can see in that area is hit by an attack roll: halve that attack's damage against the creature." }
+    ],
+  },
+  'Circle of Spores': {
+    3:[
+      { name:'Circle Spells', desc:'Always prepared — <strong>3</strong>: Blindness/Deafness, Charm Person, Chill Touch · <strong>5</strong>: Animate Dead · <strong>7</strong>: Confusion · <strong>9</strong>: Contagion.' },
+      { name:'Halo of Spores', desc:'Invisible spores fill a 10-ft Emanation from you, granting telepathy out to 10 ft, or +10 ft of range if you already have telepathy. Reaction when a creature you can see moves into the Emanation or starts its turn there: it makes a CON save against your spell save DC, taking 1d4 Necrotic damage on a failure, or having Disadvantage on its next attack roll before the end of its turn on a success. The die becomes 1d6 at level 6, 1d8 at level 10, and 1d10 at level 14.' },
+      { name:'Symbiotic Entity', desc:'Bonus Action: expend a use of Wild Shape to waken your spores instead of shape-shifting, gaining Temporary HP equal to four times your Druid level for 10 minutes — it ends early if you dismiss it, gain the Incapacitated condition, or use the feature again. <em>Deadly Halo</em>: roll your Halo of Spores damage die a second time and add it to the total. <em>Entropic Empowerment</em>: once per turn, deal an extra 1d6 Necrotic damage to a target you hit with a melee weapon or Unarmed Strike.' }
+    ],
+    6:[
+      { name:'Fungal Infestation', desc:'Reaction when a Small or Medium Beast or Humanoid dies within 10 ft of you: it stands up immediately with 1 HP, and you may transfer any number of your Symbiotic Entity Temporary HP to it. It uses the Zombie stat block, is an ally, shares your Initiative but acts right after you, and obeys your mental commands, otherwise Dodging and moving away from danger. It lasts 1 hour, ending early if you end it as a Bonus Action or it drops to 0 HP. Uses equal to your WIS modifier (minimum 1), regained on a Long Rest.' }
+    ],
+    10:[
+      { name:'Explosive Burst', desc:'When an Undead creature you created dies, it bursts with spores: each creature you choose within 10 ft of it makes a CON save against your spell save DC, taking 2d8 Necrotic damage on a failure or half as much on a success.' }
+    ],
+    14:[
+      { name:'Fungal Body', desc:'You have Immunity to the Blinded, Deafened, Frightened, and Poisoned conditions, and any Critical Hit against you counts as a normal hit unless you have the Incapacitated condition. While you have the Unconscious condition, your spores drive your body: your Speed does not drop to 0, and on your turn they move you toward allies and away from danger.' }
+    ],
+  },
+  'Circle of the Titan': {
+    3:[
+      { name:'Circle of the Titan Spells', desc:'Always prepared — <strong>3</strong>: Enlarge/Reduce, Thaumaturgy, Thunderwave · <strong>5</strong>: Fear · <strong>7</strong>: Fire Shield · <strong>9</strong>: Destructive Wave. You can also cast these spells while in your Titan Form.' },
+      { name:'Titan Form', desc:'When you use Wild Shape you can take a Titan Form instead of a Beast, choosing <em>Behemoth</em>, <em>Leviathan</em>, or <em>Insectoid</em>. The form lasts 10 minutes rather than a number of hours. Each stat block gains extra benefits at the Druid levels it lists, and anything that applies to your Beast forms applies to your Titan Form.' },
+      { name:'Behemoth', desc:'Titan Form option — Large (Huge at level 10+, Gargantuan at 14+), AC 13 + WIS, Temp HP equal to 4 × your Druid level, Speed 40 ft and Climb 40 ft, STR and DEX equal your WIS score, Darkvision 60 ft. <em>Siege Monster</em>: double damage to objects and structures. <em>Rend</em>: melee attack using your spell attack bonus, reach 10 ft, 1d8 + WIS Slashing, rising to 2d8 at level 6 and 3d8 at 12; two Rends per Attack at level 5+. <em>Incandescent Breath</em>: expend a level 1+ slot for a 5-ft-wide, 60-ft-long Line, DEX save, 2d10 Radiant per slot level (half on a success). <em>Rampager</em> (level 10+): Bonus Action, expend a level 1+ slot and move half your Speed without provoking; the first time each turn you enter the space of an enemy two sizes smaller, it makes a STR save or falls Prone, instead taking 1d10 Bludgeoning per slot level if already Prone.' },
+      { name:'Leviathan', desc:'Titan Form option — Large (Huge at level 10+, Gargantuan at 14+), AC 13 + WIS, Temp HP equal to 4 × your Druid level, Speed 40 ft and Swim 40 ft, STR and DEX equal your WIS score, Darkvision 60 ft. <em>Amphibious</em>: you breathe air and water. <em>Siege Monster</em>: double damage to objects and structures. <em>Rend</em>: melee attack using your spell attack bonus, reach 10 ft, 1d8 + WIS Bludgeoning, rising to 2d8 at level 6 and 3d8 at 12; two Rends per Attack at level 5+. <em>Toxic Deluge</em> (level 10+): Bonus Action, expend a level 1+ slot; each creature you choose in a 10-ft Emanation makes a CON save or takes 2d4 Poison per slot level and is Poisoned until the start of your next turn.' },
+      { name:'Insectoid', desc:"Titan Form option — Large (Huge at level 10+, Gargantuan at 14+), AC 13 + WIS, Temp HP equal to 4 × your Druid level, Speed 40 ft plus Fly 40 ft at level 10+, STR and DEX equal your WIS score, Darkvision 60 ft. <em>Flyby</em> (level 10+): you don't provoke Opportunity Attacks when you fly out of an enemy's reach. <em>Siege Monster</em>: double damage to objects and structures. <em>Rend</em>: melee attack using your spell attack bonus, reach 10 ft, 1d8 + WIS Piercing, rising to 2d8 at level 6 and 3d8 at 12; two Rends per Attack at level 5+. <em>Energizing Pollen</em>: expend a level 1+ slot and move up to half your Speed without provoking while trailing healing pollen; each creature you move within 5 ft of can regain 2d6 HP per slot level, once per turn each." }
+    ],
+    6:[
+      { name:'Dire Impact', desc:"<em>Elemental Rend</em>: whenever you hit with your Titan Form's Rend, you can change its damage to Acid, Cold, Fire, Lightning, or Thunder. <em>Shock Wave</em>: once per turn, immediately after you move at least half your Speed, each creature in a 10-ft Emanation from you makes a CON save against your spell save DC or has the Prone condition." }
+    ],
+    10:[
+      { name:'Primal Havoc', desc:"<em>Huge Size</em>: you can become Huge when you assume your Titan Form, if there's room. <em>Toughened Hide</em>: immediately after taking a Huge or larger Titan Form, expend a level 1+ slot to gain a bonus to AC equal to half the slot's level (round up) for the form's duration. <em>Above It All</em>: while Huge or larger in Titan Form, Difficult Terrain from heavy snow, ice, rubble, or undergrowth costs you no extra movement." }
+    ],
+    14:[
+      { name:'Monstrous Appetite', desc:"<em>Gargantuan Size</em>: you can become Gargantuan when you assume your Titan Form, if there's room. <em>Grappling Rend</em>: once per turn while Huge or larger, a hit with your Rend can give the target the Grappled condition (escape DC equals your spell save DC), one target at a time. <em>Swallow</em>: Bonus Action while Gargantuan to make a Large or smaller creature you've Grappled attempt a STR save — on a failure you swallow it, ending the Grapple, and it is Blinded and Restrained with Total Cover, taking Acid damage at the start of each of your turns equal to a number of d12s equal to your WIS modifier. You can hold a number of creatures equal to your WIS modifier (minimum one) and must keep Concentration; losing it or leaving your Titan Form regurgitates them all Prone within 10 ft of you." }
+    ],
   },
 },
 
@@ -1540,6 +1722,85 @@ const SUBCLASS_DATA = {
     18:[{ name:'Inspiring Leader', desc:'You are immune to the Charmed and Frightened conditions. Your Team Tactics and Rallying Surge now affect up to 2 allies simultaneously.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'Arcane Archer': {
+    3:[
+      { name:'Arcane Archer Lore', desc:'You learn either the <em>Druidcraft</em> or <em>Prestidigitation</em> cantrip, using INT as your spellcasting ability for it. You also gain proficiency in Arcana and Nature; replace either one you already have with another skill of your choice.' },
+      { name:'Arcane Shot', desc:'You learn two Arcane Shot options, gaining another at Fighter 7, 10, 15, and 18 and swapping one known option each time. Once per turn when you make a ranged attack with an Ammunition weapon you can apply one option, deciding on a hit that deals damage unless the option uses no attack roll. INT modifier uses (minimum 1), regained on a Short or Long Rest; the save DC is 8 + INT + PB. Your Arcane Shot Die is a d6, becoming a d8 at <strong>10</strong>, a d10 at <strong>15</strong>, and a d12 at <strong>18</strong>.' },
+      { name:'Arcane Shot Options', desc:'<em>Banishing Shot</em>: +1 die Psychic, CHA save or banished to a harmless demiplane (Incapacitated, Speed 0) until the end of its next turn · <em>Beguiling Shot</em>: +2 dice Psychic, WIS save or Charmed until your next turn by you or an ally within 30 ft (ends early if the charmer harms it) · <em>Bursting Shot</em>: the target and each creature in a 10-ft Emanation from it take 2 dice Force · <em>Enfeebling Shot</em>: +2 dice Necrotic, CON save or Poisoned until the end of its next turn and its hits deal 1 die less damage · <em>Grasping Shot</em>: +1 die Slashing, STR save or Restrained for 1 minute (Athletics check vs your DC as an action to escape) · <em>Piercing Shot</em>: no attack roll — a 30-ft Line 1 ft wide ignoring cover, DEX save for damage as if hit plus 2 dice Piercing, half on a success · <em>Seeking Shot</em>: no attack roll — a creature seen in the last minute within long range makes a DEX save for damage as if hit plus 2 dice Force and you learn its location, half damage only on a success · <em>Shadow Shot</em>: +1 die Psychic, WIS save or Blinded until the end of its next turn.' }
+    ],
+    7:[
+      { name:'Curving Shot', desc:"When you miss with an attack roll using an Ammunition weapon, you can take a Bonus Action immediately after to ricochet the shot at a new creature you can see within the weapon's range and within 60 ft of the original target, making a new attack roll against it." },
+      { name:'Magical Ammunition', desc:'Magic action: imbue nonmagical ammunition with a property and fire it at a solid surface within range; on a hit it sticks there for the duration, then is destroyed. <em>Darkening Shot</em>: shadows fill a 15-ft Emanation for 1 minute, snuffing nonmagical flames and imposing a -5 penalty on WIS (Perception) checks and Passive Perception · <em>Unlocking Shot</em>: a loud knock audible 300 ft away unlocks, unsticks, or unbars one mundane closure per object in a 15-ft Emanation · <em>Vine Shot</em>: a 60-ft climbable vine grows and withers after 10 minutes. Once per Short or Long Rest, or by expending a use of Second Wind (no action required).' }
+    ],
+    10:[
+      { name:'Ever-Ready Shot', desc:'When you roll Initiative, you can regain one expended use of Arcane Shot.' }
+    ],
+    15:[
+      { name:'Arcane Burst', desc:'When you use Indomitable, each creature of your choice in a 10-ft Emanation from you must succeed on a STR save against your Arcane Shot DC or be pushed up to 20 ft straight away from you.' }
+    ],
+    18:[
+      { name:'Masterful Shots', desc:"Reaction when a creature you can see misses you with an attack roll: move up to half your Speed away from it without provoking Opportunity Attacks, then make a ranged attack roll against it if it is within your weapon's range." }
+    ],
+  },
+  'Cavalier': {
+    3:[
+      { name:'Bonus Proficiency', desc:'Gain proficiency in one skill of your choice from Animal Handling, History, Insight, Performance, or Persuasion — or learn one language of your choice instead.' },
+      { name:'Born to the Saddle', desc:'Advantage on saves made to avoid falling off your mount, and if you fall no more than 10 ft you land on your feet unless you have the Incapacitated condition. Mounting or dismounting costs only 5 ft of movement rather than half your Speed.' },
+      { name:'Unwavering Mark', desc:'When you hit a creature with a Melee weapon, you can mark it until the end of your next turn; the mark ends early if you are Incapacitated, you die, or someone else marks the creature. While within 5 ft of you, a marked creature has Disadvantage on attack rolls against anyone but you, and if it hits another creature you have Advantage on attack rolls against it until the end of your next turn.' }
+    ],
+    7:[
+      { name:'Warding Maneuver', desc:"Reaction while wielding a Melee weapon or a Shield, when you or a creature you can see within 5 ft is hit by an attack roll: roll 1d8 and add it to the target's AC against that attack. If the attack still hits, the target has Resistance to its damage. Uses equal to your CON modifier (minimum 1), regained on a Long Rest." }
+    ],
+    10:[
+      { name:'Hold the Line', desc:'Creatures provoke an Opportunity Attack from you when they move 5 ft or more while within your reach, and a creature you hit with an Opportunity Attack has its Speed reduced to 0 until the end of the current turn.' }
+    ],
+    15:[
+      { name:'Ferocious Charger', desc:"During the first round of each combat, you and your mount gain +10 ft Speed and your movement doesn't provoke Opportunity Attacks. When you move within 5 ft of a creature that round, it makes a STR save (DC 8 + STR + PB) or you push it 5 ft away or knock it Prone; a creature makes this save only once during a turn." }
+    ],
+    18:[
+      { name:'Vigilant Defender', desc:"In combat you get a special Reaction usable once on every creature's turn except your own. It can only be used to make an Opportunity Attack, and not on a turn where you already took your normal Reaction." }
+    ],
+  },
+  'Gladiator': {
+    3:[
+      { name:'Brutality', desc:"Once per turn when you hit with a Melee weapon attack roll, add one Brutality effect of your choice; you have CHA modifier uses (min once), regained on a Short or Long Rest. <em>Bleed</em>: activate Sap alongside a different mastery you are using, and deal extra damage of the weapon's type equal to your CHA modifier (min 1). <em>Bluff</em>: activate Vex alongside another mastery, and gain Advantage on your next save before the end of your next turn. <em>Stumble</em>: activate Topple alongside another mastery, and on its next turn the target can take only an action or a Bonus Action, not both." },
+      { name:'Combat Theatrics', desc:'<em>Athletic Flair</em>: add your CHA modifier (min +1) to every DEX (Acrobatics) and STR (Athletics) check. <em>Bonus Proficiency</em>: gain proficiency in one of Acrobatics, Athletics, Deception, Intimidation, or Performance.' }
+    ],
+    7:[
+      { name:'Flourish Parry', desc:"Reaction when an enemy hits you with a melee attack roll: add your CHA modifier (min +1) to your AC against that attack, possibly turning the hit into a miss. <em>Flourish Counter</em>: if the attack then misses, make a Melee weapon attack against that creature as part of the same Reaction, and on a hit you can apply a Brutality effect without spending a use. Once the counterattack hits, you can't counter again until a Long Rest or until you expend a use of Second Wind (no action required)." }
+    ],
+    10:[
+      { name:'Bolder Brutalities', desc:'You add three options to Brutality. <em>Rive</em>: activate Cleave alongside a different mastery you are using, and add your ability modifier to the damage of the extra attack. <em>Rush</em>: activate Push alongside another mastery, then move up to your Speed without provoking Opportunity Attacks. <em>Stagger</em>: activate Slow alongside another mastery, and the target has Disadvantage on its next save before the end of your next turn.' }
+    ],
+    15:[
+      { name:'Brutal Resurgence', desc:'You regain an expended use of Brutality whenever you use Second Wind to regain Hit Points, and again whenever you use Action Surge.' }
+    ],
+    18:[
+      { name:'Mutilate', desc:"When you hit a Bloodied creature with an attack roll, it makes a CON save (DC 8 + your CHA modifier + PB). On a failure it is <em>Maimed</em> — it can make only one attack when it takes the Attack action — and <em>Sluggish</em> — its Speed is halved and it takes a -2 penalty to AC. The effects last until it regains Hit Points, and once a target fails this save you can't use the feature again until a Long Rest." }
+    ],
+  },
+  'Hell Knight': {
+    3:[
+      { name:'Diabolical Gift', desc:"<em>Devil's Sight</em>: you see normally in Dim Light and Darkness, magical or not, within 120 ft. <em>Devil's Talents</em>: you know Infernal (another language of your choice if you already know it), and you gain proficiency in <em>Deception</em>, <em>Performance</em>, or <em>Sleight of Hand</em>." },
+      { name:'Hell-Forged Weapon', desc:"When you take the Attack action, you can imbue every weapon you're holding with hellfire. A weapon stays transformed until you use this feature again, you fall Unconscious, it spends 1 minute or more beyond 5 ft of you, or you end the effect (no action required). A Hell-Forged Weapon sheds Dim Light in a 5-ft radius and can deal <em>Cold</em>, <em>Fire</em>, or <em>Necrotic</em> damage instead of its normal type — choose when you imbue it." },
+      { name:'Infernal Wound', desc:'Your Infernal Wound Die is a d6. When you hit with your Hell-Forged Weapon, you can deal extra damage equal to one roll of the die, of the type chosen when you imbued the weapon, and give the target an infernal wound if it lacks one. A wounded creature takes another die roll of that damage at the start of each of its turns for 1 minute, until it regains HP, or until it or a creature within 5 ft takes an action to stanch the wound. CON modifier uses (minimum once), all regained on a Short or Long Rest.' }
+    ],
+    7:[
+      { name:'Advanced Wounds', desc:"When you roll your Infernal Wound Die, you can apply one effect below; rolling a 6 adds its Devil's Luck rider. Usable once, then not again until the start of your next turn. <em>Purulence of Minauros</em>: each enemy in a 5-ft Emanation from the target takes Acid damage equal to your CON modifier and the target is Poisoned until the end of its next turn — Devil's Luck: each creature damaged takes a -1 penalty to AC until the end of your next turn. <em>Rupture of Cania</em>: the target takes Force damage equal to your CON modifier — Devil's Luck: it subtracts 1d6 from its next save before the end of your next turn. <em>Stygian Gangrene</em>: the target takes Cold damage equal to your CON modifier and can't take Reactions until the start of its next turn — Devil's Luck: its Speed is halved until the end of its next turn." },
+      { name:'Infernal Equipment', desc:'<em>Infernal Resilience</em>: whenever you finish a Short or Long Rest, choose Cold, Fire, or Necrotic; while wearing Heavy armor or wielding a Shield you have Resistance to that type until you choose another. <em>Unholy Power</em>: you can treat a roll of 1 on your Infernal Wound Die as a 6.' }
+    ],
+    10:[
+      { name:'Hellfire Surge', desc:'When you use Action Surge while holding a Hell-Forged Weapon, hellfire erupts in a 20-ft Emanation from you that lasts until the end of your next turn. A creature suffering an infernal wound that starts its turn inside the Emanation takes damage equal to two rolls of your Infernal Wound Die instead of one.' }
+    ],
+    15:[
+      { name:"Devil's Misfortune", desc:'Reaction when a creature with an infernal wound hits you with an attack roll: roll your Infernal Wound Die and reduce the damage taken by the number rolled. On a 6 you roll again, to a maximum of three rolls, reducing the damage by the total. If the attack was a Critical Hit, it becomes a normal hit.' }
+    ],
+    18:[
+      { name:'Infernal Bargain', desc:'When you roll a 6 on your Infernal Wound Die three or more times before the start of your next turn, you gain Heroic Inspiration. <em>Infernal Inspiration</em>: expend that Heroic Inspiration to force a creature you can see within 120 ft to reroll a d20 it rolled for a D20 Test. If the new roll makes it succeed, you regain an expended use of Indomitable or Second Wind (your choice); if the new roll makes it fail, you lose HP equal to 3d6 plus your Fighter level.' }
+    ],
+  },
 },
 
 'Monk': {
@@ -1573,6 +1834,70 @@ const SUBCLASS_DATA = {
     6:[{ name:'Environmental Burst', desc:'Elemental Burst also creates a 5-ft radius at impact. Others in range make DEX save or take the same elemental damage (half on success).' }],
     11:[{ name:'Stride of the Elements', desc:'Spend 2 Focus Points: gain Fly or Swim speed = walking speed for 10 minutes.' }],
     17:[{ name:'Elemental Epitome', desc:'Spend 4 Focus Points: resistance to Acid, Cold, Fire, Lightning, Thunder for 1 minute. Once per turn, deal extra 1 Martial Arts die elemental damage on a hit.' }],
+  },
+
+  /* ── Unearthed Arcana ── */
+  'Tattooed Warrior': {
+    3:[
+      { name:'Magic Tattoos', desc:'You gain the magic tattoos granted by this subclass, placed anywhere on your body and unaffected by damage or injury; they can look like brands, scars, birthmarks, scales, or any other marking. Tattoo save DCs equal 8 + WIS + PB, and WIS is your spellcasting ability for tattoo spells. On finishing a Long Rest you can reshape one tattoo, swapping its option for another on the same list.' },
+      { name:'Beast Tattoos', desc:"You gain two animal tattoos of your choice. <em>Bat</em>: Dancing Lights, plus Blindsight out to 10 ft · <em>Butterfly</em>: Light, and you may use DEX instead of STR for a High Jump's height · <em>Crane</em>: Guidance, and missing with a Flurry of Blows attack gives Advantage on your next attack roll against that creature before the end of your next turn · <em>Horse</em>: Message, and spending 1 Focus Point on Step of the Wind raises your Speed by 10 ft until your next turn · <em>Tortoise</em>: Spare the Dying, and spending 1 Focus Point on Patient Defense gives +1 AC until your next turn." }
+    ],
+    6:[
+      { name:'Celestial Tattoo', desc:'You gain one more tattoo depicting a celestial phenomenon, letting you spend 1 Focus Point to roll your Martial Arts die and add it to a check. <em>Comet</em>: the WIS check of the Search action · <em>Eclipse</em>: the DEX (Stealth) check of the Hide action · <em>Sunburst</em>: the INT check of the Study action.' }
+    ],
+    11:[
+      { name:'Nature Tattoo', desc:'You gain one more tattoo depicting a natural feature, granting Resistance to a damage type you choose: <em>Sea Storm</em> — Cold, Lightning, or Thunder · <em>Volcano</em> — Acid, Fire, or Poison. You can change the chosen type whenever you finish a Short or Long Rest or use Uncanny Metabolism.' }
+    ],
+    17:[
+      { name:'Monster Tattoo', desc:'You gain a tattoo of a mighty creature. <em>Beholder</em>: at the start of your turn spend 1 Focus Point for a hovering Fly Speed equal to your Speed for 10 minutes, and as a Magic action spend 1 Focus Point to fire four rays at targets within 120 ft, each a ranged spell attack (WIS) dealing 1 Martial Arts die + WIS Force damage · <em>Chromatic Dragon</em>: on the Attack action, spend 1 Focus Point to replace one attack with a 30-ft Cone of Acid, Cold, Fire, Lightning, or Poison — DEX save for 2 Martial Arts dice + WIS damage, half on a success · <em>Displacer Beast</em>: when you spend a Focus Point on Flurry of Blows or Step of the Wind, spend 1 more to cast Mirror Image as part of that Bonus Action · <em>Troll</em>: while Bloodied with at least 1 HP you regain 5 + WIS HP at the start of each of your turns, and severed body parts regrow after a Short or Long Rest.' }
+    ],
+  },
+  'Warrior of Intoxication': {
+    3:[
+      { name:'Bonus Proficiencies', desc:"Gain proficiency in Performance — or, if you already have it, in one skill of your choice from the level 1 Monk list — and proficiency with Brewer's Supplies if you lack it." },
+      { name:'Drunken Technique', desc:"Whenever you use Flurry of Blows, your Speed increases by 10 ft until the end of the current turn and your movement during that time doesn't provoke Opportunity Attacks." }
+    ],
+    6:[
+      { name:'Tipsy Sway', desc:'<em>Leap to Your Feet</em>: while Prone, you can stand up by spending only 5 ft of movement rather than half your Speed. <em>Redirect Attack</em>: Reaction when a creature misses you with a melee attack roll — spend 1 Focus Point to make that attack hit one creature of your choice other than the attacker that you can see within 5 ft of yourself.' },
+      { name:'Mystic Brew', desc:"On finishing a Short or Long Rest while holding Brewer's Supplies, magically produce one beverage: <em>Cinnamon Dragon</em>, <em>Heavenly Spirit</em>, or <em>Refreshing Dip</em>. Only you benefit; spend 1 minute drinking a pint to gain its effect for 1 hour, or 8 hours if you expend 1 Focus Point when creating it, and any leftover vanishes at your next rest. <em>Cinnamon Dragon</em>: Magic action to exhale toxic flames in a 30-ft Cone — DEX save (DC 8 + WIS + PB) or take Fire damage equal to four rolls of your Martial Arts die and be Poisoned until the end of its next turn, half damage only on a success. <em>Heavenly Spirit</em>: Resistance to Psychic and Radiant damage. <em>Refreshing Dip</em>: whenever you regain HP, regain extra HP equal to one roll of your Martial Arts die." }
+    ],
+    11:[
+      { name:'Master Brewer', desc:"Two more options are added to Mystic Brew. <em>Blue Lightning</em>: whenever you take a Reaction that isn't an Opportunity Attack or casting a spell, make one Unarmed Strike as part of that Reaction. <em>Drunkard's Luck</em>: you gain Heroic Inspiration if you don't have it, and you can give yourself Heroic Inspiration when you roll Initiative without it." }
+    ],
+    17:[
+      { name:'Intoxicated Frenzy', desc:'When you use Flurry of Blows, you can make up to three additional Unarmed Strikes with it — six in total — provided each strike targets a different creature this turn.' }
+    ],
+  },
+  'Warrior of the Mystic Arts': {
+    3:[
+      { name:'Spellcasting', desc:'Third-caster progression on the Sorcerer list, using WIS as your spellcasting ability and an Arcane Focus as your Spellcasting Focus. You know two cantrips at <strong>3</strong> and a third at <strong>10</strong>, and you start with three prepared level 1 spells, rising to 13 prepared spells at level 20. Slots reach level 2 at <strong>7</strong>, level 3 at <strong>13</strong>, and level 4 at <strong>19</strong>. Each Monk level you can swap one cantrip and one prepared spell.' }
+    ],
+    6:[
+      { name:'Mystic Focus', desc:'Expend a spell slot to regain Focus Points equal to its level (no action required). Bonus Action: spend Focus Points to recover one expended slot of level 4 or lower — <strong>1</strong>: 2 FP, Monk 6 · <strong>2</strong>: 3 FP, Monk 7 · <strong>3</strong>: 5 FP, Monk 13 · <strong>4</strong>: 6 FP, Monk 19.' },
+      { name:'Mystic Fighting Style', desc:'When you take the Attack action on your turn, you can replace one of the attacks with a casting of one of your Sorcerer cantrips that has a casting time of an action.' }
+    ],
+    11:[
+      { name:'Centered Focus', desc:'Whenever you expend a Focus Point on Flurry of Blows, Patient Defense, or Step of the Wind, you have Advantage on saves to maintain Concentration until the start of your next turn.' }
+    ],
+    17:[
+      { name:'Improved Mystic Fighting Style', desc:'When you take the Attack action on your turn, you can replace two of the attacks with a casting of one of your level 1 or 2 Sorcerer spells that has a casting time of an action.' }
+    ],
+  },
+  'Warrior of Venom': {
+    3:[
+      { name:'Envenom Weapon', desc:"At the start of your turn, expend 1 Focus Point to coat one Monk weapon you're holding with a toxin drawn from your blood, choosing its effect as you apply it. The toxin lasts 1 minute or until a creature takes damage from the weapon. <em>Slowing Toxin</em>: until the start of your next turn the target's Speed is halved, it can't take Reactions, and it can take either an action or a Bonus Action on its turn, not both. <em>Venom</em>: the target takes Poison damage equal to two rolls of your Martial Arts die." },
+      { name:'Potent Arsenal', desc:"You gain a Poisoner's Kit and proficiency with it, and you can craft a Basic Poison in 1 day (8 hours of work). Whenever you deal Poison damage with a Monk feature or a Monk weapon, you can change that damage type to Acid." }
+    ],
+    6:[
+      { name:'Toxic Touch', desc:"Magic action, 1 Focus Point: a creature you touch makes a CON save or has the Poisoned condition for 1 minute, affected by one option of your choice. <em>Intoxicant</em>: it is also Charmed for the duration or until you or an ally damages it. <em>Sedative</em>: it falls asleep and is Unconscious until another creature uses an action to shake it awake. <em>Truth Serum</em>: it can't knowingly tell a lie." }
+    ],
+    11:[
+      { name:'Toxin Refiner', desc:"Your body filters poison: you gain Immunity to Poison damage. Whenever you are subjected to Poison damage, both Envenom Weapon options deal extra Poison damage equal to one roll of your Martial Arts die — you can't gain this benefit again until the end of your next turn. Whenever you ingest a poison, you regain HP equal to one roll of your Martial Arts die." },
+      { name:'Toxic Blood', desc:'Whenever a creature hits you with a melee attack roll, the attacker takes 1d6 Poison damage. While you are Bloodied, it instead takes Poison damage equal to one roll of your Martial Arts die.' }
+    ],
+    17:[
+      { name:'Hallucinogenic Breath', desc:'When you take the Attack action, you can expend 2 Focus Points and replace one attack with an exhalation of hallucinogenic vapors at one creature you can see within 30 ft. It makes a CON save, taking Poison damage equal to three rolls of your Martial Arts die and gaining the Frightened condition for 1 minute or until it takes damage (half damage only on a success). While Frightened this way, it must take the Dash action and move away from you by the safest route each turn unless there is nowhere to move.' }
+    ],
   },
 },
 
@@ -1625,6 +1950,40 @@ const SUBCLASS_DATA = {
     20:[{ name:'Genie Apotheosis', desc:'For 1 minute, you gain a Fly speed equal to your walk speed, immunity to fire, cold, lightning, and thunder damage, and once per turn you can turn one failed D20 Test into a success.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'Oath of the Spellguard': {
+    3:[
+      { name:'Guardian Bond', desc:'Magic action, one Channel Divinity use: forge a bond with a willing creature within 5 ft for 1 hour, ending early if you fall Unconscious, if you end it, or if you forge a new one. While the bonded creature is within your reach and is hit by an attack roll, Reaction: add your CHA modifier (minimum +1) to its AC, possibly turning the hit into a miss.' },
+      { name:'Oath of the Spellguard Spells', desc:"Always prepared — <strong>3</strong>: Detect Magic, Shield · <strong>5</strong>: See Invisibility, Silence · <strong>9</strong>: Counterspell, Dispel Magic · <strong>13</strong>: Freedom of Movement, Otiluke's Resilient Sphere · <strong>17</strong>: Circle of Power, Hallow." },
+      { name:'Spellguard Strike', desc:'Reaction when you see a creature within your reach cast a spell with Verbal, Somatic, or Material components: make one melee attack against it with a weapon or an Unarmed Strike.' }
+    ],
+    7:[
+      { name:'Aura of Concentration', desc:'You and your allies in your Aura of Protection have Advantage on CON saves to maintain Concentration.' }
+    ],
+    15:[
+      { name:'Spell-Breaking Blade', desc:"Immediately after your Spellguard Strike hits, you can cast Counterspell as part of the same Reaction. A slot spent on that Counterspell isn't expended if the spell fails to stop a spell." }
+    ],
+    20:[
+      { name:'Eternal Spellguard', desc:'Bonus Action: empower your Aura of Protection for 1 minute or until you end it (no action required), once per Long Rest or by expending a level 5 spell slot. <em>Bodyguard</em>: your Guardian Bond target has Resistance to all damage while in the aura · <em>Protection from Magic</em>: you and your allies in the aura have Advantage on saves against spells · <em>Spell Ward</em>: spell attack rolls against you and your allies in the aura have Disadvantage.' }
+    ],
+  },
+  'Oathbreaker': {
+    3:[
+      { name:'Conjure Undead', desc:'Bonus Action, one use of Channel Divinity: summon Skeletons or Zombies (your choice) equal to half your CHA modifier, rounded up, minimum one, in unoccupied spaces within 30 ft. They serve as allies for 1 minute before dissolving into ash, share your Initiative but act right after your turn, and obey your verbal commands — otherwise they Dodge and move to avoid danger.' },
+      { name:'Dreadful Aspect', desc:'Immediately after you cast Divine Smite, expend one use of Channel Divinity: each creature of your choice in a 30-ft Emanation makes a WIS save or has the Frightened condition for 1 minute, repeating the save at the end of each of its turns.' },
+      { name:'Oathbreaker Spells', desc:'Always prepared — <strong>3</strong>: Hellish Rebuke, Witch Bolt · <strong>5</strong>: Crown of Madness, Darkness · <strong>9</strong>: Fear, Summon Undead · <strong>13</strong>: Blight, Phantasmal Killer · <strong>17</strong>: Contagion, Steel Wind Strike.' }
+    ],
+    7:[
+      { name:'Aura of Hate', desc:'When you — or any allied Fiend or Undead in your Aura of Protection — hits a creature with a melee attack, that attack deals extra Necrotic damage equal to your CHA modifier.' }
+    ],
+    15:[
+      { name:'Supernatural Resistance', desc:'You gain Resistance to Bludgeoning, Piercing, and Slashing damage.' }
+    ],
+    20:[
+      { name:'Dread Lord', desc:'Bonus Action: imbue your Aura of Protection with unholy gloom for 10 minutes or until you end it (no action required). <em>Darkness</em>: magical Darkness fills the aura, and you and your allies inside can see through it. <em>Fear</em>: a Frightened creature that starts its turn in the aura takes 4d10 Psychic damage. <em>Shadow Strike</em>: Bonus Action for a melee spell attack against one creature in the aura, dealing 3d10 + CHA Necrotic damage on a hit. Recharges on a Long Rest, or by expending a level 5 spell slot.' }
+    ],
+  },
 },
 
 /* ── Psion (Unearthed Arcana — playtest) ──
@@ -1735,6 +2094,23 @@ const SUBCLASS_DATA = {
     15:[{ name:'Frozen Tundra', desc:'As an Action, you can create a 30-ft radius zone of supernatural cold centered on you for 1 minute (Concentration). Creatures entering or starting their turn in the zone take 2d8 Cold damage (CON save halves). The area is difficult terrain. 1/Long Rest.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'Hollow Warden': {
+    3:[
+      { name:'Hollow Warden Spells', desc:'Always prepared — <strong>3</strong>: Wrathful Smite · <strong>5</strong>: Spike Growth · <strong>9</strong>: Phantom Steed · <strong>13</strong>: Hallucinatory Terrain · <strong>17</strong>: Awaken.' },
+      { name:'Wrath of the Wild', desc:"When you cast Hunter's Mark you transform for the spell's duration, your body wreathed in rotten bark or beastly bristles. <em>Ancient Armor</em>: bonus to AC equal to your WIS modifier (min +1). <em>Unnerving Aura</em>: an enemy that starts its turn within a 10-ft Emanation from you makes a WIS save against your spell save DC, and on a failure it can take either an action or a Bonus Action that turn, not both." }
+    ],
+    7:[
+      { name:'Hungering Might', desc:'You gain a bonus to CON saves equal to your WIS modifier (min +1). Once per turn while transformed by Wrath of the Wild and Bloodied, hitting a creature with an attack roll regains you 1d10 + your WIS modifier HP.' }
+    ],
+    11:[
+      { name:'Rot and Violence', desc:"Extra benefits while transformed by Wrath of the Wild. <em>Eerie Aura</em>: a creature that fails its save against Unnerving Aura also takes Necrotic, Poison, or Psychic damage (your choice) equal to your Ranger level, ignoring Resistance. <em>Strangling Roots</em>: when you hit with a weapon attack, you can activate the Sap or Slow mastery property in addition to a different mastery you're already using with that weapon." }
+    ],
+    15:[
+      { name:'Ancient Endurance', desc:"<em>Persistent Hunt</em>: if you drop to 0 HP while transformed by Wrath of the Wild and don't die outright, expend a level 4+ spell slot (no action required) to set your HP to five times the level of that slot instead. <em>Timeless</em>: you have Immunity to the Exhaustion condition." }
+    ],
+  },
 },
 
 'Rogue': {
@@ -1793,6 +2169,57 @@ const SUBCLASS_DATA = {
     17:[{ name:'Assassin of the Dead Three', desc:'Your Sneak Attack damage dice increase by one size (d6→d8). You regain one use of Fearful Presence on each Short Rest. When you reduce a creature to 0 HP with Sneak Attack, you regain HP equal to your PB + INT mod.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'House Agent': {
+    3:[
+      { name:'House Insignia', desc:"You carry a magical brooch or coin bearing your sponsor's heraldry and can cast spells with it, using CHA as your spellcasting ability. You learn the Friends cantrip and can cast Find Familiar as a Ritual, choosing the Spider form — your sponsor supplies the Material component for the first casting. Once you cast a spell with the insignia, you can't cast that spell again until you finish a Long Rest. If you lose the insignia, your house delivers a replacement when you next finish a Long Rest." },
+      { name:'Insignia Spells', desc:'Learned at the listed Rogue levels — <strong>3</strong>: Charm Person · <strong>5</strong>: Suggestion · <strong>9</strong>: Hypnotic Pattern.' },
+      { name:'Charming Presence', desc:'You can take the Influence action as a Bonus Action. You also gain proficiency in one skill of your choice: <em>Deception</em> · <em>Intimidation</em> · <em>Performance</em> · <em>Persuasion</em>.' }
+    ],
+    9:[
+      { name:'Backstab', desc:'You have Advantage on attack rolls against creatures within 5 ft of you that are Friendly to you or have the Charmed condition. New Cunning Strike option — <em>Stunning Betrayal</em> (Cost: 4d6): if the target was Friendly or Charmed when you hit it, it has the Stunned condition until the start of your next turn.' }
+    ],
+    13:[
+      { name:'Infiltration Partner', desc:'The familiar you have through Find Familiar gains Darkvision with a range of 120 ft and Truesight with a range of 30 ft. When you cast Find Familiar, or finish a Short or Long Rest while you have a familiar, you can grant it Temporary HP equal to your Rogue level.' },
+      { name:'Silver Tongue', desc:"A creature's Hostile attitude no longer imposes Disadvantage on your CHA checks to influence that creature." }
+    ],
+    17:[
+      { name:'Subtle Manipulator', desc:"New Cunning Strike option — <em>Confound</em> (5d6): the target makes a WIS save against your spellcasting DC or has the Charmed condition for 1 minute, repeating the save whenever it takes damage. You can also cast Friends as a Bonus Action, and its target no longer automatically succeeds on the save for being a non-Humanoid or for fighting you. Finally, when a spell of yours that Charmed a target ends, the target doesn't know you Charmed it." }
+    ],
+  },
+  'Magic Stealer': {
+    3:[
+      { name:'Empower Sneak Attack', desc:"Reaction when a creature you can see within 30 ft casts a level 1+ spell: absorb its energy. Until the end of your next turn, your next Sneak Attack hit deals extra Force damage, rolling a number of d6s equal to the spell's level. You have INT modifier uses (minimum 1), regained on a Long Rest." },
+      { name:'Drain Magic', desc:'Magic action: touch a willing creature and end one ongoing level 1 or 2 spell on it; it immediately recovers one expended spell slot of level 2 or lower (its choice). Once per Short or Long Rest.' }
+    ],
+    9:[
+      { name:'Magical Sabotage', desc:"New Cunning Strike options. <em>Spell Susceptibility</em> (2d6): the target has Disadvantage on its next save against a spell, until the start of your next turn · <em>Disrupt Spell</em> (3d6): until the start of your next turn, each spell the target casts requires an INT save or it dissipates with no effect and the action, Bonus Action, or Reaction is wasted — a slot spent on it isn't expended · <em>Steal Resistance</em> (2d6): name a damage type; if the target has Resistance to it, it loses that Resistance and you gain it until the start of your next turn." }
+    ],
+    13:[
+      { name:'Occult Shroud', desc:'Whenever you finish a Long Rest, you can cast Nondetection using INT as your spellcasting ability, targeting only yourself, with the duration increased to 24 hours.' },
+      { name:'Improved Drain Magic', desc:'Drain Magic becomes a Bonus Action, can end an ongoing spell of level 1, 2, or 3 on the target, and lets the target recover an expended spell slot of level 3 or lower (its choice).' }
+    ],
+    17:[
+      { name:'Eldritch Implosion', desc:'When you use Empower Sneak Attack, you can force the caster to make a CON save (DC 8 + your DEX modifier + PB). On a failure, the spell dissipates with no effect and the target has the Stunned condition until the start of its next turn.' }
+    ],
+  },
+  'Phantom': {
+    3:[
+      { name:'Wails from the Grave', desc:'Immediately after you deal Sneak Attack damage on your turn, target a second creature you can see within 30 ft of the first: roll half your Sneak Attack dice (round up) and deal that much Necrotic damage as the dead wail around it. Usable a number of times equal to your DEX modifier (min 1), regained on a Long Rest.' },
+      { name:'Whispers of the Dead', desc:'Whenever you finish a Short or Long Rest, a ghostly presence grants you one skill or tool proficiency you lack. You lose it when you use this feature again to choose a different one.' }
+    ],
+    9:[
+      { name:'Tokens of the Departed', desc:"Each Long Rest you gain two soul trinkets — Tiny objects that last until your next Long Rest and teleport back to you if you ever move more than 30 ft away; you gain three at Rogue level 13 and four at 17. <em>Death's Knell</em>: expend and destroy one when you deal Sneak Attack damage to use Wails from the Grave without spending a use. <em>Life Essence</em>: while you hold at least one, you have Advantage on Death Saves and CON saves. <em>Spirit Query</em>: Magic action, expend and destroy one to cast Augury with no components, using DEX. You can also take a Reaction when a creature you can see dies within 30 ft to regain one expended trinket." },
+      { name:'Voice of Death', desc:'You can cast Speak with Dead once without a spell slot, requiring no components and using DEX as your spellcasting modifier. You regain this casting when you finish a Short or Long Rest.' }
+    ],
+    13:[
+      { name:'Ghost Walk', desc:'Bonus Action: assume a spectral form for 10 minutes or until you end it (no action required). <em>Flight</em>: Fly Speed of 10 ft with hovering · <em>Hazy Form</em>: attack rolls against you have Disadvantage · <em>Incorporeal Movement</em>: you move through occupied spaces as Difficult Terrain, taking 1d10 Force damage if you end your turn in one. Once per Long Rest, unless you expend and destroy a soul trinket (no action required) to restore the use.' }
+    ],
+    17:[
+      { name:"Death's Friend", desc:"<em>Death's Lament</em>: when you use Wails from the Grave, you can deal its Necrotic damage to the first creature as well as the second. <em>Draw of Death</em>: when you roll Initiative with no soul trinkets remaining, you regain one for Tokens of the Departed." }
+    ],
+  },
 },
 
 'Sorcerer': {
@@ -1842,6 +2269,87 @@ const SUBCLASS_DATA = {
     18:[{ name:'Spellfire Transcendence', desc:'You gain a Fly speed of 60 ft and resistance to fire, radiant, and force damage. When a spell of 5th level or lower targets you, you can use your Reaction to negate it entirely and regain Sorcery Points equal to the spell\'s level. 1/Long Rest.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'Ancestral Sorcery': {
+    3:[
+      { name:"Ancestor's Lore", desc:'Add your CHA modifier (minimum +1) to every INT check you make. You also gain proficiency in one skill of your choice among Arcana, History, Investigation, Nature, or Religion.' },
+      { name:'Ancestral Spells', desc:"Always prepared — <strong>3</strong>: Command, Guidance, Locate Object, Protection from Evil and Good, Resistance, Spiritual Weapon · <strong>5</strong>: Magic Circle, Spirit Guardians · <strong>7</strong>: Divination, Locate Creature · <strong>9</strong>: Legend Lore, Yolande's Regal Presence." },
+      { name:'Visage of the Ancestor', desc:'Choose the form your ancestor takes, whether its likeness in life or a symbolic creature. While your Innate Sorcery is active, that form appears as a spectral haze around you and you have Advantage on any ability check made as part of the Influence action.' }
+    ],
+    6:[
+      { name:'Superior Spell Disruption', desc:'You always have Counterspell and Dispel Magic prepared. While your Innate Sorcery is active, you can cast each of them without expending a spell slot: Counterspell then gives the target Disadvantage on its CON save, and Dispel Magic gives you Advantage on your checks to end ongoing spells. Once you cast one of them this way, you need a Long Rest before casting that spell this way again.' }
+    ],
+    14:[
+      { name:'Ancestral Majesty', desc:'While your Innate Sorcery is active, a magical aura fills a 5-ft Emanation around you. When a creature you can see enters the Emanation or ends its turn there, you can force it to make a CHA save; on a failure it has the Prone condition or the Frightened condition until the end of your next turn (your choice). A creature makes this save only once per turn.' },
+      { name:'Steady Spellcaster', desc:"Taking damage can't break your Concentration on Sorcerer spells." }
+    ],
+    18:[
+      { name:"Ancestor's Ward", desc:'While your Innate Sorcery is active, you have Advantage on saves against spells. Once during a use of Innate Sorcery, when you fail a save against a spell, you can choose to succeed instead.' }
+    ],
+  },
+  'Defiled Sorcery': {
+    3:[
+      { name:'Defile and Empower', desc:"Once per turn when you roll damage for a spell cast with a spell slot, roll unexpended Hit Point Dice up to half the slot's level (round up, min one die) and add the total to one damage roll; those dice are expended. <em>Life Steal</em>: instead target a creature you can see within 30 ft — it makes a CON save vs your spell save DC (creatures Immune to Exhaustion succeed automatically), and on a failure you roll and expend its Hit Point Dice instead, up to half the slot's level (round down, min one die). Once a creature fails that save, Life Steal is unavailable until a Long Rest unless you spend 3 Sorcery Points (no action required)." },
+      { name:'Defiler Spells', desc:'Always prepared — <strong>3</strong>: Blindness/Deafness, Inflict Wounds, Ray of Enfeeblement, Ray of Sickness · <strong>5</strong>: Bestow Curse, Vampiric Touch · <strong>7</strong>: Blight, Hallucinatory Terrain · <strong>9</strong>: Antilife Shell, Contagion.' }
+    ],
+    6:[
+      { name:'Corrupted Caster', desc:"<em>Defiler's Ward</em>: when you take a Bonus Action to turn Sorcery Points into a spell slot, gain Temp HP equal to the total of d6s rolled equal to the slot's level; while you have Temp HP, a creature that hits you with a melee attack roll takes Necrotic or Poison damage (your choice) equal to your CHA modifier. <em>Strengthened Rot</em>: damage from your Sorcerer spells and features ignores Resistance to Necrotic and Poison damage." }
+    ],
+    14:[
+      { name:'Withering Aura', desc:"While your Innate Sorcery is active, a 15-ft Emanation of defiling magic surrounds you. <em>Defiling Shroud</em>: when an enemy in the aura hits you with an attack roll, reduce that attack's total damage by your CHA modifier. <em>Essence Siphon</em>: when an enemy dies in the aura, regain 1d4 Sorcery Points — only once until you use Innate Sorcery again." }
+    ],
+    18:[
+      { name:'Superior Defiler', desc:"<em>Fouled Soul</em>: you have Immunity to the Poisoned and Exhaustion conditions. <em>Furthered Defilement</em>: your Withering Aura grows to a 30-ft Emanation, and enemies can't regain Hit Points while inside it." }
+    ],
+  },
+  'Demonic Sorcery': {
+    3:[
+      { name:'Abyssal Rupture', desc:'When you use Innate Sorcery, you tear open a 10-ft-radius Sphere of Abyssal energy centered on a point you can see within 30 ft. On activation and as a Bonus Action while Innate Sorcery is active, choose one option below; at the start of each of your turns you can move the Sphere to another point you can see within 30 ft. <em>Demonic Lash</em>: melee spell attack against a target within 5 ft of the rupture — on a hit, 1d8 Slashing damage, and a Large or smaller target can be pulled up to 10 ft toward the center. <em>Terrifying Screams</em>: each creature in the rupture makes a WIS save against your spell save DC or takes 1d4 Psychic damage.' },
+      { name:'Demonic Spells', desc:'Always prepared — <strong>3</strong>: Bane, Dissonant Whispers, Spike Growth, Web · <strong>5</strong>: Bestow Curse, Dispel Magic · <strong>7</strong>: Giant Insect, Hallucinatory Terrain · <strong>9</strong>: Contact Other Plane, Modify Memory.' }
+    ],
+    6:[
+      { name:'Abyssal Realm', desc:"When you spend at least 1 Sorcery Point as part of a Magic action or a Bonus Action on your turn, you can flood either a 10-ft Emanation from yourself or the Sphere of your Abyssal Rupture with one layer of the Abyss (save DC equals your spell save DC). <em>Gaping Maw's Frenzy</em>: name a horizontal direction; each creature in the area that fails a CHA save must spend as much movement as possible going that way by the safest route at the start of its next turn. <em>Maze of Azzatar</em>: each creature makes an INT save, and on a failure you have the benefits of the Invisible condition against it until the start of your next turn. <em>Slime Pits' Haze</em>: each creature makes a CON save or gains your choice of the Charmed or Poisoned condition until the start of your next turn." }
+    ],
+    14:[
+      { name:'Abyssal Conduit', desc:'<em>Rupture Expansion</em>: your Abyssal Rupture becomes a 30-ft-radius Sphere, and its area is Difficult Terrain for your enemies. <em>Fiendish Servant</em>: you always have Summon Fiend prepared, and you can cast it without Concentration — that casting lasts 1 minute and you must choose Demon. The summoned Fiend has Advantage on attack rolls while inside your Abyssal Rupture.' }
+    ],
+    18:[
+      { name:'Abyssal Explosion', desc:"Magic action: fill a 30-ft-radius Sphere with an explosion of Abyssal energy. Each creature in it makes a CON save against your spell save DC; on a failure it takes 8d6 Force damage if it isn't a Fiend, and it has the Incapacitated condition until the start of your next turn. Once per Long Rest, unless you spend 7 Sorcery Points (no action required) to restore the use." }
+    ],
+  },
+  'Faerzress Sorcery': {
+    3:[
+      { name:'Faerzress Spells', desc:'Always prepared — <strong>3</strong>: Faerie Fire, Magic Weapon, Misty Step, Witch Bolt · <strong>5</strong>: Nondetection, Sending · <strong>7</strong>: Arcane Eye, Stone Shape · <strong>9</strong>: Passwall, Scrying.' },
+      { name:'Faerzress Zone', desc:'Magic action, 3 Sorcery Points: flood an area within 120 ft, no larger than a 40-ft Cube, with faerzress for 24 hours. Inside it, creatures automatically succeed on saves against Divination effects and magical sensors cannot enter, teleportation of 1 mile or more into or out of the area is blocked, and the area is lit by Dim Light in which Darkvision sees color and grants Advantage on WIS (Perception) checks relying on sight. Filling the same area every day for 365 days makes it permanent.' },
+      { name:'Immunity to Faerzress', desc:'You ignore the detrimental effects of faerzress. Creatures in a faerzress area do not automatically succeed on saves against your Divination spells, and sensors created by your spells, such as Clairvoyance and Arcane Eye, can enter such an area. When you teleport yourself or others, those creatures may cross into or out of faerzress no matter the distance.' }
+    ],
+    6:[
+      { name:'Faerzress Affinity', desc:'You gain Resistance to Lightning damage and Darkvision out to 60 ft, or +30 ft of range if you already have Darkvision, and you discern color in Darkness. You also have Advantage on WIS (Perception) checks to see in Dim Light or Darkness, and your Immunity to Faerzress extends to allies within 30 ft.' }
+    ],
+    14:[
+      { name:'Faerzress Spell', desc:'When one or more creatures fail a save against a spell you cast, spend 1 Sorcery Point to lace one of those targets with faerzress for 1 minute: it cannot teleport, it cannot cast Divination spells, and it has Disadvantage on saves against Divination spells.' },
+      { name:'Faerzress Step', desc:'You always have Teleport prepared and can cast it once without expending a spell slot, regaining that use on a Long Rest. In addition, whenever you roll on the Teleportation Outcome table, you may instead choose any outcome available for your familiarity.' }
+    ],
+    18:[
+      { name:'Faerzress Form', desc:'When you use your Innate Sorcery, you can become pure faerzress energy for 1 minute, keeping your shape, personality, memories, speech, and game statistics; your equipment does not transform but stays usable. You gain Immunity to the Grappled, Paralyzed, Petrified, Poisoned, Prone, and Restrained conditions, Resistance to every damage type except Force and Psychic, and a Fly Speed equal to your Speed with hovering, moving through creatures and objects as Difficult Terrain but taking 1d10 Force damage if you end your turn inside an object. Once per Long Rest, or spend 7 Sorcery Points to restore the use.' }
+    ],
+  },
+  'Shadow Sorcery': {
+    3:[
+      { name:'Eyes of the Dark', desc:'You have Darkvision out to 120 ft and Blindsight out to 10 ft. You can also see normally through the Darkness created by any spell you cast.' },
+      { name:'Shadow Spells', desc:'Always prepared — <strong>3</strong>: Bane, Darkness, Inflict Wounds, Pass Without Trace · <strong>5</strong>: Hunger of Hadar, Summon Undead · <strong>7</strong>: Greater Invisibility, Phantasmal Killer · <strong>9</strong>: Contagion, Creation.' }
+    ],
+    6:[
+      { name:'Spirits of Ill Omen', desc:'You can cast Summon Undead without its Material component, and once per Long Rest without a spell slot. Whenever you start casting it, you can modify it to require no Concentration; that casting then lasts 1 minute and ends early if you cast the spell again.' }
+    ],
+    14:[
+      { name:'Shadow Walk', desc:'While you are in Dim Light or Darkness, you can take a Bonus Action to teleport up to 120 ft to an unoccupied space you can see that is also in Dim Light or Darkness.' }
+    ],
+    18:[
+      { name:'Umbral Form', desc:'Bonus Action: adopt a shadowy form for 1 minute, until you have the Incapacitated condition, or until you end it (no action required). <em>Incorporeal Movement</em>: you move through occupied spaces as Difficult Terrain, taking 1d10 Force damage if you end your turn in one · <em>Shadow Resilience</em>: Resistance to all damage except Force and Radiant · <em>Strength of the Grave</em>: if you would drop to 0 HP without dying outright, make a CHA save (DC 5 + half the damage taken) to set your HP to three times your Sorcerer level instead. Once per Long Rest, unless you spend 6 Sorcery Points (no action required) to restore the use.' }
+    ],
+  },
 },
 
 'Warlock': {
@@ -1880,6 +2388,84 @@ const SUBCLASS_DATA = {
     6:[{ name:'Entropic Ward', desc:'Reaction: impose disadvantage on one attack roll vs you. If it misses, advantage on your next attack vs it. 1/Short or Long Rest.' }],
     10:[{ name:'Thought Shield', desc:'Thoughts can\'t be read. Resistance to Psychic damage. When you take Psychic damage, the attacker takes the same amount.' }],
     14:[{ name:'Create Thrall', desc:'Action: touch an incapacitated Humanoid. It is Charmed (cured by Remove Curse) and you share a telepathic link with it over any distance on the same plane.' }],
+  },
+
+  /* ── Unearthed Arcana ── */
+  'Hexblade Patron': {
+    3:[
+      { name:'Hexblade Spells', desc:'Always prepared — <strong>3</strong>: Arcane Vigor, Hex, Shield, Wrathful Smite · <strong>5</strong>: Bestow Curse, Conjure Barrage · <strong>7</strong>: Freedom of Movement, Staggering Smite · <strong>9</strong>: Animate Objects, Steel Wind Strike.' },
+      { name:"Hexblade's Curse", desc:"Bonus Action: curse one creature you can see within 30 ft for 1 minute; it ends early if you use the feature again, dismiss it, or die. Casting a spell with a slot that curses a target can apply the curse instead of the Bonus Action, and the curse then lasts 1 minute or the spell's duration, whichever is longer. <em>Hungering Hex</em>: you regain 1d8 + CHA HP when the cursed target drops to 0 HP. <em>Accursed Shield</em>: +2 AC while wearing no armor and wielding no Shield, whenever you are within 10 ft of the cursed target. Uses equal to your CHA modifier (minimum once), all regained on a Long Rest." },
+      { name:'Unyielding Will', desc:'When you succeed on a save to maintain Concentration, each creature of your choice in a 10-ft Emanation from you takes 2d6 Necrotic damage; usable again at the start of your next turn. When you fail such a save, you can choose to succeed instead and gain Temporary HP equal to 1d10 + your Warlock level, once per Long Rest.' }
+    ],
+    6:[
+      { name:'Malign Brutality', desc:'<em>Harrowing Hex</em>: after casting a level 1+ spell with a casting time of an action, make one weapon attack as a Bonus Action. <em>Hindering Curse</em>: when you hit the cursed target with an attack roll, it has Disadvantage on its next save before the start of your next turn. <em>Inescapable Hex</em>: when the cursed target ends its turn 30 ft or further from you, you can move up to your Speed straight toward it.' }
+    ],
+    10:[
+      { name:'Armor of Hexes', desc:"Reaction when you take damage from the target cursed by your Hexblade's Curse: reduce that damage by an amount equal to your Warlock level." }
+    ],
+    14:[
+      { name:'Masterful Hex', desc:"<em>Accursed Critical</em>: your attack rolls against the cursed target score a Critical Hit on a 19 or 20. <em>Explosive Hex</em>: when you damage the cursed target, it and each creature of your choice in a 30-ft Emanation from it take 3d6 Necrotic, Psychic, or Radiant damage (your choice) and have their Speed reduced by 10 ft until the start of your next turn — once per Long Rest, or restored by expending a Pact Magic slot (no action required). <em>Hex Restoration</em>: regain one use of Hexblade's Curse on a Short Rest or when you use Magical Cunning." }
+    ],
+  },
+  'Primordial Patron': {
+    3:[
+      { name:'Elemental Node', desc:"Choose an element, which sets the damage type of your subclass features (<em>Air</em> Thunder · <em>Earth</em> Acid · <em>Fire</em> Fire · <em>Water</em> Cold); you can change it whenever you gain a level. Magic action: create a 5-ft-radius Sphere of that element centered on a point within 60 ft, and move it up to 30 ft as a Bonus Action on later turns. A creature other than you makes a DEX save against your spell save DC — when the node appears, when it moves into its space, and when it enters the node or ends its turn there (once per turn) — taking 1d6 damage of your element's type, or half on a success. It lasts 1 minute, until you dismiss it (no action required), or until you create another node; once per Short or Long Rest, or expend a Pact Magic spell slot (no action) to restore the use. Damage rises to 2d6 at Warlock level 6 and 3d6 at level 14." },
+      { name:'Elemental Spells', desc:"Always prepared, the primordial spells plus those of your chosen element — <strong>3</strong>: Chromatic Orb, Darkvision · <em>Air</em> Feather Fall, Shatter · <em>Earth</em> Entangle, Knock · <em>Fire</em> Burning Hands, Heat Metal · <em>Water</em> Alter Self, Ice Knife. <strong>5</strong>: Elemental Weapon · <em>Air</em> Fly · <em>Earth</em> Plant Growth · <em>Fire</em> Fireball · <em>Water</em> Water Walk. <strong>7</strong>: Summon Elemental (the spirit's element matches yours) · <em>Air</em> Freedom of Movement · <em>Earth</em> Vitriolic Sphere · <em>Fire</em> Wall of Fire · <em>Water</em> Control Water. <strong>9</strong>: Commune with Nature · <em>Air</em> Steel Wind Strike · <em>Earth</em> Wall of Stone · <em>Fire</em> Flame Strike · <em>Water</em> Cone of Cold." }
+    ],
+    6:[
+      { name:'Elemental Haven', desc:'Your node shields you. <em>Elemental Protection</em>: while within your node, you gain a bonus to AC equal to your CHA modifier (minimum of 1). <em>Elemental Teleport</em>: Bonus Action to teleport into your node or the nearest unoccupied space within 5 ft of it, CHA modifier times (minimum of once) per Long Rest.' }
+    ],
+    10:[
+      { name:'Primeval Protection', desc:"<em>Elemental Fortitude</em>: you have Resistance to your chosen element's damage type, and Immunity to it while within your Elemental Node. <em>Node Improvement</em>: your Elemental Node becomes a 10-ft-radius Sphere." }
+    ],
+    14:[
+      { name:'Elemental Harbinger', desc:"<em>Elemental Vortex</em>: whenever you expend a Pact Magic spell slot while within your node, one creature you choose within 30 ft of the node must succeed on a STR save or be pulled up to 15 ft toward its center. <em>Node Improvement</em>: your node now lasts up to 1 hour. <em>Primordial Herald</em>: while within your node, you can cast Planar Ally without expending a spell slot by speaking your patron's name — usable again only after you finish 2d4 Long Rests." }
+    ],
+  },
+  'Sorcerer-King Patron': {
+    3:[
+      { name:'Sorcerer-King Spells', desc:'Always prepared — <strong>3</strong>: Command, Compelled Duel, Hold Person, Mind Spike, Wrathful Smite · <strong>5</strong>: Fear, Sending · <strong>7</strong>: Compulsion, Staggering Smite · <strong>9</strong>: Dominate Person, Synaptic Static. <em>Psionic Casting</em>: cast spells from this table without Verbal or Material components, except Materials that are consumed or have a listed cost.' },
+      { name:"Tyrant's Herald", desc:'<em>Intimidating Presence</em>: gain proficiency in Intimidation if you lack it, plus Expertise in that skill. <em>Voice of Tyranny</em>: cast Command as a Bonus Action without expending a spell slot, a number of times equal to your CHA modifier (min once), regaining all uses on a Long Rest.' }
+    ],
+    6:[
+      { name:'Decisive Edict', desc:'When you cast a spell using a Pact Magic slot, profane power can erupt in a 30-ft Emanation from you; for each creature you can see in it, choose <em>Marshal</em>: it has Advantage on attack rolls until the end of its next turn · <em>Oppress</em>: it must succeed on a WIS save vs your spell save DC or be Frightened until the end of its next turn. Once per Short or Long Rest, and you also regain it when you use Magical Cunning.' }
+    ],
+    10:[
+      { name:'Vindictive Rebuke', desc:'Reaction when an enemy hits you with an attack roll: it rerolls the d20 and must use the new roll. If the attack then misses, that creature takes Psychic damage equal to your Warlock level. You have CHA modifier uses (min once), regained on a Long Rest.' }
+    ],
+    14:[
+      { name:'Absolute Tyranny', desc:"Whenever you cast Command, you can target one additional creature within the spell's range, and any creature Frightened by you automatically fails its save against your Command." }
+    ],
+  },
+  'Undead Patron': {
+    3:[
+      { name:'Form of Dread', desc:"Bonus Action: become an avatar of your patron's dreadful power for 1 minute, until you have the Incapacitated condition, or until you end it (no action required); usable a number of times equal to your CHA modifier (min 1) per Long Rest. <em>Facsimile of Life</em>: Temp HP equal to 1d10 + your Warlock level. <em>Frightful Avatar</em>: Immunity to the Frightened condition, and once per turn when you hit a creature with an attack roll you can force a WIS save against your spell save DC or it is Frightened until the end of your next turn." },
+      { name:'Undead Spells', desc:'Always prepared — <strong>3</strong>: Blindness/Deafness, False Life, Phantasmal Force, Ray of Sickness · <strong>5</strong>: Speak with Dead, Vampiric Touch · <strong>7</strong>: Death Ward, Phantasmal Killer · <strong>9</strong>: Antilife Shell, Cloudkill.' }
+    ],
+    6:[
+      { name:'Grave Touched', desc:"<em>Arcane Necrosis</em>: Necrotic damage you deal with spells or attack rolls ignores Resistance to Necrotic damage, and once per turn while using Form of Dread you can change a damaging spell's damage type to Necrotic. <em>Undead Endurance</em>: you gain no Exhaustion from dehydration, malnutrition, or suffocation, you don't need to sleep, and magic can't put you to sleep." }
+    ],
+    10:[
+      { name:'Necrotic Husk', desc:"<em>Necrotic Resilience</em>: Resistance to Necrotic damage, which becomes Immunity while you use Form of Dread. <em>Unholy Resuscitation</em>: if you drop to 0 HP and don't die outright, creatures of your choice in a 30-ft Emanation from you make a CON save against your spell save DC, taking 2d10 + your Warlock level Necrotic damage, half on a success; your HP then changes to 10 times your CHA modifier (min 10) and you gain 1 Exhaustion level. Once per Short or Long Rest." }
+    ],
+    14:[
+      { name:'Superior Dread', desc:'Added benefits while you use Form of Dread. <em>Flight</em>: Fly Speed equal to your Speed, with hovering. <em>Profane Casting</em>: Warlock spells from the Conjuration or Necromancy schools need no Verbal, Somatic, or Material components, except components that are consumed or have a listed cost. <em>Vitality Siphon</em>: once per turn when you deal Necrotic damage, you regain HP equal to your CHA modifier (min 1).' }
+    ],
+  },
+  'Vestige Patron': {
+    3:[
+      { name:'Vestige Companion', desc:"A Small Celestial, Fiend, or Undead companion (choose the type) with AC 13 + your CHA modifier, HP 4 + four times your Warlock level, Fly 30 ft (hover), and your PB added to its checks and saves. It acts on your turn but takes only the Dodge action unless you spend a Bonus Action to command it or sacrifice one of your attacks for its <em>Vestige's Strike</em> (your spell attack bonus, reach 5 ft or range 60 ft, 1d6 + 3 + CHA Fire, Necrotic, or Radiant by type). Once per day as a Bonus Action it uses <em>Divine Power</em> — <em>Cursed Invocation</em> (Undead): curse a creature within 30 ft for 1 minute, giving it Disadvantage on attacks against you and the vestige · <em>Fiendish Swap</em> (Fiend): you and the vestige teleport and swap places within 60 ft · <em>Healing Touch</em> (Celestial): a touched creature regains 2d8 + CHA HP and ends Blinded, Deafened, or Poisoned. At 0 HP it disappears until you spend 1 minute manifesting it again; a Magic action dismisses it to a pocket dimension or returns it within 30 ft, and each Long Rest you can resummon it in a new form and type." },
+      { name:'Vestige Spells', desc:"Choose one Cleric Domain — <em>Life</em> · <em>Light</em> · <em>Trickery</em> · <em>War</em>. Its Domain Spells become Warlock spells for you and are always prepared once your Warlock level equals the Cleric level listed for them on that Domain's table." }
+    ],
+    6:[
+      { name:'Vestige Recovery', desc:'Your Vestige Companion regains its use of Divine Power whenever you finish a Short or Long Rest, and whenever you use your Magical Cunning feature.' }
+    ],
+    10:[
+      { name:'Aura of Power', desc:'Magic action, once per Long Rest: the vestige manifests a 30-ft Emanation lasting a number of hours equal to your CHA modifier, or until the vestige disappears or is dismissed. You, the vestige, and allies inside gain Resistance to Fire, Necrotic, and Radiant damage and Immunity to the Charmed and Frightened conditions. If you drop to 0 HP within the aura, your HP instead become your Warlock level + your CHA modifier, and the vestige is dismissed to its pocket dimension until you finish a Long Rest.' }
+    ],
+    14:[
+      { name:'Semblance of Life', desc:'Once per Long Rest, while the vestige is within 90 ft, cast Summon Celestial, Summon Fiend, or Summon Undead (matching its type) without a spell slot or Material components. The vestige becomes the summoned creature and uses that stat block for 1 minute, at a spell level equal to half your Warlock level (round down, maximum 9), then returns to its previous form.' }
+    ],
   },
 },
 
@@ -1966,6 +2552,88 @@ const SUBCLASS_DATA = {
     14:[{ name:'Song of Victory', desc:'While Bladesinging, add your INT modifier to melee weapon damage rolls.' }],
   },
 
+
+  /* ── Unearthed Arcana ── */
+  'Conjurer': {
+    3:[
+      { name:'Benign Transposition', desc:'Bonus Action: teleport up to 30 ft to an unoccupied space you can see, or swap places with a willing Medium or smaller creature in a space within range. INT modifier uses (minimum 1), regained on a Long Rest.' },
+      { name:'Conjuration Savant', desc:'Add two Wizard Conjuration spells of level 2 or lower to your spellbook for free, and one more Conjuration spell each time you gain access to a new level of spell slots (of a level you have slots for).' }
+    ],
+    6:[
+      { name:'Distant Transposition', desc:"Benign Transposition's range rises to 60 ft, and you now regain all of its expended uses on a Short or Long Rest." },
+      { name:'Durable Summons', desc:'A creature you summon or create with a Conjuration spell cast using a spell slot gains Temporary HP equal to twice your Wizard level when it appears. While it has those Temporary HP it has Resistance to every damage type except Force, Necrotic, Psychic, and Radiant.' }
+    ],
+    10:[
+      { name:'Focused Conjuration', desc:'Taking damage can never break your Concentration on a Conjuration spell.' }
+    ],
+    14:[
+      { name:'Splintered Summons', desc:'When you cast Summon Aberration, Summon Construct, Summon Dragon, Summon Elemental, or Summon Fey with a spell slot, you can summon two creatures of the same kind instead of one, each in a space of your choice within range, but each has half the normal HP. Losing Concentration dismisses both. Once per Long Rest, or by expending a level 5+ spell slot (no action required).' }
+    ],
+  },
+  'Enchanter': {
+    3:[
+      { name:'Enchanting Conversationalist', desc:'Gain proficiency in <em>Deception</em>, <em>Intimidation</em>, or <em>Persuasion</em>, and add your INT modifier (minimum +1) to ability checks made with that skill.' },
+      { name:'Enchantment Savant', desc:'Add two Wizard Enchantment spells of level 2 or lower to your spellbook for free, and one more Enchantment spell each time you gain access to a new level of spell slots (of a level you have slots for).' },
+      { name:'Hypnotic Presence', desc:'Magic action: one creature within 10 ft that can see or hear you makes a WIS save against your spell save DC or is Charmed for 1 minute, becoming Incapacitated with a Speed of 0. It ends early if your Concentration ends, the target moves more than 10 ft away, it can neither see nor hear you, or it takes damage. Once per Long Rest, or by expending a level 1+ spell slot (no action required).' }
+    ],
+    6:[
+      { name:'Split Enchantment', desc:'When you cast an Enchantment spell that targets an extra creature at higher levels, such as Charm Person, you can raise its effective level by 1. INT modifier uses, regained on a Long Rest.' }
+    ],
+    10:[
+      { name:'Instinctive Charm', desc:"Reaction when a creature you can see within 30 ft hits you with an attack roll: it makes a WIS save against your spell save DC. On a failure the attack misses you and instead targets another creature within the attack's range (your choice if several), using the same attack roll. Once per Long Rest, or by casting an Enchantment spell with a spell slot." }
+    ],
+    14:[
+      { name:'Alter Memories', desc:"You always have Modify Memory prepared, and when you cast it you can target a second creature within the spell's range." }
+    ],
+  },
+  'Imaskarcanist': {
+    3:[
+      { name:'Unlight Adept', desc:'When you cast a spell that deals Acid, Cold, Fire, Lightning, or Thunder damage, you can change that damage type to Radiant. Dim Light created by your spells is Bright Light instead.' },
+      { name:'Unlight Invigoration', desc:'Bonus Action: choose a willing creature you can see within 30 ft and expend one or two of your Hit Point Dice. The target gains Temporary HP equal to the total rolled + your INT modifier, and until it has no Temporary HP left it has Advantage on STR checks and sheds Bright Light in a 10-ft radius.' }
+    ],
+    6:[
+      { name:'Unlight Restoration', desc:'Bonus Action: choose a creature you can see within 30 ft and expend one or two of your Hit Point Dice. It regains HP equal to the total rolled and sheds Bright Light in a 10-ft radius until the end of its next turn. If you expended two dice, you may instead forgo the healing to end one condition on it: <em>Blinded</em> · <em>Deafened</em> · <em>Paralyzed</em> · <em>Poisoned</em>.' }
+    ],
+    10:[
+      { name:'Secrets of Deep Imaskar', desc:'<em>Imaskarcana Lore</em>: attune to a magic item as a Magic action, once per Long Rest. <em>Piercing Unlight</em>: your spells ignore Resistance to Radiant damage. <em>Unlight Resilience</em>: you gain Resistance to Radiant damage. <em>Imaskar Seals</em>: Glyph of Warding is always prepared, and once per Long Rest you cast it without a slot or Material components, as if using your highest Wizard slot — any previous glyph made this way breaks, its spell ending untriggered.' }
+    ],
+    14:[
+      { name:'Doom of Unlight', desc:'Reaction when a creature takes Radiant damage from a spell you cast: it makes a CON save against your spell save DC or is cursed. While cursed, it sheds Bright Light in a 20-ft radius, attack rolls against it have Advantage, it takes Radiant damage equal to your character level at the start of each of its turns, and it has Advantage on STR checks and melee attack rolls — hitting a creature with a melee attack lets it repeat the save to end the curse. If it drops to 0 HP it explodes: roll d8s equal to half your character level, and creatures in a 10-ft Emanation on it take that much Radiant damage. Once per Long Rest, unless you expend a level 6+ spell slot (no action required).' }
+    ],
+  },
+  'Necromancer': {
+    3:[
+      { name:'Necromancy Savant', desc:'Add two Wizard Necromancy spells of level 2 or lower to your spellbook for free, and one more Necromancy spell each time you gain access to a new level of spell slots (of a level you have slots for).' },
+      { name:'Necromancy Spellbook', desc:"<em>Necrotic Resistance</em>: you have Resistance to Necrotic damage · <em>Grim Harvest</em>: when you cast a Necromancy spell with a spell slot, an Undead you can see within 60 ft regains HP equal to the slot's level + your Wizard level · <em>Undead Familiar</em>: Find Familiar appears in your spellbook, and you can summon it as a Skeleton or Zombie in addition to the normal forms." }
+    ],
+    6:[
+      { name:'Grave Power', desc:'While holding your spellbook: <em>Grave Resilience</em> — using Arcane Recovery lowers your Exhaustion level by 1 · <em>Overwhelming Necrosis</em> — damage from your Wizard spells and Wizard features ignores Resistance to Necrotic damage.' },
+      { name:'Undead Thralls', desc:"You always have Animate Dead prepared and can cast it once without a spell slot, and you can raise its effective level by 1 when you start casting it. Undead you create or summon with a Necromancy spell cast using a spell slot gain <em>Undead Fortitude</em> — current and maximum HP increased by the slot's level + your INT modifier for the spell's duration — and <em>Withering Strike</em> — extra Necrotic damage equal to your INT modifier (minimum 1) on each of their hits." }
+    ],
+    10:[
+      { name:'Harvest Undead', desc:'Reaction right after damage leaves you Bloodied without killing you: reduce an Undead you control that you can see to 0 HP, then regain HP equal to your Wizard level.' }
+    ],
+    14:[
+      { name:"Death's Master", desc:"While holding your spellbook: <em>Bolster Undead</em> — Bonus Action to give any number of Undead you created or summoned within 60 ft Temporary HP equal to your Wizard level, once per Undead per 24 hours · <em>Extinguish Undead</em> — when an Undead you can see drops to 0 HP you can make it burst, rolling d6s equal to half its unexpended Hit Dice (round up, minimum 1d6); each creature in a 10-ft Emanation makes a DEX save, taking that much Necrotic damage and losing its Reactions until its next turn on a failure, half damage only on a success. Exploding an Undead you don't control costs a Reaction and a level 5+ spell slot." }
+    ],
+  },
+  'Transmuter': {
+    3:[
+      { name:'Transmutation Savant', desc:'Add two Wizard Transmutation spells of level 2 or lower to your spellbook for free, and one more Transmutation spell each time you gain access to a new level of spell slots (of a level you have slots for).' },
+      { name:"Transmuter's Stone", desc:'On a Long Rest, create a Tiny magic stone that lasts until you use this feature again and serves as a Spellcasting Focus for your Wizard spells. Whoever carries it gains proficiency in CON saves plus one benefit you choose: <em>Darkvision</em> 60 ft, or +60 ft to existing Darkvision · <em>Speed</em> +10 ft · <em>Resistance</em> to Acid, Cold, Fire, Lightning, Poison, or Thunder. You can change the benefit whenever you cast a Transmutation spell using a spell slot.' },
+      { name:'Wondrous Alteration', desc:'You always have Alter Self prepared and can cast it once without a spell slot, regaining that use on a Long Rest. While under its effects each option gains more: <em>Aquatic Adaptation</em> — Dash as a Bonus Action while underwater · <em>Change Appearance</em> — Advantage on CHA (Deception) checks · <em>Natural Weapons</em> — your growth deals 2d6 of its damage type and you have Advantage on CON saves to maintain Concentration.' }
+    ],
+    6:[
+      { name:'Empowered Transmutation', desc:'When you cast a Transmutation spell that deals no damage, such as Fly or Magical Weapon, using a spell slot, you can treat it as cast with a slot 1 level higher. INT modifier uses (minimum 1), regained on a Long Rest.' }
+    ],
+    10:[
+      { name:'Potent Stone', desc:"Your Transmuter's Stone can carry up to two benefits, each option taken only once except Resistance, which must use different damage types; you can change either or both when you cast a Transmutation spell with a spell slot. Two new options join the list: <em>Mighty Build</em> — Advantage on STR saves and the bearer counts as one size larger for carrying capacity · <em>Tremorsense</em> — Tremorsense out to 30 ft." },
+      { name:'Shapechanger', desc:'You always have Polymorph prepared and can cast it once without a spell slot, regaining that use on a Long Rest. When you target yourself you can modify the spell — once per Long Rest — to keep <em>Game Statistics</em> (personality, memories, speech, your INT, WIS, and CHA scores, class features, languages, and feats) and <em>Transmute Spells</em> (cast Transmutation spells while shape-shifted, except those with a costed or consumed Material component).' }
+    ],
+    14:[
+      { name:'Master Transmuter', desc:"Magic action while carrying your Transmuter's Stone: consume its stored magic for one benefit, after which the stone crumbles to dust unless you expend a level 5+ spell slot as part of the action. <em>Major Transformation</em>: after 10 minutes of handling, turn one nonmagical object no larger than a 10-ft Cube (or eight connected 5-ft Cubes) into another of similar size and mass and equal or lesser value · <em>Panacea</em>: a creature you touch regains half its HP maximum (round down), is cured of magical contagions and curses including Attunement to a cursed item, and loses the Poisoned and Petrified conditions · <em>Restore Life</em>: cast Raise Dead without a spell slot, the stone replacing the Material components · <em>Restore Youth</em>: a willing creature you touch drops to 0 Exhaustion and permanently looks 3d10 years younger, to a minimum of young adulthood." }
+    ],
+  },
 },
 
 'Artificer': {
@@ -2016,6 +2684,24 @@ const SUBCLASS_DATA = {
     15:[
       { name:'Safe Haven', desc:'When a map holder drops to 0 HP, they can destroy the map to immediately regain HP equal to twice your Artificer level and teleport to within 5 ft of you or another map holder (no distance limit).' },
       { name:'Cartographer\'s Path', desc:'Each map holder can cast Find the Path once per Long Rest for free. When you use your Flash of Genius reaction, you or the map holder can additionally teleport up to 30 ft to an unoccupied space.' }
+    ],
+  },
+
+  /* ── Unearthed Arcana ── */
+  'Reanimator': {
+    3:[
+      { name:'Reanimator Spells', desc:'Always prepared — <strong>3</strong>: False Life, Spare the Dying, Witch Bolt · <strong>5</strong>: Blindness/Deafness, Enhance Ability · <strong>9</strong>: Animate Dead, Lightning Bolt · <strong>13</strong>: Blight, Death Ward · <strong>17</strong>: Antilife Shell, Raise Dead.' },
+      { name:'Jolt to Life', desc:'When you cast Spare the Dying you can send a jolt of electricity through the target: it regains 1 HP, and each creature in a 10-ft Emanation from it makes a DEX save against your spell save DC, taking 1d4 + half your Artificer level (round up) Lightning damage, half as much on a success. Usable a number of times equal to your INT modifier, regained on a Long Rest.' },
+      { name:'Reanimated Companion', desc:"Magic action with Artisan's Tools you're proficient with: assemble a Reanimated Companion in an unoccupied space within 5 ft. Small Undead — AC 10 + INT, HP 4 + four times your Artificer level, Speed 30 ft, Blindsight 60 ft, Resistance to Necrotic and Poison, Immunity to Lightning (it heals from Lightning instead), Immunity to Charmed, Exhaustion, and Poisoned. <em>Dreadful Swipe</em>: melee attack using your spell attack modifier, 1d4 + 2 + INT Necrotic, and the target can't take Opportunity Attacks until its next turn · <em>Death Burst</em>: when it dies, each creature in a 10-ft Emanation makes a DEX save vs your spell save DC or takes 2d6 Necrotic. It lasts until you finish a Long Rest or dismiss it, acts on your turn but only Dodges unless you spend a Bonus Action to command it, and can be created once per Long Rest or by expending a spell slot." }
+    ],
+    5:[
+      { name:'Strange Modifications', desc:"Whenever you create your Reanimated Companion, give it one option of your choice. <em>Arcane Conduit</em>: you can cast spells as though from the companion's space (using your own senses), and once per turn when an Artificer Evocation or Necromancy spell of yours deals damage while the companion is within 120 ft, add your INT modifier to one of that spell's damage rolls. <em>Ferocity</em>: when you command the companion to take the Dreadful Swipe action, it uses that action twice." }
+    ],
+    9:[
+      { name:'Improved Reanimation', desc:'Your companion gains a second option of your choice, picked when you create it. <em>Bloated</em>: it becomes Large or Medium, its Dreadful Swipe can push a Large or smaller target 10 ft away, and its Death Burst adds your INT modifier to the damage. <em>Gaunt</em>: Speed becomes 45 ft with an equal Climb Speed that handles ceilings without a check, and creatures of your choice starting their turn within a 10-ft Emanation make a WIS save vs your spell save DC or are Frightened until their next turn. <em>Moist</em>: it gains a Swim Speed equal to its Speed, and any creature within 10 ft that hits it takes Acid damage equal to your INT modifier.' }
+    ],
+    15:[
+      { name:'Promethean Reanimation', desc:"<em>Facilitated Revival</em>: the Material component cost of Revivify and Raise Dead is halved. <em>Improved Companion</em>: your companion's Death Burst deals 4d6, and its Necrotic damage ignores Resistance. <em>Life Transfer</em>: Reaction when you take damage — your Reanimated Companion drops to 0 HP and dies, triggering Death Burst, and you regain HP equal to your Artificer level." }
     ],
   },
 },
@@ -2095,14 +2781,66 @@ const CLASS_RESOURCES = {
 
    La clé d'une option UA reste le nom nu (« Psion », « Myconid ») : c'est
    elle qui part dans la fiche et qui sert d'index dans les tables. Si WotC
-   publie l'option pour de bon, il suffit de retirer `ua: true` — aucune
+   publie l'option pour de bon, il suffit de retirer le drapeau — aucune
    fiche existante ne casse, aucune migration à écrire.
+
+   Espèces et classes portent le drapeau sur l'entrée elle-même (`ua: true`).
+   Les sous-classes, non : SUBCLASS_DATA[classe][sous-classe] est indexé par
+   niveau, et une clé de métadonnée s'y ferait passer pour un palier. D'où
+   cette table à côté, dont un smoke-test vérifie qu'elle ne dérive pas.
    ════════════════════════════════════════════════════════════ */
 
-/** Cette espèce ou cette classe est-elle du matériel de playtest ? */
+/* Sous-classe de playtest → document d'origine. Les noms de sous-classes
+   sont uniques toutes classes confondues, la clé simple suffit. */
+const UA_SUBCLASSES = {
+  'Ancestral Sorcery': 'Arcane Subclasses (June 2025)',
+  'Arcana Domain': 'Arcane Subclasses (June 2025) → Arcana Unleashed (Sept. 15, 2026)',
+  'Arcane Archer': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
+  'Cavalier': 'Subclasses Update (Oct. 2025)',
+  'Circle of Preservation': 'Apocalyptic Subclasses (Aug. 2025)',
+  'Circle of Spores': 'Underdark Options 2 (Sept. 2026)',
+  'Circle of the Titan': 'Villainous Options Update (June 2026)',
+  'College of Spirits': 'Horror Subclasses (May 2025)',
+  'Conjurer': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
+  'Defiled Sorcery': 'Apocalyptic Subclasses (Aug. 2025)',
+  'Demonic Sorcery': 'Villainous Options Update (June 2026)',
+  'Enchanter': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
+  'Faerzress Sorcery': 'Underdark Options 2 (Sept. 2026)',
+  'Freedom Domain': 'Underdark Options 2 (Sept. 2026)',
+  'Gladiator': 'Apocalyptic Subclasses (Aug. 2025)',
+  'Grave Domain': 'Horror Subclasses (May 2025)',
+  'Hell Knight': 'Villainous Options Update (June 2026)',
+  'Hexblade Patron': 'Arcane Subclasses (June 2025)',
+  'Hollow Warden': 'Horror Subclasses (May 2025)',
+  'House Agent': 'Underdark Options (Aug. 2026)',
+  'Imaskarcanist': 'Underdark Options (Aug. 2026)',
+  'Magic Stealer': 'Mystic Subclasses (Jan. 2026)',
+  'Necromancer': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
+  'Oath of the Spellguard': 'Mystic Subclasses (Jan. 2026)',
+  'Oathbreaker': 'Subclasses Update (Oct. 2025)',
+  'Path of Lament': 'Villainous Options 2 (Apr. 2026)',
+  'Path of the Spiritual Guardian': 'Subclasses Update (Oct. 2025)',
+  'Path of the Storm Herald': 'Subclasses Update (Oct. 2025)',
+  'Path of Unlight': 'Underdark Options (Aug. 2026)',
+  'Pestilence Domain': 'Villainous Options (Apr. 2026)',
+  'Phantom': 'Horror Subclasses (May 2025)',
+  'Primordial Patron': 'Villainous Options 2 (Apr. 2026)',
+  'Reanimator': 'Horror Subclasses (May 2025)',
+  'Shadow Sorcery': 'Horror Subclasses (May 2025)',
+  'Sorcerer-King Patron': 'Apocalyptic Subclasses (Aug. 2025)',
+  'Tattooed Warrior': 'Arcane Updates (Sept. 2025)',
+  'Transmuter': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
+  'Undead Patron': 'Horror Subclasses (May 2025)',
+  'Vestige Patron': 'Mystic Subclasses (Jan. 2026) → Arcana Unleashed (Sept. 15, 2026)',
+  'Warrior of Intoxication': 'Subclasses Update (Oct. 2025)',
+  'Warrior of the Mystic Arts': 'Mystic Subclasses (Jan. 2026) → Arcana Unleashed (Sept. 15, 2026)',
+  'Warrior of Venom': 'Villainous Options 2 (Apr. 2026)',
+};
+
+/** Cette espèce, cette classe ou cette sous-classe est-elle du playtest ? */
 function estUA(nom) {
   if (!nom) return false;
-  return !!(SPECIES_DATA[nom]?.ua || CLASS_DATA[nom]?.ua);
+  return !!(SPECIES_DATA[nom]?.ua || CLASS_DATA[nom]?.ua || UA_SUBCLASSES[nom]);
 }
 
 /** Nom tel qu'on l'affiche dans une liste de choix : « (UA) Myconid ». */
@@ -2113,11 +2851,17 @@ function nomUA(nom) {
 /** Document de playtest d'origine, pour l'infobulle d'une option. */
 function sourceUA(nom) {
   if (!nom) return '';
-  return SPECIES_DATA[nom]?.uaSource || CLASS_DATA[nom]?.uaSource || '';
+  return SPECIES_DATA[nom]?.uaSource || CLASS_DATA[nom]?.uaSource || UA_SUBCLASSES[nom] || '';
 }
 
-/** Attribut `title` prêt à coller sur une <option> (vide si l'option est officielle). */
-function titreUA(nom) {
+/** Texte d'infobulle pour une option de playtest (vide si l'option est officielle). */
+function infoUA(nom) {
   const src = sourceUA(nom);
-  return src ? ` title="Unearthed Arcana — ${src} · playtest material, not official yet"` : '';
+  return src ? `Unearthed Arcana — ${src} · playtest material, not official yet` : '';
+}
+
+/** Le même, prêt à coller comme attribut dans une <option>. */
+function titreUA(nom) {
+  const info = infoUA(nom);
+  return info ? ` title="${info}"` : '';
 }
