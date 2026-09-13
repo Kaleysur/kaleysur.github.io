@@ -1107,27 +1107,48 @@ function ok(cond, label) {
       Sorcerer:  [3, 6, 14, 18],    Warlock: [3, 6, 10, 14],     Wizard:  [3, 6, 10, 14],
       Artificer: [3, 5, 9, 15],     Psion:   [3, 6, 10, 14],
     };
-    /* Cinq collèges de Barde portent un palier 10 que le PHB 2024 ne donne pas :
-       leur capacité de niveau 14 y a glissé (Peerless Skill est au 14 dans le
-       livre), et leur niveau 14 porte un nom qu'aucun livre ne contient
-       — « Unmatched Lore », « Valor's Triumph »… L'anomalie est antérieure à
-       cette passe et n'est pas corrigée ici : elle est épinglée pour rester
-       visible. Le jour où on la répare, c'est cette liste qui tombe. */
-    const BARDE_PALIER_10 = ['College of Dance', 'College of Glamour', 'College of Lore',
-                             'College of Valor', 'College of Whispers'];
-    eq(Object.entries(SUBCLASS_DATA.Bard).filter(([, d]) => d[10]).map(([n]) => n).sort(),
-       BARDE_PALIER_10, 'Barde : exactement ces cinq collèges ont un palier 10 en trop');
-
     Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) => {
       const permis = PALIERS[cls];
       ok(!!permis, `${cls} : paliers de sous-classe non documentés dans les tests`);
       if (!permis) return;
       Object.entries(subs).forEach(([sub, byLevel]) =>
-        Object.keys(byLevel).map(Number).forEach(lvl => {
-          if (cls === 'Bard' && lvl === 10 && BARDE_PALIER_10.includes(sub)) return;
-          ok(permis.includes(lvl), `${cls}/${sub} : palier ${lvl} hors de ${permis.join('/')}`);
-        }));
+        Object.keys(byLevel).map(Number).forEach(lvl =>
+          ok(permis.includes(lvl), `${cls}/${sub} : palier ${lvl} hors de ${permis.join('/')}`)));
     });
+
+    /* ── Barde ──
+       Cinq collèges portaient un palier 10 qui n'existe pas chez le Barde : leur
+       capacité de niveau 14 y avait glissé, et le niveau 14 portait un nom
+       qu'aucun livre ne contient (« Unmatched Lore », « Valor's Triumph »…).
+       Relu dans le PHB 2024, collège par collège. Ces relevés sont ce qui
+       empêche la dérive de revenir. */
+    {
+      const attendu = {
+        'College of Dance':    { 3: ['Dazzling Footwork'], 6: ['Inspiring Movement', 'Tandem Footwork'], 14: ['Leading Evasion'] },
+        'College of Glamour':  { 3: ['Beguiling Magic', 'Mantle of Inspiration'], 6: ['Mantle of Majesty'], 14: ['Unbreakable Majesty'] },
+        'College of Lore':     { 3: ['Bonus Proficiencies', 'Cutting Words'], 6: ['Magical Discoveries'], 14: ['Peerless Skill'] },
+        'College of Valor':    { 3: ['Combat Inspiration', 'Martial Training'], 6: ['Extra Attack'], 14: ['Battle Magic'] },
+        // Xanathar's Guide (2014) : le seul que le PHB 2024 n'a pas réédité
+        'College of Whispers': { 3: ['Psychic Blades', 'Words of Terror'], 6: ['Mantle of Whispers'], 14: ['Shadow Lore'] },
+      };
+      Object.entries(attendu).forEach(([college, paliers]) => {
+        const d = SUBCLASS_DATA.Bard[college];
+        ok(!!d, `${college} : présent`);
+        if (!d) return;
+        eq(Object.keys(d).map(Number).sort((a, b) => a - b),
+           Object.keys(paliers).map(Number).sort((a, b) => a - b), `${college} : paliers`);
+        Object.entries(paliers).forEach(([lvl, noms]) =>
+          eq((d[lvl] || []).map(f => f.name), noms, `${college} niveau ${lvl}`));
+      });
+      // Aucun collège ne doit porter de palier 10 : le Barde n'en a pas
+      eq(Object.entries(SUBCLASS_DATA.Bard).filter(([, d]) => d[10]).map(([n]) => n), [],
+         'Barde : plus aucun palier 10');
+      // Les capstones inventées ne doivent pas revenir
+      const tout = JSON.stringify(SUBCLASS_DATA.Bard);
+      ['Unmatched Lore', "Valor's Triumph", 'Mantle of Dreams', 'Master of Intrigue',
+       'Irresistible Dance'].forEach(faux =>
+        ok(!tout.includes(faux), `Barde : « ${faux} » n'existe dans aucun livre`));
+    }
 
     // Toute sous-classe commence au niveau 3 — c'est la règle 2024, sans exception
     Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) =>

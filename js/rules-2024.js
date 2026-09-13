@@ -1398,48 +1398,65 @@ const SUBCLASS_DATA = {
 'Bard': {
   'College of Dance': {
     3:[
-      { name:'Dazzling Footwork', desc:'No-armor AC = 10+DEX+CHA. On a weapon hit, target makes DEX save or falls Prone.' },
-      { name:'Inspiring Movement', desc:'Reaction + 1 Bardic Inspiration: an ally hit by an attack within 5 ft can move half their speed, and you can also move up to your speed (no OA).' }
+      { name:'Dazzling Footwork', desc:"While you wear no armor and wield no Shield: <em>Dance Virtuoso</em> Advantage on Charisma (Performance) checks that involve dancing · <em>Unarmored Defense</em> base AC = 10 + DEX + CHA · <em>Agile Strikes</em> when you expend a Bardic Inspiration as part of an action, Bonus Action or Reaction, you can make one Unarmed Strike as part of it · <em>Bardic Damage</em> use DEX for the attack rolls of your Unarmed Strikes, and you can deal Bludgeoning damage equal to a roll of your Bardic Inspiration die + DEX instead of the normal damage — that roll doesn't expend the die." }
     ],
-    6:[{ name:'Tandem Footwork', desc:'Roll Initiative without Surprise: spend 1 Bardic Inspiration, roll the die, add to yours and all allies within 60 ft.' }],
-    10:[{ name:'Leading Evasion', desc:'On a DEX save you succeed: take no damage. Up to 3 allies within 5 ft who failed take half.' }],
-    14:[{ name:'Irresistible Dance', desc:'Always have Otto\'s Irresistible Dance prepared. Cast it as a Bonus Action without a slot (no concentration). 1/Long Rest.' }],
+    6:[
+      { name:'Inspiring Movement', desc:'Reaction when an enemy you can see ends its turn within 5 ft: expend one Bardic Inspiration to move up to half your Speed, then one ally of your choice within 30 ft can use its Reaction to move up to half its Speed. None of this movement provokes Opportunity Attacks.' },
+      { name:'Tandem Footwork', desc:'When you roll Initiative without the Incapacitated condition, you can expend one Bardic Inspiration: roll the die, and you and each ally within 30 ft who can see or hear you add that much to Initiative.' }
+    ],
+    14:[
+      { name:'Leading Evasion', desc:'When an effect lets you make a DEX save for half damage, you take none on a success and half on a failure. Creatures within 5 ft making that same save can share the benefit. Unusable while you have the Incapacitated condition.' }
+    ],
   },
   'College of Glamour': {
     3:[
-      { name:'Beguiling Magic', desc:'When you cast an Enchantment or Illusion spell, one creature within 60 ft makes WIS save or is Charmed or Frightened until end of next turn. Uses = CHA mod/Long Rest.' },
-      { name:'Mantle of Inspiration', desc:'Bonus Action + Bardic Inspiration die: targets within 60 ft gain temp HP = roll and can move their speed immediately (no OA).' }
+      { name:'Beguiling Magic', desc:'You always have Charm Person and Mirror Image prepared. Right after you cast an Enchantment or Illusion spell with a spell slot, a creature you can see within 60 ft makes a WIS save or has the Charmed or Frightened condition (your choice) for 1 minute, repeating the save at the end of each of its turns. Once per Long Rest — or restore the use by expending one Bardic Inspiration (no action required).' },
+      { name:'Mantle of Inspiration', desc:'Bonus action: expend one Bardic Inspiration and roll the die. Choose up to your CHA modifier of other creatures within 60 ft (minimum one); each gains Temporary HP equal to twice the number rolled, and each can then use its Reaction to move up to its Speed without provoking Opportunity Attacks.' }
     ],
-    6:[{ name:'Mantle of Majesty', desc:'Bonus Action: assume majesty for 1 minute. Cast Command as a Bonus Action each turn without a slot. Charmed creatures auto-fail save vs Command. 1/Long Rest.' }],
-    10:[{ name:'Unbreakable Majesty', desc:'Bonus Action: if a creature attacks you before your next turn, it must pass CHA save or its attack auto-misses and it can\'t attack you again this turn. 1/Long Rest.' }],
-    14:[{ name:'Mantle of Dreams', desc:'Use Mantle of Inspiration without spending a Bardic Inspiration die by expending a 1st-level or higher spell slot.' }],
+    6:[
+      { name:'Mantle of Majesty', desc:'You always have Command prepared. Bonus action: cast Command without a spell slot and take on an unearthly appearance for 1 minute or until your Concentration ends; while it lasts you can cast Command as a Bonus Action without a slot, and a creature Charmed by you automatically fails its save against it. Once per Long Rest — or restore the use by expending a level 3+ spell slot (no action required).' }
+    ],
+    14:[
+      { name:'Unbreakable Majesty', desc:'Bonus action: assume a magically majestic presence for 1 minute or until you have the Incapacitated condition. The first time a creature hits you with an attack roll on a turn, it must succeed on a CHA save or the attack misses instead. Once per Short or Long Rest.' }
+    ],
   },
   'College of Lore': {
     3:[
-      { name:'Bonus Proficiencies', desc:'Gain proficiency in 3 skills of your choice.' },
-      { name:'Cutting Words', desc:'Reaction: spend 1 Bardic Inspiration to subtract the die roll from a creature\'s attack, ability check, or damage roll within 60 ft.' }
+      { name:'Bonus Proficiencies', desc:'You gain proficiency with three skills of your choice.' },
+      { name:'Cutting Words', desc:'Reaction when a creature you can see within 60 ft makes a damage roll or succeeds on an ability check or an attack roll: expend one Bardic Inspiration and subtract the die roll from it, reducing the damage or turning the success into a failure.' }
     ],
-    6:[{ name:'Magical Discoveries', desc:'Learn 2 spells from any class list. They count as Bard spells and don\'t count against prepared spells.' }],
-    10:[{ name:'Peerless Skill', desc:'When you make an ability check, spend a Bardic Inspiration die and add the result. If still failing, recover the die.' }],
-    14:[{ name:'Unmatched Lore', desc:'Gain Expertise in 3 skills of your choice.' }],
+    6:[
+      { name:'Magical Discoveries', desc:'Learn two spells from the Cleric, Druid or Wizard lists, in any combination. Each must be a cantrip or of a level you have spell slots for. They are always prepared, and whenever you gain a Bard level you can swap one for another that meets the same conditions.' }
+    ],
+    14:[
+      { name:'Peerless Skill', desc:"When you fail an ability check or an attack roll, you can expend one Bardic Inspiration and add the die roll to the d20, possibly turning the failure into a success. If it still fails, the Bardic Inspiration isn't expended." }
+    ],
   },
   'College of Valor': {
     3:[
-      { name:'Combat Inspiration', desc:'Bardic Inspiration can also be used: roll die and add to a weapon damage roll, or use as a Reaction to add to AC vs one attack.' },
-      { name:'Martial Training', desc:'Gain proficiency with Medium Armor, Shields, and Martial weapons.' }
+      { name:'Combat Inspiration', desc:"A creature holding a Bardic Inspiration die from you can spend it on one of two effects. <em>Defense</em>: when it is hit by an attack roll, it can use its Reaction to roll the die and add the result to its AC against that attack, possibly making it miss. <em>Offense</em>: right after it hits with an attack roll, it can roll the die and add the result to that attack's damage." },
+      { name:'Martial Training', desc:'You gain proficiency with Martial weapons and training with Medium armor and Shields. You can also use a Simple or Martial weapon as a Spellcasting Focus for your Bard spells.' }
     ],
-    6:[{ name:'Extra Attack', desc:'Attack twice when you take the Attack action.' }],
-    10:[{ name:'Battle Magic', desc:'When you cast a Bard spell as your action, make one weapon attack as a Bonus Action.' }],
-    14:[{ name:'Valor\'s Triumph', desc:'Allies who use your Bardic Inspiration for damage or AC rolls add 1 extra Bardic die to the roll.' }],
+    6:[
+      { name:'Extra Attack', desc:'You can attack twice instead of once whenever you take the Attack action. You can also cast one of your cantrips that has a casting time of an action in place of one of those attacks.' }
+    ],
+    14:[
+      { name:'Battle Magic', desc:'After you cast a spell that has a casting time of an action, you can make one attack with a weapon as a Bonus Action.' }
+    ],
   },
+  /* Xanathar's Guide to Everything (2014). Seul collège de cette liste
+     que le PHB 2024 n'a pas réédité — aucune version 2024 n'existe. */
   'College of Whispers': {
     3:[
-      { name:'Psychic Blades', desc:'When you hit with a weapon, spend Bardic Inspiration to deal extra Psychic: 2d6 (Lv.3), 3d6 (Lv.5), 5d6 (Lv.10), 8d6 (Lv.15).' },
-      { name:'Words of Terror', desc:'Spend 1 minute talking to a Humanoid. Deception vs Insight: on success, it\'s Frightened of a named creature for 1 hour. 1/Short or Long Rest per target.' }
+      { name:'Psychic Blades', desc:'When you hit a creature with a weapon attack, you can expend one Bardic Inspiration to deal extra Psychic damage — 2d6, rising to 3d6 at level 5, 5d6 at level 10 and 8d6 at level 15. Once per round, on your turn.' },
+      { name:'Words of Terror', desc:'Speak alone with a Humanoid for at least 1 minute: at the end of the conversation it makes a WIS save against your spell save DC or is Frightened of you, or of another creature of your choice, for 1 hour — until it is attacked or damaged, or sees its allies attacked or damaged. On a success it never suspects a thing. Once per Short or Long Rest.' }
     ],
-    6:[{ name:'Mantle of Whispers', desc:'Reaction when a Humanoid dies within 30 ft: capture their shadow. Wear it to impersonate them (Disguise Self) for 1 hour. 1/Short or Long Rest.' }],
-    10:[{ name:'Shadow Lore', desc:'Whisper at one creature within 30 ft. WIS save or Frightened for 8 hours (can\'t react, must flee). 1/Long Rest.' }],
-    14:[{ name:'Master of Intrigue', desc:'Disguise Self at will. Mimic the speech patterns of anyone you\'ve heard for at least 1 minute.' }],
+    6:[
+      { name:'Mantle of Whispers', desc:"Reaction when a Humanoid dies within 30 ft: capture its shadow, keeping it until you spend it or finish a Long Rest. Action to spend it: you take on the dead person's appearance, healthy and alive, for 1 hour (Bonus Action to end), with access to whatever they would freely tell a casual acquaintance. An Insight check to see through it is contested by your Deception, with a +5 bonus to your roll. Once per Short or Long Rest." }
+    ],
+    14:[
+      { name:'Shadow Lore', desc:"Magic action: whisper a phrase that only one creature of your choice within 30 ft can hear. It makes a WIS save against your spell save DC, succeeding automatically if it shares no language with you or can't hear you. On a failure it is Charmed for 8 hours, or until you or your allies attack or damage it: convinced you know its most mortifying secret, it obeys your commands. Once per Long Rest." }
+    ],
   },
   'College of the Moon': {
     3:[
