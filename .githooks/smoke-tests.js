@@ -1565,6 +1565,122 @@ function ok(cond, label) {
 
 
 
+
+/* ══════════ Import Roll20 (joueurs.html) ══════════ */
+{
+  /* Roll20 n'exporte rien nativement : le JSON vient de l'extension VTT
+     Enhancement Suite, et c'est une liste plate d'attributs dont les noms
+     varient d'une feuille à l'autre. Le parseur est volontairement tolérant —
+     ces tests fixent ce qu'il doit savoir lire, y compris les pièges :
+     PV max rangé dans la colonne `max`, expertise notée « 2 », multiclassage
+     éclaté sur des attributs séparés, sections répétables à identifiant. */
+  const J = staged('joueurs.html');
+  eval(extract(J, 'function parseRoll20JSON(raw)'));
+
+  const at = (name, current, max) => ({ name, current, max: max === undefined ? '' : max });
+  const fiche = { schema_version: 3, name: 'Brannor', attribs: [
+    at('character_name', 'Brannor'),
+    at('strength', '10'), at('dexterity', '18'), at('constitution', '14'),
+    at('intelligence', '12'), at('wisdom', '13'), at('charisma', '8'),
+    at('hp', '27', '34'), at('ac', '16'), at('speed', '30 ft'),
+    at('initiative_bonus', '6'), at('hp_temp', '5'), at('hitdietype', 'd8'),
+    at('class', 'Rogue'), at('base_level', '5'), at('subclass', 'Assassin'),
+    at('race', 'Wood Elf'), at('background', 'Criminal'), at('alignment', 'Chaotic Neutral'),
+    at('experience', '6500'),
+    at('dexterity_save_prof', '1'), at('intelligence_save_prof', '1'),
+    at('stealth_prof', '2'), at('acrobatics_prof', '1'), at('deception_prof', '0'),
+    at('multiclass1_flag', '1'), at('multiclass1', 'Fighter'), at('multiclass1_lvl', '2'),
+    at('pp', '2'), at('gp', '140'), at('sp', '12'), at('cp', '7'),
+    at('personality_traits', 'Je parle peu.'), at('ideals', 'La liberté.'),
+    at('repeating_attack_-abc_atkname', 'Rapière'),
+    at('repeating_attack_-abc_atkbonus', '+7'),
+    at('repeating_attack_-abc_dmgbase', '1d8'),
+    at('repeating_attack_-abc_dmgattr', '4'),
+    at('repeating_attack_-abc_dmgtype', 'Piercing'),
+    at('repeating_inventory_-i1_itemname', 'Potion of Healing'),
+    at('repeating_inventory_-i1_itemcount', '3'),
+    at('repeating_inventory_-i2_itemname', 'Thieves Tools'),
+    at('repeating_spell-cantrip_-s1_spellname', 'Minor Illusion'),
+    at('repeating_spell-1_-s2_spellname', 'Shield'),
+    at('repeating_spell-2_-s3_spellname', 'Misty Step'),
+    at('repeating_spell-2_-s3_spellduration', 'Concentration, up to 1 minute'),
+    at('lvl1_slots_total', '', '4'), at('lvl2_slots_total', '', '2'),
+    at('repeating_traits_-t1_name', 'Sneak Attack'),
+    at('repeating_proficiencies_-p1_name', 'Simple weapons'),
+  ] };
+
+  const r = parseRoll20JSON(fiche);
+  const c = r.character;
+
+  eq(c.characterName, 'Brannor', 'Roll20 : nom');
+  eq(c.species, 'Wood Elf', 'Roll20 : espèce');
+  eq(c.background, 'Criminal', 'Roll20 : historique');
+  eq(c.xp, 6500, 'Roll20 : expérience');
+  eq([c.for, c.dex, c.con, c.int, c.sag, c.cha], [10, 18, 14, 12, 13, 8], 'Roll20 : caractéristiques');
+
+  // Roll20 range les PV courants dans `current` et le maximum dans `max`
+  eq(c.pvMax, 34, 'Roll20 : PV max lus dans la colonne max');
+  eq(c.pvActuel, 27, 'Roll20 : PV courants');
+  eq(c.pvTemp, 5, 'Roll20 : PV temporaires');
+  eq(c.ca, 16, 'Roll20 : CA');
+  eq(c.vitesse, 30, 'Roll20 : « 30 ft » devient 30');
+  eq(c.initiative, 6, 'Roll20 : initiative');
+  eq(c.deVie, '7d8', 'Roll20 : dés de vie au niveau total');
+
+  // Le multiclassage vit dans des attributs séparés, pas dans une liste
+  eq(c.classes.map(x => x.classe + ' ' + x.niveau), ['Rogue 5', 'Fighter 2'], 'Roll20 : multiclassage');
+  eq(c.niveau, 7, 'Roll20 : niveau total');
+  eq(c.sousClasse, 'Assassin', 'Roll20 : sous-classe');
+
+  eq([c.saveDex, c.saveInt], [true, true], 'Roll20 : sauvegardes maîtrisées');
+  eq(c.saveFor, undefined, 'Roll20 : une sauvegarde non maîtrisée reste absente');
+  eq(c.discret, 2, 'Roll20 : « 2 » vaut expertise');
+  eq(c.acrobaties, 1, 'Roll20 : « 1 » vaut maîtrise');
+  eq(c.duperie, undefined, 'Roll20 : « 0 » ne vaut rien');
+
+  // Les sections répétables sont regroupées par identifiant de ligne
+  eq(c.attaques.map(x => x.nom), ['Rapière'], 'Roll20 : attaques');
+  eq(c.attaques[0].degat, '1d8 + 4', 'Roll20 : dégâts recomposés');
+  eq(c.attaques[0].bonus, '+7', 'Roll20 : bonus d\'attaque conservé tel quel');
+  eq(c.attaques[0].atkType, '', 'Roll20 : caractéristique laissée vide — calcAtkBonus garde le bonus');
+  eq(c.spells.map(x => x.name + '@' + x.level),
+     ['Minor Illusion@0', 'Shield@1', 'Misty Step@2'], 'Roll20 : sorts, cantrip au niveau 0');
+  ok(c.spells[2].conc, 'Roll20 : concentration déduite de la durée');
+  eq([c.emplacementsSort[1], c.emplacementsSort[2]], [4, 2], 'Roll20 : emplacements de sorts');
+  eq(r.inventory.map(i => i.qty + 'x' + i.name), ['3xPotion of Healing', '1xThieves Tools'], 'Roll20 : inventaire');
+  eq(r.currency, { pp: 2, gp: 140, ep: 0, sp: 12, cp: 7 }, 'Roll20 : bourse');
+  eq(c.customFeatures.map(f => f.name), ['Sneak Attack'], 'Roll20 : capacités');
+  eq(c.maitrises, 'Simple weapons', 'Roll20 : maîtrises');
+  eq(c.traits, 'Je parle peu.', 'Roll20 : personnalité');
+
+  // La modale d'aperçu est partagée avec l'import D&D Beyond : même forme attendue
+  ['character', 'inventory', 'currency', '_meta'].forEach(k =>
+    ok(k in r, `Roll20 : la sortie porte « ${k} », comme l'import D&D Beyond`));
+  eq(r._meta.source, 'Roll20', 'Roll20 : la modale saura quoi annoncer');
+  ok(r._meta.multiclass, 'Roll20 : multiclassage signalé dans l\'aperçu');
+
+  /* ── Robustesse ── */
+  let leve = false;
+  try { parseRoll20JSON({ name: 'x' }); } catch { leve = true; }
+  ok(leve, 'Roll20 : un JSON sans attributs est refusé, pas importé à moitié');
+
+  const vide = parseRoll20JSON({ attribs: [] });
+  eq(vide.character.for, 10, 'Roll20 : fiche vide — caractéristique par défaut');
+  eq(vide.character.pvMax, 1, 'Roll20 : fiche vide — jamais 0 PV');
+  eq(vide.character.spells.length, 0, 'Roll20 : fiche vide — aucun sort inventé');
+  eq(vide.character.attaques.length, 0, 'Roll20 : fiche vide — aucune attaque inventée');
+
+  // Les deux enveloppes rencontrées dans la nature
+  eq(parseRoll20JSON({ character: fiche })._meta.name, 'Brannor', 'Roll20 : enveloppe { character: … }');
+  eq(parseRoll20JSON({ attributes: fiche.attribs })._meta.name, 'Brannor', 'Roll20 : clé « attributes »');
+
+  /* L'interface doit exister, sinon le parseur n'est atteignable par personne */
+  ['r20-dropzone', 'r20-import-file', 'r20-paste-area', 'r20-paste-btn', 'ddb-modal-title'].forEach(id =>
+    ok(J.includes('id="' + id + '"'), `Roll20 : l'élément #${id} est dans la page`));
+  ok(/estRoll20 \? parseRoll20JSON\(raw\) : parseDnDBeyondJSON\(raw\)/.test(J),
+     'Roll20 : le handler reconnaît la provenance au lieu d\'exiger la bonne zone');
+}
+
 /* ══════════ Service worker ══════════ */
 {
   /* On exécute vraiment le service worker dans un faux environnement et on lui
