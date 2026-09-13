@@ -4082,6 +4082,36 @@ html.has-char-bg .vb-mini-stat { background: rgba(0,0,0,0.35) !important; }
         </div>
       </div>
       <div class="settings-section">
+        <h3><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg> Importer depuis Roll20</h3>
+        <div style="font-size:0.78rem;color:#999;margin-bottom:0.85rem;">
+          ⓘ Roll20 n'offre aucun export de personnage. Il faut l'extension gratuite
+          <strong style="color:var(--gold);">VTT Enhancement Suite</strong> (Firefox ou Chrome) :
+          elle ajoute un bouton <em>Export</em> en haut de la fiche, qui télécharge un <code style="color:var(--gold-dark);">.json</code>.
+        </div>
+        <div class="ddb-dropzone" id="r20-dropzone">
+          <div class="ddb-dropzone-icon"><svg class="ic" aria-hidden="true"><use href="#i-die"></use></svg></div>
+          <div class="ddb-dropzone-title">Drop the Roll20 .json here</div>
+          <div class="ddb-dropzone-sub">or</div>
+          <label class="btn btn-sm btn-gold" style="cursor:pointer;">
+            <svg class="ic" aria-hidden="true"><use href="#i-folder"></use></svg> Select a file
+            <input type="file" id="r20-import-file" accept=".json,application/json" style="display:none;">
+          </label>
+        </div>
+        <div class="ddb-or">— or —</div>
+        <div class="ddb-method">
+          <div class="ddb-method-label">Paste JSON</div>
+          <textarea id="r20-paste-area" class="field-input" rows="3"
+            placeholder='{"schema_version":3,"name":"...","attribs":[{"name":"strength","current":"16"}]}' style="font-family:monospace;font-size:0.72rem;"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:0.4rem;">
+            <button class="btn btn-sm btn-gold" id="r20-paste-btn">✓ Import pasted JSON</button>
+          </div>
+        </div>
+        <div class="ddb-method-hint">
+          The sheet is read attribute by attribute, so both « D&amp;D 5E by Roll20 » and the older
+          « 5th Edition OGL » sheet go through. Whatever is missing stays blank — nothing is invented.
+        </div>
+      </div>
+      <div class="settings-section">
         <h3>Account</h3>
         <div class="settings-row">
           <div class="settings-label">Reset this character<div class="settings-desc">Clears the active character sheet (account stays)</div></div>
@@ -7308,6 +7338,276 @@ function renderExhaustion() {
 /* ── Repos ── */
 
 /* ── Import D&D Beyond ── */
+/* ══════════════════════════════════════════════════════════
+   Import Roll20
+
+   Roll20 n'offre aucun export de personnage — c'est délibéré de leur part.
+   Le seul chemin praticable est l'extension VTT Enhancement Suite, qui pose
+   un bouton « Export » sur la fiche et produit un JSON.
+
+   Ce JSON est une liste plate d'attributs, pas une structure : la fiche
+   Roll20 stocke tout sous forme de paires nom/valeur, et les noms varient
+   d'une feuille à l'autre (« D&D 5E by Roll20 », « 5th Edition OGL »,
+   et leurs versions successives). D'où un parseur tolérant : on construit
+   un index des attributs et on interroge plusieurs noms possibles pour
+   chaque champ, plutôt que d'exiger une forme exacte.
+
+   Il rend la même structure que parseDnDBeyondJSON — { character, inventory,
+   currency, _meta } — pour réutiliser la modale d'aperçu et l'application.
+   ══════════════════════════════════════════════════════════ */
+
+function parseRoll20JSON(raw) {
+  const d = raw && (raw.character || raw);
+  const attribsBruts = d && (d.attribs || d.attributes);
+  if (!Array.isArray(attribsBruts))
+    throw new Error('Roll20 JSON not recognised — expected an "attribs" list (VTT Enhancement Suite export)');
+
+  /* ── Index des attributs ──
+     Roll20 range chaque valeur dans `current`, et la borne haute — PV max,
+     par exemple — dans `max`. Les deux comptent. */
+  const A = new Map();
+  attribsBruts.forEach(a => {
+    if (!a || typeof a.name !== 'string') return;
+    A.set(a.name.toLowerCase(), { cur: a.current, max: a.max });
+  });
+
+  /** Première valeur non vide parmi plusieurs noms d'attribut possibles. */
+  const val = (...noms) => {
+    for (const n of noms) {
+      const e = A.get(n.toLowerCase());
+      if (e && e.cur !== undefined && e.cur !== null && String(e.cur).trim() !== '') return String(e.cur).trim();
+    }
+    return '';
+  };
+  const valMax = (...noms) => {
+    for (const n of noms) {
+      const e = A.get(n.toLowerCase());
+      if (e && e.max !== undefined && e.max !== null && String(e.max).trim() !== '') return String(e.max).trim();
+    }
+    return '';
+  };
+  const num = (...noms) => { const v = parseInt(val(...noms)); return isNaN(v) ? 0 : v; };
+  const numMax = (...noms) => { const v = parseInt(valMax(...noms)); return isNaN(v) ? 0 : v; };
+  /** Un attribut « prof » vaut 0, vide, ou un bonus : tout le reste est une maîtrise. */
+  const prof = (...noms) => { const v = val(...noms); return !!v && v !== '0'; };
+
+  /* ── Sections répétables ──
+     Roll20 les nomme `repeating_<section>_<rowid>_<champ>`. On regroupe par
+     identifiant de ligne, puis on lit les champs de chaque ligne. */
+  function repeating(section) {
+    const prefixe = 'repeating_' + section.toLowerCase() + '_';
+    const lignes = new Map();
+    A.forEach((v, nom) => {
+      if (!nom.startsWith(prefixe)) return;
+      const reste = nom.slice(prefixe.length);
+      const coupe = reste.indexOf('_');
+      if (coupe === -1) return;
+      const id = reste.slice(0, coupe);
+      const champ = reste.slice(coupe + 1);
+      if (!lignes.has(id)) lignes.set(id, {});
+      lignes.get(id)[champ] = v.cur;
+    });
+    return [...lignes.values()];
+  }
+  const champ = (ligne, ...noms) => {
+    for (const n of noms) {
+      const v = ligne[n];
+      if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+    }
+    return '';
+  };
+
+  /* ── Caractéristiques ──
+     `strength` porte le score sur les feuilles récentes, `strength_base` sur
+     les anciennes. On prend ce qui répond. */
+  const ABILS = [['for', 'strength'], ['dex', 'dexterity'], ['con', 'constitution'],
+                 ['int', 'intelligence'], ['sag', 'wisdom'], ['cha', 'charisma']];
+  const stats = {};
+  ABILS.forEach(([cle, nom]) => {
+    stats[cle] = num(nom, nom + '_base') || 10;
+  });
+  const mod = s => Math.floor((s - 10) / 2);
+
+  /* ── Sauvegardes et compétences ── */
+  const saveProfs = {};
+  const SAVE_KEYS = { strength: 'saveFor', dexterity: 'saveDex', constitution: 'saveCon',
+                      intelligence: 'saveInt', wisdom: 'saveSag', charisma: 'saveCha' };
+  Object.entries(SAVE_KEYS).forEach(([nom, cle]) => {
+    if (prof(nom + '_save_prof', nom + '_saving_throw_prof')) saveProfs[cle] = true;
+  });
+
+  const SKILL_KEYS = {
+    acrobatics: 'acrobaties', animal_handling: 'animaux', arcana: 'arcanes',
+    athletics: 'athletisme', deception: 'duperie', history: 'histoire',
+    insight: 'perspicacite', intimidation: 'intimidation', investigation: 'investigation',
+    medicine: 'medecine', nature: 'nature', perception: 'perception',
+    performance: 'performance', persuasion: 'persuasion', sleight_of_hand: 'prestidig',
+    religion: 'religion', stealth: 'discret', survival: 'survie',
+  };
+  const skillProfs = {};
+  Object.entries(SKILL_KEYS).forEach(([nom, cle]) => {
+    const tiret = nom.replace(/_/g, '');
+    // 2 = expertise sur la feuille Roll20, 1 = maîtrise
+    const brut = val(nom + '_prof', tiret + '_prof', nom + '_type');
+    if (!brut || brut === '0') return;
+    const n = parseFloat(brut);
+    skillProfs[cle] = (n >= 2 || /expert/i.test(brut)) ? 2 : 1;
+  });
+
+  /* ── Classes et niveaux ──
+     `class` tient le nom, `base_level` ou `level` le niveau. Le multiclassage
+     vit dans `multiclass1_flag` / `multiclass1` / `multiclass1_lvl`. */
+  const classePrincipale = val('class', 'class_display').replace(/\s+\d+$/, '').trim();
+  const niveauPrincipal = num('base_level', 'level') || 1;
+  const classesArr = [];
+  if (classePrincipale) {
+    classesArr.push({ classe: classePrincipale, sousClasse: val('subclass'), niveau: niveauPrincipal, customSousClasse: '' });
+  }
+  for (let i = 1; i <= 3; i++) {
+    if (!prof('multiclass' + i + '_flag')) continue;
+    const nom = val('multiclass' + i, 'multiclass' + i + '_class');
+    if (!nom) continue;
+    classesArr.push({
+      classe: nom.replace(/\s+\d+$/, '').trim(),
+      sousClasse: val('multiclass' + i + '_subclass'),
+      niveau: num('multiclass' + i + '_lvl') || 1,
+      customSousClasse: '',
+    });
+  }
+  const niveauTotal = classesArr.length ? classesArr.reduce((s, c) => s + c.niveau, 0) : niveauPrincipal;
+
+  /* ── Combat ── */
+  const pvMax = numMax('hp') || num('hp_max', 'hp') || 1;
+  const pvActuel = num('hp') || pvMax;
+  const ca = num('ac', 'armor_class', 'ac_base') || 10;
+  const vitesse = parseInt(String(val('speed', 'npc_speed')).replace(/[^\d]/g, '')) || 30;
+  const initiative = num('initiative_bonus', 'initiative', 'initiative_overall') || mod(stats.dex);
+
+  /* ── Attaques ──
+     Même forme que celles de l'import D&D Beyond : `degat` au singulier,
+     `atkType` pour la caractéristique, `prof` pour la maîtrise. */
+  const attaques = repeating('attack').map(l => ({
+    nom: champ(l, 'atkname', 'name'),
+    bonus: champ(l, 'atkbonus', 'atkmod', 'attack_bonus'),
+    // Roll20 donne le bonus d'attaque deja calcule. On le passe tel quel plutot
+    // que de deviner la caracteristique : calcAtkBonus() n'utilise le bonus manuel
+    // que si atkType est vide, et une supposition fausse ecraserait un chiffre juste.
+    // Le joueur peut choisir la caracteristique apres coup pour que ca suive ses niveaux.
+    atkType: '',
+    prof: false,
+    degat: [champ(l, 'dmgbase', 'dmg1base', 'atkdmgbase', 'dmg'), champ(l, 'dmgattr', 'dmg1attr')]
+      .filter(Boolean).join(' + '),
+    typeDegat: champ(l, 'dmgtype', 'dmg1type', 'atkdmgtype'),
+    portee: champ(l, 'atkrange', 'range'),
+    notes: champ(l, 'atkdesc', 'desc'),
+  })).filter(a => a.nom);
+
+  /* ── Sorts ──
+     Une section répétable par niveau : repeating_spell-0 … repeating_spell-9,
+     plus repeating_spell-cantrip sur certaines versions. */
+  const spells = [];
+  const NIVEAUX = ['cantrip', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  NIVEAUX.forEach(n => {
+    const niveau = (n === 'cantrip') ? 0 : parseInt(n);
+    repeating('spell-' + n).forEach(l => {
+      const nom = champ(l, 'spellname', 'name');
+      if (!nom) return;
+      spells.push({
+        name: nom,
+        level: String(niveau),
+        degat: champ(l, 'spelldamage', 'damage'),
+        typeDegat: champ(l, 'spelldamagetype', 'damagetype'),
+        portee: champ(l, 'spellrange', 'range'),
+        action: champ(l, 'spellcastingtime', 'castingtime'),
+        desc: champ(l, 'spelldescription', 'description', 'spellcontent'),
+        _open: false,
+        conc: /conc/i.test(champ(l, 'spellduration', 'duration', 'spellconcentration')),
+        prepared: !!champ(l, 'spellprepared'),
+      });
+    });
+  });
+  spells.sort((a, b) => parseInt(a.level) - parseInt(b.level));
+
+  /* ── Emplacements de sorts ── */
+  const emplacementsSort = {};
+  const emplacementsUtilises = {};
+  for (let n = 1; n <= 9; n++) {
+    emplacementsSort[n] = numMax('lvl' + n + '_slots_total', 'spell_slots_l' + n) || num('lvl' + n + '_slots_total') || 0;
+    emplacementsUtilises[n] = 0;
+  }
+
+  /* ── Inventaire et bourse ── */
+  // Roll20 ne range pas les objets par catégorie : tout arrive en « equipement ».
+  const inventory = repeating('inventory').map(l => ({
+    qty: parseInt(champ(l, 'itemcount', 'count')) || 1,
+    name: champ(l, 'itemname', 'name'),
+    notes: champ(l, 'itemcontent', 'itemdescription', 'description').substring(0, 200),
+    cat: 'equipement',
+  })).filter(i => i.name);
+
+  const currency = {
+    pp: num('pp'), gp: num('gp'), ep: num('ep'), sp: num('sp'), cp: num('cp'),
+  };
+
+  /* ── Capacités : traits, dons, aptitudes de classe ── */
+  const customFeatures = [];
+  ['traits', 'class-features', 'classfeature', 'feature', 'racialtrait', 'features'].forEach(section => {
+    repeating(section).forEach(l => {
+      const nom = champ(l, 'name', 'traitname', 'featurename');
+      if (!nom) return;
+      if (customFeatures.some(f => f.name === nom)) return;
+      customFeatures.push({
+        name: nom,
+        source: 'Roll20',
+        desc: champ(l, 'description', 'desc', 'traitdescription'),
+        _open: false,
+      });
+    });
+  });
+
+  /* ── Maîtrises et langues ── */
+  const maitrises = repeating('proficiencies').map(l => champ(l, 'name', 'prof')).filter(Boolean).join(', ');
+
+  const character = {
+    characterName: val('character_name') || d.name || '',
+    species: val('race', 'subrace') || '',
+    classe: classePrincipale, sousClasse: val('subclass'), niveau: niveauTotal,
+    background: val('background'),
+    alignement: val('alignment'), xp: num('experience', 'xp'), inspiration: prof('inspiration'),
+    ...stats, ...saveProfs, ...skillProfs,
+    ca, initiative, vitesse,
+    pvMax, pvActuel, pvTemp: num('hp_temp', 'temp_hp'),
+    deVie: val('hitdietype') ? niveauTotal + String(val('hitdietype')).replace(/^1?d?/, 'd') : niveauTotal + 'd8',
+    nbDeVie: niveauTotal, nbDeVieUtilises: 0,
+    mortSucces: 0, mortEchecs: 0,
+    attaques,
+    classeSort: val('spellclass') || classePrincipale,
+    caractSort: '', emplacementsSort, emplacementsUtilises,
+    spells, customFeatures, resources: [], conditions: [],
+    maitrises, langues: '',
+    traits: val('personality_traits', 'personality'), ideaux: val('ideals'),
+    liens: val('bonds'), defauts: val('flaws'),
+    apparence: '', historique: val('backstory', 'bio'),
+    classes: classesArr.length ? classesArr : [{ classe: classePrincipale, sousClasse: '', niveau: niveauTotal, customSousClasse: '' }],
+  };
+
+  return {
+    character, inventory, currency,
+    _meta: {
+      source: 'Roll20',
+      name: character.characterName, classe: classePrincipale, subClass: character.sousClasse,
+      level: niveauTotal, ac: ca, initiative, speed: vitesse,
+      pvMax, deVie: character.deVie,
+      spells: spells.length, items: inventory.length,
+      skills: Object.keys(skillProfs).length, saves: Object.keys(saveProfs).length,
+      attacks: attaques.length, features: customFeatures.length,
+      multiclass: classesArr.length > 1, classesArr,
+      warlock: /warlock/i.test(classePrincipale),
+      attribs: A.size,
+    },
+  };
+}
+
 function parseDnDBeyondJSON(raw) {
   const d = raw.data || raw;
   if (!d.name && !d.classes) throw new Error("JSON format not recognized — make sure you use the /character/ID/json URL");
@@ -7622,6 +7922,9 @@ function openDdbModal(parsed) {
   _ddbParsed = parsed;
   const m = parsed._meta;
   const overlay = document.getElementById('ddb-modal-overlay');
+  // La modale sert les deux imports : elle dit lequel elle est en train de montrer.
+  const titre = document.getElementById('ddb-modal-title');
+  if (titre) titre.textContent = 'Import from ' + (m.source || 'D&D Beyond');
   const classLine = m.multiclass
     ? m.classesArr.map(c => `${c.classe} ${c.niveau}`).join(' / ')
     : `${m.classe || '—'}${m.subClass ? ' ('+m.subClass+')' : ''} niv. ${m.level}`;
@@ -11917,11 +12220,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Repos
   document.getElementById('btn-short-rest').addEventListener('click', doShortRest);
 
-  // D&D Beyond import — handler unifié
+  // Import de fiche — un seul handler, la provenance se devine au format :
+  // Roll20 exporte une liste `attribs`, D&D Beyond un objet `data`.
+  // Les deux zones de dépôt acceptent donc les deux fichiers.
   function handleDdbJsonText(text) {
     try {
       const raw = JSON.parse(text);
-      const parsed = parseDnDBeyondJSON(raw);
+      const brut = (raw && raw.character) || raw;
+      const estRoll20 = !!(brut && (Array.isArray(brut.attribs) || Array.isArray(brut.attributes)));
+      const parsed = estRoll20 ? parseRoll20JSON(raw) : parseDnDBeyondJSON(raw);
       openDdbModal(parsed);
     } catch(err) {
       const errEl = document.getElementById('ddb-error');
@@ -11971,6 +12278,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.disabled = false; btn.textContent = orig;
     }
   });
+
+  // Roll20 — fichier, glisser-déposer, collage. Même handler que D&D Beyond.
+  document.getElementById('r20-import-file')?.addEventListener('change', e => {
+    handleDdbFile(e.target.files?.[0]);
+    e.target.value = '';
+  });
+  document.getElementById('r20-paste-btn')?.addEventListener('click', () => {
+    const txt = document.getElementById('r20-paste-area')?.value?.trim();
+    if (!txt) { showToast('The field is empty', 'warn'); return; }
+    handleDdbJsonText(txt);
+    document.getElementById('r20-paste-area').value = '';
+  });
+  const r20drop = document.getElementById('r20-dropzone');
+  if (r20drop) {
+    ['dragenter','dragover'].forEach(ev => r20drop.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); r20drop.classList.add('drag-over');
+    }));
+    ['dragleave','drop'].forEach(ev => r20drop.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); r20drop.classList.remove('drag-over');
+    }));
+    r20drop.addEventListener('drop', e => handleDdbFile(e.dataTransfer?.files?.[0]));
+  }
 
   // 3. Bouton "Importer le JSON collé"
   document.getElementById('ddb-paste-btn')?.addEventListener('click', () => {
@@ -14461,7 +14790,7 @@ document.addEventListener('keydown', e => {
     <!-- ── Modal Import D&D Beyond ── -->
     <div class="ddb-modal-overlay" id="ddb-modal-overlay">
       <div class="ddb-modal">
-        <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> Import from D&D Beyond</h3>
+        <h3><svg class="ic" aria-hidden="true"><use href="#i-swords"></use></svg> <span id="ddb-modal-title">Import from D&D Beyond</span></h3>
         <div class="ddb-modal-sub">Review the detected information before applying</div>
         <div id="ddb-error" class="ddb-error" style="display:none;"></div>
         <div class="ddb-preview" id="ddb-preview"></div>
