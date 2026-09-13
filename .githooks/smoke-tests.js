@@ -1562,6 +1562,86 @@ function ok(cond, label) {
   eq(getDmgMod(), '', 'seules les cibles dmg comptent');
 }
 
+
+/* ══════════ Campagnes (dm.html) ══════════ */
+{
+  const D = staged('dm.html');
+  /* Les fonctions de filtre lisent `campagnes` et `allPlayers` dans leur portée.
+     On les déclare ici en `var` : les déclarations de fonction d'un eval sloppy
+     fuient vers cette portée, et leurs variables libres s'y résolvent. */
+  var ADMIN_USER = 'dm';
+  var campagnes = { actif: '', liste: {} };
+  var allPlayers = [];
+  eval([
+    extract(D, 'function clePerso(username, charId)'),
+    extract(D, 'function campagnesTriees()'),
+    extract(D, 'function campagneActive()'),
+    extract(D, 'function persoVisible(username, charId)'),
+    extract(D, 'function persosVisibles(player)'),
+    extract(D, 'function joueursVisibles()'),
+    extract(D, 'function persoRepresentatif(player)'),
+  ].join('\n'));
+
+  const perso = nom => ({ name: nom, character: { classe: 'Bard', niveau: 3 } });
+  allPlayers = [
+    { username: 'dm',    data: {} },
+    { username: 'alice', data: { activeCharId: 'c1', characters: { c1: perso('Lyra'), c2: perso('Nym') } } },
+    { username: 'bob',   data: { activeCharId: 'c1', characters: { c1: perso('Thorn') } } },
+    { username: 'clara', data: { activeCharId: 'c1', characters: { c1: perso('Sable') } } },
+  ];
+
+  eq(clePerso('alice', 'c1'), 'alice::c1', 'clé d\'un personnage');
+
+  /* ── Sans campagne choisie : rien ne change ── */
+  eq(campagneActive(), null, 'aucune campagne active par défaut');
+  eq(joueursVisibles().map(p => p.username), ['alice', 'bob', 'clara'],
+     'sans filtre : tous les joueurs, jamais le MJ');
+  eq(persosVisibles(allPlayers[1]).map(([cid]) => cid), ['c1', 'c2'], 'sans filtre : tous les personnages');
+  ok(persoVisible('clara', 'c1'), 'sans filtre : un personnage passe');
+
+  /* ── Une campagne choisie : seuls ses personnages ── */
+  campagnes = {
+    actif: 'a',
+    liste: {
+      a: { nom: 'Les Cendres', membres: ['alice::c1', 'bob::c1'] },
+      b: { nom: 'Ayakan',      membres: ['alice::c2', 'clara::c1'] },
+    },
+  };
+  eq(campagneActive().nom, 'Les Cendres', 'campagne active résolue');
+  eq(joueursVisibles().map(p => p.username), ['alice', 'bob'],
+     'un joueur sans personnage dans la campagne disparaît');
+  eq(persosVisibles(allPlayers[1]).map(([cid]) => cid), ['c1'],
+     'un joueur ne montre que le personnage de la campagne');
+  ok(!persoVisible('alice', 'c2'), 'un personnage d\'une autre campagne est masqué');
+  ok(!persoVisible('clara', 'c1'), 'un personnage hors campagne est masqué');
+
+  campagnes.actif = 'b';
+  eq(joueursVisibles().map(p => p.username), ['alice', 'clara'], 'changer de campagne change la table');
+  eq(persosVisibles(allPlayers[1]).map(([cid]) => cid), ['c2'], 'le même joueur, l\'autre personnage');
+
+  /* ── Le personnage représentatif suit le filtre ──
+     Sans ça, la barre de vie d'alice montrerait Lyra alors qu'on joue Ayakan. */
+  eq(persoRepresentatif(allPlayers[1])[0], 'c2',
+     'personnage représentatif : l\'actif est hors campagne, on prend le visible');
+  campagnes.actif = 'a';
+  eq(persoRepresentatif(allPlayers[1])[0], 'c1',
+     'personnage représentatif : l\'actif passe le filtre, on le garde');
+  campagnes.actif = '';
+  eq(persoRepresentatif(allPlayers[1])[0], 'c1', 'sans filtre : le personnage actif');
+  eq(persoRepresentatif({ username: 'vide', data: {} })[0], null, 'joueur sans personnage');
+  eq(persoRepresentatif(null)[0], null, 'joueur absent');
+
+  /* ── Tri et robustesse ── */
+  campagnes = { actif: '', liste: { z: { nom: 'Ayakan' }, a: { nom: 'Les Cendres' } } };
+  eq(campagnesTriees().map(([, c]) => c.nom), ['Ayakan', 'Les Cendres'], 'campagnes triées par nom');
+  campagnes = { actif: 'fantome', liste: {} };
+  eq(campagneActive(), null, 'un identifiant inconnu ne filtre rien');
+  eq(joueursVisibles().map(p => p.username), ['alice', 'bob', 'clara'],
+     'un identifiant inconnu laisse tout visible');
+  campagnes = { actif: 'a', liste: { a: { nom: 'Vide' } } };
+  eq(joueursVisibles(), [], 'une campagne sans membres ne montre personne');
+}
+
 /* ══════════ Butin (dm.html) ══════════ */
 {
   const D = staged('dm.html');
