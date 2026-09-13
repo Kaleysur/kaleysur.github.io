@@ -1564,6 +1564,84 @@ function ok(cond, label) {
 
 
 
+
+/* ══════════ Service worker ══════════ */
+{
+  /* On exécute vraiment le service worker dans un faux environnement et on lui
+     soumet des requêtes, plutôt que de relire son source à la grep. Ce qui
+     compte n'est pas ce qu'il écrit, c'est la branche qu'il prend :
+       .html et .json → réseau d'abord. Ce sont des données : leur contenu
+                        change sans que leur URL bouge, donc un cache-first les
+                        fige jusqu'au prochain roulement de service worker.
+       le reste       → cache d'abord, dans le cache de LA version courante.
+     Les sorts du Psion sont restés invisibles pour l'avoir oublié.
+
+     Le test est synchrone : les deux stratégies se distinguent à l'appel, avant
+     toute attente — network-first appelle fetch() tout de suite, cache-first
+     interroge caches.match() tout de suite. */
+  const src = staged('service-worker.js');
+
+  const ecouteurs = {};
+  const faux = {
+    addEventListener: (type, fn) => { (ecouteurs[type] = ecouteurs[type] || []).push(fn); },
+    location: { hostname: 'kaleysur.github.io' },
+    skipWaiting: () => {},
+    clients: { claim: () => {} },
+  };
+  let cacheInterroge;
+  const fauxCaches = {
+    open: async () => ({ put: () => {}, add: async () => {}, match: async () => null }),
+    keys: async () => [],
+    match: (req, opts) => { cacheInterroge = opts && opts.cacheName; return Promise.resolve(null); },
+    delete: async () => true,
+  };
+  let reseauAppele;
+  const fauxFetch = () => { reseauAppele = true; return Promise.resolve(null); };
+
+  new Function('self', 'caches', 'fetch', 'URL', src)(faux, fauxCaches, fauxFetch, URL);
+
+  const surFetch = (ecouteurs.fetch || [])[0];
+  ok(typeof surFetch === 'function', 'service worker : un gestionnaire de fetch');
+
+  /* Soumet une requête et dit qui a été consulté en premier. */
+  const strategie = (chemin, destination) => {
+    reseauAppele = false; cacheInterroge = undefined;
+    let repondu = false;
+    surFetch({
+      request: { method: 'GET', url: 'https://kaleysur.github.io' + chemin, destination: destination || '' },
+      respondWith: p => { repondu = true; if (p && p.catch) p.catch(() => {}); },
+    });
+    if (!repondu) return 'ignoree';
+    return reseauAppele ? 'reseau' : (cacheInterroge !== undefined ? 'cache' : 'ignoree');
+  };
+
+  /* Données : le réseau d'abord */
+  ['/spells-2024.json', '/search-index.json', '/monsters-eberron.json',
+   '/items-faerun-heroes.json', '/manifest.json'].forEach(f =>
+    eq(strategie(f), 'reseau', `${f} : servi depuis le réseau, pas depuis le cache`));
+
+  /* Pages : le réseau d'abord, comme avant */
+  eq(strategie('/joueurs.html', 'document'), 'reseau', 'joueurs.html : réseau d\'abord');
+  eq(strategie('/'), 'reseau', 'racine : réseau d\'abord');
+  eq(strategie('/lore/ayakan.html'), 'reseau', 'une page de lore : réseau d\'abord');
+
+  /* Le reste : le cache d'abord, et dans le cache de la version courante */
+  ['/css/style.css', '/js/rules-2024.js', '/js/compendium.js', '/img/carte.jpg'].forEach(f => {
+    eq(strategie(f), 'cache', `${f} : servi depuis le cache`);
+    ok(/^kaleysur-v\d+$/.test(cacheInterroge || ''),
+       `${f} : la recherche vise le cache de la version (${cacheInterroge})`);
+  });
+
+  /* Les fichiers de données restent pré-chargés, pour le hors-ligne */
+  const assets = extract(src, 'const ASSETS');
+  ['spells-2024.json', 'search-index.json', 'joueurs.html', 'dm.html'].forEach(f =>
+    ok(assets.includes(f), `ASSETS : ${f} pré-chargé pour le hors-ligne`));
+
+  ok(/const CACHE_NAME = 'kaleysur-v\d+';/.test(src), 'service worker : nom de cache versionné');
+  ok(/self\.skipWaiting\(\)/.test(src) && /self\.clients\.claim\(\)/.test(src),
+     'service worker : la nouvelle version prend la main sans attendre');
+}
+
 /* ══════════ Sorts (spells-2024.json) ══════════ */
 {
   /* Le fichier porte une marque d'ordre d'octets : JSON.parse s'y casse les
