@@ -66,6 +66,7 @@ function ok(cond, label) {
     extract(R, 'const CLASS_RESOURCES'),
     extract(R, 'const MULTICLASS_PREREQ'),
     extract(J, 'function syncClassesToLegacy(c)'),
+    extract(J, 'function migrerNomsSousClasse(c)'),
     extract(J, 'function abilKeysFromFeat(abilStr)'),
     extract(J, 'function preparedTotal(c)'),
     extract(J, 'function multiclassPrereqCheck(c, className)'),
@@ -157,12 +158,14 @@ function ok(cond, label) {
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
           STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,
           FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,
-          CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES } =
+          CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES,
+          SUBCLASS_RENOMMEES } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
       + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
       + ' FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,'
       + ' CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES,'
+      + ' SUBCLASS_RENOMMEES,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -427,7 +430,7 @@ function ok(cond, label) {
     [4,8,12,16].forEach(n => ok(lv.includes(n), `${cls} : ASI manquant au niveau ${n}`));
   });
   // Multiclasse : un Guerrier 3 / Magicien 3 qui monte Guerrier 4 a bien son ASI
-  ok(planLevelUp(hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:3},{classe:'Wizard',sousClasse:'School of Evocation',niveau:3}] }), 'Fighter').isAsi,
+  ok(planLevelUp(hero({ classes:[{classe:'Fighter',sousClasse:'Champion',niveau:3},{classe:'Wizard',sousClasse:'Evoker',niveau:3}] }), 'Fighter').isAsi,
      'ASI calculé sur le niveau de classe, pas le total');
 
   // Bornes
@@ -439,10 +442,10 @@ function ok(cond, label) {
   // Application : niveau, PV, dés de vie, sous-classe
   {
     const c = hero({ classes:[{classe:'Wizard',sousClasse:'',niveau:2}], con:14, pvMax:14, pvActuel:9, nbDeVie:2 });
-    const r = applyLevelUp(c, planLevelUp(c, 'Wizard'), { hp:5, subclass:'School of Evocation' });
+    const r = applyLevelUp(c, planLevelUp(c, 'Wizard'), { hp:5, subclass:'Evoker' });
     ok(r.ok, 'montée appliquée');
     eq(c.classes[0].niveau, 3, 'niveau de classe incrémenté');
-    eq(c.classes[0].sousClasse, 'School of Evocation', 'sous-classe écrite');
+    eq(c.classes[0].sousClasse, 'Evoker', 'sous-classe écrite');
     eq(c.pvMax, 19, 'PV max +5');
     eq(c.pvActuel, 14, 'PV actuels suivent le gain');
     eq(c.nbDeVie, 3, 'dé de vie ajouté');
@@ -503,7 +506,7 @@ function ok(cond, label) {
     const dexOnly = hero({ classes:[{classe:'Rogue',sousClasse:'Assassin',niveau:3}], for:8, dex:16 });
     eq(planLevelUp(dexOnly, 'Fighter').prereq.ok, true, 'Guerrier : DEX seule suffit');
     // Monter sa propre classe ne déclenche aucune vérification
-    eq(planLevelUp(hero({ classes:[{classe:'Wizard',sousClasse:'School of Evocation',niveau:3}], int:8 }), 'Wizard').prereq, null,
+    eq(planLevelUp(hero({ classes:[{classe:'Wizard',sousClasse:'Evoker',niveau:3}], int:8 }), 'Wizard').prereq, null,
        'pas de prérequis quand on monte sa classe');
   }
   // Toute classe jouable doit avoir des prérequis déclarés
@@ -1175,6 +1178,85 @@ function ok(cond, label) {
     ok(SUBCLASS_DATA.Wizard.Imaskarcanist[14].some(f => f.name === 'Doom of Unlight'),
        'Imaskarcanist : Doom of Unlight au niveau 14');
     eq(Object.keys(UA_SUBCLASSES).length, 42, '42 sous-classes de playtest');
+
+    /* ── Magicien ──
+       Les huit « School of … » venaient de 2014. Quatre ont une version 2024
+       dans le PHB sous un autre nom, quatre n'en ont une que dans les documents
+       de playtest. Relu école par école, et le Bladesinger avec. */
+    {
+      const attendu = {
+        Abjurer:     { 3: ['Abjuration Savant', 'Arcane Ward'],      6: ['Projected Ward'],      10: ['Spell Breaker'],       14: ['Spell Resistance'] },
+        Diviner:     { 3: ['Divination Savant', 'Portent'],          6: ['Expert Divination'],   10: ['The Third Eye'],       14: ['Greater Portent'] },
+        Evoker:      { 3: ['Evocation Savant', 'Potent Cantrip'],    6: ['Sculpt Spells'],       10: ['Empowered Evocation'], 14: ['Overchannel'] },
+        Illusionist: { 3: ['Illusion Savant', 'Improved Illusions'], 6: ['Phantasmal Creatures'],10: ['Illusory Self'],       14: ['Illusory Reality'] },
+        // Forgotten Realms (2025), pas le PHB — mais bien du contenu 2024
+        Bladesinger: { 3: ['Bladesong', 'Training in War and Song'], 6: ['Extra Attack'],        10: ['Song of Defense'],     14: ['Song of Victory'] },
+      };
+      Object.entries(attendu).forEach(([ecole, paliers]) => {
+        const d = SUBCLASS_DATA.Wizard[ecole];
+        ok(!!d, `${ecole} : présent`);
+        if (!d) return;
+        eq(Object.keys(d).map(Number).sort((a, b) => a - b),
+           Object.keys(paliers).map(Number).sort((a, b) => a - b), `${ecole} : paliers`);
+        Object.entries(paliers).forEach(([lvl, noms]) =>
+          eq((d[lvl] || []).map(f => f.name), noms, `${ecole} niveau ${lvl}`));
+      });
+
+      // Plus aucune « School of … » : c'était la marque du contenu 2014
+      eq(Object.keys(SUBCLASS_DATA.Wizard).filter(n => /^School of /.test(n)), [],
+         'Magicien : plus aucune école au nom de 2014');
+
+      // Le Savant 2024 donne des sorts ; celui de 2014 réduisait le coût de copie
+      ['Abjurer', 'Diviner', 'Evoker', 'Illusionist'].forEach(ecole => {
+        const savant = SUBCLASS_DATA.Wizard[ecole][3].find(f => /Savant$/.test(f.name));
+        ok(/spellbook for free/.test(savant.desc), `${ecole} : Savant version 2024`);
+        ok(!/half/.test(savant.desc), `${ecole} : Savant ne parle plus de coût de copie`);
+      });
+
+      // Évocateur : Potent Cantrip au 3 et Sculpt Spells au 6 — l'ordre inverse
+      // de 2014, et l'erreur exacte qu'on vient de corriger
+      ok(SUBCLASS_DATA.Wizard.Evoker[3].some(f => f.name === 'Potent Cantrip'),
+         'Évocateur : Potent Cantrip au niveau 3, pas au 6');
+      ok(SUBCLASS_DATA.Wizard.Evoker[6].some(f => f.name === 'Sculpt Spells'),
+         'Évocateur : Sculpt Spells au niveau 6, pas au 3');
+
+      // Capacités de 2014 qui ne doivent pas revenir
+      const tout = JSON.stringify(SUBCLASS_DATA.Wizard);
+      ['Improved Abjuration', 'Improved Minor Illusion', 'Malleable Illusions',
+       'Minor Conjuration', 'Hypnotic Gaze', 'Minor Alchemy'].forEach(vieux =>
+        ok(!tout.includes(vieux), `Magicien : « ${vieux} » est du contenu 2014`));
+    }
+
+    /* ── Renommages ──
+       La sous-classe est stockée par son nom : sans cette table, les fiches
+       existantes perdraient la leur. Chaque ancien nom doit avoir disparu de
+       SUBCLASS_DATA, chaque nouveau doit y être. */
+    {
+      const parNomTout = new Set(Object.values(SUBCLASS_DATA).flatMap(s => Object.keys(s)));
+      Object.entries(SUBCLASS_RENOMMEES).forEach(([ancien, neuf]) => {
+        ok(!parNomTout.has(ancien), `renommage : « ${ancien} » existe encore comme sous-classe`);
+        ok(parNomTout.has(neuf), `renommage : « ${neuf} » n'existe pas`);
+      });
+      eq(Object.keys(SUBCLASS_RENOMMEES).length, 8, 'huit écoles de magie renommées');
+
+      // La migration réécrit les deux endroits où le nom est stocké
+      const fiche = {
+        sousClasse: 'School of Evocation',
+        classes: [{ classe: 'Wizard', sousClasse: 'School of Evocation', niveau: 5 },
+                  { classe: 'Rogue',  sousClasse: 'Thief',               niveau: 2 }],
+      };
+      eq(migrerNomsSousClasse(fiche), true, 'migration : signale le changement');
+      eq(fiche.classes[0].sousClasse, 'Evoker', 'migration : multiclassage réécrit');
+      eq(fiche.classes[1].sousClasse, 'Thief', 'migration : une sous-classe à jour est laissée seule');
+      eq(fiche.sousClasse, 'Evoker', 'migration : champ hérité réécrit');
+      // Idempotente : un second passage ne trouve plus rien
+      eq(migrerNomsSousClasse(fiche), false, 'migration : rien à faire au second passage');
+      eq(migrerNomsSousClasse({ classes: [{ classe: 'Wizard', sousClasse: 'Abjurer' }] }), false,
+         'migration : un nom déjà à jour ne bouge pas');
+      eq(migrerNomsSousClasse(null), false, 'migration : fiche absente');
+      eq(migrerNomsSousClasse({}), false, 'migration : fiche vide');
+    }
+
   }
 
   // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].

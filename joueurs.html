@@ -6020,11 +6020,33 @@ function updateCharSummary() {
    MULTICLASS HELPERS
    ════════════════════════════════════════════════════════════ */
 
+/* ── Sous-classes renommées ──
+   La sous-classe est enregistrée par son nom. Quand ce nom change — les écoles
+   de magie sont passées de « School of Abjuration » à « Abjurer » avec le PHB
+   2024 — une fiche existante pointerait dans le vide et basculerait en
+   « Custom… ». On réécrit le nom stocké. La table vit dans rules-2024.js, et la
+   fonction est idempotente : au second passage elle ne trouve plus rien. */
+function migrerNomsSousClasse(c) {
+  if (!c || typeof SUBCLASS_RENOMMEES === 'undefined') return false;
+  let change = false;
+  (c.classes || []).forEach(cl => {
+    const neuf = SUBCLASS_RENOMMEES[cl.sousClasse];
+    if (neuf) { cl.sousClasse = neuf; change = true; }
+  });
+  const neufLegacy = SUBCLASS_RENOMMEES[c.sousClasse];
+  if (neufLegacy) { c.sousClasse = neufLegacy; change = true; }
+  return change;
+}
+
 function migrateToMulticlass(c) {
   if (!c) return;
   if (!c.classes || !c.classes.length) {
     c.classes = [{ classe: c.classe || '', sousClasse: c.sousClasse || '', niveau: parseInt(c.niveau) || 1, customSousClasse: '' }];
   }
+  // renderAll() passe ici avant tout rendu : c'est le bon endroit pour rattraper
+  // un nom de sous-classe périmé, une seule fois, avant que quoi que ce soit
+  // s'en serve.
+  if (migrerNomsSousClasse(c)) triggerSave();
 }
 
 function getClasses(c) {
