@@ -157,12 +157,12 @@ function ok(cond, label) {
           STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS, SPELL_PREP_STYLE,
           STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,
           FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,
-          CANTRIPS_KNOWN, CLASS_RESOURCES } =
+          CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
       + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
       + ' FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,'
-      + ' CANTRIPS_KNOWN, CLASS_RESOURCES,'
+      + ' CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -1056,6 +1056,105 @@ function ok(cond, label) {
       eq(levels[0], 3, `${cls}/${sub} : premiere capacite au niveau ${levels[0]} au lieu de 3`);
     });
   });
+
+
+  /* ── Sous-classes Unearthed Arcana ──
+     Elles ne peuvent pas porter le drapeau sur elles-mêmes : SUBCLASS_DATA est
+     indexé par niveau, une clé de métadonnée s'y ferait passer pour un palier.
+     D'où UA_SUBCLASSES à côté — et d'où ces tests, qui sont ce qui l'empêche de
+     dériver silencieusement. */
+  {
+    // Le nom de sous-classe est la clé de UA_SUBCLASSES : il doit être unique
+    // toutes classes confondues, sinon deux sous-classes se partagent une source.
+    const parNom = new Map();
+    Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) =>
+      Object.keys(subs).forEach(sub => {
+        ok(!parNom.has(sub), `« ${sub} » existe dans ${parNom.get(sub)} et ${cls} — nom de sous-classe non unique`);
+        parNom.set(sub, cls);
+      }));
+
+    // Ni une espèce ni une classe ne doit porter un nom de sous-classe :
+    // estUA() interroge les trois tables sans savoir de quoi il s'agit.
+    parNom.forEach((cls, sub) => {
+      ok(!SPECIES_DATA[sub], `« ${sub} » est à la fois une sous-classe et une espèce`);
+      ok(!CLASS_DATA[sub], `« ${sub} » est à la fois une sous-classe et une classe`);
+    });
+
+    // Aucune entrée orpheline dans un sens ni dans l'autre
+    Object.keys(UA_SUBCLASSES).forEach(sub =>
+      ok(parNom.has(sub), `UA_SUBCLASSES : « ${sub} » n'existe dans aucune classe`));
+    Object.entries(UA_SUBCLASSES).forEach(([sub, src]) =>
+      ok(typeof src === 'string' && src.length > 10, `${sub} : document d'origine manquant`));
+
+    // Étiquetage
+    Object.keys(UA_SUBCLASSES).forEach(sub => {
+      ok(estUA(sub), `${sub} : reconnue comme playtest`);
+      eq(nomUA(sub), '(UA) ' + sub, `${sub} : préfixe « (UA) »`);
+      ok(infoUA(sub).includes('Unearthed Arcana'), `${sub} : infobulle de playtest`);
+    });
+    ['Champion', 'Life Domain', 'Bladesinger', 'Thief'].forEach(sub => {
+      ok(!estUA(sub), `${sub} : officielle, pas de drapeau`);
+      eq(nomUA(sub), sub, `${sub} : nom inchangé`);
+      eq(infoUA(sub), '', `${sub} : aucune infobulle`);
+    });
+
+    // Paliers de sous-classe du PHB 2024 : ils varient d'une classe à l'autre.
+    // Un palier hors liste veut dire qu'on a recopié la table d'une autre classe.
+    const PALIERS = {
+      Barbarian: [3, 6, 10, 14],    Bard:    [3, 6, 14],         Cleric:  [3, 6, 8, 17],
+      Druid:     [3, 6, 10, 14],    Fighter: [3, 7, 10, 15, 18], Monk:    [3, 6, 11, 17],
+      Paladin:   [3, 7, 15, 20],    Ranger:  [3, 7, 11, 15],     Rogue:   [3, 9, 13, 17],
+      Sorcerer:  [3, 6, 14, 18],    Warlock: [3, 6, 10, 14],     Wizard:  [3, 6, 10, 14],
+      Artificer: [3, 5, 9, 15],     Psion:   [3, 6, 10, 14],
+    };
+    /* Cinq collèges de Barde portent un palier 10 que le PHB 2024 ne donne pas :
+       leur capacité de niveau 14 y a glissé (Peerless Skill est au 14 dans le
+       livre), et leur niveau 14 porte un nom qu'aucun livre ne contient
+       — « Unmatched Lore », « Valor's Triumph »… L'anomalie est antérieure à
+       cette passe et n'est pas corrigée ici : elle est épinglée pour rester
+       visible. Le jour où on la répare, c'est cette liste qui tombe. */
+    const BARDE_PALIER_10 = ['College of Dance', 'College of Glamour', 'College of Lore',
+                             'College of Valor', 'College of Whispers'];
+    eq(Object.entries(SUBCLASS_DATA.Bard).filter(([, d]) => d[10]).map(([n]) => n).sort(),
+       BARDE_PALIER_10, 'Barde : exactement ces cinq collèges ont un palier 10 en trop');
+
+    Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) => {
+      const permis = PALIERS[cls];
+      ok(!!permis, `${cls} : paliers de sous-classe non documentés dans les tests`);
+      if (!permis) return;
+      Object.entries(subs).forEach(([sub, byLevel]) =>
+        Object.keys(byLevel).map(Number).forEach(lvl => {
+          if (cls === 'Bard' && lvl === 10 && BARDE_PALIER_10.includes(sub)) return;
+          ok(permis.includes(lvl), `${cls}/${sub} : palier ${lvl} hors de ${permis.join('/')}`);
+        }));
+    });
+
+    // Toute sous-classe commence au niveau 3 — c'est la règle 2024, sans exception
+    Object.entries(SUBCLASS_DATA).forEach(([cls, subs]) =>
+      Object.entries(subs).forEach(([sub, byLevel]) =>
+        ok(!!byLevel[3], `${cls}/${sub} : rien au niveau 3`)));
+
+    // Les huit qui paraissent dans Arcana Unleashed le 15 septembre 2026 :
+    // leur infobulle doit le dire, c'est ce qui signale quand retirer le drapeau.
+    ['Arcana Domain', 'Arcane Archer', 'Warrior of the Mystic Arts', 'Vestige Patron',
+     'Conjurer', 'Enchanter', 'Necromancer', 'Transmuter'].forEach(sub =>
+      ok(/Arcana Unleashed/.test(UA_SUBCLASSES[sub] || ''), `${sub} : parution annoncée dans l'infobulle`));
+
+    // Quelques relevés de contenu, pour attraper une extraction qui aurait glissé
+    eq(SUBCLASS_DATA.Artificer.Reanimator && Object.keys(SUBCLASS_DATA.Artificer.Reanimator).map(Number).sort((a, b) => a - b),
+       [3, 5, 9, 15], 'Reanimator : paliers d\'Artificier');
+    eq(Object.keys(SUBCLASS_DATA.Paladin.Oathbreaker).map(Number).sort((a, b) => a - b),
+       [3, 7, 15, 20], 'Oathbreaker : paliers de Paladin');
+    eq(Object.keys(SUBCLASS_DATA.Bard['College of Spirits']).map(Number).sort((a, b) => a - b),
+       [3, 6, 14], 'College of Spirits : le Barde n\'a que trois paliers');
+    ok(SUBCLASS_DATA.Fighter['Hell Knight'][3].some(f => f.name === 'Infernal Wound'),
+       'Hell Knight : Infernal Wound au niveau 3');
+    ok(SUBCLASS_DATA.Cleric['Freedom Domain'][3].some(f => f.name === 'Unencumbered Grace'),
+       'Freedom Domain : Unencumbered Grace au niveau 3');
+    ok(SUBCLASS_DATA.Wizard.Imaskarcanist[14].some(f => f.name === 'Doom of Unlight'),
+       'Imaskarcanist : Doom of Unlight au niveau 14');
+    eq(Object.keys(UA_SUBCLASSES).length, 42, '42 sous-classes de playtest');
+  }
 
   // Sous-classes : structure SUBCLASS_DATA[classe][sous-classe][niveau] = [features].
   // Attrape une sous-classe mal imbriquée (elle apparaîtrait comme une fausse classe).
