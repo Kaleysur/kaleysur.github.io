@@ -1563,6 +1563,80 @@ function ok(cond, label) {
 }
 
 
+
+/* ══════════ Sorts (spells-2024.json) ══════════ */
+{
+  /* Le fichier porte une marque d'ordre d'octets : JSON.parse s'y casse les
+     dents si on ne l'enlève pas. C'est déjà arrivé une fois. */
+  const brut = staged('spells-2024.json').replace(/^\uFEFF/, '');
+  let sorts = null;
+  try { sorts = JSON.parse(brut); } catch (e) { ok(false, 'spells-2024.json : JSON invalide — ' + e.message); }
+
+  if (sorts) {
+    ok(Array.isArray(sorts) && sorts.length > 400, `spells-2024.json : ${sorts.length} sorts`);
+
+    const CLASSES = ['Artificer', 'Bard', 'Cleric', 'Druid', 'Paladin', 'Psion',
+                     'Ranger', 'Sorcerer', 'Warlock', 'Wizard'];
+    const vus = new Set();
+    sorts.forEach(sp => {
+      ok(typeof sp.name === 'string' && sp.name.length > 0, 'sort sans nom');
+      ok(!vus.has(sp.name), `${sp.name} : sort en double`);
+      vus.add(sp.name);
+      ok(Number.isInteger(sp.level) && sp.level >= 0 && sp.level <= 9, `${sp.name} : niveau ${sp.level}`);
+      ok(typeof sp.school === 'string' && sp.school.length > 2, `${sp.name} : école manquante`);
+      ok(typeof sp.desc === 'string' && sp.desc.length > 20, `${sp.name} : description trop courte`);
+      ok(Array.isArray(sp.classes) && sp.classes.length > 0, `${sp.name} : aucune classe`);
+      (sp.classes || []).forEach(c =>
+        ok(CLASSES.includes(c), `${sp.name} : classe « ${c} » inconnue`));
+      // Le filtre du compendium lit ce champ : un booléen ou rien, jamais une chaîne
+      if (sp.concentration !== undefined)
+        ok(typeof sp.concentration === 'boolean', `${sp.name} : concentration doit être un booléen`);
+    });
+
+    /* ── La liste du Psion, relevée dans « Psion Update » (oct. 2025) ──
+       143 sorts. Le compte est figé : un sort qui disparaît de la liste est une
+       régression, un sort qui s'y ajoute demande de mettre ce test à jour. */
+    const duPsion = sorts.filter(sp => sp.classes.includes('Psion'));
+    eq(duPsion.length, 143, 'liste de sorts du Psion');
+    eq(duPsion.filter(sp => sp.level === 0).length, 12, 'Psion : 12 sorts mineurs');
+
+    // Les 17 sorts qui n'existent que dans le document de playtest
+    const playtest = sorts.filter(sp => sp.ua);
+    eq(playtest.length, 17, '17 sorts de playtest');
+    playtest.forEach(sp =>
+      ok(sp.classes.includes('Psion'), `${sp.name} : sort de playtest hors liste du Psion`));
+    ['Telekinetic Fling', 'Life Siphon', 'Ego Whip', 'Telekinetic Crush', 'Intellect Fortress',
+     'Thought Form', 'Psychic Scream', 'Summon Astral Entity'].forEach(n => {
+      const sp = sorts.find(x => x.name === n);
+      ok(!!sp, `${n} : présent`);
+      ok(sp && sp.ua === true, `${n} : marqué playtest`);
+    });
+
+    // Crown of Madness vient du PHB 2024, pas du playtest : il manquait au fichier
+    const crown = sorts.find(sp => sp.name === 'Crown of Madness');
+    ok(!!crown, 'Crown of Madness : présent');
+    ok(crown && !crown.ua, 'Crown of Madness : officiel, pas du playtest');
+    eq(crown && crown.level, 2, 'Crown of Madness : niveau 2');
+
+    // Quelques niveaux relevés dans la table du document
+    [['Telekinetic Fling', 0], ['Life Siphon', 1], ['Ego Whip', 2], ['Intellect Fortress', 3],
+     ["Raulothim's Psychic Lance", 4], ['Psionic Blast', 6], ["Abi-Dalzim's Horrid Wilting", 8],
+     ['Psychic Scream', 9]].forEach(([n, lvl]) => {
+      const sp = sorts.find(x => x.name === n);
+      eq(sp && sp.level, lvl, `${n} : niveau ${lvl}`);
+    });
+
+    // Le filtre du compendium doit proposer le Psion, avec la valeur que porte la donnée
+    const J = staged('joueurs.html');
+    const filtre = J.slice(J.indexOf('id="comp-filter-class"'), J.indexOf('id="comp-filter-class"') + 900);
+    ok(/<option value="Psion">/.test(filtre), 'compendium : le filtre propose le Psion');
+    ok(/<option value="Psion">\(UA\) Psion<\/option>/.test(filtre),
+       'compendium : le Psion est annoncé comme playtest');
+    CLASSES.forEach(c =>
+      ok(filtre.includes(`value="${c}"`), `compendium : le filtre propose ${c}`));
+  }
+}
+
 /* ══════════ Campagnes (dm.html) ══════════ */
 {
   const D = staged('dm.html');
