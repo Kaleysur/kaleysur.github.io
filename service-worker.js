@@ -209,22 +209,32 @@ self.addEventListener('fetch', event => {
     || url.pathname === '/'
     || url.pathname === '';
 
-  if (isHTML) {
-    // Pages HTML : network-first — toujours fraîches, cache en fallback hors-ligne
+  /* Les .json sont des DONNÉES : sorts, objets, monstres, index de recherche.
+     Leur contenu change sans que leur URL bouge, donc le cache-first les fige
+     jusqu'au prochain roulement de service worker — c'est ce qui a rendu les
+     sorts du Psion invisibles alors qu'ils étaient bien en ligne. Le réseau
+     d'abord, avec revalidation ETag côté navigateur : une réponse 304 ne coûte
+     presque rien, et le cache reste là pour le hors-ligne. */
+  const isData = url.pathname.endsWith('.json');
+
+  if (isHTML || isData) {
+    // Pages et données : network-first — toujours fraîches, cache en fallback hors-ligne
     event.respondWith(
       fetch(event.request).then(response => {
         if (response && response.status === 200 && response.type === 'basic') {
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
         }
         return response;
-      }).catch(() => caches.match(event.request))
+      }).catch(() => caches.match(event.request, { cacheName: CACHE_NAME }))
     );
     return;
   }
 
-  // Assets (CSS, JS, images…) : cache-first
+  // Assets (CSS, JS, images…) : cache-first, dans le cache de CETTE version.
+  // Sans `cacheName`, la recherche balaie tous les caches — un ancien
+  // `kaleysur-v###` pas encore purgé pouvait répondre à la place du neuf.
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(event.request, { cacheName: CACHE_NAME }).then(cached => {
       if (cached) return cached;
       return fetch(event.request).then(response => {
         if (response && response.status === 200 && response.type === 'basic') {

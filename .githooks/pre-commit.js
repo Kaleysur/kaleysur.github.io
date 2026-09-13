@@ -62,7 +62,7 @@ if (errors) {
    en fait partie depuis que les données de règles y ont été extraites : sans lui
    dans cette liste, changer une table de classe ne déclenchait plus rien. */
 const TESTE = ['joueurs.html', 'dm.html', 'js/rules-2024.js', 'js/compendium.js',
-               'spells-2024.json', '.githooks/smoke-tests.js'];
+               'spells-2024.json', 'service-worker.js', '.githooks/smoke-tests.js'];
 if (staged.some(f => TESTE.includes(f))) {
   try {
     execSync(`node "${__dirname}/smoke-tests.js"`, { stdio: 'inherit' });
