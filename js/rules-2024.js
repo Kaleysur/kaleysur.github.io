@@ -2487,86 +2487,80 @@ const SUBCLASS_DATA = {
 },
 
 'Wizard': {
-  'School of Abjuration': {
+  'Abjurer': {
     3:[
-      { name:'Abjuration Savant', desc:'Abjuration spells cost half gold and time to copy into your spellbook.' },
-      { name:'Arcane Ward', desc:'Casting an Abjuration spell of 1st+ level creates/restores a ward with HP = 2×level + INT mod. Absorbs damage directed at you. Restore it by casting Abjuration spells (restores 2× spell level HP).' }
+      { name:'Abjuration Savant', desc:'Add two Wizard Abjuration spells of level 2 or lower to your spellbook for free, and one more Abjuration spell each time you gain access to a new level of spell slots.' },
+      { name:'Arcane Ward', desc:"When you cast an Abjuration spell with a spell slot, you can raise a ward on yourself that lasts until your next Long Rest, with a HP maximum equal to twice your Wizard level + INT. It takes your damage for you — your Resistances and Vulnerabilities apply first — and once at 0 HP it stops absorbing but its magic remains. Casting an Abjuration spell with a slot restores twice the slot's level in HP; a Bonus Action spending a slot does the same. Once per Long Rest." }
     ],
-    6:[{ name:'Projected Ward', desc:'Reaction: your Arcane Ward absorbs damage that would hit a creature within 30 ft.' }],
-    10:[{ name:'Improved Abjuration', desc:'Add PB to ability checks for Abjuration spells that require them (Counterspell, Dispel Magic, etc.).' }],
-    14:[{ name:'Spell Resistance', desc:'Advantage on saves vs spells. Resistance to spell damage.' }],
+    6:[
+      { name:'Projected Ward', desc:"Reaction when a creature you can see within 30 ft takes damage: your Arcane Ward absorbs it instead. If that drops the ward to 0 HP, the warded creature takes what's left." }
+    ],
+    10:[
+      { name:'Spell Breaker', desc:"You always have Counterspell and Dispel Magic prepared. You can cast Dispel Magic as a Bonus Action and add your PB to its ability check. When you cast either spell with a spell slot and it fails to stop a spell, the slot isn't expended." }
+    ],
+    14:[
+      { name:'Spell Resistance', desc:'You have Advantage on saving throws against spells, and Resistance to the damage of spells.' }
+    ],
   },
-  'School of Conjuration': {
+  'Diviner': {
     3:[
-      { name:'Conjuration Savant', desc:'Conjuration spells cost half gold and time to copy.' },
-      { name:'Minor Conjuration', desc:'Action: conjure a Tiny nonmagical object (worth ≤25 gp) for 1 hour. Disappears if you move 5+ ft from it.' }
+      { name:'Divination Savant', desc:'Add two Wizard Divination spells of level 2 or lower to your spellbook for free, and one more Divination spell each time you gain access to a new level of spell slots.' },
+      { name:'Portent', desc:'When you finish a Long Rest, roll two d20s and record them. You can replace any D20 Test made by you or by a creature you can see with one of these rolls — decided before the roll, and only once per turn. Each is spent once, and unused rolls are lost at your next Long Rest.' }
     ],
-    6:[{ name:'Benign Transposition', desc:'Bonus Action: teleport 30 ft or swap places with a Small/Medium willing creature within 30 ft. Recharges when you cast a Conjuration spell of 1st+ level. 1/Long Rest.' }],
-    10:[{ name:'Focused Conjuration', desc:'While concentrating on a Conjuration spell, your concentration can\'t be broken by taking damage.' }],
-    14:[{ name:'Durable Summons', desc:'Creatures you conjure or create with Conjuration spells gain 30 temp HP.' }],
+    6:[
+      { name:'Expert Divination', desc:'When you cast a Divination spell using a level 2+ spell slot, you regain one expended spell slot. It must be of a lower level than the one you spent, and no higher than level 5.' }
+    ],
+    10:[
+      { name:'The Third Eye', desc:'Bonus action, once per Short or Long Rest — choose <em>Darkvision</em> (120 ft), <em>Greater Comprehension</em> (you can read any language), or <em>See Invisibility</em> (cast it without a spell slot). The benefit lasts until you start a Short or Long Rest.' }
+    ],
+    14:[
+      { name:'Greater Portent', desc:'You roll three d20s for your Portent feature instead of two.' }
+    ],
   },
-  'School of Divination': {
+  'Evoker': {
     3:[
-      { name:'Divination Savant', desc:'Divination spells cost half gold and time to copy.' },
-      { name:'Portent', desc:'After a Long Rest, roll 2 d20s. Before your next Long Rest, replace any d20 roll you or a visible creature makes with one of your Portent dice (before the roll).' }
+      { name:'Evocation Savant', desc:'Add two Wizard Evocation spells of level 2 or lower to your spellbook for free, and one more Evocation spell each time you gain access to a new level of spell slots.' },
+      { name:'Potent Cantrip', desc:"When you cast a damaging cantrip at a creature and miss with the attack roll, or the target succeeds on its saving throw, it still takes half the cantrip's damage — but suffers none of the cantrip's other effects." }
     ],
-    6:[{ name:'Expert Divination', desc:'When you cast a Divination spell of 2nd+ using a slot, regain one expended slot of lower level (max 5th).' }],
-    10:[{ name:'The Third Eye', desc:'Bonus Action: Darkvision 60 ft, Ethereal Sight 60 ft, read any language, or see invisible (as the spell). Lasts until next Short or Long Rest.' }],
-    14:[{ name:'Greater Portent', desc:'You now roll 3 Portent dice after a Long Rest instead of 2.' }],
+    6:[
+      { name:'Sculpt Spells', desc:"When you cast an Evocation spell that affects other creatures you can see, choose a number of them equal to 1 + the spell's level. They automatically succeed on their saving throws against it, and take no damage where they would normally take half." }
+    ],
+    10:[
+      { name:'Empowered Evocation', desc:'Whenever you cast a Wizard spell from the Evocation school, you can add your INT modifier to one of its damage rolls.' }
+    ],
+    14:[
+      { name:'Overchannel', desc:'When you cast a damaging Wizard spell with a level 1–5 spell slot, you can deal maximum damage with it on that turn. The first use costs nothing; every further use before a Long Rest deals you 2d12 Necrotic per level of the slot, rising by 1d12 each time, and that damage ignores Resistance and Immunity.' }
+    ],
   },
-  'School of Enchantment': {
+  'Illusionist': {
     3:[
-      { name:'Enchantment Savant', desc:'Enchantment spells cost half gold and time to copy.' },
-      { name:'Hypnotic Gaze', desc:'Action: charm a creature within 5 ft (WIS save). It is Incapacitated, speed 0. Maintain as a Bonus Action each turn for up to 1 minute.' }
+      { name:'Illusion Savant', desc:'Add two Wizard Illusion spells of level 2 or lower to your spellbook for free, and one more Illusion spell each time you gain access to a new level of spell slots.' },
+      { name:'Improved Illusions', desc:"You cast Illusion spells without Verbal components, and an Illusion spell of yours with a range of 10 ft or more gains 60 ft of range. You also know Minor Illusion — or another Wizard cantrip if you already know it, and it doesn't count against your total. You create both a sound and an image with a single casting of it, and you can cast it as a Bonus Action." }
     ],
-    6:[{ name:'Instinctive Charm', desc:'Reaction: redirect an attack against you to another creature within the attacker\'s range (CHA save to resist). 1/Short or Long Rest.' }],
-    10:[{ name:'Split Enchantment', desc:'Enchantment spells targeting 1 creature can instead target 2 creatures.' }],
-    14:[{ name:'Alter Memories', desc:'Charm a creature with an Enchantment spell: it forgets INT mod hours of memories (CON save to resist).' }],
-  },
-  'School of Evocation': {
-    3:[
-      { name:'Evocation Savant', desc:'Evocation spells cost half gold and time to copy.' },
-      { name:'Sculpt Spells', desc:'When casting an Evocation spell, choose up to INT mod creatures you can see. They auto-succeed on saves and take no damage from the spell.' }
+    6:[
+      { name:'Phantasmal Creatures', desc:"You always have Summon Beast and Summon Fey prepared. When you cast either, you can change its school to Illusion so the creature appears spectral — and you can cast that version once without a spell slot, which halves the creature's HP. Once per spell per Long Rest." }
     ],
-    6:[{ name:'Potent Cantrip', desc:'Damaging cantrips deal half damage on a successful save (if normally no damage on success).' }],
-    10:[{ name:'Empowered Evocation', desc:'Add INT mod to one damage roll of any Wizard Evocation spell.' }],
-    14:[{ name:'Overchannel', desc:'Evocation spell of 5th level or lower: deal maximum damage. 2nd+ use before Long Rest: take 2d12 Necrotic per spell level.' }],
-  },
-  'School of Illusion': {
-    3:[
-      { name:'Illusion Savant', desc:'Illusion spells cost half gold and time to copy.' },
-      { name:'Improved Minor Illusion', desc:'Know Minor Illusion. When you cast it, create both a sound and an image in a single casting.' }
+    10:[
+      { name:'Illusory Self', desc:'Reaction when a creature hits you with an attack roll: an illusory duplicate steps between you, the attack automatically misses, and the illusion dissipates. Once per Short or Long Rest — or restore the use by expending a level 2+ spell slot (no action required).' }
     ],
-    6:[{ name:'Malleable Illusions', desc:'When you cast an Illusion spell with duration ≥ 1 minute, change its nature once per casting with a Magic action.' }],
-    10:[{ name:'Illusory Self', desc:'Reaction: when hit by an attack, interpose an illusory duplicate — the attack hits it instead. 1/Short or Long Rest.' }],
-    14:[{ name:'Illusory Reality', desc:'When you cast a 1st+ Illusion spell, choose one nonliving object in the illusion to become real for 1 minute.' }],
-  },
-  'School of Necromancy': {
-    3:[
-      { name:'Necromancy Savant', desc:'Necromancy spells cost half gold and time to copy.' },
-      { name:'Grim Harvest', desc:'When you kill a creature with a spell, regain HP = 2× spell level (or 3× if Necromancy). No Constructs or Undead.' }
+    14:[
+      { name:'Illusory Reality', desc:'When you cast an Illusion spell with a spell slot, you can choose one inanimate, nonmagical object that is part of the illusion and make it real — a Bonus Action while the spell lasts. It stays real for 1 minute, during which it can neither deal damage nor impose conditions.' }
     ],
-    6:[{ name:'Undead Thralls', desc:'+1 undead to your Animate Dead limit. Your undead gain +PB damage and +Wizard level max HP.' }],
-    10:[{ name:'Inured to Undeath', desc:'Resistance to Necrotic damage. Your HP max can\'t be reduced.' }],
-    14:[{ name:'Command Undead', desc:'Action: one undead within 60 ft makes WIS save or comes under your control for 24 hours. INT ≥ 8 = advantage on save.' }],
-  },
-  'School of Transmutation': {
-    3:[
-      { name:'Transmutation Savant', desc:'Transmutation spells cost half gold and time to copy.' },
-      { name:'Minor Alchemy', desc:'Over 10 minutes, temporarily transform 1 cubic foot of nonmagical material into another basic material. Reverts after 1 hour.' }
-    ],
-    6:[{ name:'Transmuter\'s Stone', desc:'Create a stone over 8 hours. Holder gains one benefit: Darkvision 60 ft, +10 ft speed, CON save proficiency, or resistance to one energy type.' }],
-    10:[{ name:'Shapechanger', desc:'Cast Polymorph on yourself (CR 1 or lower Beast) once per Short or Long Rest without a slot.' }],
-    14:[{ name:'Master Transmuter', desc:'Destroy your Transmuter\'s Stone for one of: reshape matter (5-ft cube), cure all diseases and poisons on one creature, cast Raise Dead, or reduce target\'s age by 2d10 years.' }],
   },
   'Bladesinger': {
     3:[
-      { name:'Training in War and Song', desc:'You gain proficiency with a one-handed melee weapon of your choice and Performance. You can use INT instead of STR or DEX for attack and damage rolls with your chosen weapon while Bladesinging.' },
-      { name:'Bladesong', desc:'Bonus Action: activate Bladesong for 1 minute (can\'t wear medium/heavy armor or use shields, and can\'t cast two-handed spells). While active, gain +INT mod to AC, +10 ft walking speed, Advantage on Acrobatics, and +INT mod to CON saves to maintain Concentration. 2×/Short Rest.' }
+      { name:'Bladesong', desc:"Bonus action, while you wear no armor and use no Shield: the Bladesong lasts 1 minute, ending early if you have the Incapacitated condition, don armor or a Shield, or use two hands to attack with a weapon. <em>Agility</em>: bonus to AC equal to your INT modifier (minimum +1), +10 ft Speed, and Advantage on Dexterity (Acrobatics) checks. <em>Bladework</em>: use INT for the attack and damage rolls of any weapon you're proficient with. <em>Focus</em>: add your INT modifier to CON saves made to keep Concentration. Uses = your INT modifier (minimum one), all regained on a Long Rest and one back whenever you use Arcane Recovery." },
+      { name:'Training in War and Song', desc:"You gain proficiency with every Melee Martial weapon that has neither the Two-Handed nor the Heavy property, and you can use a Melee weapon you're proficient with as a Spellcasting Focus for your Wizard spells. You also gain proficiency in Acrobatics, Athletics, Performance or Persuasion." }
     ],
-    6:[{ name:'Extra Attack', desc:'You can attack twice instead of once whenever you take the Attack action. One of those attacks can be replaced with a cantrip.' }],
-    10:[{ name:'Song of Defense', desc:'While Bladesinging, use your Reaction when you take damage to expend a spell slot and reduce the damage by 5× the slot\'s level.' }],
-    14:[{ name:'Song of Victory', desc:'While Bladesinging, add your INT modifier to melee weapon damage rolls.' }],
+    6:[
+      { name:'Extra Attack', desc:'You can attack twice instead of once whenever you take the Attack action. You can also cast one of your Wizard cantrips that has a casting time of an action in place of one of those attacks.' }
+    ],
+    10:[
+      { name:'Song of Defense', desc:"Reaction when you take damage while your Bladesong is active: expend one spell slot and reduce the damage by five times the slot's level." }
+    ],
+    14:[
+      { name:'Song of Victory', desc:'After you cast a spell that has a casting time of an action, you can make one attack with a weapon as a Bonus Action.' }
+    ],
   },
 
 
@@ -2786,6 +2780,24 @@ const CLASS_RESOURCES = {
   Artificer: lvl => [
     { name:'Infuse Item', used:0, max:Math.floor(lvl/2)+1, reset:'long' }
   ]
+};
+
+
+/* ── Sous-classes renommées ──
+   Les écoles de magie portaient leur nom de 2014 (« School of Conjuration »).
+   Le PHB 2024 les appelle autrement, et quatre d'entre elles n'ont de version
+   2024 que sous un autre nom. La clé stockée dans la fiche est le nom : sans
+   cette table, un magicien perdrait sa sous-classe au prochain chargement.
+   Elle est appliquée une fois, au premier rendu, puis ne matche plus rien. */
+const SUBCLASS_RENOMMEES = {
+  'School of Abjuration':    'Abjurer',
+  'School of Conjuration':   'Conjurer',
+  'School of Divination':    'Diviner',
+  'School of Enchantment':   'Enchanter',
+  'School of Evocation':     'Evoker',
+  'School of Illusion':      'Illusionist',
+  'School of Necromancy':    'Necromancer',
+  'School of Transmutation': 'Transmuter',
 };
 
 /* ════════════════════════════════════════════════════════════
