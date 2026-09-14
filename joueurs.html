@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <!-- Couleur du thème : posée avant le rendu, sinon l'or par défaut clignote -->
+  <script src="js/theme.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Players · Adventurer's Log — Kaleysur</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +30,42 @@
       --text-label: #8a8a8a;  /* petits libellés en capitales */
       --gold-text: #d0aa50;   /* accent quand il doit se LIRE, pas décorer */
       --info: #5a9fd4;
+    }
+
+
+    /* ── Liseré autour du texte ──
+       La fiche flotte au-dessus de l'illustration du personnage, et les
+       panneaux sont translucides : sans bord sombre, les glyphes se fondent
+       dans ce qu'il y a derrière. Deux niveaux — un liseré net collé au
+       glyphe pour le texte courant et les petits libellés, un halo plus large
+       pour les gros chiffres, qui ont plus de surface à détacher. */
+    :root {
+      /* Petit texte : un liseré serré. Un contour dur boucherait les empattements
+         a 8 px, un flou large les rendrait sales — on reste collé au glyphe. */
+      --halo:      0 1px 1px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.6);
+      /* Gros chiffres et titres : vrai contour d'un pixel sur les quatre cotés,
+         plus une ombre portée. C'est là que le mot « bordure » se voit. */
+      --halo-fort: -1px 0 0 rgba(0,0,0,0.7), 1px 0 0 rgba(0,0,0,0.7),
+                   0 -1px 0 rgba(0,0,0,0.7), 0 1px 0 rgba(0,0,0,0.7),
+                   0 2px 5px rgba(0,0,0,0.6);
+    }
+
+    /* Le texte de la fiche. Les fenêtres modales ont leur propre fond opaque :
+       un liseré n'y sert à rien et brouillerait les petites tailles. */
+    #screen-dashboard :is(div, span, label, td, th, li, p, h1, h2, h3, h4, strong, em, a, button, input, select, textarea) {
+      text-shadow: var(--halo);
+    }
+    #screen-dashboard :is(.modal-overlay, .ddb-modal-overlay, .sr-modal-overlay,
+                          .new-char-modal-overlay, #compendium-overlay) * {
+      text-shadow: none;
+    }
+
+    /* Les chiffres qu'on lit de loin : nom du personnage, modificateurs de
+       caractéristique, points de vie, valeurs vitales. */
+    #screen-dashboard :is(.vb-hero-name, .ability-mod, .ability-score-input,
+                          .vb-hp-current, .stat-bubble input, .vb-combat-value,
+                          .passive-val, .vb-fact-value, .sheet-section-title) {
+      text-shadow: var(--halo-fort);
     }
 
     /* ── Écrans ── */
@@ -4453,6 +4491,12 @@ const THEMES = [
   { id:'cuivre',    name:'Cuivre',    gold:'#c87840', dark:'#904820' },
   { id:'turquoise', name:'Turquoise', gold:'#40b8a8', dark:'#208878' },
 ];
+/* Dérivation du thème : js/theme.js, partagé avec tout le site.
+   Ces alias laissent le reste de la page appeler les fonctions comme avant. */
+const hexToHsl = (hex) => KaleysurTheme.hexToHsl(hex);
+const hslToHex = (h, s, l) => KaleysurTheme.hslToHex(h, s, l);
+const rampeTexte = (accent) => KaleysurTheme.rampeTexte(accent);
+
 function applyTheme(id) {
   let gold, dark, activeId, label;
   // Accepte un objet custom {custom:true, gold, dark} ou un string ID
@@ -4463,27 +4507,10 @@ function applyTheme(id) {
     const t = THEMES.find(x => x.id === id) || THEMES[0];
     gold = t.gold; dark = t.dark; activeId = t.id; label = t.name;
   }
-  document.documentElement.style.setProperty('--gold', gold);
-  document.documentElement.style.setProperty('--gold-dark', dark);
-  // Dériver les couleurs de fond depuis la teinte du thème
-  try {
-    const [h, s] = hexToHsl(gold);
-    const sat = Math.min(s * 0.65, 40);
-    document.documentElement.style.setProperty('--bg-primary',   hslToHex(h, sat,        3.5));
-    document.documentElement.style.setProperty('--bg-secondary', hslToHex(h, sat,        6  ));
-    document.documentElement.style.setProperty('--bg-card',      hslToHex(h, sat + 4,    8.5));
-    document.documentElement.style.setProperty('--bg-nav',       hslToHex(h, sat * 0.7,  2.5));
-    document.documentElement.style.setProperty('--border',       hslToHex(h, Math.min(s * 0.7, 52), 20));
-    document.documentElement.style.setProperty('--j-panel',      hslToHex(h, sat + 4,    8.5));
-    document.documentElement.style.setProperty('--j-input',      hslToHex(h, sat * 0.8,  5  ));
-    document.documentElement.style.setProperty('--j-border-col', hslToHex(h, Math.min(s * 0.7, 52), 20));
-    // Texte : teinté par le thème, mais la clarté est plancherée (voir rampeTexte)
-    const rampe = rampeTexte(gold);
-    document.documentElement.style.setProperty('--j-text',     rampe.text);
-    document.documentElement.style.setProperty('--text-dim',   rampe.dim);
-    document.documentElement.style.setProperty('--text-label', rampe.label);
-    document.documentElement.style.setProperty('--gold-text',  rampe.gold);
-  } catch(_e) {}
+  /* La palette entière est dérivée par js/theme.js, chargé dans le <head> de
+     toutes les pages du site. Une seule source de vérité : sinon la fiche et
+     le wiki repartent avec deux teintes différentes au premier ajout. */
+  try { KaleysurTheme.appliquerPalette(gold, dark); } catch (_e) {}
   try { localStorage.setItem('kaleysur_theme', JSON.stringify({ gold, dark })); } catch(e) {}
   document.querySelectorAll('.theme-swatch').forEach(s => s.classList.toggle('active', s.dataset.theme === activeId));
   const lbl = document.getElementById('theme-label');
@@ -10896,37 +10923,6 @@ function renderSectionVisibility() {
 /* ════════════════════════════════════════════════════════════
    COULEUR PERSONNALISÉE
    ════════════════════════════════════════════════════════════ */
-/* ── Rampe de texte dérivée de l'accent ──
-   Les fonds de la fiche descendent à 3,5 % de clarté : sous ~50 %, un texte
-   disparaît. On garde la teinte du thème pour la cohérence, mais la clarté est
-   plancherée — c'est ce qui manquait, et pourquoi un accent violet sombre
-   rendait la moitié des libellés illisibles.
-   `gold-text` ne fait que RELEVER : un accent déjà clair n'est pas terni. */
-function rampeTexte(gold) {
-  const [h, s, l] = hexToHsl(gold);
-  return {
-    text:  hslToHex(h, Math.min(s * 0.22, 18), 88),  // texte courant
-    dim:   hslToHex(h, Math.min(s * 0.20, 14), 64),  // texte secondaire
-    label: hslToHex(h, Math.min(s * 0.20, 14), 55),  // petits libellés en capitales
-    gold:  hslToHex(h, Math.min(s, 70), Math.max(l, 62)), // accent quand il doit se LIRE
-  };
-}
-
-function hexToHsl(hex) {
-  let r=parseInt(hex.slice(1,3),16)/255,g=parseInt(hex.slice(3,5),16)/255,b=parseInt(hex.slice(5,7),16)/255;
-  const max=Math.max(r,g,b),min=Math.min(r,g,b);
-  let h,s,l=(max+min)/2;
-  if(max===min){h=s=0;}else{
-    const d=max-min; s=l>0.5?d/(2-max-min):d/(max+min);
-    switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}
-  }
-  return[Math.round(h*360),Math.round(s*100),Math.round(l*100)];
-}
-function hslToHex(h,s,l){
-  s/=100;l/=100;
-  const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
-  return'#'+[0,8,4].map(n=>Math.round(f(n)*255).toString(16).padStart(2,'0')).join('');
-}
 /* ── Extraction de palette depuis une image (portrait ou fond) ── */
 function extractPortraitPalette(src) {
   const img = new Image();

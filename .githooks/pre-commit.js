@@ -62,7 +62,7 @@ if (errors) {
    en fait partie depuis que les données de règles y ont été extraites : sans lui
    dans cette liste, changer une table de classe ne déclenchait plus rien. */
 const TESTE = ['joueurs.html', 'dm.html', 'js/rules-2024.js', 'js/compendium.js',
-               'spells-2024.json', 'service-worker.js', 'css/style.css',
+               'spells-2024.json', 'service-worker.js', 'css/style.css', 'js/theme.js',
                '.githooks/smoke-tests.js'];
 if (staged.some(f => TESTE.includes(f))) {
   try {
