@@ -15,6 +15,11 @@
   --gold:          #c9a227;
   --gold-light:    #e8c84a;
   --gold-dark:     #8a6e1a;
+  /* --gold-dark est une couleur de bordure : à 25 % de clarté elle est
+     illisible en texte sur nos fonds. --gold-text garde la teinte de l'accent
+     avec une clarté suffisante. joueurs.html la recalcule selon le thème du
+     personnage ; ailleurs, c'est cette valeur qui sert. */
+  --gold-text:     #d9b444;
   --parchment:     #e8d5b0;
   --parchment-dim: #b8a880;
   --red-dark:      #7a1e2e;
@@ -296,7 +301,7 @@ body {
 .sidebar-section-title {
   font-family: var(--font-ui);
   font-size: 0.65rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   padding: 0.25rem 1.25rem;
@@ -389,7 +394,7 @@ body {
   font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   padding: 0.55rem 0.8rem 0.1rem 0.9rem;
   display: block;
   border-top: 1px solid rgba(74,53,16,0.35);
@@ -446,7 +451,7 @@ body {
 .page-category {
   font-family: var(--font-ui);
   font-size: 0.7rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-bottom: 0.4rem;
@@ -570,7 +575,7 @@ hr {
   margin-right: 0.3rem;
   vertical-align: middle;
   flex-shrink: 0;
-  color: var(--gold-dark);
+  color: var(--gold-text);
 }
 .card-icon svg { display: block; width: 100%; height: 100%; }
 .card-link .card-icon {
@@ -579,7 +584,7 @@ hr {
   width: 36px;
   height: 36px;
   margin: 0 auto 0.5rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
 }
 
 /* Nom : inline dans .card, block dans .card-link */
@@ -610,7 +615,7 @@ hr {
   font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   border: 1px solid var(--border);
   padding: 0.1rem 0.4rem;
   border-radius: 3px;
@@ -649,7 +654,7 @@ hr {
   background: var(--bg-secondary);
   font-size: 4rem;
   border-bottom: 1px solid var(--border);
-  color: var(--gold-dark);
+  color: var(--gold-text);
 }
 .infobox-image svg { display: block; }
 
@@ -692,7 +697,7 @@ hr {
 }
 
 .section-sep-icon {
-  color: var(--gold-dark);
+  color: var(--gold-text);
   font-size: 1.2rem;
 }
 
@@ -747,7 +752,7 @@ hr {
 .timeline-date {
   font-family: var(--font-ui);
   font-size: 0.75rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   white-space: nowrap;
   min-width: 110px;
   padding-top: 0.1rem;
@@ -786,7 +791,7 @@ hr {
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--bg-secondary);
-  color: var(--gold-dark);
+  color: var(--gold-text);
 }
 .char-avatar svg { display: block; width: 36px; height: 36px; }
 
@@ -816,7 +821,7 @@ hr {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border: 1px solid var(--border);
-  color: var(--gold-dark);
+  color: var(--gold-text);
   padding: 0.1rem 0.45rem;
   border-radius: 3px;
 }
@@ -893,7 +898,7 @@ hr {
 .breadcrumb a { color: var(--text-muted); }
 .breadcrumb a:hover { color: var(--gold); }
 .breadcrumb-sep { color: var(--border-light); }
-.breadcrumb-current { color: var(--gold-dark); }
+.breadcrumb-current { color: var(--gold-text); }
 
 /* --- Table of contents ------------------------------------ */
 .toc {
@@ -911,7 +916,7 @@ hr {
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   margin-bottom: 0.6rem;
 }
 
@@ -954,7 +959,7 @@ hr {
 }
 
 .hero-ornament {
-  color: var(--gold-dark);
+  color: var(--gold-text);
   font-size: 1.5rem;
   letter-spacing: 0.5rem;
   margin-bottom: 2rem;
@@ -985,7 +990,7 @@ footer {
   gap: 0.5rem;
 }
 
-footer span { color: var(--gold-dark); }
+footer span { color: var(--gold-text); }
 
 /* --- Utility ---------------------------------------------- */
 .text-gold { color: var(--gold); }
@@ -1014,7 +1019,7 @@ footer span { color: var(--gold-dark); }
 /* --- Ornamental divider ----------------------------------- */
 .ornament {
   text-align: center;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   font-size: 1rem;
   letter-spacing: 0.5rem;
   margin: 1.5rem 0;
@@ -1129,7 +1134,7 @@ footer span { color: var(--gold-dark); }
 [data-moon="blue"]  .sidebar-link .icon { color: var(--moon-blue); }
 [data-moon="white"] .sidebar-link .icon { color: var(--moon-white); }
 [data-moon="red"]   .sidebar-link .icon { color: var(--moon-red); }
-[data-moon="gold"]  .sidebar-link .icon { color: var(--gold-dark); }
+[data-moon="gold"]  .sidebar-link .icon { color: var(--gold-text); }
 
 .sidebar-link:hover .icon { opacity: 1 !important; }
 .sidebar-link.active .icon { color: var(--gold) !important; }
@@ -1254,7 +1259,7 @@ footer span { color: var(--gold-dark); }
   position: relative;
 }
 .klc-tab svg   { width: 13px; height: 13px; flex-shrink: 0; }
-.klc-tab:hover { color: var(--gold-dark); }
+.klc-tab:hover { color: var(--gold-text); }
 .klc-tab-on    { color: var(--gold) !important; border-bottom-color: var(--gold-dark); }
 
 #klc-dm-badge {
@@ -1318,7 +1323,7 @@ footer span { color: var(--gold-dark); }
 
 .klc-author {
   font-size: 0.68rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   font-family: 'Cinzel', serif;
   letter-spacing: 0.03em;
   margin-bottom: 0.15rem;
@@ -1447,7 +1452,7 @@ footer span { color: var(--gold-dark); }
    de la pastille, et le nombre de membres en tete de conversation. */
 .klc-groupe {
   flex-shrink: 0; font-size: 0.58rem; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--gold-dark); border: 1px solid var(--border); border-radius: 99px;
+  color: var(--gold-text); border: 1px solid var(--border); border-radius: 99px;
   padding: 0.05rem 0.3rem; line-height: 1.4;
 }
 .klc-membres { font-size: 0.62rem; color: var(--text-muted); }
@@ -1517,7 +1522,7 @@ footer span { color: var(--gold-dark); }
 .hero-corner {
   position: absolute;
   font-size: 0.9rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   opacity: 0.55;
   line-height: 1;
 }
@@ -1562,7 +1567,7 @@ footer span { color: var(--gold-dark); }
   margin-bottom: 1.5rem;
 }
 .hero-ornament {
-  color: var(--gold-dark);
+  color: var(--gold-text);
   font-size: 1.2rem;
   letter-spacing: 0.6rem;
   text-align: center;
@@ -1644,7 +1649,7 @@ footer span { color: var(--gold-dark); }
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   border: 1px solid var(--border);
   padding: 0.1rem 0.4rem;
   border-radius: 3px;
@@ -1666,7 +1671,7 @@ footer span { color: var(--gold-dark); }
   left: 0.85rem;
   top: 1rem;
   font-size: 1.6rem;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   opacity: 0.65;
   line-height: 1;
 }
@@ -1679,7 +1684,7 @@ footer span { color: var(--gold-dark); }
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   text-decoration: none;
   border-bottom: 1px solid var(--border);
   padding-bottom: 1px;
@@ -1696,7 +1701,7 @@ footer span { color: var(--gold-dark); }
   font-family: var(--font-ui);
   font-size: 0.68rem;
   letter-spacing: 0.08em;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   background: var(--bg-secondary);
   padding: 0.75rem 1rem;
   min-width: 130px;
@@ -1734,7 +1739,7 @@ footer span { color: var(--gold-dark); }
 .world-map-section:hover .world-map-img { opacity: 1; }
 .world-map-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(13,13,18,0.88)); padding: 2.5rem 1.75rem 1.1rem; display: flex; justify-content: space-between; align-items: flex-end; }
 .world-map-label { font-family: var(--font-title); font-size: 1.1rem; color: var(--gold); letter-spacing: 0.06em; }
-.world-map-cta { font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-dark); border-bottom: 1px solid rgba(201,162,39,0.3); padding-bottom: 1px; }
+.world-map-cta { font-family: var(--font-ui); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-text); border-bottom: 1px solid rgba(201,162,39,0.3); padding-bottom: 1px; }
 
 /* --- Entrées de continent --------------------------------- */
 .continent-entry { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--gold-dark); border-radius: 0 var(--radius) var(--radius) 0; padding: 1.5rem 1.75rem; margin-bottom: 1rem; transition: background var(--transition); }
@@ -1746,7 +1751,7 @@ footer span { color: var(--gold-dark); }
 .continent-entry p { color: var(--text-secondary); line-height: 1.8; font-size: 0.92rem; margin-bottom: 0.75rem; }
 .continent-entry strong { color: var(--parchment-dim); font-weight: 600; }
 .continent-links { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.continent-link { font-family: var(--font-ui); font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-dark); text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 1px; transition: color var(--transition), border-color var(--transition); }
+.continent-link { font-family: var(--font-ui); font-size: 0.67rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-text); text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 1px; transition: color var(--transition), border-color var(--transition); }
 .continent-link:hover { color: var(--gold); border-color: var(--gold-dark); }
 .continent-entry--astoryem { border-left-color: #2e5496; }
 .continent-entry--astoryem .continent-icon-wrap { border-color: rgba(46,84,150,0.3); background: rgba(46,84,150,0.1); }
@@ -1763,7 +1768,7 @@ footer span { color: var(--gold-dark); }
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--gold-text);
   text-decoration: none;
   border-bottom: 1px solid var(--border);
   padding-bottom: 2px;
@@ -2375,7 +2380,7 @@ footer span { color: var(--gold-dark); }
     }
     .map-info-link {
       font-size: 0.78rem;
-      color: var(--gold-dark);
+      color: var(--gold-text);
       margin-top: 0.2rem;
       display: inline-block;
       text-decoration: none;
