@@ -1575,11 +1575,15 @@ function ok(cond, label) {
      mais plancherise la clarté ; ces tests la vérifient sur des accents de
      toutes les teintes, y compris les plus sombres. */
   const J = staged('joueurs.html');
-  eval([
-    extract(J, 'function hexToHsl(hex)'),
-    extract(J, 'function hslToHex(h,s,l)'),
-    extract(J, 'function rampeTexte(gold)'),
-  ].join('\n'));
+  /* La dérivation vit dans js/theme.js, chargé par toutes les pages. On
+     exécute le module dans un faux navigateur et on prend ce qu'il expose. */
+  const fauxWindow = {};
+  new Function('window', 'localStorage', 'document', staged('js/theme.js'))(
+    fauxWindow,
+    { getItem: () => null, setItem: () => {} },
+    { documentElement: { style: { setProperty: () => {} } } }
+  );
+  const { hexToHsl, hslToHex, rampeTexte, paletteTheme } = fauxWindow.KaleysurTheme;
 
   /* Luminance relative et contraste WCAG. */
   const lum = hex => {
@@ -1668,6 +1672,66 @@ function ok(cond, label) {
   // Une variable ne peut pas se définir par elle-même : la déclaration devient
   // invalide et la variable n'existe plus. C'était le cas de --j-text.
   ok(!/--j-text:\s*var\(--j-text/.test(J), '--j-text ne se référence plus lui-même');
+
+  /* ── Le thème couvre tout le site ──
+     La palette doit fournir TOUTES les variables que les deux feuilles
+     utilisent. Une variable oubliée, et la page garde l'or d'origine à cet
+     endroit : c'est le genre d'écart qu'on ne voit qu'en naviguant. */
+  {
+    const C2 = staged('css/style.css');
+    const p = paletteTheme('#a06ad0', '#6a4090');
+
+    // Toutes les variables déclarées dans le :root de la feuille partagée,
+    // hors celles qui ne sont pas des couleurs.
+    const racine = C2.slice(C2.indexOf(':root'), C2.indexOf('}', C2.indexOf(':root')));
+    /* Hors du theme : les unites, les polices, et les couleurs SEMANTIQUES.
+       Un avertissement rouge ne doit pas virer au violet parce que le joueur
+       a choisi cet accent — le rouge veut dire quelque chose. */
+    const HORS_COULEUR = ['--radius', '--transition', '--sidebar-w', '--nav-h', '--shadow',
+                          '--font-ui', '--font-body', '--font-display', '--font-title',
+                          '--red', '--red-dark'];
+    const declarees = [...racine.matchAll(/(--[a-z-]+):/g)].map(m => m[1])
+      .filter(v => !HORS_COULEUR.includes(v));
+    declarees.forEach(v =>
+      ok(v in p, `palette : ${v} manque — cette page resterait dorée`));
+
+    // …et les variables propres à la fiche
+    ['--j-panel', '--j-input', '--j-border-col', '--j-text', '--text-dim', '--text-label']
+      .forEach(v => ok(v in p, `palette : ${v} manque pour la fiche`));
+
+    // Toute valeur est une couleur exploitable
+    Object.entries(p).forEach(([nom, val]) =>
+      ok(/^#[0-9a-f]{6}$/i.test(val) || /^rgba?\(/.test(val),
+         `palette : ${nom} = « ${val} » n'est pas une couleur`));
+
+    // L'accent demandé ressort tel quel : on ne corrige pas le choix du joueur
+    eq(p['--gold'], '#a06ad0', 'palette : l\'accent choisi est conservé');
+    eq(p['--gold-dark'], '#6a4090', 'palette : la nuance sombre fournie est conservée');
+    // …et se déduit si elle manque
+    ok(/^#[0-9a-f]{6}$/i.test(paletteTheme('#a06ad0')['--gold-dark']),
+       'palette : nuance sombre déduite quand elle n\'est pas fournie');
+
+    // Les fonds restent des fonds : sombres, quelle que soit la teinte choisie
+    ['#ffffff', '#f0e0b0', '#a06ad0', '#141414'].forEach(accent => {
+      const q = paletteTheme(accent);
+      const clarte = v => hexToHsl(q[v])[2];
+      ok(clarte('--bg-primary') <= 8, `${accent} : --bg-primary reste sombre (${clarte('--bg-primary')} %)`);
+      ok(clarte('--bg-card') <= 16, `${accent} : --bg-card reste sombre (${clarte('--bg-card')} %)`);
+      ok(clarte('--text-primary') >= 80, `${accent} : --text-primary reste clair`);
+      // --text-muted valait #6e5530 : 2,5:1, sous le seuil. Il suit la rampe.
+      ok(clarte('--text-muted') >= 45, `${accent} : --text-muted lisible (${clarte('--text-muted')} %)`);
+    });
+
+    // js/theme.js est chargé par toutes les pages, et dans le <head>
+    const pages = ['index.html', 'joueurs.html', 'dm.html', 'carte.html', 'chronologie.html'];
+    pages.forEach(f => {
+      let src; try { src = staged(f); } catch { return; }
+      ok(/<script src="[^"]*js\/theme\.js"><\/script>/.test(src), `${f} : charge js/theme.js`);
+      const tete = src.slice(0, src.indexOf('</head>'));
+      ok(tete.includes('js/theme.js'),
+         `${f} : js/theme.js est dans le <head>, sinon la couleur clignote`);
+    });
+  }
 }
 
 /* ══════════ Import Roll20 (joueurs.html) ══════════ */
