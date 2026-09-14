@@ -1566,6 +1566,110 @@ function ok(cond, label) {
 
 
 
+
+/* ══════════ Lisibilité du texte ══════════ */
+{
+  /* Les fonds de la fiche descendent à 3,5 % de clarté. Un texte sous ~50 %
+     de clarté y disparaît — c'est ce qui rendait la moitié des libellés
+     invisibles sur un thème violet sombre. La rampe garde la teinte du thème
+     mais plancherise la clarté ; ces tests la vérifient sur des accents de
+     toutes les teintes, y compris les plus sombres. */
+  const J = staged('joueurs.html');
+  eval([
+    extract(J, 'function hexToHsl(hex)'),
+    extract(J, 'function hslToHex(h,s,l)'),
+    extract(J, 'function rampeTexte(gold)'),
+  ].join('\n'));
+
+  /* Luminance relative et contraste WCAG. */
+  const lum = hex => {
+    const v = i => parseInt(hex.slice(i, i + 2), 16) / 255;
+    const f = x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    return 0.2126 * f(v(1)) + 0.7152 * f(v(3)) + 0.0722 * f(v(5));
+  };
+  const contraste = (a, b) => {
+    const L1 = lum(a), L2 = lum(b);
+    return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05);
+  };
+
+  /* Le fond le plus clair que le thème produise : --bg-card, à 8,5 %. C'est le
+     pire cas pour un texte, donc celui qu'on teste. */
+  const fondLePlusClair = gold => {
+    const [h, sa] = hexToHsl(gold);
+    return hslToHex(h, Math.min(sa * 0.65, 40) + 4, 8.5);
+  };
+
+  const ACCENTS = [
+    ['or (défaut)', '#c9a227'], ['violet', '#a06ad0'], ['sang', '#a33a3a'],
+    ['forêt', '#2f7a4a'], ['glace', '#6aa8d0'], ['très sombre', '#2a1e0a'],
+    ['presque noir', '#141414'], ['très clair', '#f0e0b0'], ['saturé', '#ff0000'],
+    ['désaturé', '#808080'],
+  ];
+
+  ACCENTS.forEach(([nom, accent]) => {
+    const r = rampeTexte(accent);
+    const fond = fondLePlusClair(accent);
+    // AA demande 4,5:1 pour le petit texte. Les libellés sont le plancher.
+    ok(contraste(r.label, fond) >= 4.5,
+       `rampe ${nom} : libellés à ${contraste(r.label, fond).toFixed(2)}:1 (min 4,5)`);
+    ok(contraste(r.dim, fond) >= 4.5,
+       `rampe ${nom} : texte secondaire à ${contraste(r.dim, fond).toFixed(2)}:1`);
+    ok(contraste(r.text, fond) >= 7,
+       `rampe ${nom} : texte courant à ${contraste(r.text, fond).toFixed(2)}:1 (min 7)`);
+    ok(contraste(r.gold, fond) >= 4.5,
+       `rampe ${nom} : accent lisible à ${contraste(r.gold, fond).toFixed(2)}:1`);
+    // Une rampe cohérente : du plus sombre au plus clair
+    ok(lum(r.label) <= lum(r.dim) && lum(r.dim) <= lum(r.text),
+       `rampe ${nom} : libellé ≤ secondaire ≤ courant`);
+    [r.text, r.dim, r.label, r.gold].forEach(c =>
+      ok(/^#[0-9a-f]{6}$/i.test(c), `rampe ${nom} : « ${c} » est une couleur hex`));
+  });
+
+  /* L'accent lisible RELÈVE la clarté, il ne la baisse jamais : un thème clair
+     choisi par un joueur ne doit pas être terni au passage. */
+  [['#f0e0b0', 88], ['#ffffff', 100], ['#a06ad0', 62]].forEach(([accent, clarte]) => {
+    const r = rampeTexte(accent);
+    ok(hexToHsl(r.gold)[2] >= Math.min(clarte, 62) - 2,
+       `accent clair ${accent} : gardé clair (${hexToHsl(r.gold)[2]} %)`);
+  });
+  ok(hexToHsl(rampeTexte('#141414').gold)[2] >= 60, 'accent presque noir : relevé au-dessus de 60 %');
+
+  /* La teinte est préservée — la rampe reste dans le thème */
+  [['#a06ad0', 271], ['#2f7a4a', 145], ['#c9a227', 46]].forEach(([accent, teinte]) => {
+    const h = hexToHsl(rampeTexte(accent).gold)[0];
+    ok(Math.abs(h - teinte) <= 4, `${accent} : teinte conservée (${h}° pour ${teinte}°)`);
+  });
+
+  /* ── Le CSS ne doit plus court-circuiter la rampe ── */
+  // Les gris codés en dur descendaient à 1,6:1. Ils passent tous par la rampe.
+  ['#333', '#444', '#555', '#666', '#777', '#888'].forEach(g => {
+    // Le délimiteur en tête évite d'attraper border-color, outline-color…
+    // — c'est exactement l'erreur commise en écrivant ce correctif.
+    const re = new RegExp('(?:^|[;{\\s])color:\\s*' + g + '(?![0-9a-fA-F])', 'g');
+    eq((J.match(re) || []).length, 0, `aucun ${g} codé en dur comme couleur de texte`);
+  });
+
+  // --gold-dark est une bordure : à 20-25 % de clarté, illisible en texte.
+  const C = staged('css/style.css');
+  [['joueurs.html', J], ['css/style.css', C]].forEach(([nom, src]) => {
+    const txt = [...src.matchAll(/([a-z-]*color):\s*var\(--gold-dark\)/g)].filter(m => m[1] === 'color');
+    eq(txt.length, 0, `${nom} : --gold-dark n'est plus une couleur de texte`);
+    // …et réciproquement, --gold-text ne doit pas servir de bordure
+    const bord = [...src.matchAll(/([a-z-]+color):\s*var\(--gold-text\)/g)].map(m => m[1]).filter(p => p !== 'color');
+    eq(bord.length, 0, `${nom} : --gold-text ne sert qu'au texte (${[...new Set(bord)].join(',')})`);
+  });
+
+  // Les variables existent avant le premier applyTheme(), et ailleurs que sur la fiche
+  ['--text-dim', '--text-label', '--gold-text'].forEach(v =>
+    ok(new RegExp(v + ':\\s*#').test(J), `joueurs.html : ${v} a une valeur de repli`));
+  ok(/--gold-text:\s*#/.test(C), 'css/style.css : --gold-text défini pour les autres pages');
+  eq((C.match(/var\(--gold-text\)/g) || []).length > 0, true, 'css/style.css : la rampe y est utilisée');
+
+  // Une variable ne peut pas se définir par elle-même : la déclaration devient
+  // invalide et la variable n'existe plus. C'était le cas de --j-text.
+  ok(!/--j-text:\s*var\(--j-text/.test(J), '--j-text ne se référence plus lui-même');
+}
+
 /* ══════════ Import Roll20 (joueurs.html) ══════════ */
 {
   /* Roll20 n'exporte rien nativement : le JSON vient de l'extension VTT
