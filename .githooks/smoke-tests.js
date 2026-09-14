@@ -1567,6 +1567,94 @@ function ok(cond, label) {
 
 
 
+
+/* ══════════ Couleurs avancées (surcharges de thème) ══════════ */
+{
+  /* Les couleurs avancées sont des SURCHARGES posées par-dessus le thème, pas
+     une palette parallèle. La nuance est tout le bug : le thème dérive les
+     mêmes variables et applyTheme() est rejoué à chaque changement de
+     personnage, donc une surcharge appliquée une seule fois au chargement se
+     faisait effacer juste après — elle ne survivait pas à un rafraîchissement. */
+  const J = staged('joueurs.html');
+
+  var playerData = null;
+  // extract() cherche une accolade : une const de chaine simple lui echappe.
+  var PALETTE_KEY = 'kaleysur_palette';
+  eq(J.includes("const PALETTE_KEY = 'kaleysur_palette'"), true, 'cle de stockage des couleurs avancees');
+  eval([
+    extract(J, 'const PALETTE_VARS'),
+    extract(J, 'const PALETTE_DEFAULTS'),
+    extract(J, 'function loadPalette()'),
+  ].join('\n'));
+
+  // Aucune surcharge : loadPalette rend null, et applyPalette(null) ne touche
+  // à rien. C'est ce qui laisse le thème décider pour tout le monde.
+  playerData = null;
+  global.localStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+  eq(loadPalette(), null, 'aucune surcharge : rien à appliquer');
+
+  global.localStorage = { getItem: () => '{}', setItem: () => {}, removeItem: () => {} };
+  eq(loadPalette(), null, 'objet vide : ce n\'est pas une surcharge');
+
+  global.localStorage = { getItem: () => 'pas du json', setItem: () => {}, removeItem: () => {} };
+  eq(loadPalette(), null, 'JSON illisible : traité comme absent');
+
+  const surcharge = { panel: '#1a3a2a', input: '#0a1a12', border: '#2f7a4a', text: '#d0f0e0' };
+  global.localStorage = { getItem: () => JSON.stringify(surcharge), setItem: () => {}, removeItem: () => {} };
+  eq(loadPalette(), surcharge, 'surcharge enregistrée : relue telle quelle');
+
+  // Une surcharge partielle reste une surcharge : les autres variables
+  // continuent de suivre le thème.
+  global.localStorage = { getItem: () => JSON.stringify({ panel: '#1a3a2a' }), setItem: () => {}, removeItem: () => {} };
+  eq(loadPalette(), { panel: '#1a3a2a' }, 'surcharge partielle acceptée');
+
+  // La fiche du joueur prime sur le stockage local
+  playerData = { palette: { text: '#ffffff' } };
+  eq(loadPalette(), { text: '#ffffff' }, 'la fiche prime sur le stockage local');
+  delete global.localStorage;
+
+  /* ── Le câblage, sans lequel rien de tout ça ne sert ── */
+  // applyTheme doit rejouer les surcharges APRÈS avoir dérivé la palette :
+  // c'est la ligne qui manquait.
+  const corps = J.slice(J.indexOf('function applyTheme(id)'),
+                        J.indexOf('function buildThemeSwatches'));
+  const iDerive = corps.indexOf('KaleysurTheme.appliquerPalette');
+  const iSurcharge = corps.indexOf('applyPalette(loadPalette())');
+  ok(iDerive !== -1, 'applyTheme dérive la palette du thème');
+  ok(iSurcharge !== -1, 'applyTheme rejoue les couleurs avancées');
+  ok(iSurcharge > iDerive,
+     'applyTheme : les surcharges passent APRÈS la dérivation, sinon elles sont effacées');
+
+  // applyPalette ne doit rien poser quand il n'y a pas de surcharge
+  const ap = extract(J, 'function applyPalette(p)');
+  ok(/if \(!p\) return/.test(ap), 'applyPalette : sans surcharge, il ne touche à rien');
+  ok(!/PALETTE_DEFAULTS\.panel/.test(ap),
+     'applyPalette : ne retombe plus sur l\'ancienne palette dorée');
+
+  // « Reset » efface la surcharge au lieu d'écrire les anciennes valeurs
+  const reset = J.slice(J.indexOf("getElementById('btn-reset-palette')"),
+                        J.indexOf("getElementById('btn-reset-palette')") + 900);
+  ok(/savePalette\(null\)/.test(reset), 'Reset : efface la surcharge');
+  ok(/removeProperty\('--j-panel'\)/.test(reset), 'Reset : retire la variable posée en ligne');
+  ok(/applyCharTheme\(\)/.test(reset), 'Reset : rend la main au thème');
+  ok(!/\{ \.\.\.PALETTE_DEFAULTS \}/.test(reset),
+     'Reset : ne réécrit pas l\'ancienne palette dorée par-dessus le thème');
+
+  // savePalette(null) doit vraiment nettoyer les deux côtés
+  const sp = extract(J, 'function savePalette(p)');
+  ok(/removeItem\(PALETTE_KEY\)/.test(sp), 'savePalette(null) : vide le stockage local');
+  ok(/delete playerData\.palette/.test(sp), 'savePalette(null) : vide aussi la fiche');
+
+  // Les quatre variables surchargeables sont celles que le thème dérive :
+  // si les deux listes divergent, une couleur devient impossible à surcharger.
+  const vars = extract(J, 'const PALETTE_VARS');
+  ['--j-panel', '--j-input', '--j-border-col', '--j-text'].forEach(v =>
+    ok(vars.includes(v), `PALETTE_VARS : ${v} surchargeable`));
+  const theme = staged('js/theme.js');
+  ['--j-panel', '--j-input', '--j-border-col', '--j-text'].forEach(v =>
+    ok(theme.includes("'" + v + "'"), `js/theme.js : ${v} dérivé du thème`));
+}
+
 /* ══════════ Lisibilité du texte ══════════ */
 {
   /* Les fonds de la fiche descendent à 3,5 % de clarté. Un texte sous ~50 %
