@@ -4511,6 +4511,9 @@ function applyTheme(id) {
      toutes les pages du site. Une seule source de vérité : sinon la fiche et
      le wiki repartent avec deux teintes différentes au premier ajout. */
   try { KaleysurTheme.appliquerPalette(gold, dark); } catch (_e) {}
+  // Les couleurs avancées sont des surcharges : elles repassent par-dessus,
+  // sinon la dérivation qu'on vient de faire les effacerait.
+  try { applyPalette(loadPalette()); } catch (_e) {}
   try { localStorage.setItem('kaleysur_theme', JSON.stringify({ gold, dark })); } catch(e) {}
   document.querySelectorAll('.theme-swatch').forEach(s => s.classList.toggle('active', s.dataset.theme === activeId));
   const lbl = document.getElementById('theme-label');
@@ -5819,8 +5822,8 @@ async function openDashboard() {
   if (!playerData) playerData = emptyPlayerData(currentUser);
   // Appliquer le thème sauvegardé
   buildThemeSwatches();
-  applyCharTheme(); // appliquer le thème du personnage actif
-  applyPalette(loadPalette()); // palette étendue
+  applyCharTheme(); // le thème du personnage, puis ses surcharges par-dessus
+  applyPalette(loadPalette());
   applyPageBg(playerData); // fond de page global
   renderCharSelector(); // sélecteur de personnage dans le topbar
   showScreen('screen-dashboard');
@@ -11032,37 +11035,73 @@ function applyCustomColor(hex) {
 /* ════════════════════════════════════════════════════════════
    PALETTE AVANCÉE
    ════════════════════════════════════════════════════════════ */
+/* ── Couleurs avancées ──
+   Ce sont des SURCHARGES posées par-dessus le thème, pas une palette parallèle.
+   La distinction compte : le thème dérive --j-panel, --j-input, --j-border-col
+   et --j-text de la teinte d'accent, et applyTheme() est rejoué à chaque
+   changement de personnage. Si les surcharges n'étaient qu'appliquées une fois
+   au chargement, le thème les écrasait juste après — c'est ce qui se passait,
+   et pourquoi elles ne survivaient pas à un rafraîchissement.
+
+   Deux règles en découlent :
+     · aucune surcharge enregistrée → on ne touche à rien, le thème décide ;
+     · une surcharge enregistrée → elle est rejouée APRÈS chaque applyTheme(). */
 const PALETTE_KEY = 'kaleysur_palette';
+const PALETTE_VARS = { panel:'--j-panel', input:'--j-input', border:'--j-border-col', text:'--j-text' };
+// Valeurs d'origine, gardées uniquement comme dernier recours d'affichage.
 const PALETTE_DEFAULTS = { panel:'#221a0e', input:'#110d07', border:'#4a3510', text:'#e2cfa0' };
 
 function applyPalette(p) {
   const r = document.documentElement;
-  r.style.setProperty('--j-panel',      p.panel  || PALETTE_DEFAULTS.panel);
-  r.style.setProperty('--j-input',      p.input  || PALETTE_DEFAULTS.input);
-  r.style.setProperty('--j-border-col', p.border || PALETTE_DEFAULTS.border);
-  r.style.setProperty('--j-text',       p.text   || PALETTE_DEFAULTS.text);
+  if (!p) return;                       // rien d'enregistré : le thème garde la main
+  for (const [cle, variable] of Object.entries(PALETTE_VARS)) {
+    const v = p[cle];
+    if (v) r.style.setProperty(variable, v);
+  }
 }
 function savePalette(p) {
-  try { localStorage.setItem(PALETTE_KEY, JSON.stringify(p)); } catch(e) {}
-  if (playerData) playerData.palette = p;
+  try {
+    if (p) localStorage.setItem(PALETTE_KEY, JSON.stringify(p));
+    else   localStorage.removeItem(PALETTE_KEY);
+  } catch(e) {}
+  if (playerData) {
+    if (p) playerData.palette = p;
+    else   delete playerData.palette;
+  }
 }
+/** Les surcharges enregistrées, ou null s'il n'y en a aucune. */
 function loadPalette() {
-  const stored = playerData?.palette || (() => { try { return JSON.parse(localStorage.getItem(PALETTE_KEY)); } catch(e) { return null; } })();
-  return stored || { ...PALETTE_DEFAULTS };
+  const stocke = playerData?.palette || (() => {
+    try { return JSON.parse(localStorage.getItem(PALETTE_KEY)); } catch(e) { return null; }
+  })();
+  if (!stocke || typeof stocke !== 'object') return null;
+  // Un objet vide ne vaut pas une surcharge
+  return Object.values(PALETTE_VARS).some((_, i) => stocke[Object.keys(PALETTE_VARS)[i]]) ? stocke : null;
+}
+/** Ce qui est réellement appliqué en ce moment — surcharge ou valeur du thème.
+    Les sélecteurs doivent montrer la couleur visible, pas une constante figée. */
+function paletteEffective() {
+  const cs = getComputedStyle(document.documentElement);
+  const p = loadPalette() || {};
+  const out = {};
+  for (const [cle, variable] of Object.entries(PALETTE_VARS)) {
+    out[cle] = p[cle] || cs.getPropertyValue(variable).trim() || PALETTE_DEFAULTS[cle];
+  }
+  return out;
 }
 function syncPaletteUI(p) {
-  const map = { 'pal-panel': p.panel, 'pal-input': p.input, 'pal-border': p.border, 'pal-text': p.text };
-  for (const [id, val] of Object.entries(map)) {
-    const ci = document.getElementById(id);
-    const ch = document.getElementById(id + '-hex');
+  const effective = p || paletteEffective();
+  for (const cle of Object.keys(PALETTE_VARS)) {
+    const val = effective[cle];
+    const ci = document.getElementById('pal-' + cle);
+    const ch = document.getElementById('pal-' + cle + '-hex');
     if (ci && val) ci.value = val;
     if (ch && val) ch.value = val;
   }
 }
 function initPaletteUI() {
-  const p = loadPalette();
-  applyPalette(p);
-  syncPaletteUI(p);
+  applyPalette(loadPalette());
+  syncPaletteUI();
 
   document.getElementById('palette-toggle')?.addEventListener('click', () => {
     const adv = document.getElementById('palette-advanced');
@@ -11071,7 +11110,7 @@ function initPaletteUI() {
     const open = adv.style.display !== 'none';
     adv.style.display = open ? 'none' : 'block';
     if (icon) icon.textContent = open ? '▼' : '▲';
-    if (!open) syncPaletteUI(loadPalette());
+    if (!open) syncPaletteUI();
   });
 
   // Live sync color picker → hex input
@@ -11101,10 +11140,23 @@ function initPaletteUI() {
   });
 
   document.getElementById('btn-reset-palette')?.addEventListener('click', () => {
-    const p = { ...PALETTE_DEFAULTS };
-    applyPalette(p);
-    savePalette(p);
-    syncPaletteUI(p);
+    // Effacer la surcharge, pas la remplacer par l'ancienne palette dorée :
+    // on rend la main au thème, quel qu'il soit.
+    savePalette(null);
+    document.documentElement.style.removeProperty('--j-panel');
+    document.documentElement.style.removeProperty('--j-input');
+    document.documentElement.style.removeProperty('--j-border-col');
+    document.documentElement.style.removeProperty('--j-text');
+    applyCharTheme();
+    // Sans theme de personnage, on retombe sur celui du site plutot que sur
+    // la valeur figee de la feuille de style.
+    if (!C()?.theme && !playerData?.theme) {
+      try {
+        const t = KaleysurTheme.themeEnregistre();
+        if (t) KaleysurTheme.appliquerPalette(t.gold, t.dark);
+      } catch (_e) {}
+    }
+    syncPaletteUI();
     triggerSave();
   });
 }
