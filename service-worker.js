@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kaleysur-v223';
+const CACHE_NAME = 'kaleysur-v224';
 
 const ASSETS = [
   'index.html',
@@ -11,6 +11,7 @@ const ASSETS = [
   'css/style.css',
   'js/icons.js',
   'js/components.js',
+  'js/theme.js',
   'js/wiki.js',
   'js/compendium.js',
   'js/monsters.js',

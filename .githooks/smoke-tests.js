@@ -1918,7 +1918,8 @@ function ok(cond, label) {
 
   /* Les fichiers de données restent pré-chargés, pour le hors-ligne */
   const assets = extract(src, 'const ASSETS');
-  ['spells-2024.json', 'search-index.json', 'joueurs.html', 'dm.html'].forEach(f =>
+  ['spells-2024.json', 'search-index.json', 'joueurs.html', 'dm.html',
+   'js/theme.js', 'js/components.js'].forEach(f =>
     ok(assets.includes(f), `ASSETS : ${f} pré-chargé pour le hors-ligne`));
 
   ok(/const CACHE_NAME = 'kaleysur-v\d+';/.test(src), 'service worker : nom de cache versionné');
