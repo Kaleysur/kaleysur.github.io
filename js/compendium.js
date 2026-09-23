@@ -79,13 +79,28 @@
     if (cats.includes(prev)) sel.value = prev;
   }
 
+  /* ── Suppléments locaux ──
+     Déclarés ici parce qu'ils servent deux fois : au chargement, et dans la clé
+     du cache persistant. */
+  const ITEMS_LOCAUX = ['items-arcana-unleashed.json', 'items-eberron.json',
+                        'items-faerun-heroes.json', 'items-faerun-adventures.json'];
+  const MONSTRES_LOCAUX = ['monsters-arcana-unleashed.json', 'monsters-eberron.json',
+                           'monsters-faerun-heroes.json', 'monsters-faerun-adventures.json'];
+
   /* ── Cache persistant (Cache API, TTL 24h) — évite de re-fetch Open5e à chaque session ── */
   const COMP_CACHE = 'kaleysur-compendium-v1';
   const COMP_TTL   = 24 * 60 * 60 * 1000;
+  /* La clé porte la liste des suppléments : en ajouter un doit invalider le
+     cache tout de suite, sinon le nouveau contenu reste invisible 24 h. Ce
+     cache survit aux bumps du service worker, donc rien d'autre ne le purge. */
+  function _cleCache(tab) {
+    const locaux = tab === 'equipment' ? ITEMS_LOCAUX : tab === 'monsters' ? MONSTRES_LOCAUX : [];
+    return '__comp__' + tab + (locaux.length ? '__' + locaux.join(',') : '');
+  }
   async function _persistGet(tab) {
     try {
       const c = await caches.open(COMP_CACHE);
-      const r = await c.match('__comp__' + tab);
+      const r = await c.match(_cleCache(tab));
       if (!r) return null;
       const { ts, items } = await r.json();
       return (Date.now() - ts < COMP_TTL && Array.isArray(items)) ? items : null;
@@ -94,7 +109,7 @@
   async function _persistPut(tab, items) {
     try {
       const c = await caches.open(COMP_CACHE);
-      await c.put('__comp__' + tab, new Response(
+      await c.put(_cleCache(tab), new Response(
         JSON.stringify({ ts: Date.now(), items }),
         { headers: { 'Content-Type': 'application/json' } }
       ));
@@ -127,7 +142,7 @@
         // Items 2024 — Open5e v2 (même source que les monstres)
         _allItems = await _fetchAll(`${O5E}/v2/items/?document__key__in=${DOC}&limit=300&ordering=name`);
         // Suppléments locaux (Eberron, Héros de Faerûn…)
-        for (const fname of ['items-eberron.json', 'items-faerun-heroes.json', 'items-faerun-adventures.json']) {
+        for (const fname of ITEMS_LOCAUX) {
           try {
             const re = await fetch(fname);
             if (re.ok) { const local = await re.json(); _allItems = [...local, ..._allItems]; }
@@ -137,7 +152,7 @@
       } else {
         _allItems = await _fetchAll(`${O5E}/v2/creatures/?document__key__in=${DOC}&limit=300`);
         // Suppléments locaux (Eberron, Héros de Faerûn…)
-        for (const fname of ['monsters-eberron.json', 'monsters-faerun-heroes.json', 'monsters-faerun-adventures.json']) {
+        for (const fname of MONSTRES_LOCAUX) {
           try {
             const rm = await fetch(fname);
             if (rm.ok) { const local = await rm.json(); _allItems = [...local, ..._allItems]; }
@@ -150,6 +165,11 @@
     } catch(e) {
       list().innerHTML = '<div class="comp-empty">Could not load the compendium. Check your connection.</div>';
     }
+  }
+
+  /* Livre d'origine, quand ce n'est pas le Manuel des joueurs. */
+  function _livre(item) {
+    return item.source ? ` · ${item.source}` : '';
   }
 
   function _render() {
@@ -211,7 +231,7 @@
           <div class="comp-item-info">
             <div class="comp-item-name">${item.ua ? '(UA) ' : ''}${item.name}</div>
             <div class="comp-item-meta">${school}${conc}${ritual} · ${castTime} · ${range} · ${item.components||''}${mat}</div>
-            <div class="comp-item-meta" style="color:#888;font-size:0.7rem;">${classes}</div>
+            <div class="comp-item-meta" style="color:#888;font-size:0.7rem;">${classes}${_livre(item)}</div>
             <div class="comp-item-desc">${preview}</div>
           </div>
           <button class="btn-comp-add" data-comp-type="spell" data-comp-idx="${_allItems.indexOf(item)}">+ Add</button>`;
@@ -228,7 +248,7 @@
         div.innerHTML = `
           <div class="comp-item-info">
             <div class="comp-item-name">${item.name}</div>
-            <div class="comp-item-meta">${[cat, costStr, weight].filter(Boolean).join(' · ')}</div>
+            <div class="comp-item-meta">${[cat, costStr, weight].filter(Boolean).join(' · ')}${_livre(item)}</div>
           </div>
           <button class="btn-comp-add" data-comp-type="item" data-comp-idx="${_allItems.indexOf(item)}">+ Add</button>`;
 

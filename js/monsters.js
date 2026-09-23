@@ -19,6 +19,7 @@
   /* Suppléments maison, chargés après l'API pour passer devant elle en cas
      d'homonyme : une version locale corrigée doit gagner. */
   const LOCAUX = [
+    ['monsters-arcana-unleashed.json',  'Arcana Unleashed'],
     ['monsters-eberron.json',           'Eberron'],
     ['monsters-faerun-heroes.json',     'Faerûn'],
     ['monsters-faerun-adventures.json', 'Faerûn']

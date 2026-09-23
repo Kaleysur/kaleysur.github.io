@@ -159,13 +159,13 @@ function ok(cond, label) {
           STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,
           FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,
           CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES,
-          SUBCLASS_RENOMMEES } =
+          SUBCLASS_RENOMMEES, SOURCE_LIVRE, livreSource, donsDisponibles } =
     new Function(R + '; return { CLASS_DATA, SPECIES_DATA, BACKGROUND_DATA, GENERAL_FEATS,'
       + ' ORIGIN_FEATS, STARTING_EQUIP, DND_CLASSES, SUBCLASS_DATA, PREPARED_SPELLS,'
       + ' STARTING_SPELLS, LANGUAGES, TOOL_CHOICES, MULTICLASS_PREREQ, STARTING_ARMOR,'
       + ' FEATURE_CHOICES, estUA, nomUA, sourceUA, titreUA,'
       + ' CANTRIPS_KNOWN, CLASS_RESOURCES, infoUA, UA_SUBCLASSES,'
-      + ' SUBCLASS_RENOMMEES,'
+      + ' SUBCLASS_RENOMMEES, SOURCE_LIVRE, livreSource, donsDisponibles,'
       + ' SPELL_PREP_STYLE };')();
   const SKILL_KEYS = extract(J, 'const SKILLS = [')
     .match(/key:'([a-z]+)'/g).map(s => s.slice(5, -1));
@@ -579,9 +579,14 @@ function ok(cond, label) {
   /* -- Choix de capacites : style de combat, ordre divin, metamagie... -- */
   {
     // Les options du style de combat dependent de la classe
-    eq(featureOptions('Fighting Style', 'Fighter').options.length, 6, 'Guerrier : six styles de combat');
-    eq(featureOptions('Fighting Style', 'Paladin').options.length, 5, 'Paladin : cinq styles');
-    eq(featureOptions('Fighting Style', 'Ranger').options.length, 4, 'Rodeur : quatre styles');
+    // Arcana Unleashed ajoute Arcane Warrior, ouvert aux trois classes qui ont
+    // la capacite Fighting Style — d'ou un style de plus dans chaque liste.
+    eq(featureOptions('Fighting Style', 'Fighter').options.length, 7, 'Guerrier : sept styles de combat');
+    eq(featureOptions('Fighting Style', 'Paladin').options.length, 6, 'Paladin : six styles');
+    eq(featureOptions('Fighting Style', 'Ranger').options.length, 5, 'Rodeur : cinq styles');
+    ['Fighter', 'Paladin', 'Ranger'].forEach(cls =>
+      ok(featureOptions('Fighting Style', cls).options.includes('Arcane Warrior'),
+         `${cls} : Arcane Warrior propose`));
     ok(!featureOptions('Fighting Style', 'Paladin').options.includes('Archery'),
        'Archery n est pas propose au Paladin');
     ok(featureOptions('Fighting Style', 'Ranger').options.includes('Druidic Warrior'),
@@ -590,7 +595,7 @@ function ok(cond, label) {
        'Blessed Warrior propre au Paladin');
     eq(featureOptions('Metamagic', 'Sorcerer').pick, 2, 'Metamagie : deux options a retenir');
     eq(featureOptions('Second Wind', 'Fighter'), null, 'une capacite sans choix ne propose rien');
-    eq(featureOptions('Additional Fighting Style', 'Fighter').options.length, 6,
+    eq(featureOptions('Additional Fighting Style', 'Fighter').options.length, 7,
        'Champion : herite de la liste du Guerrier');
 
     // Chaque option a une description : sans elle l'infobulle serait vide
@@ -1158,11 +1163,45 @@ function ok(cond, label) {
       Object.entries(subs).forEach(([sub, byLevel]) =>
         ok(!!byLevel[3], `${cls}/${sub} : rien au niveau 3`)));
 
-    // Les huit qui paraissent dans Arcana Unleashed le 15 septembre 2026 :
-    // leur infobulle doit le dire, c'est ce qui signale quand retirer le drapeau.
-    ['Arcana Domain', 'Arcane Archer', 'Warrior of the Mystic Arts', 'Vestige Patron',
-     'Conjurer', 'Enchanter', 'Necromancer', 'Transmuter'].forEach(sub =>
-      ok(/Arcana Unleashed/.test(UA_SUBCLASSES[sub] || ''), `${sub} : parution annoncée dans l'infobulle`));
+    /* Les huit sous-classes d'Arcana Unleashed sont parues le 15 septembre 2026.
+       Elles ne sont plus du playtest — mais elles ne sont pas dans le Manuel des
+       joueurs pour autant : il faut posseder le livre. L'infobulle passe donc de
+       l'avertissement de playtest a la mention du livre, et c'est cette bascule
+       que le test surveille, dans les deux sens. */
+    const PARUES = ['Arcana Domain', 'Arcane Archer', 'Warrior of the Mystic Arts',
+                    'Vestige Patron', 'Conjurer', 'Enchanter', 'Necromancer', 'Transmuter'];
+    PARUES.forEach(sub => {
+      ok(!UA_SUBCLASSES[sub], `${sub} : sortie de la table de playtest`);
+      ok(!estUA(sub), `${sub} : plus reconnue comme playtest`);
+      eq(nomUA(sub), sub, `${sub} : plus de prefixe « (UA) »`);
+      eq(infoUA(sub), '', `${sub} : plus d'avertissement de playtest`);
+      eq(livreSource(sub), 'Arcana Unleashed (2026)', `${sub} : le livre a posseder est indique`);
+      ok(titreUA(sub).includes('Arcana Unleashed'), `${sub} : le livre passe dans l'infobulle`);
+    });
+    // Les huit existent bien dans la classe annoncee : les officialiser ne sert a
+    // rien si le nom a derive au passage.
+    [['Cleric', 'Arcana Domain'], ['Fighter', 'Arcane Archer'],
+     ['Monk', 'Warrior of the Mystic Arts'], ['Warlock', 'Vestige Patron'],
+     ['Wizard', 'Conjurer'], ['Wizard', 'Enchanter'],
+     ['Wizard', 'Necromancer'], ['Wizard', 'Transmuter']].forEach(([cls, sub]) =>
+      ok(!!SUBCLASS_DATA[cls]?.[sub], `${sub} : presente chez le ${cls}`));
+
+    /* Capacites renommees entre le playtest et le livre. Le fichier contenait la
+       version playtest ; ces noms-la sont ceux du livre, releves sur les pages
+       de dnd2024.wikidot.com qui citent « Arcana Unleashed » comme source. */
+    [['Cleric', 'Arcana Domain', 3, 'Student of Arcana', 'Arcane Initiate'],
+     ['Cleric', 'Arcana Domain', 17, 'Magical Mastery', 'Arcane Mastery'],
+     ['Fighter', 'Arcane Archer', 15, 'Indomitable Teleport', 'Arcane Burst'],
+     ['Monk', 'Warrior of the Mystic Arts', 11, 'Focused Strike', 'Centered Focus'],
+     ['Warlock', 'Vestige Patron', 6, 'Vestige Power', null],
+     ['Warlock', 'Vestige Patron', 10, 'Vestige Recovery', 'Aura of Power'],
+     ['Wizard', 'Transmuter', 10, 'Shape-Shifter', 'Shapechanger'],
+    ].forEach(([cls, sub, lvl, publie, playtest]) => {
+      const noms = (SUBCLASS_DATA[cls][sub][lvl] || []).map(f => f.name);
+      ok(noms.includes(publie), `${sub} niv.${lvl} : « ${publie} » (version publiee)`);
+      if (playtest) ok(!JSON.stringify(SUBCLASS_DATA[cls][sub]).includes(`"${playtest}"`),
+                       `${sub} : « ${playtest} » etait le nom de playtest`);
+    });
 
     // Quelques relevés de contenu, pour attraper une extraction qui aurait glissé
     eq(SUBCLASS_DATA.Artificer.Reanimator && Object.keys(SUBCLASS_DATA.Artificer.Reanimator).map(Number).sort((a, b) => a - b),
@@ -1177,7 +1216,7 @@ function ok(cond, label) {
        'Freedom Domain : Unencumbered Grace au niveau 3');
     ok(SUBCLASS_DATA.Wizard.Imaskarcanist[14].some(f => f.name === 'Doom of Unlight'),
        'Imaskarcanist : Doom of Unlight au niveau 14');
-    eq(Object.keys(UA_SUBCLASSES).length, 42, '42 sous-classes de playtest');
+    eq(Object.keys(UA_SUBCLASSES).length, 34, '34 sous-classes encore en playtest');
 
     /* ── Magicien ──
        Les huit « School of … » venaient de 2014. Quatre ont une version 2024
@@ -2210,6 +2249,235 @@ function ok(cond, label) {
   eq(lireLigneObjet('0x Rien'), { qty: 1, name: 'Rien' }, 'quantite nulle ramenee a un');
   eq(lireObjets('Potion' + "\n" + "\n" + '2x Torch').length, 2, 'lignes vides sautees');
   eq(lireObjets('').length, 0, 'texte vide');
+}
+
+/* ══════════ Arcana Unleashed (15 septembre 2026) ══════════ */
+{
+  /* Ce que le livre annonce, et qui sert de reference a tout ce bloc.
+     Le bestiaire fait exception : sur ses 19 creatures, quatre seulement ont un
+     bloc complet hors du livre. Les quinze autres sont volontairement absentes —
+     les inventer donnerait un compendium qui a l'air complet et qui ment a la
+     table. Le compte de 4 est donc un choix, pas un oubli, et le test le fige
+     pour qu'on s'en souvienne le jour ou quelqu'un voudra "completer". */
+  const LIVRE = 'Arcana Unleashed';
+
+  const R = staged('js/rules-2024.js');
+  const R2 = new Function(R + '; return { BACKGROUND_DATA, ORIGIN_FEATS, GENERAL_FEATS,'
+    + ' SUBCLASS_DATA, FEATURE_CHOICES, SOURCE_LIVRE, livreSource, donsDisponibles };')();
+  /* Les cles de competence sont celles de la fiche : un historique qui en nomme
+     une autre passerait la relecture et ne cocherait rien a l'ecran. */
+  const CLES_COMP = extract(staged('joueurs.html'), 'const SKILLS = [')
+    .match(/key:'([a-z]+)'/g).map(x => x.slice(5, -1));
+
+  /* ── Les 33 sorts ── */
+  {
+    const sorts = JSON.parse(staged('spells-2024.json').replace(/^﻿/, ''));
+    const au = sorts.filter(sp => sp.source === LIVRE);
+    eq(au.length, 33, '33 sorts du livre');
+
+    /* Sept des 33 sont des reprises d'anciens livres, les 26 autres sont
+       inedits. Si ce partage derive, c'est qu'une entree a ete mal rattachee. */
+    const REPRISES = ['Wither and Bloom', 'Catnap', 'Enervation', 'Negative Energy Flood',
+                      'Power Word Pain', 'Illusory Dragon', 'Invulnerability'];
+    const noms = new Set(au.map(sp => sp.name));
+    REPRISES.forEach(n => ok(noms.has(n), 'sort repris : ' + n));
+
+    /* Onze sorts de niveau 7 ou plus : « plus de la moitie » des 33 sont de
+       niveau 5+, ce qui est la promesse du livre. */
+    ok(au.filter(sp => sp.level >= 5).length > au.length / 2,
+       'plus de la moitie des sorts sont de niveau 5+');
+
+    au.forEach(sp => {
+      ok(Number.isInteger(sp.level) && sp.level >= 0 && sp.level <= 9, sp.name + ' : niveau');
+      ok(!!sp.school, sp.name + ' : ecole');
+      ok(Array.isArray(sp.classes) && sp.classes.length > 0, sp.name + ' : au moins une classe');
+      /* Invulnerability tient en une phrase de 53 signes : le seuil attrape une
+         description vide ou tronquee, il n'exige pas une longueur. */
+      ok((sp.desc || '').length > 40, sp.name + ' : description');
+      ok(!!sp.castingTime && !!sp.range && !!sp.duration, sp.name + ' : en-tete complet');
+      /* L'en-tete vit dans les champs structures. Le recopier en tete du texte
+         casse l'apercu du compendium, qui affiche la premiere ligne : on y
+         lisait « Casting Time: Action » a la place du sort. */
+      ok(!/^(Casting Time|Range|Components|Duration|Level|School)\s*:/i.test(sp.desc),
+         sp.name + ' : pas d\'en-tete recopie dans la description');
+      /* La concentration se lit dans la duree : les deux doivent s'accorder,
+         sinon la fiche affiche un sort concentre qui n'en est pas un. */
+      eq(sp.concentration, /^C[,\s]/.test(sp.duration), sp.name + ' : concentration coherente');
+      /* Le rituel s'ecrit « … or R » dans le temps d'incantation, comme partout
+         ailleurs dans le fichier — pas dans le drapeau. */
+      eq(sp.ritual, false, sp.name + ' : le rituel se note dans castingTime');
+      ok(/^[a-z0-9-]+$/.test(sp.slug), sp.name + ' : slug');
+    });
+    /* Dueling Ground est le seul rituel du lot : c'est ce qui verifie que la
+       convention « or R » a bien ete appliquee au lieu du drapeau. */
+    ok(/ or R$/.test((au.find(sp => sp.name === 'Dueling Ground') || {}).castingTime || ''),
+       'Dueling Ground : rituel note dans le temps d\'incantation');
+  }
+
+  /* ── Les 10 historiques et les 10 dons d'origine ── */
+  {
+    const HISTORIQUES = ['Agent of the Ninth Quill', 'Bejeweled Conclave Spy',
+      'Cosmic Dawn Experiment', 'Covenant of the Grave Recruit', 'Crucible Storm Chaser',
+      'Familiar Trainer', 'Horizon Weaver Initiate', 'Phantasmic Circus Trouper',
+      'Seer Apprentice', 'Ward of the Sheltering Hands'];
+    eq(HISTORIQUES.filter(h => R2.BACKGROUND_DATA[h]).length, 10, '10 historiques du livre');
+
+    /* Chaque historique donne le don de sa faction, un pour un. Cette bijection
+       est ce qui a servi a recouper deux listes trouvees separement : si elle
+       casse, c'est qu'un don ou un historique a ete mal recopie. */
+    const dons = HISTORIQUES.map(h => R2.BACKGROUND_DATA[h].feat);
+    eq(new Set(dons).size, 10, 'un don d\'origine distinct par historique');
+    dons.forEach(d => ok(!!R2.ORIGIN_FEATS[d], 'don d\'origine defini : ' + d));
+
+    HISTORIQUES.forEach(h => {
+      const b = R2.BACKGROUND_DATA[h];
+      eq(b.abilities.length, 3, h + ' : trois caracteristiques');
+      eq(b.skillKeys.length, 2, h + ' : deux competences');
+      b.skillKeys.forEach(k => ok(CLES_COMP.includes(k), h + ' : competence connue — ' + k));
+      ok(!!b.tool, h + ' : un outil');
+      eq(R2.livreSource(h), 'Arcana Unleashed (2026)', h + ' : livre indique');
+    });
+  }
+
+  /* ── Dons generaux, dons epiques, style de combat ── */
+  {
+    const ADEPTES = ['Abjuration', 'Conjuration', 'Divination', 'Enchantment',
+                     'Evocation', 'Illusion', 'Necromancy', 'Transmutation'];
+    ADEPTES.forEach(ecole =>
+      ok(!!R2.GENERAL_FEATS[ecole + ' Adept'], 'don d\'ecole : ' + ecole + ' Adept'));
+
+    ['Elemental Familiar', 'Otherworldly Familiar', 'Soothing Familiar', 'Warlike Familiar']
+      .forEach(d => {
+        ok(!!R2.GENERAL_FEATS[d], 'don de familier : ' + d);
+        ok(/Familiar Friend/.test(R2.GENERAL_FEATS[d].prereq),
+           d + ' : prerequis Familiar Friend');
+      });
+
+    /* Les trois dons epiques sont reserves au niveau 19. Les lister plus tot
+       revient a proposer un choix que la regle refuse — c'est precisement ce
+       qui arrivait tant que GENERAL_FEATS etait affiche tel quel. */
+    const EPIQUES = ['Boon of Erupting Spellpower', 'Boon of Magic School Mastery',
+                     'Boon of the Iron Mind'];
+    EPIQUES.forEach(d => {
+      ok(R2.GENERAL_FEATS[d] && R2.GENERAL_FEATS[d].epic === true, d + ' : marque epique');
+      ok(!R2.donsDisponibles(4).includes(d), d + ' : absent au niveau 4');
+      ok(!R2.donsDisponibles(18).includes(d), d + ' : absent au niveau 18');
+      ok(R2.donsDisponibles(19).includes(d), d + ' : propose au niveau 19');
+    });
+    eq(R2.donsDisponibles(19).length - R2.donsDisponibles(4).length, 3,
+       'seuls les trois dons epiques s\'ajoutent au niveau 19');
+    /* Un appel sans niveau ne doit pas ouvrir les dons epiques par accident. */
+    ok(!R2.donsDisponibles().some(d => EPIQUES.includes(d)),
+       'sans niveau connu, pas de don epique');
+
+    /* Tout don doit dire ce qu'il fait : une entree vide passerait inapercue au
+       milieu de soixante. Le seuil est bas expres — « Gain proficiency with Heavy
+       armor. » est une description complete, et elle fait trente signes. */
+    Object.entries(R2.GENERAL_FEATS).forEach(([nom, f]) =>
+      ok((f.desc || '').length > 25, 'don decrit : ' + nom));
+    Object.entries(R2.ORIGIN_FEATS).forEach(([nom, d]) =>
+      ok(String(d).length > 25, 'don d\'origine decrit : ' + nom));
+  }
+
+  /* ── Objets magiques ── */
+  {
+    const objets = JSON.parse(staged('items-arcana-unleashed.json'));
+    eq(objets.length, 52, '52 objets magiques');
+
+    /* La repartition par rarete est le releve du livre. Elle sert de controle :
+       un objet mal classe ou perdu se voit tout de suite ici. */
+    const parRarete = {};
+    objets.forEach(o => { parRarete[o.rarity] = (parRarete[o.rarity] || 0) + 1; });
+    /* Compare des paires triees : eq() compare cle a cle dans l'ordre, et celui
+       des raretes depend de l'ordre alphabetique des objets. */
+    eq(Object.entries(parRarete).sort(),
+       [['Artifact', 2], ['Common', 9], ['Legendary', 3], ['Rare', 15],
+        ['Uncommon', 20], ['Very Rare', 3]],
+       'repartition des raretes');
+
+    /* Le filtre de categories du compendium se construit a partir des donnees :
+       une categorie inedite par objet donnerait un menu illisible. */
+    const CATS = ['Wondrous Items', 'Magic Items', 'Weapon', 'Armor'];
+    const vus = new Set();
+    objets.forEach(o => {
+      ok(CATS.includes(o.category), o.name + ' : categorie du filtre — ' + o.category);
+      ok((o.desc || '').length > 80, o.name + ' : description');
+      eq(o.source, LIVRE, o.name + ' : livre d\'origine');
+      eq(typeof o.requires_attunement, 'boolean', o.name + ' : attunement booleen');
+      ok(!vus.has(o.name), o.name + ' : objet en double');
+      vus.add(o.name);
+      /* L'en-tete reprend rarete et type, comme dans items-eberron.json. */
+      ok(o.desc.startsWith(o.rarity), o.name + ' : en-tete commence par la rarete');
+    });
+  }
+
+  /* ── Bestiaire ── */
+  {
+    const monstres = JSON.parse(staged('monsters-arcana-unleashed.json'));
+    eq(monstres.length, 4, '4 blocs de monstres publiquement disponibles sur 19');
+    eq(monstres.map(m => m.name).sort(),
+       ['Living Vitriolic Sphere', 'Spellguard', 'Taisus', 'Venger'],
+       'les quatre blocs complets');
+
+    monstres.forEach(m => {
+      ok(m.armor_class > 0, m.name + ' : CA');
+      ok(m.hit_points > 0, m.name + ' : points de vie');
+      ok(!!m.hit_dice, m.name + ' : des de vie');
+      ok(typeof m.cr === 'number' && m.cr > 0, m.name + ' : facteur de puissance');
+      ok(m.actions.length > 0, m.name + ' : au moins une action');
+      ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']
+        .forEach(c => ok(m[c] > 0, m.name + ' : ' + c));
+      ok(Object.keys(m.speed).length > 0, m.name + ' : vitesse');
+      eq(m.source, LIVRE, m.name + ' : livre d\'origine');
+      /* Chaque action porte un nom ET un texte : un decoupage rate produit des
+         entrees a moitie vides, et c'est arrive — les actions legendaires de
+         Venger avaient atterri dans ses reactions. */
+      ['special_abilities', 'actions', 'bonus_actions', 'reactions', 'legendary_actions']
+        .forEach(k => (m[k] || []).forEach(a => {
+          ok(!!a.name && a.desc.length > 10, m.name + ' : ' + k + ' — ' + a.name);
+        }));
+    });
+    /* Venger : le decoupage en sections a deja echoue ici, parce que son intitule
+       porte un suffixe (« LEGENDARY ACTIONS (4 uses in Lair) »). */
+    const venger = monstres.find(m => m.name === 'Venger');
+    eq(venger.reactions.length, 1, 'Venger : une seule reaction');
+    eq(venger.legendary_actions.map(a => a.name),
+       ['Booming Censure', 'Crimson Strike', 'Magic-Binding Chains'],
+       'Venger : ses trois actions legendaires, pas ailleurs');
+  }
+
+  /* ── Les fichiers sont effectivement charges ──
+     Un fichier de donnees present dans le depot et absent des chargeurs est du
+     contenu invisible : le depot grossit, l'application ne change pas. */
+  {
+    const C = staged('js/compendium.js');
+    ok(C.includes('items-arcana-unleashed.json'), 'compendium : objets charges');
+    ok(C.includes('monsters-arcana-unleashed.json'), 'compendium : monstres charges');
+    ok(/item\.source \? /.test(C) || /_livre\(item\)/.test(C),
+       'compendium : le livre d\'origine est affiche');
+
+    /* Le cache persistant du compendium garde objets et monstres 24 h et
+       survit aux bumps du service worker. Si sa cle ne depend pas des
+       suppplements charges, ajouter un fichier ne change rien a l'ecran
+       pendant une journee — on livre 52 objets que personne ne voit. */
+    const cle = new Function(
+      C.slice(C.indexOf('const ITEMS_LOCAUX'), C.indexOf('async function _persistGet'))
+      + '; return _cleCache;')();
+    ok(cle('equipment').includes('items-arcana-unleashed.json'),
+       'cache compendium : la cle des objets porte les suppplements');
+    ok(cle('monsters').includes('monsters-arcana-unleashed.json'),
+       'cache compendium : la cle des monstres porte les suppplements');
+    ok(cle('equipment') !== cle('monsters'), 'cache compendium : une cle par onglet');
+    eq(cle('spells'), '__comp__spells',
+       'cache compendium : les sorts sont un fichier local, pas de supplement dans la cle');
+
+    const M = staged('js/monsters.js');
+    ok(M.includes('monsters-arcana-unleashed.json'), 'bestiaire : fichier declare');
+
+    const SW = staged('service-worker.js');
+    ['items-arcana-unleashed.json', 'monsters-arcana-unleashed.json'].forEach(f =>
+      ok(SW.includes(f), 'service worker : ' + f + ' pre-cache'));
+  }
 }
 
 /* ══════════ Verdict ══════════ */
