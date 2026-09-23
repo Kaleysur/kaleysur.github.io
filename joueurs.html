@@ -8421,7 +8421,7 @@ function renderLvlupTab() {
 
     // Body: ASI — sélecteur de feat (PHB 2024) + note libre
     if (d.isAsi) {
-      const featOpts = Object.keys(GENERAL_FEATS).map(fn =>
+      const featOpts = donsDisponibles(d.totalLv).map(fn =>
         `<option value="${esc(fn)}">${esc(fn)}</option>`).join('');
       bodyHtml += `<div class="lvlrow-section">
         <div class="lvlrow-sec-title">⬆ ASI / Feat Decision</div>
@@ -13907,7 +13907,7 @@ document.addEventListener('DOMContentLoaded', function initLevelUpModal() {
       $('lvlup-asi-a').innerHTML = '<option value="">— +2 ici, ou +1/+1 —</option>' + opt();
       $('lvlup-asi-b').innerHTML = '<option value="">— none (so +2) —</option>' + opt();
       $('lvlup-feat').innerHTML = '<option value="">— Choose a feat —</option>'
-        + Object.keys(GENERAL_FEATS).filter(f => f !== 'Ability Score Improvement')
+        + donsDisponibles(plan.totalAfter).filter(f => f !== 'Ability Score Improvement')
             .map(f => `<option>${esc(f)}</option>`).join('');
       syncAsiNote();
     }

@@ -305,7 +305,38 @@ const GENERAL_FEATS = {
   'Telepathic':         { asi:true, abil:'INT, SAG or CHA', prereq:'', desc:"Speak telepathically to any creature within 60 ft that understands a language. You always have Detect Thoughts prepared — cast once per Long Rest without a slot." },
   'War Caster':         { asi:true, abil:'INT, SAG or CHA', prereq:'Spellcasting/Pact Magic', desc:"Advantage on CON saves to maintain Concentration. Perform somatic components with weapons/shield in hand. Cast a spell (1 action, targeting one creature) instead of an Opportunity Attack." },
   'Weapon Master':      { asi:true, abil:'FOR or DEX', prereq:'', desc:"You gain the Mastery property for one kind of weapon you're proficient with; you can change it on a Long Rest." },
+  /* ── Arcana Unleashed (2026) ──
+     Les huit « Adept » couvrent les huit ecoles de magie : memes sorts
+     toujours prepares, effet propre a l'ecole. Les quatre dons de familier
+     prolongent Familiar Friend. */
+  'Abjuration Adept':   { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Shield, Lesser Restoration, Protection from Energy, Banishment and Mass Cure Wounds prepared as your slots allow. When you cast an Abjuration spell with a slot, you or a creature within 30 ft gains Temp HP equal to twice the slot level." },
+  'Conjuration Adept':  { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Entangle, Misty Step, Conjure Animals, Dimension Door and Conjure Elemental prepared as your slots allow. Add the feat's ability modifier to CON saves to maintain Concentration on a Conjuration spell." },
+  'Divination Adept':   { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Detect Evil and Good, Mind Spike, Clairvoyance, Divination and Scrying prepared as your slots allow. Reaction: give a creature within 60 ft Advantage or Disadvantage on a D20 Test — once per Long Rest, and regained whenever you cast a Divination spell with a slot." },
+  'Enchantment Adept':  { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Dissonant Whispers, Enthrall, Hold Person, Dominate Beast and Modify Memory prepared as your slots allow. You can cast Enchantment spells with no components, except costed or consumed Material components." },
+  'Evocation Adept':    { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Chromatic Orb, Shatter, Fireball, Vitriolic Sphere and Wall of Force prepared as your slots allow. Once per turn when an Evocation spell deals damage, expend up to two Hit Point Dice and add the roll to one damage roll." },
+  'Illusion Adept':     { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Silent Image, Phantasmal Force, Major Image, Hallucinatory Terrain and Seeming prepared as your slots allow. You can cast Illusion spells with no components (except costed or consumed ones), and creatures have Disadvantage on Investigation checks to see through your illusions." },
+  'Necromancy Adept':   { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Inflict Wounds, Ray of Enfeeblement, Vampiric Touch, Blight and Raise Dead prepared as your slots allow. When you cast a Necromancy spell with a slot, expend up to two Hit Point Dice and regain HP equal to the roll plus the slot level." },
+  'Transmutation Adept':{ asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"Always have Jump, Spider Climb, Slow, Polymorph and Animate Objects prepared as your slots allow. On your turn, casting a Transmutation spell with a slot increases your Speed by 5 ft per slot level until the end of the turn." },
+  'Elemental Familiar': { asi:true, abil:'choice', prereq:'Level 4+, Familiar Friend', desc:"Imbue your familiar with Acid, Cold, Fire, Lightning or Thunder: it gains Resistance to that type, and as a Bonus Action it can burst — DEX save in a 5-ft Emanation or 2d4 damage and Prone (Medium or smaller)." },
+  'Otherworldly Familiar':{ asi:true, abil:'choice', prereq:'Level 4+, Familiar Friend', desc:"Your familiar gains Resistance to Necrotic, Poison, Psychic, Radiant or Thunder damage (your choice), and can move through creatures and objects as Difficult Terrain." },
+  'Soothing Familiar':  { asi:true, abil:'choice', prereq:'Level 4+, Familiar Friend', desc:"While your familiar is within 120 ft, allies in a 5-ft Emanation around it treat a 1 or 2 as a 3 on any die rolled to restore Hit Points." },
+  'Warlike Familiar':   { asi:true, abil:'choice', prereq:'Level 4+, Familiar Friend', desc:"You always have Battle Familiar prepared and can cast it once per Long Rest without a slot. Reaction: your battle familiar adds your Proficiency Bonus to the AC of a creature within 5 ft of it against one attack." },
+  'Magic Connoisseur':  { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Magic Initiate', desc:"Choose a level-1 and a level-2 spell from your Magic Initiate list: they are always prepared and each can be cast once per Long Rest without a slot. You can swap one of them whenever you gain a level." },
+  'Spell Resistant':    { asi:true, abil:'DEX or CON', prereq:'Level 4+', desc:"Resistance to Necrotic, Psychic, Radiant or Thunder damage (your choice). When you would fail a save against a spell or magical effect, add 1d6 to the roll (PB times per Long Rest)." },
+  'Spell Subterfuge':   { asi:true, abil:'INT, SAG or CHA', prereq:'Level 4+, Spellcasting/Pact Magic', desc:"After casting a spell with the Magic action using a slot, take both Dash and Hide as one Bonus Action (the feat's ability modifier, times per Long Rest). Casting with a Verbal component or a spell attack doesn't end your Invisible condition if you end your turn with Three-Quarters or Total Cover." },
+  /* Dons epiques : reserves au niveau 19, d'ou le drapeau. */
+  'Boon of Erupting Spellpower':{ epic:true, asi:true, abil:'INT, SAG or CHA', prereq:'Level 19+, Spellcasting/Pact Magic', desc:"The chosen score can rise to 30. When a spell you cast with a slot deals damage, treat any 1 or 2 on its damage dice as a 3, and creatures damaged by it also have the Prone condition. Once per Initiative roll or Rest." },
+  'Boon of Magic School Mastery':{ epic:true, asi:true, abil:'INT, SAG or CHA', prereq:'Level 19+, Spellcasting/Pact Magic', desc:"The chosen score can rise to 30. Pick a school of magic: a level-1 spell from it is always prepared and castable with no slot or components, and a level-7-or-lower spell from it is always prepared and castable once per Long Rest without a slot. Repeatable with a different school." },
+  'Boon of the Iron Mind':{ epic:true, asi:true, abil:'choice', prereq:'Level 19+', desc:"The chosen score can rise to 30. You lose Concentration only if you start another Concentration effect, gain the Petrified or Unconscious condition, or die." },
 };
+/** Dons proposables a ce niveau de personnage.
+    Les dons epiques d'Arcana Unleashed sont reserves au niveau 19 : les lister
+    plus tot revient a proposer un choix que la regle refuse. */
+function donsDisponibles(niveauTotal) {
+  return Object.keys(GENERAL_FEATS)
+    .filter(nom => !GENERAL_FEATS[nom].epic || (niveauTotal || 0) >= 19);
+}
+
 /* ── Capacites qui demandent un CHOIX (PHB 2024) ──
    Jusqu'ici l'assistant se contentait d'afficher « Fighting Style — Choose a
    fighting style: ... » sans jamais laisser choisir. Le joueur devait le noter
@@ -318,11 +349,12 @@ const FEATURE_CHOICES = {
   'Fighting Style': {
     pick: 1,
     perClass: {
-      Fighter: ['Archery','Defense','Dueling','Great Weapon Fighting','Protection','Two-Weapon Fighting'],
-      Paladin: ['Blessed Warrior','Defense','Dueling','Great Weapon Fighting','Protection'],
-      Ranger:  ['Archery','Defense','Druidic Warrior','Two-Weapon Fighting'],
+      Fighter: ['Arcane Warrior','Archery','Defense','Dueling','Great Weapon Fighting','Protection','Two-Weapon Fighting'],
+      Paladin: ['Arcane Warrior','Blessed Warrior','Defense','Dueling','Great Weapon Fighting','Protection'],
+      Ranger:  ['Arcane Warrior','Archery','Defense','Druidic Warrior','Two-Weapon Fighting'],
     },
     desc: {
+      'Arcane Warrior':       'You learn two Wizard cantrips; INT, WIS or CHA is your spellcasting ability for them (Arcana Unleashed).',
       'Archery':              '+2 to ranged weapon attack rolls.',
       'Blessed Warrior':      'You learn two Cleric cantrips; Charisma is your spellcasting ability for them.',
       'Defense':              '+1 AC while wearing armor.',
@@ -427,6 +459,17 @@ const ORIGIN_FEATS = {
   'Skilled':          "Proficiency in any combination of three skills or tools of your choice.",
   'Tavern Brawler':   "Unarmed Strike deals 1d4. Once per turn, deal extra damage equal to your Proficiency Bonus. You can push a creature 5 ft on an Unarmed Strike hit. Proficiency with improvised weapons.",
   'Tough':            "Your Hit Point maximum increases by twice your character level.",
+  /* ── Arcana Unleashed (2026) — un don par faction du livre ── */
+  'Arcane Artist':    "Learn Minor Illusion. When you cast an Illusion spell, one ally within 30 ft who can see you gains Heroic Inspiration (once per Long Rest).",
+  'Arcane Eloquence': "Learn Vicious Mockery. Add 1d4 to your Deception, Intimidation and Persuasion checks.",
+  'Arcane Infiltrator':"Learn Friends. You can take the Dodge action as a Bonus Action, a number of times equal to your Proficiency Bonus per Long Rest.",
+  'Arcane Omens':     "Learn Guidance. Reaction when you or a creature within 30 ft fails a save: add 1d4 to the roll (PB times per Long Rest).",
+  'Arcane Overload':  "Learn Fire Bolt. When an Evocation spell you cast deals damage, add your Proficiency Bonus to one damage roll (once per Long Rest).",
+  'Arcane Safeguard': "Learn Resistance, castable as a Bonus Action (PB times per Long Rest). When you take the Help action on an ability check, the ally gains Temp HP equal to your Proficiency Bonus.",
+  'Arcane Undertaker':"Learn a Necromancy cantrip from the Cleric or Wizard list. Add 1d4 to History and Medicine checks. Stabilising a creature at 0 HP with the Help action grants you Heroic Inspiration (once per Long Rest).",
+  'Familiar Friend':  "You always have Find Familiar prepared and can cast it once per Long Rest without a slot or Material components.",
+  'Portal Jumper':    "Resistance to Necrotic, Psychic or Radiant damage (your choice). Spend 15 ft of movement to teleport 15 ft (PB times per Long Rest, once per turn).",
+  'Transmuted Anatomy':"+5 ft Speed. Advantage on saves against forced shape-shifting, and a Reaction to add 1d4 to a failed CON save (PB times per Long Rest).",
 };
 const BACKGROUND_DATA = {
   'Acolyte':      { abilities:['int','sag','cha'], feat:'Magic Initiate',  skills:'Insight, Religion',        skillKeys:['perspicacite','religion'],   tool:"Calligrapher's Supplies" },
@@ -445,6 +488,17 @@ const BACKGROUND_DATA = {
   'Scribe':       { abilities:['dex','int','sag'], feat:'Skilled',         skills:'Investigation, Perception', skillKeys:['investigation','perception'], tool:"Calligrapher's Supplies" },
   'Soldier':      { abilities:['for','dex','con'], feat:'Savage Attacker', skills:'Athletics, Intimidation',   skillKeys:['athletisme','intimidation'], tool:"Gaming Set (choice)" },
   'Wayfarer':     { abilities:['dex','sag','cha'], feat:'Lucky',           skills:'Insight, Stealth',          skillKeys:['perspicacite','discret'],    tool:"Thieves' Tools" },
+  /* ── Arcana Unleashed (2026) — chacun rattache a une faction du livre ── */
+  'Agent of the Ninth Quill':     { abilities:['for','int','cha'], feat:'Arcane Infiltrator',  skills:'Arcana, Sleight of Hand',   skillKeys:['arcanes','prestidig'],        tool:"Thieves' Tools" },
+  'Bejeweled Conclave Spy':       { abilities:['dex','sag','cha'], feat:'Arcane Eloquence',    skills:'Deception, Perception',     skillKeys:['duperie','perception'],       tool:'Disguise Kit' },
+  'Cosmic Dawn Experiment':       { abilities:['for','dex','con'], feat:'Transmuted Anatomy',  skills:'Athletics, Survival',       skillKeys:['athletisme','survie'],        tool:"Artisan's Tools (choice)" },
+  'Covenant of the Grave Recruit':{ abilities:['for','int','sag'], feat:'Arcane Undertaker',   skills:'History, Medicine',         skillKeys:['histoire','medecine'],        tool:'Herbalism Kit' },
+  'Crucible Storm Chaser':        { abilities:['for','con','int'], feat:'Arcane Overload',     skills:'Athletics, Nature',         skillKeys:['athletisme','nature'],        tool:"Glassblower's Tools" },
+  'Familiar Trainer':             { abilities:['con','int','sag'], feat:'Familiar Friend',     skills:'Animal Handling, Arcana',   skillKeys:['animaux','arcanes'],          tool:'Gaming Set (choice)' },
+  'Horizon Weaver Initiate':      { abilities:['dex','con','sag'], feat:'Portal Jumper',       skills:'Acrobatics, Survival',      skillKeys:['acrobaties','survie'],        tool:"Weaver's Tools" },
+  'Phantasmic Circus Trouper':    { abilities:['dex','con','cha'], feat:'Arcane Artist',       skills:'Deception, Performance',    skillKeys:['duperie','performance'],      tool:'Disguise Kit' },
+  'Seer Apprentice':              { abilities:['int','sag','cha'], feat:'Arcane Omens',        skills:'History, Insight',          skillKeys:['histoire','perspicacite'],    tool:"Navigator's Tools" },
+  'Ward of the Sheltering Hands': { abilities:['con','sag','cha'], feat:'Arcane Safeguard',    skills:'Insight, Medicine',         skillKeys:['perspicacite','medecine'],    tool:"Cook's Utensils" },
 };
 
 /* ════════════════════════════════════════════════════════════
@@ -1534,14 +1588,14 @@ const SUBCLASS_DATA = {
   'Arcana Domain': {
     3:[
       { name:'Arcana Domain Spells', desc:"Always prepared — <strong>3</strong>: Detect Magic, Magic Missile, Magic Weapon, Nystul's Magic Aura · <strong>5</strong>: Counterspell, Dispel Magic · <strong>7</strong>: Arcane Eye, Leomund's Secret Chest · <strong>9</strong>: Bigby's Hand, Teleportation Circle." },
-      { name:'Arcane Initiate', desc:'<em>Arcane Knowledge</em>: you gain proficiency in Arcana if you lack it, and Expertise in that skill. <em>Cantrips</em>: you learn two Wizard cantrips, and can swap one of them for another Wizard cantrip whenever you gain a Cleric level.' },
+      { name:'Student of Arcana', desc:'<em>Magical Knowledge</em>: you gain proficiency in Arcana, or in one skill of your choice from the Cleric level-1 list if you already have Arcana. <em>Cantrips</em>: you learn two Wizard cantrips, and can swap one of them for another Wizard cantrip whenever you gain a Cleric level.' },
       { name:'Modify Magic', desc:'As you cast a spell, expend one use of Channel Divinity to alter it (no action required). <em>Fortifying Spell</em>: one target of the spell gains Temporary HP equal to 2d8 + your Cleric level. <em>Tenacious Spell</em>: when the spell forces a save, choose one target you can see and roll 1d6 as a penalty to that save.' }
     ],
     6:[
       { name:'Dispelling Recovery', desc:'Immediately after you cast a spell with a slot that restores HP to a creature or ends a condition on it, you can cast Dispel Magic on that creature as a Bonus Action without a slot. Uses equal to your WIS modifier (minimum once), all regained on a Long Rest.' }
     ],
     17:[
-      { name:'Arcane Mastery', desc:'Learn four Wizard spells, one each from levels 6, 7, 8, and 9, and always have them prepared. Whenever you gain a Cleric level, you can replace one of them with another Wizard spell of the same level.' }
+      { name:'Magical Mastery', desc:'Learn four Wizard spells, one each from levels 6, 7, 8, and 9, and always have them prepared. Whenever you gain a Cleric level, you can replace one of them with another Wizard spell of the same level.' }
     ],
   },
   'Freedom Domain': {
@@ -1755,7 +1809,7 @@ const SUBCLASS_DATA = {
       { name:'Ever-Ready Shot', desc:'When you roll Initiative, you can regain one expended use of Arcane Shot.' }
     ],
     15:[
-      { name:'Arcane Burst', desc:'When you use Indomitable, each creature of your choice in a 10-ft Emanation from you must succeed on a STR save against your Arcane Shot DC or be pushed up to 20 ft straight away from you.' }
+      { name:'Indomitable Teleport', desc:'When you use your Indomitable feature and succeed on the saving throw, you can teleport up to 60 ft to an unoccupied space you can see.' }
     ],
     18:[
       { name:'Masterful Shots', desc:"Reaction when a creature you can see misses you with an attack roll: move up to half your Speed away from it without provoking Opportunity Attacks, then make a ranged attack roll against it if it is within your weapon's range." }
@@ -1894,7 +1948,7 @@ const SUBCLASS_DATA = {
       { name:'Mystic Fighting Style', desc:'When you take the Attack action on your turn, you can replace one of the attacks with a casting of one of your Sorcerer cantrips that has a casting time of an action.' }
     ],
     11:[
-      { name:'Centered Focus', desc:'Whenever you expend a Focus Point on Flurry of Blows, Patient Defense, or Step of the Wind, you have Advantage on saves to maintain Concentration until the start of your next turn.' }
+      { name:'Focused Strike', desc:'When you use Stunning Strike, whether the target succeeds or fails on the saving throw, it has Disadvantage on saving throws against your spells until the start of your next turn.' }
     ],
     17:[
       { name:'Improved Mystic Fighting Style', desc:'When you take the Attack action on your turn, you can replace two of the attacks with a casting of one of your level 1 or 2 Sorcerer spells that has a casting time of an action.' }
@@ -2475,10 +2529,10 @@ const SUBCLASS_DATA = {
       { name:'Vestige Spells', desc:"Choose one Cleric Domain — <em>Life</em> · <em>Light</em> · <em>Trickery</em> · <em>War</em>. Its Domain Spells become Warlock spells for you and are always prepared once your Warlock level equals the Cleric level listed for them on that Domain's table." }
     ],
     6:[
-      { name:'Vestige Recovery', desc:'Your Vestige Companion regains its use of Divine Power whenever you finish a Short or Long Rest, and whenever you use your Magical Cunning feature.' }
+      { name:'Vestige Power', desc:'Your Vestige Companion regains its use of Divine Power whenever you finish a Short or Long Rest, and whenever you use your Magical Cunning feature. While you are within 30 ft of the vestige, you also have Resistance to the same damage types it has.' }
     ],
     10:[
-      { name:'Aura of Power', desc:'Magic action, once per Long Rest: the vestige manifests a 30-ft Emanation lasting a number of hours equal to your CHA modifier, or until the vestige disappears or is dismissed. You, the vestige, and allies inside gain Resistance to Fire, Necrotic, and Radiant damage and Immunity to the Charmed and Frightened conditions. If you drop to 0 HP within the aura, your HP instead become your Warlock level + your CHA modifier, and the vestige is dismissed to its pocket dimension until you finish a Long Rest.' }
+      { name:'Vestige Recovery', desc:'When your Vestige Companion would drop to 0 HP, you can take a Reaction and expend a Pact Magic spell slot to leave it at its Hit Point maximum instead and teleport it to an unoccupied space within 30 ft of you. Once per Long Rest.' }
     ],
     14:[
       { name:'Semblance of Life', desc:'Once per Long Rest, while the vestige is within 90 ft, cast Summon Celestial, Summon Fiend, or Summon Undead (matching its type) without a spell slot or Material components. The vestige becomes the summoned creature and uses that stat block for 1 minute, at a spell level equal to half your Warlock level (round down, maximum 9), then returns to its previous form.' }
@@ -2639,7 +2693,7 @@ const SUBCLASS_DATA = {
     ],
     10:[
       { name:'Potent Stone', desc:"Your Transmuter's Stone can carry up to two benefits, each option taken only once except Resistance, which must use different damage types; you can change either or both when you cast a Transmutation spell with a spell slot. Two new options join the list: <em>Mighty Build</em> — Advantage on STR saves and the bearer counts as one size larger for carrying capacity · <em>Tremorsense</em> — Tremorsense out to 30 ft." },
-      { name:'Shapechanger', desc:'You always have Polymorph prepared and can cast it once without a spell slot, regaining that use on a Long Rest. When you target yourself you can modify the spell — once per Long Rest — to keep <em>Game Statistics</em> (personality, memories, speech, your INT, WIS, and CHA scores, class features, languages, and feats) and <em>Transmute Spells</em> (cast Transmutation spells while shape-shifted, except those with a costed or consumed Material component).' }
+      { name:'Shape-Shifter', desc:'You always have Polymorph prepared and can cast it once without a spell slot, regaining that use on a Long Rest. When you target yourself you can modify the spell — once per Long Rest — to keep <em>Game Statistics</em> (personality, memories, speech, your INT, WIS, and CHA scores, class features, languages, and feats) and <em>Transmute Spells</em> (cast Transmutation spells while shape-shifted, except those with a costed or consumed Material component).' }
     ],
     14:[
       { name:'Master Transmuter', desc:"Magic action while carrying your Transmuter's Stone: consume its stored magic for one benefit, after which the stone crumbles to dust unless you expend a level 5+ spell slot as part of the action. <em>Major Transformation</em>: after 10 minutes of handling, turn one nonmagical object no larger than a 10-ft Cube (or eight connected 5-ft Cubes) into another of similar size and mass and equal or lesser value · <em>Panacea</em>: a creature you touch regains half its HP maximum (round down), is cured of magical contagions and curses including Attunement to a cursed item, and loses the Poisoned and Petrified conditions · <em>Restore Life</em>: cast Raise Dead without a spell slot, the stone replacing the Material components · <em>Restore Youth</em>: a willing creature you touch drops to 0 Exhaustion and permanently looks 3d10 years younger, to a minimum of young adulthood." }
@@ -2823,17 +2877,13 @@ const SUBCLASS_RENOMMEES = {
    sont uniques toutes classes confondues, la clé simple suffit. */
 const UA_SUBCLASSES = {
   'Ancestral Sorcery': 'Arcane Subclasses (June 2025)',
-  'Arcana Domain': 'Arcane Subclasses (June 2025) → Arcana Unleashed (Sept. 15, 2026)',
-  'Arcane Archer': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
   'Cavalier': 'Subclasses Update (Oct. 2025)',
   'Circle of Preservation': 'Apocalyptic Subclasses (Aug. 2025)',
   'Circle of Spores': 'Underdark Options 2 (Sept. 2026)',
   'Circle of the Titan': 'Villainous Options Update (June 2026)',
   'College of Spirits': 'Horror Subclasses (May 2025)',
-  'Conjurer': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
   'Defiled Sorcery': 'Apocalyptic Subclasses (Aug. 2025)',
   'Demonic Sorcery': 'Villainous Options Update (June 2026)',
-  'Enchanter': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
   'Faerzress Sorcery': 'Underdark Options 2 (Sept. 2026)',
   'Freedom Domain': 'Underdark Options 2 (Sept. 2026)',
   'Gladiator': 'Apocalyptic Subclasses (Aug. 2025)',
@@ -2844,7 +2894,6 @@ const UA_SUBCLASSES = {
   'House Agent': 'Underdark Options (Aug. 2026)',
   'Imaskarcanist': 'Underdark Options (Aug. 2026)',
   'Magic Stealer': 'Mystic Subclasses (Jan. 2026)',
-  'Necromancer': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
   'Oath of the Spellguard': 'Mystic Subclasses (Jan. 2026)',
   'Oathbreaker': 'Subclasses Update (Oct. 2025)',
   'Path of Lament': 'Villainous Options 2 (Apr. 2026)',
@@ -2858,13 +2907,27 @@ const UA_SUBCLASSES = {
   'Shadow Sorcery': 'Horror Subclasses (May 2025)',
   'Sorcerer-King Patron': 'Apocalyptic Subclasses (Aug. 2025)',
   'Tattooed Warrior': 'Arcane Updates (Sept. 2025)',
-  'Transmuter': 'Arcane Updates (Sept. 2025) → Arcana Unleashed (Sept. 15, 2026)',
   'Undead Patron': 'Horror Subclasses (May 2025)',
-  'Vestige Patron': 'Mystic Subclasses (Jan. 2026) → Arcana Unleashed (Sept. 15, 2026)',
   'Warrior of Intoxication': 'Subclasses Update (Oct. 2025)',
-  'Warrior of the Mystic Arts': 'Mystic Subclasses (Jan. 2026) → Arcana Unleashed (Sept. 15, 2026)',
   'Warrior of Venom': 'Villainous Options 2 (Apr. 2026)',
 };
+
+/* ── Options officielles hors Manuel des joueurs ──
+   Une option qui n'est plus du playtest n'est pas pour autant dans le PHB : il
+   faut posseder le livre pour la jouer. L'infobulle le dit, a la place de
+   l'avertissement de playtest qu'elle portait avant. */
+const SOURCE_LIVRE = {};
+['Arcana Domain', 'Arcane Archer', 'Conjurer', 'Enchanter', 'Necromancer', 'Transmuter', 'Vestige Patron', 'Warrior of the Mystic Arts',
+ 'Agent of the Ninth Quill', 'Bejeweled Conclave Spy', 'Cosmic Dawn Experiment',
+ 'Covenant of the Grave Recruit', 'Crucible Storm Chaser', 'Familiar Trainer',
+ 'Horizon Weaver Initiate', 'Phantasmic Circus Trouper', 'Seer Apprentice',
+ 'Ward of the Sheltering Hands',
+].forEach(nom => { SOURCE_LIVRE[nom] = 'Arcana Unleashed (2026)'; });
+
+/** Livre dont vient cette option, vide si elle est dans le PHB. */
+function livreSource(nom) {
+  return (nom && SOURCE_LIVRE[nom]) || '';
+}
 
 /** Cette espèce, cette classe ou cette sous-classe est-elle du playtest ? */
 function estUA(nom) {
@@ -2889,8 +2952,9 @@ function infoUA(nom) {
   return src ? `Unearthed Arcana — ${src} · playtest material, not official yet` : '';
 }
 
-/** Le même, prêt à coller comme attribut dans une <option>. */
+/** Le même, prêt à coller comme attribut dans une <option>.
+    A defaut d'avertissement de playtest, on indique le livre a posseder. */
 function titreUA(nom) {
-  const info = infoUA(nom);
+  const info = infoUA(nom) || livreSource(nom);
   return info ? ` title="${info}"` : '';
 }

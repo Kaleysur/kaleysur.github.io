@@ -1,0 +1,328 @@
+[
+  {
+    "name": "Living Vitriolic Sphere",
+    "size": "Large",
+    "type": "Construct",
+    "subtype": "",
+    "alignment": "Unaligned",
+    "armor_class": 15,
+    "armor_desc": "",
+    "hit_points": 76,
+    "hit_dice": "8d10 + 32",
+    "speed": {
+      "walk": "25 ft.",
+      "fly": "25 ft."
+    },
+    "saving_throws": {},
+    "skills": {},
+    "damage_resistances": [],
+    "damage_immunities": [
+      "Acid"
+    ],
+    "condition_immunities": [
+      "Blinded",
+      "Charmed",
+      "Deafened",
+      "Frightened",
+      "Grappled",
+      "Poisoned",
+      "Prone",
+      "Restrained"
+    ],
+    "senses": "Passive Perception 10",
+    "languages": "None",
+    "challenge_rating": "5",
+    "cr": 5,
+    "special_abilities": [
+      {
+        "name": "Amorphous",
+        "desc": "The living spell can move through a space as narrow as 1 inch without expending extra movement to do so."
+      },
+      {
+        "name": "Magic Resistance",
+        "desc": "The living spell has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "desc": "The living spell makes two Magical Strike attacks."
+      },
+      {
+        "name": "Magical Strike",
+        "desc": "Melee Attack Roll: +7, reach 10 ft. Hit: 21 (5d6 + 4) Acid damage."
+      },
+      {
+        "name": "Spell Mimicry (Recharge 5-6)",
+        "desc": "Dexterity Saving Throw: DC 15, each creature in a 20-foot-radius Sphere centered on a point within 150 feet. Failure: 25 (10d4) Acid damage, and 12 (5d4) Acid damage at the end of the target's next turn. Success: Half initial damage only."
+      }
+    ],
+    "bonus_actions": [],
+    "reactions": [],
+    "legendary_actions": [],
+    "source": "Arcana Unleashed",
+    "strength": 10,
+    "dexterity": 15,
+    "constitution": 18,
+    "intelligence": 3,
+    "wisdom": 10,
+    "charisma": 6
+  },
+  {
+    "name": "Spellguard",
+    "size": "Medium",
+    "type": "Humanoid",
+    "subtype": "",
+    "alignment": "Lawful or Neutral",
+    "armor_class": 20,
+    "armor_desc": "",
+    "hit_points": 105,
+    "hit_dice": "14d8 + 42",
+    "speed": {
+      "walk": "30 ft."
+    },
+    "saving_throws": {},
+    "skills": {
+      "arcana": "+4",
+      "athletics": "+7",
+      "perception": "+4"
+    },
+    "damage_resistances": [],
+    "damage_immunities": [],
+    "condition_immunities": [],
+    "senses": "Passive Perception 14",
+    "languages": "Common",
+    "challenge_rating": "5",
+    "cr": 5,
+    "special_abilities": [
+      {
+        "name": "Superior Magic Resistance",
+        "desc": "The spellguard has Advantage on saving throws against spells and other magical effects. Spell attack rolls have Disadvantage against the spellguard."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "desc": "The spellguard makes two attacks, using Force Flail or Javelin in any combination."
+      },
+      {
+        "name": "Force Flail",
+        "desc": "Melee Attack Roll: +7, reach 5 ft. Hit: 8 (1d8 + 4) Bludgeoning damage plus 7 (2d6) Force damage."
+      },
+      {
+        "name": "Javelin",
+        "desc": "Melee or Ranged Attack Roll: +7, reach 5 ft. or range 30/120 ft. Hit: 14 (3d6 + 4) Piercing damage."
+      }
+    ],
+    "bonus_actions": [],
+    "reactions": [
+      {
+        "name": "Defensive Divination",
+        "desc": "Trigger: A creature the spellguard can see hits an ally within 5 feet of the spellguard with an attack roll, or an ally within 5 feet of the spellguard fails a saving throw against a spell or other magical effect. Response: The spellguard rolls 1d20 and chooses whether to use that roll in place of the d20 rolled for the attack roll or saving throw."
+      }
+    ],
+    "legendary_actions": [],
+    "source": "Arcana Unleashed",
+    "strength": 18,
+    "dexterity": 11,
+    "constitution": 16,
+    "intelligence": 12,
+    "wisdom": 13,
+    "charisma": 10
+  },
+  {
+    "name": "Taisus",
+    "size": "Huge",
+    "type": "Aberration",
+    "subtype": "",
+    "alignment": "Chaotic or Neutral",
+    "armor_class": 18,
+    "armor_desc": "",
+    "hit_points": 310,
+    "hit_dice": "27d12 + 135",
+    "speed": {
+      "walk": "40 ft.",
+      "fly": "60 ft."
+    },
+    "saving_throws": {},
+    "skills": {
+      "arcana": "+19",
+      "insight": "+12",
+      "perception": "+12"
+    },
+    "damage_resistances": [],
+    "damage_immunities": [
+      "Poison"
+    ],
+    "condition_immunities": [
+      "Charmed",
+      "Frightened",
+      "Grappled",
+      "Paralyzed",
+      "Petrified",
+      "Poisoned",
+      "Restrained"
+    ],
+    "senses": "Passive Perception 22",
+    "languages": "All; telepathy 120 ft.",
+    "challenge_rating": "19",
+    "cr": 19,
+    "special_abilities": [
+      {
+        "name": "Arcane Immortality",
+        "desc": "If the taisus dies, its body crumbles into glittering dust. It gains a new body after 1d10 days, reviving with all its Hit Points, unless a Wish spell is cast on its remains to prevent the effects of this trait. The new body appears in an unoccupied space within 5 feet of a location designated by the taisus on its creation."
+      },
+      {
+        "name": "Legendary Resistance (4/Day)",
+        "desc": "If the taisus fails a saving throw, it can choose to succeed instead."
+      },
+      {
+        "name": "Magic Resistance",
+        "desc": "The taisus has Advantage on saving throws against spells and other magical effects."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "desc": "The taisus makes two Brain Drain attacks."
+      },
+      {
+        "name": "Brain Drain",
+        "desc": "Melee Attack Roll: +13, reach 20 ft. Hit: 20 (3d8 + 7) Force damage plus 16 (3d10) Psychic damage, and if the target is a creature with spell slots, it's subjected to the following effect. Constitution Saving Throw: DC 21. Failure: The target's highest-level unexpended spell slot is expended."
+      },
+      {
+        "name": "Spellcasting",
+        "desc": "The taisus casts one of the following spells, requiring no Material components and using Intelligence as the spellcasting ability (spell save DC 21): At Will: Detect Magic, Fireball (level 5 version), Invisibility, Mage Hand 2/Day Each: Jallarzi's Storm of Radiance, Plane Shift, Scrying 1/Day Each: Befuddlement, Disintegrate"
+      }
+    ],
+    "bonus_actions": [],
+    "reactions": [
+      {
+        "name": "Protective Magic",
+        "desc": "The taisus casts Counterspell or Shield in response to the spell's trigger, using the same spellcasting ability as Spellcasting."
+      }
+    ],
+    "legendary_actions": [
+      {
+        "name": "Deadly Drain",
+        "desc": "The taisus makes a Brain Drain attack. The taisus can't take this action again until the start of its next turn."
+      },
+      {
+        "name": "Teleport",
+        "desc": "The taisus teleports itself or a willing creature it can see within 10 feet of itself up to 120 feet to an unoccupied space the taisus can see."
+      }
+    ],
+    "source": "Arcana Unleashed",
+    "strength": 17,
+    "dexterity": 18,
+    "constitution": 20,
+    "intelligence": 25,
+    "wisdom": 22,
+    "charisma": 19
+  },
+  {
+    "name": "Venger",
+    "size": "Medium",
+    "type": "Fiend",
+    "subtype": "",
+    "alignment": "Neutral or Evil",
+    "armor_class": 19,
+    "armor_desc": "",
+    "hit_points": 202,
+    "hit_dice": "27d8 + 81",
+    "speed": {
+      "walk": "30 ft.",
+      "fly": "30 ft."
+    },
+    "saving_throws": {},
+    "skills": {
+      "arcana": "+9",
+      "deception": "+11",
+      "intimidation": "+11",
+      "perception": "+8"
+    },
+    "damage_resistances": [
+      "Cold",
+      "Fire",
+      "Lightning",
+      "Poison"
+    ],
+    "damage_immunities": [],
+    "condition_immunities": [
+      "Poisoned"
+    ],
+    "senses": "Passive Perception 18",
+    "languages": "Abyssal, Common, Infernal",
+    "challenge_rating": "17",
+    "cr": 17,
+    "special_abilities": [
+      {
+        "name": "Fiendish Restoration",
+        "desc": "If Venger dies, his body dissipates into crimson dust, and he gains a new body in 1d10 days, reviving with all his Hit Points somewhere in one of his lairs."
+      },
+      {
+        "name": "Legendary Resistance (3/Day, or 4/Day in Lair)",
+        "desc": "If Venger fails a saving throw, he can choose to succeed instead."
+      },
+      {
+        "name": "Magic Resistance",
+        "desc": "Venger has Advantage on saving throws against spells and magical effects."
+      },
+      {
+        "name": "Mounted Adept",
+        "desc": "While Venger is mounted, he and his mount have Advantage on Dexterity saving throws, and Venger can force an attack targeting his mount to target him instead. Venger can't use this trait if he has the Incapacitated condition."
+      }
+    ],
+    "actions": [
+      {
+        "name": "Multiattack",
+        "desc": "Venger makes three attacks, using Crimson Claw or Crimson Blast in any combination."
+      },
+      {
+        "name": "Crimson Claw",
+        "desc": "Melee Attack Roll: +11, reach 5 ft. Hit: 14 (2d8 + 5) Slashing damage plus 10 (3d6) Fire damage."
+      },
+      {
+        "name": "Crimson Blast",
+        "desc": "Ranged Attack Roll: +11, range 120 ft. Hit: 24 (3d12 + 5) Force damage."
+      },
+      {
+        "name": "Spellcasting",
+        "desc": "Venger casts one of the following spells, using Charisma as the spellcasting ability (spell save DC 19): At Will: Detect Magic, Invisibility, Mage Hand, Silent Image 2/Day Each: Alter Self, Contact Other Plane, Create Undead, Dimension Door 1/Day Each: Control Weather, Imprisonment"
+      }
+    ],
+    "bonus_actions": [
+      {
+        "name": "Telekinesis (2/Day)",
+        "desc": "Venger casts Telekinesis, using the same spellcasting ability as Spellcasting."
+      }
+    ],
+    "reactions": [
+      {
+        "name": "Protective Magic",
+        "desc": "Venger casts Counterspell or Shield in response to the spell's trigger, using the same spellcasting ability as Spellcasting."
+      }
+    ],
+    "legendary_actions": [
+      {
+        "name": "Booming Censure",
+        "desc": "Wisdom Saving Throw: DC 19, one creature Venger can see within 60 feet. Failure: 14 (4d6) Psychic damage, and the target has the Frightened condition until the end of its next turn. Success: Half damage only."
+      },
+      {
+        "name": "Crimson Strike",
+        "desc": "Venger makes one Crimson Claw or Crimson Blast attack."
+      },
+      {
+        "name": "Magic-Binding Chains",
+        "desc": "Dexterity Saving Throw: DC 19, one creature Venger can see within 30 feet. Failure: The target has the Restrained condition until the end of its next turn. While Restrained, the target can't take the Magic action. Failure or Success: Venger can't take this action again until the start of his next turn."
+      }
+    ],
+    "source": "Arcana Unleashed",
+    "strength": 18,
+    "dexterity": 20,
+    "constitution": 16,
+    "intelligence": 17,
+    "wisdom": 14,
+    "charisma": 21
+  }
+]
